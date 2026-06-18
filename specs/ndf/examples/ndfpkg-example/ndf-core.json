@@ -4,7 +4,7 @@
   "estado": "ativo",
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "qualificada",
-  "ndt_version_ref": "oficio-generico@1.0.0",
+  "ndt_version_ref": "oficio-generico@2.0.0",
   "metadados": {
     "tipo_documento_ref": "oficio@1.0.0",
     "entidade_produtora": {
@@ -32,7 +32,110 @@
     },
     "assunto": "Resposta ao ofício n.º 45/2026",
     "referencias": ["OF n.º 45/2026", "proc.º 456/2026"],
-    "corpo": "Em resposta ao vosso ofício n.º 45/2026, de 10 de junho de 2026, informamos que o processo referenciado se encontra em fase de análise, prevendo-se a conclusão até ao final do corrente mês.",
+    "corpo": {
+      "ncrtf_version": "1.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Em resposta ao ofício n.º 45/2026, de 10 de junho de 2026, cumpre-nos informar o seguinte:"
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "content": [
+            { "type": "text", "text": "Enquadramento" }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "O processo n.º 456/2026 encontra-se em fase de análise técnica. Nos termos do artigo " },
+            { "type": "text", "text": "62.º do CPA", "marks": ["bold"] },
+            { "type": "text", "text": ", o prazo de decisão é de " },
+            { "type": "text", "text": "90 dias", "marks": ["bold"] },
+            { "type": "text", "text": "." }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "content": [
+            { "type": "text", "text": "Diligências efectuadas" }
+          ]
+        },
+        {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data" } ] } ] },
+                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Diligência" } ] } ] },
+                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Estado" } ] } ] }
+              ]
+            },
+            {
+              "cells": [
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-01" } ] } ] },
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Notificação ao requerente" } ] } ] },
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Concluída" } ] } ] }
+              ]
+            },
+            {
+              "cells": [
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-10" } ] } ] },
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Parecer técnico" } ] } ] },
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Em curso" } ] } ] }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "content": [
+            { "type": "text", "text": "Documentos a apresentar" }
+          ]
+        },
+        {
+          "type": "ordered_list",
+          "items": [
+            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Certidão de teor do registo predial" } ] } ] },
+            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Comprovativo de NIF actualizado" } ] } ] },
+            {
+              "content": [
+                { "type": "paragraph", "content": [ { "type": "text", "text": "Declaração de conformidade (modelo DR n.º 42), contendo:" } ] },
+                {
+                  "type": "unordered_list",
+                  "items": [
+                    { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Identificação do signatário" } ] } ] },
+                    { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data e local de emissão" } ] } ] }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "O coeficiente de actualização aplica-se conforme V = V" },
+            { "type": "text", "text": "0", "marks": ["subscript"] },
+            { "type": "text", "text": " × (1 + r)" },
+            { "type": "text", "text": "n", "marks": ["superscript"] },
+            { "type": "text", "text": ", onde " },
+            { "type": "text", "text": "r", "marks": ["italic"] },
+            { "type": "text", "text": " é a taxa anual e " },
+            { "type": "text", "text": "n", "marks": ["italic"] },
+            { "type": "text", "text": " o número de anos." }
+          ]
+        }
+      ]
+    },
     "signatario": {
       "nome": "João Costa",
       "cargo": "Director-Geral"

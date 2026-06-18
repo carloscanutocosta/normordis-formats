@@ -1,0 +1,23 @@
+{
+  "_comment": "NDT v2.0.0 — campo 'corpo' migrado de 'campo_simples' para 'ncrtf'. Requer NCRTF v1.0.0.",
+  "ndt_version": "2.0.0",
+  "schema_id": "oficio-generico",
+  "versao_impresso": "2.0.0",
+  "perfil": "administrativo_simples",
+  "descricao": "Template genérico para ofícios da Administração Pública portuguesa (com corpo em NCRTF)",
+  "campos": [
+    { "id": "numero",           "label": "Número",        "tipo": "campo_simples", "obrigatorio": true },
+    { "id": "data",             "label": "Data",           "tipo": "campo_simples", "obrigatorio": true },
+    { "id": "destinatario.nome","label": "Destinatário",   "tipo": "campo_simples", "obrigatorio": true },
+    { "id": "assunto",          "label": "Assunto",        "tipo": "campo_simples", "obrigatorio": true },
+    { "id": "corpo",            "label": "Corpo",          "tipo": "ncrtf",         "obrigatorio": true }
+  ],
+  "paginas_def": [
+    {
+      "id": "pagina-principal",
+      "formato": "A4",
+      "orientacao": "portrait",
+      "margens": { "superior": 25, "inferior": 25, "esquerda": 30, "direita": 25 }
+    }
+  ]
+}

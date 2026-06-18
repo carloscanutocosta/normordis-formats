@@ -30,14 +30,91 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).parent.parent
 SCHEMA_PATH = REPO_ROOT / "specs/ndf/schema/ndf-core.schema.json"
+NCRTF_SCHEMA_PATH = REPO_ROOT / "specs/ncrtf/schemas/ncrtf.schema.json"
 VALID_DIR = REPO_ROOT / "conformance/ndf/valid"
 INVALID_DIR = REPO_ROOT / "conformance/ndf/invalid"
+
+CANONICAL_MARKS_ORDER = ["bold", "italic", "subscript", "superscript", "underline"]
 
 ANSI_GREEN = "\033[32m"
 ANSI_RED = "\033[31m"
 ANSI_YELLOW = "\033[33m"
 ANSI_RESET = "\033[0m"
 ANSI_BOLD = "\033[1m"
+
+
+_ncrtf_schema_cache = None
+
+def _ncrtf_schema():
+    global _ncrtf_schema_cache
+    if _ncrtf_schema_cache is None and NCRTF_SCHEMA_PATH.exists():
+        with open(NCRTF_SCHEMA_PATH, encoding="utf-8") as f:
+            _ncrtf_schema_cache = json.load(f)
+    return _ncrtf_schema_cache
+
+
+def check_ncrtf_value(value: dict, path: str) -> list[str]:
+    """Valida um valor NCRTF: schema + regras semânticas R1, R3 (subscript+superscript)."""
+    errors = []
+    schema = _ncrtf_schema()
+    if schema is None:
+        return []
+
+    try:
+        validator = Draft202012Validator(schema)
+        for e in validator.iter_errors(value):
+            errors.append(f"{path}: NCRTF schema — {e.message} (path: {'/'.join(str(p) for p in e.absolute_path)})")
+    except SchemaError as e:
+        errors.append(f"{path}: NCRTF schema inválido — {e.message}")
+        return errors
+
+    errors.extend(_check_ncrtf_nodes(value.get("content", []), path + ".content"))
+    return errors
+
+
+def _check_ncrtf_nodes(nodes: list, path: str) -> list[str]:
+    errors = []
+    for i, node in enumerate(nodes):
+        if not isinstance(node, dict):
+            continue
+        node_path = f"{path}[{i}]"
+        node_type = node.get("type")
+
+        if node_type == "text":
+            errors.extend(_check_ncrtf_text(node, node_path))
+        elif node_type in ("paragraph", "heading"):
+            errors.extend(_check_ncrtf_nodes(node.get("content", []), node_path + ".content"))
+        elif node_type in ("ordered_list", "unordered_list"):
+            for j, item in enumerate(node.get("items", [])):
+                errors.extend(_check_ncrtf_nodes(item.get("content", []), f"{node_path}.items[{j}].content"))
+        elif node_type == "table":
+            for r, row in enumerate(node.get("rows", [])):
+                for c, cell in enumerate(row.get("cells", [])):
+                    errors.extend(_check_ncrtf_nodes(cell.get("content", []), f"{node_path}.rows[{r}].cells[{c}].content"))
+
+    return errors
+
+
+def _check_ncrtf_text(node: dict, path: str) -> list[str]:
+    errors = []
+    marks = node.get("marks")
+    if not marks:
+        return errors
+
+    # R1 — ordem canónica das marcas
+    expected = [m for m in CANONICAL_MARKS_ORDER if m in marks]
+    if marks != expected:
+        errors.append(
+            f"{path}: marks fora da ordem canónica {CANONICAL_MARKS_ORDER} — encontrado {marks} (SPEC.md §5.3, R1)"
+        )
+
+    # subscript e superscript não podem coexistir
+    if "subscript" in marks and "superscript" in marks:
+        errors.append(
+            f"{path}: 'subscript' e 'superscript' não podem coexistir no mesmo nó text (SPEC.md §5.2)"
+        )
+
+    return errors
 
 
 def strip_meta(obj):
@@ -96,8 +173,13 @@ def check_semantic_rules(doc: dict) -> list[str]:
             "'<schema_id>@<versao_impresso>' (§2.6)"
         )
 
-    # Regra: nivel_assinatura 'qualificada' e entidade_produtora sem nif — aviso
-    # (não é erro bloqueante, mas é recomendado)
+    # Regra: campos NCRTF no bloco documento
+    documento = doc.get("documento", {})
+    if isinstance(documento, dict):
+        for field_name, field_value in documento.items():
+            if isinstance(field_value, dict) and "ncrtf_version" in field_value:
+                errors_raw = check_ncrtf_value(field_value, f"documento.{field_name}")
+                errors.extend(errors_raw)
 
     return errors
 
