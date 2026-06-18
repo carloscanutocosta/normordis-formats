@@ -1,0 +1,17 @@
+{
+  "_comment": "Inválido: lista de verificação com list_item sem campo 'checked'. Em checklist, todos os itens DEVEM ter 'checked' explicitamente (true ou false).",
+  "_expected_error": "list_item em checklist deve ter campo 'checked'",
+  "ncrtf_version": "2.0.0",
+  "content": [
+    {
+      "type": "list",
+      "list_type": "checklist",
+      "content": [
+        {
+          "type": "list_item",
+          "content": [ { "type": "text", "text": "Item sem campo checked" } ]
+        }
+      ]
+    }
+  ]
+}

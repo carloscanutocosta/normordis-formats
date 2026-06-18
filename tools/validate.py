@@ -99,7 +99,17 @@ def _check_ncrtf_nodes(nodes: list, path: str) -> list[str]:
             errors.extend(_check_ncrtf_nodes(node.get("content", []), f"{np}.content"))
         elif t == "link":
             errors.extend(_check_ncrtf_nodes(node.get("content", []), f"{np}.content"))
-        # table cells are plain strings in v2.0.0 — no NCRTF nodes inside
+        elif t == "table":
+            all_rows = list(node.get("head") or []) + list(node.get("body") or [])
+            if all_rows:
+                expected = len(all_rows[0].get("cells") or [])
+                for r, row in enumerate(all_rows[1:], 1):
+                    actual = len(row.get("cells") or [])
+                    if actual != expected:
+                        errors.append(
+                            f"{np}: tabela com número inconsistente de células — "
+                            f"linha 0 tem {expected}, linha {r} tem {actual} (SPEC.md §4.5)"
+                        )
     return errors
 
 

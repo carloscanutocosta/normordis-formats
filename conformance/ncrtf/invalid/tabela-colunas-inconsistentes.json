@@ -1,0 +1,16 @@
+{
+  "_comment": "Inválido: tabela com número inconsistente de células por linha — linha de cabeçalho tem 3 células, primeira linha de body tem 2. Viola SPEC.md §4.5.",
+  "_expected_error": "tabela com número inconsistente de células por linha",
+  "ncrtf_version": "2.0.0",
+  "content": [
+    {
+      "type": "table",
+      "head": [
+        { "cells": ["Referência", "Data", "Estado"] }
+      ],
+      "body": [
+        { "cells": ["REF/2026/001", "2026-06-01"] }
+      ]
+    }
+  ]
+}

@@ -33,7 +33,7 @@
     "assunto": "Resposta ao ofício n.º 45/2026",
     "referencias": ["OF n.º 45/2026", "proc.º 456/2026"],
     "corpo": {
-      "ncrtf_version": "1.0.0",
+      "ncrtf_version": "2.0.0",
       "content": [
         {
           "type": "paragraph",
@@ -70,28 +70,12 @@
         },
         {
           "type": "table",
-          "rows": [
-            {
-              "cells": [
-                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data" } ] } ] },
-                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Diligência" } ] } ] },
-                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Estado" } ] } ] }
-              ]
-            },
-            {
-              "cells": [
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-01" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Notificação ao requerente" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Concluída" } ] } ] }
-              ]
-            },
-            {
-              "cells": [
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-10" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Parecer técnico" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Em curso" } ] } ] }
-              ]
-            }
+          "head": [
+            { "cells": ["Data", "Diligência", "Estado"] }
+          ],
+          "body": [
+            { "cells": ["2026-06-01", "Notificação ao requerente", "Concluída"] },
+            { "cells": ["2026-06-10", "Parecer técnico", "Em curso"] }
           ]
         },
         {
@@ -102,18 +86,27 @@
           ]
         },
         {
-          "type": "ordered_list",
-          "items": [
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Certidão de teor do registo predial" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Comprovativo de NIF actualizado" } ] } ] },
+          "type": "list",
+          "list_type": "ordered",
+          "content": [
             {
+              "type": "list_item",
+              "content": [ { "type": "text", "text": "Certidão de teor do registo predial" } ]
+            },
+            {
+              "type": "list_item",
+              "content": [ { "type": "text", "text": "Comprovativo de NIF actualizado" } ]
+            },
+            {
+              "type": "list_item",
               "content": [
-                { "type": "paragraph", "content": [ { "type": "text", "text": "Declaração de conformidade (modelo DR n.º 42), contendo:" } ] },
+                { "type": "text", "text": "Declaração de conformidade (modelo DR n.º 42), contendo:" },
                 {
-                  "type": "unordered_list",
-                  "items": [
-                    { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Identificação do signatário" } ] } ] },
-                    { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data e local de emissão" } ] } ] }
+                  "type": "list",
+                  "list_type": "bullet",
+                  "content": [
+                    { "type": "list_item", "content": [ { "type": "text", "text": "Identificação do signatário" } ] },
+                    { "type": "list_item", "content": [ { "type": "text", "text": "Data e local de emissão" } ] }
                   ]
                 }
               ]
