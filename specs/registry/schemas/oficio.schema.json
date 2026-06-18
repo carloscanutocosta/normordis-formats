@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/registry/oficio/1.0.0/schema.json",
+  "title": "Ofício v1.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'oficio@1.0.0'. Comunicação formal externa da Administração Pública.",
+  "type": "object",
+  "required": ["numero", "data", "destinatario", "assunto", "corpo"],
+  "additionalProperties": false,
+  "properties": {
+    "numero": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Número do ofício no formato definido pela entidade produtora (ex.: 'OF/2026/00123').",
+      "examples": ["OF/2026/00123", "DGE/2026/OF/00045"]
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de produção do documento (ISO 8601, YYYY-MM-DD).",
+      "examples": ["2026-06-18"]
+    },
+    "destinatario": {
+      "type": "object",
+      "required": ["nome"],
+      "properties": {
+        "nome": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nome completo ou designação do destinatário."
+        },
+        "cargo": {
+          "type": "string",
+          "description": "Cargo ou função do destinatário."
+        },
+        "entidade": {
+          "type": "string",
+          "description": "Entidade/organismo do destinatário."
+        },
+        "morada": {
+          "type": "string",
+          "description": "Morada postal do destinatário (para expedição em papel)."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Endereço de correio eletrónico do destinatário."
+        }
+      },
+      "additionalProperties": false
+    },
+    "assunto": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Assunto do ofício — deve ser claro e conciso.",
+      "examples": ["Resposta ao ofício n.º 45/2026 — Pedido de informação"]
+    },
+    "referencias": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Referências a documentos ou processos anteriores (ex.: proc.º, ofício n.º).",
+      "examples": [["proc.º 123/2026", "OF n.º 45/2026"]]
+    },
+    "corpo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Corpo do ofício em texto simples (plain text). Para conteúdo com formatação estruturada, usar referência NCRTF (roadmap)."
+    },
+    "anexos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["descricao", "hash_sha256"],
+        "properties": {
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do anexo."
+          },
+          "hash_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "description": "SHA-256 digest do ficheiro de anexo (formato 'sha256:<hex>'). O ficheiro é externo ao NDF-core."
+          },
+          "nome_ficheiro": {
+            "type": "string",
+            "description": "Nome original do ficheiro de anexo."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Lista de anexos referenciados por hash. Os ficheiros são externos ao NDF-core."
+    },
+    "signatario": {
+      "type": "object",
+      "required": ["nome", "cargo"],
+      "properties": {
+        "nome": {
+          "type": "string",
+          "description": "Nome completo do signatário (confirma identidade no documento; a assinatura eletrónica é no envelope)."
+        },
+        "cargo": {
+          "type": "string",
+          "description": "Cargo do signatário."
+        },
+        "delegacao_ref": {
+          "type": "string",
+          "description": "Referência ao despacho ou delegação de competência que habilita o signatário (quando aplicável)."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

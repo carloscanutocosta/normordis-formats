@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/registry/informacao-tecnica/1.0.0/schema.json",
+  "title": "Informação Técnica v1.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'informacao-tecnica@1.0.0'. Nota interna fundamentada — análise, parecer ou proposta de decisão com fundamentação técnica.",
+  "type": "object",
+  "required": ["numero", "data", "dirigido_a", "assunto", "corpo"],
+  "additionalProperties": false,
+  "properties": {
+    "numero": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Número da informação técnica (ex.: 'IT/2026/00045').",
+      "examples": ["IT/2026/00045"]
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de produção (ISO 8601, YYYY-MM-DD)."
+    },
+    "dirigido_a": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Destinatário interno: cargo ou unidade orgânica a quem a informação é dirigida.",
+      "examples": ["Exmo. Sr. Director-Geral", "Divisão de Gestão Documental"]
+    },
+    "assunto": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Assunto da informação técnica.",
+      "examples": ["Análise de conformidade do sistema X com a Lei n.º 58/2019"]
+    },
+    "referencias": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Referências a documentos, processos ou diplomas legais relevantes."
+    },
+    "corpo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Corpo da informação técnica — análise, fundamentação e, quando aplicável, proposta de decisão."
+    },
+    "conclusao": {
+      "type": "string",
+      "description": "Síntese conclusiva ou proposta — destacada do corpo para facilitar a leitura pelo destinatário."
+    },
+    "proposta_despacho": {
+      "type": "string",
+      "description": "Texto sugerido para despacho de concordância ou decisão pelo destinatário (opcional)."
+    },
+    "autor": {
+      "type": "object",
+      "required": ["nome", "cargo"],
+      "properties": {
+        "nome": { "type": "string" },
+        "cargo": { "type": "string" },
+        "unidade_organica": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "description": "Autor da informação técnica."
+    },
+    "anexos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["descricao", "hash_sha256"],
+        "properties": {
+          "descricao": { "type": "string" },
+          "hash_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "nome_ficheiro": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

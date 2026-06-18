@@ -30,7 +30,9 @@ O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de doc
 | Norma / Regulamento | Âmbito |
 |---|---|
 | eIDAS — Regulamento (UE) n.º 910/2014 | Assinaturas eletrónicas qualificadas, selos eletrónicos |
+| eIDAS 2.0 — Regulamento (UE) 2024/1183 | Revisão eIDAS — European Digital Identity Wallet; QSCD |
 | DL n.º 12/2021 | Transposição nacional de eIDAS |
+| CPA — Código do Procedimento Administrativo (DL n.º 4/2015) | Forma dos actos administrativos; requisitos de autenticidade (Art.º 61.º) |
 | ETSI EN 319 122 | CAdES — nível B-LTA (Long Term Archival) |
 | RFC 3161 | Timestamps de confiança |
 | RFC 8785 (JCS) | Canonicalização JSON para assinatura |
@@ -85,6 +87,15 @@ NDF-core + NDT (referenciado) → reprodução visual (PDF, Word, ...)
 | **Envelope** | assinaturas CAdES-B-LTA, timestamps RFC 3161, material de validação (cadeia de certificados + revogação) | Não — é produzido a partir da assinatura sobre o NDF-core; adicionado depois |
 
 A separação não é arbitrária: o envelope **não pode** fazer parte do que é assinado, sob pena de circularidade (não é possível assinar algo que já contém a própria assinatura sobre si mesmo).
+
+### 1.2.1 Recursos desta especificação
+
+| Recurso | Localização | Descrição |
+|---|---|---|
+| JSON Schema (NDF-core) | `specs/ndf/schema/ndf-core.schema.json` | Schema machine-readable do NDF-core completo |
+| JSON Schema (Envelope) | `specs/ndf/schema/envelope.schema.json` | Schema machine-readable do envelope |
+| Registry de tipos de documento | `specs/registry/` | Schemas dos tipos canónicos (`oficio`, `informacao-tecnica`, `despacho`) |
+| Suite de conformidade | `conformance/ndf/` | Casos de teste válidos e inválidos para implementações |
 
 ### 1.3 Formato de serialização
 
@@ -352,9 +363,70 @@ Exemplos válidos:
 - **Imutabilidade**: faz parte do NDF-core canonicalizado e assinado.
 - **Resolução**: o NDT referenciado deve estar disponível no `.ndfpkg` (§8) ou num registry conforme.
 
-### 2.7 `metadados` — schema completo
+### 2.7 `metadados` — schema normativo
 
-> **Nota**: o schema completo de `metadados` será definido na próxima iteração desta especificação. Os campos actualmente dispersos nas secções §1.6, §2.9.2 e §3 serão consolidados aqui numa secção normativa própria, indexável, separada de `documento`. Ver §9 (Roadmap) — item `metadados` schema v1.1.0.
+O bloco `metadados` contém os campos descritivos transversais a qualquer tipo de documento NDF, independentes do conteúdo lógico (que fica em `documento`). É canonicalizado e assinado como parte do NDF-core.
+
+#### 2.7.1 Estrutura de referência
+
+```json
+{
+  "metadados": {
+    "tipo_documento_ref": "oficio@1.0.0",
+    "entidade_produtora": {
+      "designacao": "Direção-Geral de Exemplo",
+      "nif": "123456789",
+      "codigo_dglab": "PT-DGE-000"
+    },
+    "assunto": "Resposta ao ofício n.º 123/2026",
+    "numero_referencia": "OF/2026/00123",
+    "processo_ref": "proc.º 456/2026",
+    "idioma": "pt",
+    "classificacao_seguranca": "uso_interno",
+    "contem_dados_pessoais": false,
+    "categorias_dados_pessoais": [],
+    "base_legal_conservacao": null,
+    "responsavel_tratamento": "Direção-Geral de Exemplo"
+  }
+}
+```
+
+#### 2.7.2 Tabela de campos
+
+| Campo | Obrigatório | Tipo | Descrição |
+|---|---|---|---|
+| `tipo_documento_ref` | Sim | string | Referência versionada ao schema do tipo de documento. Formato: `"<id>@<versao>"`. Define a estrutura de `documento`. Ver §2.9.2 e `specs/registry/`. |
+| `entidade_produtora` | Sim | objeto | Entidade responsável pela produção do documento. Ver §2.7.3. |
+| `assunto` | Recomendado | string | Título ou descrição breve do documento — indexável para pesquisa e arquivo. |
+| `numero_referencia` | Recomendado | string | Número de referência documental (ex.: `"OF/2026/00123"`). |
+| `processo_ref` | Opcional | string | Referência ao processo ou procedimento a que o documento pertence. |
+| `idioma` | Opcional | string (ISO 639-1) | Idioma principal do documento. Quando omitido, assume-se `"pt"`. |
+| `classificacao_seguranca` | Recomendado | string (enum) | Classificação de segurança da informação. Ver §2.7.4. Quando omitido, o sistema produtor DEVE assumir `"uso_interno"`. |
+| `contem_dados_pessoais` | Sim | boolean | `true` se o documento contiver dados pessoais na acepção do RGPD. |
+| `categorias_dados_pessoais` | Condicional | array de string | Obrigatório se `contem_dados_pessoais: true`. Enum aberto: `"identificacao_fiscal"`, `"rendimentos"`, `"saude"`, `"dados_processuais"`, `"biometricos"`, `"outros"`. Ver §1.6. |
+| `base_legal_conservacao` | Condicional | string (enum) | Obrigatório se `contem_dados_pessoais: true`. `"obrigacao_legal"` \| `"interesse_publico"` \| `"consentimento"` \| `"contrato"`. Ver §1.6. |
+| `responsavel_tratamento` | Sim | string | Designação da entidade responsável pelo tratamento. Obrigatório mesmo quando `contem_dados_pessoais: false` — identifica o responsável pela custódia do registo. |
+
+#### 2.7.3 `entidade_produtora`
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `designacao` | Sim | Designação oficial da entidade (ex.: `"Autoridade Tributária e Aduaneira"`). |
+| `nif` | Recomendado | NIF institucional — 9 dígitos sem espaços ou pontuação. |
+| `codigo_dglab` | Opcional | Código de entidade DGLAB para identificação no contexto arquivístico (MEG). |
+
+#### 2.7.4 `classificacao_seguranca` (enum fechado)
+
+Alinhado com o DL n.º 11/2023 (Segurança de Informação do Estado) e a nomenclatura da UE:
+
+| Valor | Descrição |
+|---|---|
+| `"publico"` | Informação de acesso livre — sem restrições. Atribuição explícita obrigatória. |
+| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. Valor por defeito conservador. |
+| `"reservado"` | Divulgação restrita a destinatários identificados. |
+| `"confidencial"` | Classificação de segurança formal — acesso controlado com registo de acessos. |
+| `"secreto"` | Classificação de segurança elevada — regime de gestão documental especial. |
+| `"muito_secreto"` | Nível mais elevado — requer infraestrutura de segurança dedicada. |
 
 ### 2.8 Tipos de conteúdo permitidos
 
@@ -464,6 +536,19 @@ A classificação correcta de um acto num destes três níveis é **responsabili
 | `"avancada"` | CAdES-B-LTA com certificado SEA | Presente (B-T + B-LTA) | Presente | **Sempre presente** |
 | `"qualificada"` | CAdES-B-LTA com certificado SEQ qualificado PSSC | Presente (B-T + B-LTA) | Presente | **Sempre presente** |
 
+#### 2.10.4 Integridade de arquivo para `nivel_assinatura: "nenhuma"`
+
+Mesmo quando o acto não requer assinatura eletrónica para validade jurídica, a conservação do registo pode impor requisitos de integridade a longo prazo. A seguinte regra aplica-se:
+
+| Condição arquivística | Requisito de envelope |
+|---|---|
+| `destino_final: "eliminacao"` E PCA ≤ 5 anos | Envelope mínimo (apenas `validation_code` + `payload_hash`). CAdES-B-LTA **não obrigatório**. |
+| `destino_final: "eliminacao"` E PCA > 5 anos | CAdES-B-LTA **recomendado** (SHOULD) para garantir integridade durante o prazo de conservação. |
+| `destino_final: "conservacao_parcial_por_amostragem"` | CAdES-B-LTA **obrigatório** (MUST) para os documentos seleccionados para conservação permanente. |
+| `destino_final: "conservacao_permanente"` | CAdES-B-LTA **obrigatório** (MUST) — a integridade do arquivo permanente não pode depender apenas de um hash não selado. |
+
+Quando CAdES-B-LTA é aplicado a um documento com `nivel_assinatura: "nenhuma"`, o envelope usa um **selo institucional** (não uma assinatura pessoal) — um certificado de autenticação da entidade produtora ou do sistema de gestão documental, não um certificado qualificado pessoal. O efeito jurídico é de integridade técnica, não de assinatura com efeito legal equivalente à manuscrita.
+
 ---
 
 ## 3. Avaliação arquivística (PCA/DF — MEG/DGLAB)
@@ -496,12 +581,33 @@ A Lista Consolidada da DGLAB integra estas decisões de avaliação para os proc
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `tipo_classificacao_ref` | string | Referência ao mapeamento `tipo_classificacao` existente em `crates/domain`, ligando o tipo de documento `.ndf` à classificação MEF/MIP/DGLAB. |
+| `tipo_classificacao_ref` | string | Referência à classe/série no instrumento de avaliação arquivística. Formato normativo: `"<instrumento>/<codigo_classe>"`. Ver §3.2.1. |
 | `prazo_conservacao_administrativa.valor` | número inteiro ≥ 0 | Quantidade do prazo. |
 | `prazo_conservacao_administrativa.unidade` | string (enum) | `dias \| meses \| anos`. |
 | `prazo_conservacao_administrativa.forma_contagem` | string (enum) | Ver §3.3. |
 | `destino_final` | string (enum) | `conservacao_permanente \| eliminacao \| conservacao_parcial_por_amostragem`. |
 | `lista_consolidada_versao_ref` | string | Identificador/versão da Lista Consolidada (ou tabela de seleção derivada) usada para resolver PCA/DF no momento da finalização. |
+
+### 3.2.1 Formato normativo de `tipo_classificacao_ref`
+
+A string segue o formato `"<instrumento>/<codigo_classe>"`:
+
+| Componente | Descrição |
+|---|---|
+| `instrumento` | Identificador do instrumento de avaliação. Valores canónicos: `"lc"` (Lista Consolidada DGLAB), `"ts"` (Tabela de Seleção institucional), `"portaria"` (Portaria de Gestão de Documentos). Extensível por entidades com instrumentos próprios homologados pela DGLAB. |
+| `codigo_classe` | Código da classe ou série dentro do instrumento — segue a codificação definida pelo próprio instrumento (ex.: `"450.10.001"` para a Lista Consolidada DGLAB). |
+
+**Exemplos válidos**:
+```
+"lc/450.10.001"    — classe 450.10.001 da Lista Consolidada DGLAB
+"lc/150.30.400"    — classe 150.30.400 da Lista Consolidada DGLAB
+"ts/at/300.20"     — classe 300.20 da Tabela de Seleção da AT
+"portaria/1253-A/2009/II-3"  — série II-3 da Portaria n.º 1253-A/2009
+```
+
+A versão do instrumento consultada é registada em `lista_consolidada_versao_ref`, permitindo que a regra aplicável seja rastreável mesmo após actualização do instrumento.
+
+`tipo_classificacao_ref` é **resolvido automaticamente** pelo sistema produtor a partir do tipo de documento — nunca introduzido manualmente por documento.
 
 ### 3.3 Enum `forma_contagem`
 
@@ -551,6 +657,20 @@ CAdES-B-LTA (Long Term Archival) garante:
 - **T** (Timestamp): timestamp sobre o valor da assinatura, prova de quando a assinatura foi criada.
 - **LT** (Long Term): inclusão da cadeia de certificados e dados de revogação, permitindo validação mesmo que o repositório de revogação original deixe de estar acessível.
 - **A** (Archive): timestamp de arquivo adicional sobre assinatura + dados LT, protegendo contra a expiração/comprometimento futuro dos algoritmos/certificados usados na assinatura original.
+
+### 4.2.1 Requisitos da Autoridade de Timestamp (TSA)
+
+O timestamp RFC 3161 (B-T e B-LTA) deve ser emitido por uma TSA que cumpra os seguintes requisitos:
+
+| Requisito | Especificação |
+|---|---|
+| Qualificação | A TSA deve constar da lista de confiança de um Estado-Membro UE (EU Trusted List, conforme ETSI TS 119 612). |
+| Implementação de referência para a AP portuguesa | SCEE — Sistema de Certificação Electrónica do Estado (Agência para a Modernização Administrativa, AMA). |
+| Precisão | O timestamp deve ter precisão de 1 segundo ou melhor. |
+| Algoritmo de hash do timestamp | SHA-256 ou superior (ETSI EN 319 422). |
+| Disponibilidade de resposta | A TSA deve suportar o protocolo TSP (Time-Stamp Protocol) via HTTP ou HTTPS. |
+
+Quando a implementação opera em ambientes sem acesso à internet (ex.: redes de classificação), o timestamp pode ser obtido de uma TSA local acreditada, desde que a cadeia de confiança seja incluída no `validation_material` do envelope.
 
 ### 4.3 Agility de algoritmo criptográfico
 
@@ -686,12 +806,23 @@ Um NDF finalizado nunca é editado. Uma "nova versão" de um documento é um **N
 
 ### 6.2 Referência ao documento anterior
 
-O novo NDF regista, fora do NDF-core (metadados operacionais — ver especificação de implementação para localização exata):
+O novo NDF regista a proveniência no **envelope** (fora do NDF-core), nos seguintes campos de topo:
 
-- `versao_anterior` — identificador do NDF anterior na cadeia.
-- `hash_anterior` — `payload_hash` do NDF anterior, para verificação de cadeia.
+```json
+{
+  "versao_anterior": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "hash_anterior": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
+}
+```
 
-Estes campos **não** entram na canonicalização/assinatura do novo NDF-core (são metadados operacionais sobre a relação entre documentos, não conteúdo do documento em si). Ficam disponíveis para reconstrução de cadeias de proveniência auditáveis.
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `versao_anterior` | string (UUID v4) | `ndf_id` do NDF imediatamente anterior na cadeia de proveniência. |
+| `hash_anterior` | string (`"sha256:<hex>"`) | `payload_hash` do NDF anterior — permite verificar que o documento anterior não foi adulterado. |
+
+**Localização normativa**: estes campos ficam no envelope, ao mesmo nível de `assinaturas`, `timestamps` e `validation_code`. Não entram no NDF-core canonicalizado — são metadados relacionais sobre a ligação entre documentos, não conteúdo do documento em si.
+
+**Quando presentes**: obrigatórios quando o NDF é uma nova versão de um documento anterior (`estado` do anterior transita para `"substituido"`). Ausentes em documentos sem versão prévia.
 
 ### 6.3 Pacote de exportação (`.ndfpkg`)
 
@@ -782,8 +913,9 @@ Itens previstos para versões futuras desta especificação. Não são normativo
 | Item | Versão prevista | Descrição |
 |---|---|---|
 | Agility de algoritmo criptográfico | 1.1.0 | Mecanismo formal de re-selagem periódica (re-timestamping) com algoritmos mais recentes, sem alterar `payload_bytes`. Inclui procedimento de migração e requisitos de notificação. |
-| Schema de RGPD para dados especiais | 1.1.0 | Extensão do bloco `metadados` para categorias especiais de dados (Art.º 9.º RGPD): dados de saúde, origem racial/étnica, dados biométricos. |
-| Validação formal do `.ndfpkg` | 1.1.0 | Conjunto de testes de conformidade para implementações do pacote de exportação (ver `conformance/ndf/`). |
+| Schema de categorias especiais (RGPD Art.º 9.º) | 1.1.0 | Extensão do bloco `metadados` para categorias especiais de dados: dados de saúde, origem racial/étnica, dados biométricos — campos já previstos mas não detalhados em v1.0.0. |
+| Validação formal do `.ndfpkg` | 1.1.0 | Expansão da suite de conformidade (`conformance/ndf/`) com testes de empacotamento, resolução de NDT, e verificação de assinatura end-to-end. |
+| Registry remoto de tipos de documento | 1.1.0 | URI canónico `https://registry.normordis.pt/<id>/<versao>/schema.json` para resolução de `tipo_documento_ref` sem acesso ao `.ndfpkg`. |
 | Suporte multi-hash | 1.2.0 | Permitir `payload_hash` com múltiplos algoritmos em paralelo (`sha256`, `sha3-256`) para preparação de transição. |
 | Extensões de namespace | 2.0.0 | Mecanismo formal de extensão do NDF-core por organismos externos (ex.: `ext.at.pt`, `ext.ss.pt`) sem necessidade de revisão desta especificação base. |
 

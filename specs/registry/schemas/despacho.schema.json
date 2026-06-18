@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/registry/despacho/1.0.0/schema.json",
+  "title": "Despacho v1.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'despacho@1.0.0'. Despacho administrativo — decisão, instrução ou concordância sobre documento(s) sujeito(s).",
+  "type": "object",
+  "required": ["numero", "data", "texto"],
+  "additionalProperties": false,
+  "properties": {
+    "numero": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Número do despacho (ex.: 'DESP/2026/00123').",
+      "examples": ["DESP/2026/00123"]
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do despacho (ISO 8601, YYYY-MM-DD)."
+    },
+    "sobre": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ndf_id"],
+        "properties": {
+          "ndf_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ndf_id do documento sobre o qual recai o despacho."
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição breve do documento sujeito (para legibilidade)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Documentos sobre os quais o despacho recai, identificados por ndf_id. Pode ser vazio para despachos de iniciativa própria."
+    },
+    "texto": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Texto do despacho — decisão, instrução ou concordância."
+    },
+    "tipo_despacho": {
+      "type": "string",
+      "enum": [
+        "concordancia",
+        "discordancia",
+        "arquivamento",
+        "instrucao",
+        "decisao",
+        "delegacao",
+        "outro"
+      ],
+      "description": "Classificação do tipo de despacho para indexação e pesquisa."
+    },
+    "decisor": {
+      "type": "object",
+      "required": ["nome", "cargo"],
+      "properties": {
+        "nome": { "type": "string" },
+        "cargo": { "type": "string" },
+        "delegacao_ref": {
+          "type": "string",
+          "description": "Referência ao despacho de delegação que habilita o decisor, quando actua por delegação."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Entidade que profere o despacho."
+    },
+    "prazo_cumprimento": {
+      "type": "object",
+      "properties": {
+        "data_limite": {
+          "type": "string",
+          "format": "date",
+          "description": "Data limite para cumprimento da instrução, quando aplicável."
+        },
+        "descricao": {
+          "type": "string",
+          "description": "Descrição das condições ou instruções de cumprimento."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

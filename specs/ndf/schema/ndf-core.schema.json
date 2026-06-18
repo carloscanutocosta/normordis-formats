@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/ndf/1.0.0/ndf-core.schema.json",
+  "title": "NDF-core v1.0.0",
+  "description": "NORMORDIS Document Format — NDF-core structure. Canonical JSON object subject to JCS (RFC 8785) canonicalisation and CAdES-B-LTA signing.",
+  "type": "object",
+  "required": [
+    "ndf_version",
+    "ndf_id",
+    "estado",
+    "payload_hash_alg",
+    "nivel_assinatura",
+    "ndt_version_ref",
+    "metadados",
+    "documento",
+    "avaliacao"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ndf_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "NDF specification version (SemVer 2.0.0). Normative value for this schema: '1.0.0'.",
+      "examples": ["1.0.0"]
+    },
+    "ndf_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Permanent document identifier. UUID v4 (RFC 4122). Generated before canonicalisation, immutable after finalisation.",
+      "examples": ["a1b2c3d4-e5f6-4789-abcd-ef0123456789"]
+    },
+    "estado": {
+      "type": "string",
+      "enum": ["ativo", "substituido", "em_conservacao", "conservado_permanentemente", "eliminado"],
+      "description": "Archival lifecycle state. Only 'estado' may be updated after finalisation without altering payload_bytes."
+    },
+    "payload_hash_alg": {
+      "type": "string",
+      "enum": ["sha256"],
+      "description": "Hash algorithm used to compute payload_hash. Normative value for NDF v1.x: 'sha256' (NIST FIPS 180-4)."
+    },
+    "nivel_assinatura": {
+      "type": "string",
+      "enum": ["nenhuma", "avancada", "qualificada"],
+      "description": "Minimum electronic signature level required by the legal nature of the act. See SPEC.md §2.10."
+    },
+    "ndt_version_ref": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$",
+      "description": "NDT version reference. Format: '<schema_id>@<versao_impresso>'. Must be resolvable in the .ndfpkg or a compliant registry.",
+      "examples": ["oficio-generico@1.0.0", "modelo3-irs@2026.1", "informacao-tecnica@2.3.1"]
+    },
+    "metadados": {
+      "$ref": "#/$defs/metadados",
+      "description": "Descriptive metadata, GDPR fields, and document type reference. See SPEC.md §2.7."
+    },
+    "documento": {
+      "type": "object",
+      "description": "Document logical content. Structure is opaque at NDF-core level; validated by the schema referenced in metadados.tipo_documento_ref.",
+      "minProperties": 1
+    },
+    "avaliacao": {
+      "$ref": "#/$defs/avaliacao",
+      "description": "Archival evaluation (PCA/DF — MEG/DGLAB). See SPEC.md §3."
+    }
+  },
+  "$defs": {
+    "metadados": {
+      "type": "object",
+      "required": ["tipo_documento_ref", "entidade_produtora", "contem_dados_pessoais", "responsavel_tratamento"],
+      "properties": {
+        "tipo_documento_ref": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$",
+          "description": "Versioned reference to the document type schema. Format: '<id>@<versao>'.",
+          "examples": ["oficio@1.0.0", "informacao-tecnica@1.0.0", "despacho@1.0.0"]
+        },
+        "entidade_produtora": {
+          "type": "object",
+          "required": ["designacao"],
+          "properties": {
+            "designacao": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Official name of the producing entity."
+            },
+            "nif": {
+              "type": "string",
+              "pattern": "^[0-9]{9}$",
+              "description": "Institutional NIF (9 digits, no separators)."
+            },
+            "codigo_dglab": {
+              "type": "string",
+              "description": "DGLAB institutional code for archival context (MEG)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "assunto": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Document title or brief description — indexable."
+        },
+        "numero_referencia": {
+          "type": "string",
+          "description": "Document reference number (e.g. 'OF/2026/00123')."
+        },
+        "processo_ref": {
+          "type": "string",
+          "description": "Process or case reference."
+        },
+        "idioma": {
+          "type": "string",
+          "pattern": "^[a-z]{2}$",
+          "default": "pt",
+          "description": "ISO 639-1 language code. Defaults to 'pt' when absent."
+        },
+        "classificacao_seguranca": {
+          "type": "string",
+          "enum": ["publico", "uso_interno", "reservado", "confidencial", "secreto", "muito_secreto"],
+          "description": "Information security classification (DL n.º 11/2023). Defaults to 'uso_interno' when absent."
+        },
+        "contem_dados_pessoais": {
+          "type": "boolean",
+          "description": "True if the document contains personal data as defined by GDPR."
+        },
+        "categorias_dados_pessoais": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required when contem_dados_pessoais is true. Open enum: 'identificacao_fiscal', 'rendimentos', 'saude', 'dados_processuais', 'biometricos', 'outros'."
+        },
+        "base_legal_conservacao": {
+          "type": ["string", "null"],
+          "enum": ["obrigacao_legal", "interesse_publico", "consentimento", "contrato", null],
+          "description": "Required when contem_dados_pessoais is true. Legal basis for conservation under GDPR Art. 6."
+        },
+        "responsavel_tratamento": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the data controller (GDPR Art. 13-14). Required even when contem_dados_pessoais is false."
+        }
+      },
+      "if": {
+        "properties": { "contem_dados_pessoais": { "const": true } }
+      },
+      "then": {
+        "required": ["categorias_dados_pessoais", "base_legal_conservacao"],
+        "properties": {
+          "categorias_dados_pessoais": { "minItems": 1 },
+          "base_legal_conservacao": { "not": { "type": "null" } }
+        }
+      },
+      "additionalProperties": false
+    },
+    "avaliacao": {
+      "type": "object",
+      "required": [
+        "tipo_classificacao_ref",
+        "prazo_conservacao_administrativa",
+        "destino_final",
+        "lista_consolidada_versao_ref"
+      ],
+      "properties": {
+        "tipo_classificacao_ref": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*/[^/]+$",
+          "description": "Reference to the archival class/series. Format: '<instrumento>/<codigo_classe>'. See SPEC.md §3.2.1.",
+          "examples": ["lc/450.10.001", "lc/150.30.400", "ts/at/300.20"]
+        },
+        "prazo_conservacao_administrativa": {
+          "type": "object",
+          "required": ["valor", "unidade", "forma_contagem"],
+          "properties": {
+            "valor": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "PCA quantity."
+            },
+            "unidade": {
+              "type": "string",
+              "enum": ["dias", "meses", "anos"],
+              "description": "PCA unit."
+            },
+            "forma_contagem": {
+              "type": "string",
+              "enum": [
+                "data_documento",
+                "encerramento_processo",
+                "fim_ano_civil",
+                "fim_vigencia",
+                "outro"
+              ],
+              "description": "PCA counting start. See SPEC.md §3.3."
+            },
+            "forma_contagem_detalhe": {
+              "type": "string",
+              "description": "Required when forma_contagem is 'outro'. Free-text description."
+            }
+          },
+          "if": {
+            "properties": { "forma_contagem": { "const": "outro" } }
+          },
+          "then": {
+            "required": ["forma_contagem_detalhe"]
+          },
+          "additionalProperties": false
+        },
+        "destino_final": {
+          "type": "string",
+          "enum": [
+            "conservacao_permanente",
+            "eliminacao",
+            "conservacao_parcial_por_amostragem"
+          ],
+          "description": "Final disposition after PCA. See SPEC.md §3.4."
+        },
+        "lista_consolidada_versao_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version identifier of the Lista Consolidada (or derived selection table) used to resolve PCA/DF at finalisation time.",
+          "examples": ["lista-consolidada-dglab-2023-v3", "tabela-selecao-at-2022"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
