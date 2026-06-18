@@ -1,0 +1,33 @@
+{
+  "_comment": "Valida os três níveis de heading suportados em v1.0.0.",
+  "ncrtf_version": "1.0.0",
+  "content": [
+    {
+      "type": "heading",
+      "level": 1,
+      "content": [ { "type": "text", "text": "Título principal (nível 1)" } ]
+    },
+    {
+      "type": "paragraph",
+      "content": [ { "type": "text", "text": "Parágrafo introdutório." } ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "content": [ { "type": "text", "text": "Subtítulo (nível 2)" } ]
+    },
+    {
+      "type": "paragraph",
+      "content": [ { "type": "text", "text": "Conteúdo da secção." } ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "content": [ { "type": "text", "text": "Subsecção (nível 3)" } ]
+    },
+    {
+      "type": "paragraph",
+      "content": [ { "type": "text", "text": "Conteúdo da subsecção." } ]
+    }
+  ]
+}

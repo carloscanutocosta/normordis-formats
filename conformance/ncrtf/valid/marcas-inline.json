@@ -1,0 +1,30 @@
+{
+  "_comment": "Valida todas as marcas disponíveis em v1.0.0, na ordem canónica correcta. Subscrito e sobrescrito em nós separados.",
+  "ncrtf_version": "1.0.0",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "Texto " },
+        { "type": "text", "text": "negrito", "marks": ["bold"] },
+        { "type": "text", "text": ", " },
+        { "type": "text", "text": "itálico", "marks": ["italic"] },
+        { "type": "text", "text": ", " },
+        { "type": "text", "text": "sublinhado", "marks": ["underline"] },
+        { "type": "text", "text": ", " },
+        { "type": "text", "text": "negrito e itálico", "marks": ["bold", "italic"] },
+        { "type": "text", "text": "." }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "Fórmula: H" },
+        { "type": "text", "text": "2", "marks": ["subscript"] },
+        { "type": "text", "text": "O e E = mc" },
+        { "type": "text", "text": "2", "marks": ["superscript"] },
+        { "type": "text", "text": "." }
+      ]
+    }
+  ]
+}
