@@ -1,0 +1,22 @@
+{
+  "_comment": "Lista de verificação (checklist) com dois itens: um assinalado e um por assinalar. Todos os list_item têm checked explícito.",
+  "ncrtf_version": "2.0.0",
+  "content": [
+    {
+      "type": "list",
+      "list_type": "checklist",
+      "content": [
+        {
+          "type": "list_item",
+          "checked": true,
+          "content": [ { "type": "text", "text": "Verificar autenticidade do documento" } ]
+        },
+        {
+          "type": "list_item",
+          "checked": false,
+          "content": [ { "type": "text", "text": "Confirmar assinatura do responsável" } ]
+        }
+      ]
+    }
+  ]
+}

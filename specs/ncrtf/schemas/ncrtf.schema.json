@@ -91,6 +91,20 @@
           "minItems": 1,
           "items": { "$ref": "#/$defs/list_item" }
         }
+      },
+      "if": {
+        "properties": { "list_type": { "const": "checklist" } },
+        "required": ["list_type"]
+      },
+      "then": {
+        "properties": {
+          "content": { "items": { "required": ["checked"] } }
+        }
+      },
+      "else": {
+        "properties": {
+          "content": { "items": { "not": { "required": ["checked"] } } }
+        }
       }
     },
     "list_item": {
