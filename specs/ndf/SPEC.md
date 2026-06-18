@@ -19,7 +19,7 @@ A **implementação de referência** (código-fonte: validadores, serializadores
 
 O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de documentos no core-documental. Garante:
 
-- **Integridade e validade jurídica** conforme eIDAS (Regulamento (UE) n.º 910/2014) e DL n.º 12/2021, com assinatura eletrónica qualificada de nível CAdES-B-LTA (ETSI EN 319 122).
+- **Integridade e validade jurídica** conforme eIDAS (Regulamento (UE) n.º 910/2014) e DL n.º 12/2021. O nível de assinatura eletrónica é declarado no NDF-core (`nivel_assinatura` — ver §2.10) e varia conforme a natureza jurídica do acto: `"nenhuma"`, `"avancada"` (SEA/AES) ou `"qualificada"` (SEQ/QES). Quando requerido, o envelope CAdES-B-LTA (ETSI EN 319 122) garante validade de longo prazo.
 - **Eficiência de armazenamento**, por ser dados estruturados (tipicamente uma a duas ordens de grandeza menor que um binário renderizado equivalente), otimizado para persistência em base de dados relacional (ver §1.5).
 - **Reprodutibilidade visual** em qualquer formato de apresentação (PDF, Word, ou formato futuro), através da combinação com o NDT (NORMORDIS Document Template — estrutura/layout).
 - **Conformidade arquivística** conforme ISO 15489:2016 (Records Management), MoReq2017, o Modelo de Requisitos para Sistemas de Gestão de Arquivos Eletrónicos (MEG/DGLAB) e os instrumentos de avaliação da DGLAB (Lista Consolidada / Tabelas de Seleção).
@@ -99,8 +99,8 @@ A tabela seguinte mapeia cada requisito legal ou normativo à disposição concr
 
 | Requisito | Instrumento legal / normativo | Disposição NDF | Secção |
 |---|---|---|---|
-| Assinatura eletrónica qualificada | eIDAS, Art.º 25.º; DL n.º 12/2021 | Envelope CAdES-B com certificado qualificado | §4 |
-| Preservação de longo prazo da assinatura | eIDAS, Art.º 34.º; ETSI EN 319 122 | Nível CAdES-B-LTA; timestamp de arquivo RFC 3161 | §4.2 |
+| Assinatura eletrónica proporcional ao acto | eIDAS, Art.º 25.º–26.º; DL n.º 12/2021; CPA, Art.º 61.º | `nivel_assinatura` no NDF-core: `"nenhuma"` / `"avancada"` (SEA) / `"qualificada"` (SEQ), conforme a natureza jurídica do acto | §2.10 |
+| Preservação de longo prazo da assinatura | eIDAS, Art.º 34.º; ETSI EN 319 122 | Nível CAdES-B-LTA; timestamp de arquivo RFC 3161 — obrigatório quando `nivel_assinatura ≠ "nenhuma"` | §4.2, §5.2 |
 | Autenticidade e integridade do documento | ISO 15489:2016, §5.2; MoReq2017, R2 | JCS/RFC 8785 + SHA-256 + CAdES sobre `payload_bytes` | §1.3, §4 |
 | Imutabilidade do registo | MoReq2017, R3; MEG, R4 | Princípio de imutabilidade; proibição de edição de NDF finalizado | §2.1 |
 | Reprodutibilidade / renderização futura | MoReq2017, R5; OAIS/ISO 14721:2012 | `ndt_version_ref` embebido no NDF-core; NDT incluído no `.ndfpkg` | §2.6, §8 |
@@ -269,6 +269,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
   "ndf_id": "uuid-v4",
   "estado": "ativo",
   "payload_hash_alg": "sha256",
+  "nivel_assinatura": "qualificada",
   "ndt_version_ref": "oficio-generico@1.0.0",
   "metadados": { /* ... ver §2.7 ... */ },
   "documento": { /* ... conteúdo lógico, estrutura definida por metadados.tipo_documento_ref ... */ },
@@ -282,7 +283,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `ndf_id` | Sim | Identificador único do documento. UUID v4, gerado pelo sistema produtor antes da canonicalização. Imutável após finalização. Ver §2.3. |
 | `estado` | Sim | Estado de arquivo do documento. Enum fechado — ver §2.4. |
 | `payload_hash_alg` | Sim | Algoritmo usado para calcular `payload_hash`. Valor normativo desta versão: `"sha256"` (NIST FIPS 180-4). Ver §2.5. |
-| `ndt_version_ref` | Sim | Referência normativa ao NDT. Formato: `"schema_id@versao_impresso"`. Ver §2.6. |
+| `nivel_assinatura` | Sim | Nível mínimo de assinatura eletrónica exigido pela natureza jurídica do acto. Enum fechado — ver §2.10. |
 | `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_impresso"`. Ver §2.6. |
 | `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
@@ -437,6 +438,32 @@ Estrutura profundamente aninhada, com arrays de elementos repetíveis (anexos, s
 - **Eficiência de armazenamento permanece válida**: mesmo um Modelo 3 IRS complexo, em JSON estruturado, é tipicamente muito mais compacto do que o PDF oficial equivalente (que inclui layout completo de todos os anexos, mesmo os não preenchidos). O argumento de economia de espaço (ver discussão de vantagens do NDF) mantém-se, possivelmente de forma ainda mais pronunciada para formulários longos com muitas secções não aplicáveis/vazias no PDF mas ausentes no NDF.
 - **Anexos binários dentro de formulários complexos**: se um `tipo_documento` exigir anexos binários (ex. comprovativos digitalizados anexos a uma declaração), estes seguem o regime de documentos importados/preservação bit-a-bit (fora de âmbito desta especificação) — `documento` referencia-os por identificador/hash, nunca os embute.
 
+### 2.10 Nível de assinatura eletrónica (`nivel_assinatura`)
+
+Declara o nível mínimo de assinatura eletrónica exigido pela natureza jurídica do acto representado pelo documento. Determina quais os passos do pipeline de finalização (§5.2) que são obrigatórios e que tipo de certificado é requerido.
+
+**Distinção importante**: `nivel_assinatura` refere-se à **validade jurídica do acto**. É independente da **integridade de arquivo** — mesmo documentos com `"nenhuma"` podem (e devem, quando arquivisticamente relevantes) ter um envelope CAdES-B-LTA aplicado pela implementação para garantir integridade a longo prazo, sem que isso constitua uma assinatura com efeito jurídico.
+
+#### 2.10.1 Valores (enum fechado)
+
+| Valor | Nível eIDAS | Requisito de certificado | Passos obrigatórios no pipeline | Exemplos de actos |
+|---|---|---|---|---|
+| `"nenhuma"` | — | Nenhum | Passos 1–3 e 8 (canonicalização, hash, validation_code, persistência) | Registos internos sem efeito externo, logs de operação, tabelas de presença, minutas. |
+| `"avancada"` | SEA — Assinatura Eletrónica Avançada (eIDAS Art.º 26.º) | Certificado com identificação única do signatário; não obrigatoriamente qualificado | Passos 1–8 com CAdES-B-LTA | Ofícios, informações técnicas, pareceres, despachos de mero expediente, notificações de rotina. |
+| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS; equivalente legal à assinatura manuscrita | Passos 1–8 com CAdES-B-LTA | Contratos públicos, actos com efeito patrimonial significativo, decisões com impacto jurídico directo. |
+
+#### 2.10.2 Responsabilidade de classificação
+
+A classificação correcta de um acto num destes três níveis é **responsabilidade da entidade produtora**. A especificação NDF não define o mapeamento entre tipos de acto e níveis de assinatura — essa é uma decisão de direito administrativo, que cada entidade define de acordo com o CPA, os estatutos sectoriais, e as suas normas internas de delegação de competência e autenticidade documental.
+
+#### 2.10.3 Implicações para o envelope
+
+| `nivel_assinatura` | `assinaturas[]` | `timestamps` | `validation_material` | `validation_code` |
+|---|---|---|---|---|
+| `"nenhuma"` | Ausente ou `[]` | Ausente (opcional por razões de arquivo) | Ausente | **Sempre presente** |
+| `"avancada"` | CAdES-B-LTA com certificado SEA | Presente (B-T + B-LTA) | Presente | **Sempre presente** |
+| `"qualificada"` | CAdES-B-LTA com certificado SEQ qualificado PSSC | Presente (B-T + B-LTA) | Presente | **Sempre presente** |
+
 ---
 
 ## 3. Avaliação arquivística (PCA/DF — MEG/DGLAB)
@@ -509,12 +536,12 @@ A partir de `avaliacao.prazo_conservacao_administrativa` e da data de finalizaç
 
 ### 4.1 Componentes
 
-| Componente | Conteúdo | Norma |
-|---|---|---|
-| `assinaturas` | Uma ou mais assinaturas CAdES (CMS/PKCS#7, ASN.1 DER) sobre `sha256(payload_bytes)`, mais metadados (signatário, certificado, nível) | CAdES (ETSI EN 319 122), nível B-LTA |
-| `timestamps` | Timestamps RFC 3161 — de assinatura (B-T) e de arquivo (B-LTA) | RFC 3161 |
-| `validation_material` | Cadeia de certificados (signatário → raiz) + respostas de revogação (OCSP/CRL) capturadas no momento da assinatura | LT/LTA (ETSI EN 319 122) |
-| `validation_code` | Código de verificação canónico — derivado de `ndf_id` + `payload_hash`. Ver §4.6. | Esta especificação |
+| Componente | Conteúdo | Norma | Condicional |
+|---|---|---|---|
+| `assinaturas` | Uma ou mais assinaturas CAdES (CMS/PKCS#7, ASN.1 DER) sobre `sha256(payload_bytes)`, mais metadados (signatário, certificado, nível declarado em `nivel_assinatura`) | CAdES (ETSI EN 319 122), nível B-LTA | Obrigatório se `nivel_assinatura ∈ {"avancada", "qualificada"}`; ausente ou `[]` se `"nenhuma"` |
+| `timestamps` | Timestamps RFC 3161 — de assinatura (B-T) e de arquivo (B-LTA) | RFC 3161 | Obrigatório se `nivel_assinatura ∈ {"avancada", "qualificada"}`; opcional se `"nenhuma"` |
+| `validation_material` | Cadeia de certificados (signatário → raiz) + respostas de revogação (OCSP/CRL) capturadas no momento da assinatura | LT/LTA (ETSI EN 319 122) | Obrigatório se `nivel_assinatura ∈ {"avancada", "qualificada"}`; ausente se `"nenhuma"` |
+| `validation_code` | Código de verificação canónico — derivado de `ndf_id` + `payload_hash`. Ver §4.6. | Esta especificação | **Sempre presente** — independente de `nivel_assinatura` |
 
 ### 4.2 Nível alvo: CAdES-B-LTA
 
@@ -607,7 +634,7 @@ O `validation_code` é calculado **após** a canonicalização e o cálculo do `
 1. Canonicalizar NDF-core → payload_bytes
 2. payload_hash = SHA-256(payload_bytes)
 3. validation_code = "NDF-" + BASE32_NOPAD(SHA-256(ndf_id + "|" + payload_hash))[:20]
-4. Assinar payload_hash (CAdES-B)  ← validation_code não faz parte do que é assinado
+4. [Se nivel_assinatura ≠ "nenhuma"] Assinar payload_hash (CAdES-B)  ← validation_code não está no que é assinado
 5. ...
 ```
 
@@ -623,20 +650,25 @@ A operação de finalização transforma um NDF-core completo (rascunho) num NDF
 
 A finalização **falha** se:
 
-- Qualquer campo obrigatório do NDF-core (§2.2) estiver ausente, incluindo `ndf_id`, `ndt_version_ref`, `payload_hash_alg` e `avaliacao` completo (§3.2).
+- Qualquer campo obrigatório do NDF-core (§2.2) estiver ausente, incluindo `ndf_id`, `nivel_assinatura`, `ndt_version_ref`, `payload_hash_alg` e `avaliacao` completo (§3.2).
+- `nivel_assinatura` contiver um valor fora do enum definido em §2.10.
+- `nivel_assinatura ∈ {"avancada", "qualificada"}` e não estiver disponível um certificado electrónico conforme (SEA ou SEQ, respectivamente).
+- `nivel_assinatura = "qualificada"` e o certificado não for emitido por um PSSC inscrito na lista de confiança eIDAS.
 - `avaliacao.prazo_conservacao_administrativa` ou `avaliacao.destino_final` não puderem ser resolvidos a partir de `tipo_classificacao_ref` (Lista Consolidada indisponível ou sem entrada correspondente).
 - O conteúdo de `documento`/`metadados` violar as regras de tipos permitidos (§2.8).
 
 ### 5.2 Pipeline (ordem estrita)
 
-1. Canonicalizar o NDF-core completo (incluindo `ndf_id`, `ndt_version_ref` e `avaliacao`) via JCS (RFC 8785) → `payload_bytes`.
+Os passos 1–3 e 8 são **sempre obrigatórios**. Os passos 4–7 são **condicionais** ao valor de `nivel_assinatura` (ver §2.10).
+
+1. Canonicalizar o NDF-core completo (incluindo `ndf_id`, `nivel_assinatura`, `ndt_version_ref` e `avaliacao`) via JCS (RFC 8785) → `payload_bytes`.
 2. Calcular `payload_hash = SHA-256(payload_bytes)`.
 3. Calcular `validation_code = "NDF-" + BASE32_NOPAD(SHA-256(ndf_id + "|" + payload_hash))[:20]` (ver §4.6).
-4. Assinar `payload_hash` (CAdES-B).
-5. Obter timestamp de assinatura (CAdES-B-T).
-6. Recolher material de validação — cadeia de certificados + revogação (CAdES-B-LT).
-7. Obter timestamp de arquivo selando assinatura + material de validação (CAdES-B-LTA).
-8. Persistir atomicamente: `payload_bytes` (imutável a partir daqui) + envelope completo (incluindo `validation_code`).
+4. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Assinar `payload_hash` (CAdES-B), com certificado conforme o nível declarado (SEA ou SEQ).
+5. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Obter timestamp de assinatura (CAdES-B-T).
+6. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Recolher material de validação — cadeia de certificados + revogação (CAdES-B-LT).
+7. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Obter timestamp de arquivo selando assinatura + material de validação (CAdES-B-LTA).
+8. Persistir atomicamente: `payload_bytes` (imutável a partir daqui) + envelope completo. Para `nivel_assinatura: "nenhuma"`, o envelope contém apenas `validation_code` e `payload_hash`; os campos `assinaturas`, `timestamps` e `validation_material` estão ausentes ou vazios.
 
 ### 5.3 Pós-condições
 
@@ -771,5 +803,9 @@ Itens previstos para versões futuras desta especificação. Não são normativo
 | MEF | Macroestrutura Funcional (DGLAB) |
 | MIP | (classificação documental institucional/processual — DGLAB) |
 | Lista Consolidada | Referencial suprainstitucional da DGLAB com classificação + avaliação (PCA/DF) |
+| SEA / AES | Assinatura Eletrónica Avançada — eIDAS Art.º 26.º; identificação única do signatário sem obrigatoriedade de certificado qualificado |
+| SEQ / QES | Assinatura Eletrónica Qualificada — eIDAS Art.º 25.º; certificado qualificado PSSC; equivalente legal à assinatura manuscrita |
+| PSSC | Prestador de Serviços de Confiança Qualificado — entidade inscrita na lista de confiança eIDAS |
+| `nivel_assinatura` | Nível mínimo de assinatura eletrónica exigido pela natureza jurídica do acto: `"nenhuma"`, `"avancada"` ou `"qualificada"` (ver §2.10) |
 | CAdES-B-LTA | Nível de assinatura eletrónica avançada com timestamp de arquivo (ETSI EN 319 122) |
 | `tipo_documento_ref` | Referência ao schema versionado que define a estrutura interna de `documento` (ex.: `oficio@1.0.0`, `modelo3-irs@2025.1`) — ver §2.9.2 |
