@@ -13,15 +13,40 @@ conformance/ndf/
 
 ## Como usar
 
+### Test runner de referência
+
+```bash
+# Pré-requisito (jsonschema já incluído na maioria dos ambientes)
+pip install jsonschema
+
+# Correr toda a suite (resultado esperado: 14/14 passed)
+python3 tools/validate.py
+
+# Validar um ficheiro específico
+python3 tools/validate.py path/to/ndf-core.json
+
+# Apenas casos válidos ou inválidos
+python3 tools/validate.py --valid-only
+python3 tools/validate.py --invalid-only
+```
+
+### Campos de metadados de teste (`_*`)
+
+Os ficheiros JSON nesta suite contêm campos prefixados com `_` para documentação interna (`_comment`, `_expected_error`). Estes campos **não fazem parte do formato NDF-core** e **não devem ser emitidos** por implementações conformes.
+
+O test runner remove automaticamente todos os campos `_*` antes de validar — este comportamento é intencional e faz parte da especificação da suite. Implementações externas que integrem estes casos de teste devem aplicar o mesmo filtro.
+
+### Produtor e leitor conformes
+
 Um **produtor NDF** é conforme se:
-- Gerar documentos estruturalmente equivalentes aos exemplos em `valid/`
+- Gerar documentos estruturalmente equivalentes aos exemplos em `valid/`, sem campos `_*`
 - Rejeitar inputs com as falhas descritas em `invalid/`
 
 Um **leitor NDF** é conforme se:
-- Processar sem erro todos os exemplos em `valid/`
+- Processar sem erro todos os exemplos em `valid/` (após remoção dos campos `_*`)
 - Emitir erro e recusar processar todos os exemplos em `invalid/`
 
-A validação estrutural usa o schema em `specs/ndf/schema/ndf-core.schema.json`. Os testes de `invalid/` cobrem também regras semânticas que o JSON Schema sozinho não captura.
+A validação estrutural usa `specs/ndf/schema/ndf-core.schema.json` (JSON Schema Draft 2020-12). Os testes de `invalid/` cobrem também regras semânticas que o schema sozinho não captura (RGPD, formatos de referência, etc.). A definição normativa de conformidade encontra-se em **§10 da SPEC.md**.
 
 ## Casos de teste
 

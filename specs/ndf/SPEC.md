@@ -15,6 +15,18 @@ A **implementação de referência** (código-fonte: validadores, serializadores
 
 ## 1. Visão geral
 
+### 1.0 Terminologia normativa
+
+As palavras-chave **DEVE** (*must*), **NÃO DEVE** (*must not*), **RECOMENDADO** (*should*), **NÃO RECOMENDADO** (*should not*), **PODE** (*may*) e **OPCIONAL** (*optional*) nesta especificação são interpretadas conforme o BCP 14 (RFC 2119 e RFC 8174) quando, e apenas quando, aparecem em maiúsculas como aqui apresentadas.
+
+| Palavra-chave | Significado |
+|---|---|
+| **DEVE** | Requisito absoluto. Uma implementação conforme não pode violar este requisito. |
+| **NÃO DEVE** | Proibição absoluta. |
+| **RECOMENDADO** | Podem existir razões válidas para não seguir em casos específicos, mas as implicações DEVEM ser compreendidas e pesadas. |
+| **NÃO RECOMENDADO** | Podem existir razões válidas para usar em casos específicos, mas as implicações negativas DEVEM ser compreendidas. |
+| **PODE** | O item é verdadeiramente opcional — uma implementação pode incluir ou omitir sem perder a designação de conforme. |
+
 ### 1.1 Objetivo
 
 O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de documentos no core-documental. Garante:
@@ -300,7 +312,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
 | `avaliacao` | Sim | Avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
 
-Nenhum destes campos pode estar ausente — a finalização **falha** se algum estiver em falta (ver §5).
+Nenhum destes campos PODE estar ausente — a finalização **DEVE falhar** se algum estiver em falta (ver §5).
 
 ### 2.3 `ndf_id`
 
@@ -309,7 +321,7 @@ Identificador permanente do documento no ecossistema NORMORDIS.
 - **Tipo**: string, formato UUID v4 (RFC 4122) — ex.: `"a1b2c3d4-e5f6-4789-abcd-ef0123456789"`.
 - **Geração**: pelo sistema produtor imediatamente antes da canonicalização, nunca depois.
 - **Imutabilidade**: faz parte do NDF-core canonicalizado e assinado — não pode ser alterado após finalização.
-- **Unicidade**: o sistema produtor garante que não existem dois NDF com o mesmo `ndf_id`.
+- **Unicidade**: o sistema produtor DEVE garantir que não existem dois NDF com o mesmo `ndf_id`.
 - **Uso**: referência primária em `versao_anterior`, no manifest do `.ndfpkg`, e como chave primária no modelo de DB (§1.5).
 
 ### 2.4 Estado de arquivo (`estado`)
@@ -341,7 +353,7 @@ em_conservacao → eliminado                    (DF: eliminação — destruiç�
 
 #### 2.4.2 Mecanismo de transição de estado
 
-Cada transição de estado deve ser registada num **log de auditoria imutável**, separado do NDF e da sua base de dados operacional. O log é da responsabilidade do sistema de custódia.
+Cada transição de estado DEVE ser registada num **log de auditoria imutável**, separado do NDF e da sua base de dados operacional. O log é da responsabilidade do sistema de custódia.
 
 **Estrutura mínima de cada entrada do log de auditoria**:
 
@@ -367,11 +379,11 @@ Cada transição de estado deve ser registada num **log de auditoria imutável**
 | `actualizador` | Sim | Identidade do sistema e/ou utilizador que efectuou a transição. |
 | `instrumento_legal` | Recomendado | Referência ao instrumento (Lista Consolidada, despacho, portaria) que autoriza a transição. |
 
-**Autorização**: a transição `em_conservacao → eliminado` requer autorização formal do `responsavel_tratamento` (§2.7.2) e deve referenciar explicitamente o instrumento de avaliação que suporta a decisão de eliminação.
+**Autorização**: a transição `em_conservacao → eliminado` DEVE ser autorizada formalmente pelo `responsavel_tratamento` (§2.7.2) e DEVE referenciar explicitamente o instrumento de avaliação que suporta a decisão de eliminação.
 
 #### 2.4.3 Tombstone de eliminação
 
-Quando `estado` transita para `"eliminado"`, o sistema de custódia deve:
+Quando `estado` transita para `"eliminado"`, o sistema de custódia DEVE:
 
 1. Destruir `payload_bytes` e todos os campos do envelope excepto `validation_code` e `payload_hash`.
 2. Criar um registo tombstone imutável com os seguintes campos mínimos:
@@ -476,8 +488,8 @@ Alinhado com o DL n.º 11/2023 (Segurança de Informação do Estado) e a nomenc
 
 | Valor | Descrição |
 |---|---|
-| `"publico"` | Informação de acesso livre — sem restrições. Atribuição explícita obrigatória. |
-| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. Valor por defeito conservador. |
+| `"publico"` | Informação de acesso livre — sem restrições. DEVE ser atribuída explicitamente; NÃO DEVE ser assumida por omissão. |
+| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. O sistema produtor DEVE assumir este valor quando `classificacao_seguranca` é omitido. |
 | `"reservado"` | Divulgação restrita a destinatários identificados. |
 | `"confidencial"` | Classificação de segurança formal — acesso controlado com registo de acessos. |
 | `"secreto"` | Classificação de segurança elevada — regime de gestão documental especial. |
@@ -600,9 +612,9 @@ Mesmo quando o acto não requer assinatura eletrónica para validade jurídica, 
 | `destino_final: "eliminacao"` E PCA ≤ 5 anos | Envelope mínimo (apenas `validation_code` + `payload_hash`). CAdES-B-LTA **não obrigatório**. |
 | `destino_final: "eliminacao"` E PCA > 5 anos | CAdES-B-LTA **recomendado** (SHOULD) para garantir integridade durante o prazo de conservação. |
 | `destino_final: "conservacao_parcial_por_amostragem"` | CAdES-B-LTA **obrigatório** (MUST) para os documentos seleccionados para conservação permanente. |
-| `destino_final: "conservacao_permanente"` | CAdES-B-LTA **obrigatório** (MUST) — a integridade do arquivo permanente não pode depender apenas de um hash não selado. |
+| `destino_final: "conservacao_permanente"` | CAdES-B-LTA **DEVE** ser aplicado — a integridade do arquivo permanente NÃO DEVE depender apenas de um hash não selado. |
 
-Quando CAdES-B-LTA é aplicado a um documento com `nivel_assinatura: "nenhuma"`, o envelope usa um **selo institucional** (não uma assinatura pessoal) — um certificado de autenticação da entidade produtora ou do sistema de gestão documental, não um certificado qualificado pessoal. O efeito jurídico é de integridade técnica, não de assinatura com efeito legal equivalente à manuscrita.
+Quando CAdES-B-LTA é aplicado a um documento com `nivel_assinatura: "nenhuma"`, o envelope DEVE usar um **selo institucional** (não uma assinatura pessoal) — um certificado de autenticação da entidade produtora ou do sistema de gestão documental, não um certificado qualificado pessoal. O efeito jurídico é de integridade técnica, não de assinatura com efeito legal equivalente à manuscrita.
 
 ---
 
@@ -719,13 +731,13 @@ O timestamp RFC 3161 (B-T e B-LTA) deve ser emitido por uma TSA que cumpra os se
 
 | Requisito | Especificação |
 |---|---|
-| Qualificação | A TSA deve constar da lista de confiança de um Estado-Membro UE (EU Trusted List, conforme ETSI TS 119 612). |
+| Qualificação | A TSA DEVE constar da lista de confiança de um Estado-Membro UE (EU Trusted List, conforme ETSI TS 119 612). |
 | Implementação de referência para a AP portuguesa | SCEE — Sistema de Certificação Electrónica do Estado (Agência para a Modernização Administrativa, AMA). |
-| Precisão | O timestamp deve ter precisão de 1 segundo ou melhor. |
+| Precisão | O timestamp DEVE ter precisão de 1 segundo ou melhor. |
 | Algoritmo de hash do timestamp | SHA-256 ou superior (ETSI EN 319 422). |
-| Disponibilidade de resposta | A TSA deve suportar o protocolo TSP (Time-Stamp Protocol) via HTTP ou HTTPS. |
+| Disponibilidade de resposta | A TSA DEVE suportar o protocolo TSP (Time-Stamp Protocol) via HTTP ou HTTPS. |
 
-Quando a implementação opera em ambientes sem acesso à internet (ex.: redes de classificação), o timestamp pode ser obtido de uma TSA local acreditada, desde que a cadeia de confiança seja incluída no `validation_material` do envelope.
+Quando a implementação opera em ambientes sem acesso à internet (ex.: redes de classificação), o timestamp PODE ser obtido de uma TSA local acreditada, desde que a cadeia de confiança seja incluída no `validation_material` do envelope.
 
 ### 4.3 Agility de algoritmo criptográfico
 
@@ -823,7 +835,7 @@ A operação de finalização transforma um NDF-core completo (rascunho) num NDF
 
 ### 5.1 Pré-condições
 
-A finalização **falha** se:
+A finalização **DEVE falhar** se:
 
 - Qualquer campo obrigatório do NDF-core (§2.2) estiver ausente, incluindo `ndf_id`, `nivel_assinatura`, `ndt_version_ref`, `payload_hash_alg` e `avaliacao` completo (§3.2).
 - `nivel_assinatura` contiver um valor fora do enum definido em §2.10.
@@ -847,9 +859,9 @@ Os passos 1–3 e 8 são **sempre obrigatórios**. Os passos 4–7 são **condic
 
 ### 5.3 Pós-condições
 
-- `payload_bytes` é imutável para sempre.
-- `envelope` (assinaturas, timestamps, validation_material) é imutável para sempre.
-- Qualquer necessidade de alteração ao conteúdo lógico origina um **novo NDF** (ver §6).
+- `payload_bytes` DEVE ser tratado como imutável para sempre.
+- `envelope` (assinaturas, timestamps, validation_material) DEVE ser tratado como imutável para sempre.
+- Qualquer necessidade de alteração ao conteúdo lógico DEVE originar um **novo NDF** (ver §6) — NÃO DEVE alterar o NDF finalizado.
 
 ---
 
@@ -877,7 +889,7 @@ O novo NDF regista a proveniência no **envelope** (fora do NDF-core), nos segui
 
 **Localização normativa**: estes campos ficam no envelope, ao mesmo nível de `assinaturas`, `timestamps` e `validation_code`. Não entram no NDF-core canonicalizado — são metadados relacionais sobre a ligação entre documentos, não conteúdo do documento em si.
 
-**Quando presentes**: obrigatórios quando o NDF é uma nova versão de um documento anterior (`estado` do anterior transita para `"substituido"`). Ausentes em documentos sem versão prévia.
+****Quando presentes**: DEVEM estar presentes quando o NDF é uma nova versão de um documento anterior (`estado` do anterior transita para `"substituido"`). DEVEM estar ausentes em documentos sem versão prévia.
 
 ### 6.3 Pacote de exportação (`.ndfpkg`)
 
@@ -903,11 +915,12 @@ Cada NDF-core declara a versão da especificação NDF a que adere no campo `ndf
 
 ### 7.2 Compatibilidade retroativa
 
-Um leitor de NDF **deve**:
+Um leitor de NDF **DEVE**:
 
-- Recusar processar um NDF cuja `ndf_version` MAJOR seja superior à suportada (evolução futura com mudanças incompatíveis desconhecidas).
-- Processar corretamente NDFs com `ndf_version` MAJOR igual e MINOR igual ou inferior (campos adicionados em versões MINOR mais recentes são tratados como `null`/omissos).
-- Processar NDFs com qualquer `ndf_version` PATCH dentro do mesmo MAJOR.MINOR.
+- **DEVE** recusar processar um NDF cuja `ndf_version` MAJOR seja superior à suportada — mudanças incompatíveis desconhecidas NÃO DEVEM ser ignoradas silenciosamente.
+- **DEVE** processar correctamente NDFs com `ndf_version` MAJOR igual e MINOR igual ou inferior — campos desconhecidos adicionados em versões MINOR mais recentes DEVEM ser ignorados sem erro.
+- **DEVE** processar NDFs com qualquer `ndf_version` PATCH dentro do mesmo MAJOR.MINOR.
+- **NÃO DEVE** rejeitar um NDF com base em campos adicionais desconhecidos quando a versão MAJOR é suportada.
 
 ### 7.3 Versionamento de schemas de tipo de documento
 
@@ -976,7 +989,76 @@ Itens previstos para versões futuras desta especificação. Não são normativo
 
 ---
 
-## 10. Glossário
+## 10. Conformidade
+
+### 10.1 Produtor conforme
+
+Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer todos os seguintes requisitos:
+
+1. **DEVE** gerar NDF-core JSON que valida contra o schema `specs/ndf/schema/ndf-core.schema.json` (JSON Schema Draft 2020-12).
+2. **DEVE** canonicalizar o NDF-core via JCS (RFC 8785) produzindo `payload_bytes` determinísticos — bytes idênticos para a mesma estrutura lógica independentemente da ordem de inserção de chaves ou formatação de origem.
+3. **DEVE** calcular `payload_hash = SHA-256(payload_bytes)` conforme NIST FIPS 180-4.
+4. **DEVE** calcular `validation_code` conforme o algoritmo definido em §4.6.2.
+5. **DEVE** executar os passos do pipeline de finalização conforme `nivel_assinatura` declarado (§5.2):
+   - Para `"nenhuma"`: passos 1–3 e 8 obrigatórios.
+   - Para `"avancada"` ou `"qualificada"`: todos os passos 1–8 obrigatórios.
+6. **DEVE** incluir todos os campos obrigatórios de `metadados` (§2.7.2), incluindo os condicionais RGPD quando `contem_dados_pessoais: true`.
+7. **DEVE** definir `tipo_classificacao_ref` no formato `<instrumento>/<codigo>` (§3.2.1).
+8. **DEVE** gerar `ndf_id` como UUID v4 válido (RFC 4122), único no espaço de nomes do sistema produtor.
+9. **DEVE** definir `estado: "ativo"` no NDF-core de qualquer documento recém-finalizado.
+10. **DEVE** registar cada transição de estado em log de auditoria imutável (§2.4.2).
+11. **DEVE** aceitar todos os casos de `conformance/ndf/valid/` sem erro.
+
+### 10.2 Leitor conforme
+
+Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todos os seguintes requisitos:
+
+1. **DEVE** rejeitar qualquer NDF-core que não valide contra o schema desta versão.
+2. **DEVE** rejeitar NDFs cuja `ndf_version` MAJOR seja superior à suportada — NÃO DEVE processar silenciosamente formatos futuros desconhecidos.
+3. **DEVE** processar NDFs com `ndf_version` MAJOR igual e MINOR igual ou inferior, ignorando campos desconhecidos sem erro.
+4. **DEVE** verificar `SHA-256(payload_bytes) == payload_hash` antes de aceitar um documento como íntegro.
+5. **DEVE** verificar `validation_code` recalculando o digest conforme §4.6.2.
+6. Quando `nivel_assinatura ∈ {"avancada", "qualificada"}`: **DEVE** validar a assinatura CAdES-B-LTA e os timestamps RFC 3161; **NÃO DEVE** aceitar um documento assinado com certificado não conforme ao `nivel_assinatura` declarado.
+7. **DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`.
+8. **DEVE** aceitar todos os casos de `conformance/ndf/valid/`.
+
+### 10.3 Pacote conforme (`.ndfpkg`)
+
+Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
+
+1. **DEVE** ser um arquivo ZIP válido.
+2. **DEVE** conter `manifest.json`, `ndf-core.json` e `envelope.json` na raiz do arquivo.
+3. `manifest.json` **DEVE** incluir inventário com `hash_sha256` de cada ficheiro e os campos obrigatórios definidos em §8.2.
+4. `SHA-256(ndf-core.json)` **DEVE** coincidir com `manifest.inventario[ndf-core.json].hash_sha256`.
+5. `ndf-core.json` **DEVE** ser um NDF-core conforme (§10.1).
+6. O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`.
+
+### 10.4 Suite de conformidade e test runner
+
+A suite oficial de casos de teste está em `conformance/ndf/`. O test runner de referência é `tools/validate.py`.
+
+```bash
+# Pré-requisito
+pip install jsonschema
+
+# Correr toda a suite (resultado esperado: 14/14 passed)
+python3 tools/validate.py
+
+# Validar um ficheiro específico
+python3 tools/validate.py path/to/ndf-core.json
+
+# Apenas casos válidos / inválidos
+python3 tools/validate.py --valid-only
+python3 tools/validate.py --invalid-only
+```
+
+Uma implementação conforme **DEVE** passar todos os casos de `conformance/ndf/valid/` e **DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`.
+
+**Nota**: os ficheiros de conformidade contêm campos `_comment` e `_expected_error` prefixados com `_` para documentação interna. Estes campos **NÃO DEVEM** constar do NDF-core produzido por uma implementação — o test runner remove-os automaticamente antes de validar.
+
+---
+
+## 11. Glossário
 
 | Termo | Significado |
 |---|---|
