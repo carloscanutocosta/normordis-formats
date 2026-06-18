@@ -103,13 +103,13 @@ A tabela seguinte mapeia cada requisito legal ou normativo à disposição concr
 | Preservação de longo prazo da assinatura | eIDAS, Art.º 34.º; ETSI EN 319 122 | Nível CAdES-B-LTA; timestamp de arquivo RFC 3161 | §4.2 |
 | Autenticidade e integridade do documento | ISO 15489:2016, §5.2; MoReq2017, R2 | JCS/RFC 8785 + SHA-256 + CAdES sobre `payload_bytes` | §1.3, §4 |
 | Imutabilidade do registo | MoReq2017, R3; MEG, R4 | Princípio de imutabilidade; proibição de edição de NDF finalizado | §2.1 |
-| Reprodutibilidade / renderização futura | MoReq2017, R5; OAIS/ISO 14721:2012 | `ndt_version_ref` embebido no NDF-core; NDT incluído no `.ndfpkg` | §2.3, §8 |
+| Reprodutibilidade / renderização futura | MoReq2017, R5; OAIS/ISO 14721:2012 | `ndt_version_ref` embebido no NDF-core; NDT incluído no `.ndfpkg` | §2.6, §8 |
 | Prazo de conservação administrativa (PCA) | MEG/DGLAB, Lista Consolidada | Bloco `avaliacao.prazo_conservacao_administrativa` com `lista_consolidada_versao_ref` | §3 |
 | Destino final (conservação / eliminação) | MEG/DGLAB, Tabelas de Seleção | `avaliacao.destino_final`; eliminação no termo do PCA | §3.4 |
-| Classificação documental (MEF/MIP) | MEG/DGLAB, Macroestrutura Funcional | `metadados.tipo_classificacao_ref` | §2.2 |
+| Classificação documental (MEF/MIP) | MEG/DGLAB, Macroestrutura Funcional | `metadados.tipo_classificacao_ref` | §2.7 |
 | Cadeia de custódia / proveniência | ISO 15489:2016, §5.3; MoReq2017, R6 | `versao_anterior` + `hash_anterior`; cadeia de NDF imutáveis | §6 |
 | Limitação da conservação de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. e) | PCA + `destino_final: eliminacao` aplicado no termo do prazo | §3, §1.6 |
-| Minimização de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. c) | NDF armazena apenas campos preenchidos; sem layout nem páginas vazias | §2.4 |
+| Minimização de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. c) | NDF armazena apenas campos preenchidos; sem layout nem páginas vazias | §2.8 |
 | Direito ao apagamento | RGPD, Art.º 17.º | Eliminação integral no termo do PCA; base legal de conservação prevalente documentada | §1.6 |
 | Identificação do responsável pelo tratamento | RGPD, Art.º 13.º–14.º; Lei n.º 58/2019 | `metadados.responsavel_tratamento` obrigatório | §1.6 |
 | Categorias especiais de dados pessoais | RGPD, Art.º 9.º | `metadados.categorias_dados_pessoais` (roadmap §1.1.0) | §9 |
@@ -261,40 +261,101 @@ O NDF-core é **congelado no momento da finalização** do documento. A partir d
 
 ### 2.2 Estrutura
 
-O NDF-core é um objeto JSON com (no mínimo) os seguintes campos de topo:
+O NDF-core é um objeto JSON com os seguintes campos de topo:
 
 ```json
 {
   "ndf_version": "1.0.0",
-  "documento": { /* ... conteúdo lógico do documento, estrutura definida por tipo_documento_ref ... */ },
-  "metadados": {
-    "tipo_documento_ref": "...",
-    "...": "... demais metadados descritivos, classificação MEF/MIP/DGLAB ..."
-  },
-  "ndt_version_ref": "...",
+  "ndf_id": "uuid-v4",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "ndt_version_ref": "oficio-generico@1.0.0",
+  "metadados": { /* ... ver §2.7 ... */ },
+  "documento": { /* ... conteúdo lógico, estrutura definida por metadados.tipo_documento_ref ... */ },
   "avaliacao": { /* ... ver §3 ... */ }
 }
 ```
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `ndf_version` | Sim | Versão desta especificação a que o documento adere (semver). Permite evolução compatível/incompatível do formato. |
-| `documento` | Sim | Conteúdo lógico do documento — estrutura definida pelo tipo de documento (`.ndf` type), independente desta especificação base. |
-| `metadados` | Sim | Metadados descritivos e classificação (MEF/MIP/DGLAB), via `tipo_classificacao` (mapeamento existente em `crates/domain`). Inclui obrigatoriamente `tipo_documento_ref` (ver §2.5.2), que define o schema estrutural de `documento`. |
-| `ndt_version_ref` | Sim | Referência à versão do NDT (estrutura/layout) com que este NDF-core deve ser combinado para reprodução visual. Ver §2.3. |
-| `avaliacao` | Sim | Dados de avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
+| `ndf_version` | Sim | Versão desta especificação (SemVer 2.0.0). |
+| `ndf_id` | Sim | Identificador único do documento. UUID v4, gerado pelo sistema produtor antes da canonicalização. Imutável após finalização. Ver §2.3. |
+| `estado` | Sim | Estado de arquivo do documento. Enum fechado — ver §2.4. |
+| `payload_hash_alg` | Sim | Algoritmo usado para calcular `payload_hash`. Valor normativo desta versão: `"sha256"` (NIST FIPS 180-4). Ver §2.5. |
+| `ndt_version_ref` | Sim | Referência normativa ao NDT. Formato: `"schema_id@versao_impresso"`. Ver §2.6. |
+| `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_impresso"`. Ver §2.6. |
+| `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
+| `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
+| `avaliacao` | Sim | Avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
 
-Nenhum destes campos pode estar ausente no momento da finalização — a finalização **falha** se algum estiver em falta (ver §5).
+Nenhum destes campos pode estar ausente — a finalização **falha** se algum estiver em falta (ver §5).
 
-### 2.3 `ndt_version_ref`
+### 2.3 `ndf_id`
 
-Identifica univocamente a versão do NDT (template/layout) com que o NDF-core foi pensado para ser combinado na reprodução visual no momento da finalização.
+Identificador permanente do documento no ecossistema NORMORDIS.
 
-- **Tipo**: string (formato a definir conforme o esquema de versionamento de NDT já em uso — ex. semver do template, ou identificador composto `tipo_documento@versao`).
-- **Propósito**: garantir reprodução determinística mesmo que o NDT evolua (novas versões de templates não afetam a renderização correta de NDFs antigos, desde que a versão referenciada do NDT permaneça disponível/resoluvel).
-- **Imutabilidade**: faz parte do NDF-core, logo está sujeito à mesma imutabilidade pós-finalização.
+- **Tipo**: string, formato UUID v4 (RFC 4122) — ex.: `"a1b2c3d4-e5f6-4789-abcd-ef0123456789"`.
+- **Geração**: pelo sistema produtor imediatamente antes da canonicalização, nunca depois.
+- **Imutabilidade**: faz parte do NDF-core canonicalizado e assinado — não pode ser alterado após finalização.
+- **Unicidade**: o sistema produtor garante que não existem dois NDF com o mesmo `ndf_id`.
+- **Uso**: referência primária em `versao_anterior`, no manifest do `.ndfpkg`, e como chave primária no modelo de DB (§1.5).
 
-### 2.4 Tipos de conteúdo permitidos
+### 2.4 Estados de arquivo (`estado`)
+
+O NDF representa exclusivamente documentos finalizados. Não existe estado `rascunho` — o período de edição é responsabilidade da aplicação produtora e não produz NDF. Os estados válidos reflectem o ciclo de vida **arquivístico** do documento após finalização.
+
+| Estado | Descrição |
+|---|---|
+| `"ativo"` | Documento em uso activo, dentro do prazo de conservação administrativa (PCA). |
+| `"substituido"` | Documento supersedido por uma versão posterior na cadeia de proveniência (§6). Permanece no arquivo mas não é o documento corrente. |
+| `"em_conservacao"` | PCA decorrido; aguarda aplicação do destino final (DF) — transferência para arquivo definitivo ou eliminação. |
+| `"conservado_permanentemente"` | Destino final: conservação permanente. Documento transferido para arquivo definitivo (ex.: DGLAB). |
+| `"eliminado"` | Destino final: eliminação aplicada. O NDF-core e envelope são destruídos; pode subsistir um registo tombstone com `ndf_id`, `payload_hash` e data de eliminação para rastreabilidade. |
+
+**Transições válidas**:
+
+```
+ativo → substituido          (nova versão criada)
+ativo → em_conservacao       (PCA decorrido)
+em_conservacao → conservado_permanentemente   (DF: conservação)
+em_conservacao → eliminado                    (DF: eliminação)
+```
+
+O campo `estado` é o único campo do NDF-core que pode ser actualizado após finalização, por ser operacional. A actualização de `estado` não constitui alteração ao conteúdo do documento — o `payload_bytes` permanece inalterado.
+
+### 2.5 Algoritmo de hash (`payload_hash_alg`)
+
+O campo `payload_hash_alg` declara o algoritmo usado para calcular o digest sobre o qual recai a assinatura CAdES.
+
+**Valor normativo para NDF v1.x**: `"sha256"` — SHA-256 conforme NIST FIPS 180-4. Este é o único valor válido nesta versão da especificação.
+
+Justificação: SHA-256 é o algoritmo de digest mandatório em eIDAS (Regulamento (UE) 910/2014), em ETSI EN 319 122 (CAdES) e em RFC 3161 (timestamps). A sua implementação é universal — disponível sem dependências externas em todas as linguagens e plataformas relevantes.
+
+A transição para suporte a múltiplos algoritmos em paralelo (`"sha256"` + `"sha3-256"`) está prevista na versão 1.2.0 desta especificação (ver §9 — Roadmap).
+
+### 2.6 `ndt_version_ref`
+
+Identifica univocamente a versão do NDT com que o NDF-core deve ser combinado para reprodução visual.
+
+**Formato normativo**: `"<schema_id>@<versao_impresso>"`, onde:
+- `schema_id` é o identificador estável do tipo de documento no NDT (ex.: `"oficio-generico"`, `"modelo3-irs"`).
+- `versao_impresso` é a versão do impresso/template (ex.: `"1.0.0"` para documentos administrativos; `"2026.1"` para impressos fiscais com versão anual).
+
+Exemplos válidos:
+```
+"oficio-generico@1.0.0"
+"modelo3-irs@2026.1"
+"informacao-tecnica@2.3.1"
+```
+
+- **Imutabilidade**: faz parte do NDF-core canonicalizado e assinado.
+- **Resolução**: o NDT referenciado deve estar disponível no `.ndfpkg` (§8) ou num registry conforme.
+
+### 2.7 `metadados` — schema completo
+
+> **Nota**: o schema completo de `metadados` será definido na próxima iteração desta especificação. Os campos actualmente dispersos nas secções §1.6, §2.9.2 e §3 serão consolidados aqui numa secção normativa própria, indexável, separada de `documento`. Ver §9 (Roadmap) — item `metadados` schema v1.1.0.
+
+### 2.8 Tipos de conteúdo permitidos
 
 Os valores dentro de `documento` e `metadados` seguem as regras gerais do JCS/JSON: strings (UTF-8), números, booleanos, `null`, objetos e arrays. Não são permitidos:
 
@@ -302,9 +363,9 @@ Os valores dentro de `documento` e `metadados` seguem as regras gerais do JCS/JS
 - Valores `NaN`, `Infinity`, `-Infinity` (não representáveis em JSON estrito).
 - Chaves duplicadas no mesmo objeto (proibido por JCS).
 
-### 2.5 Tipologias de documento e extensibilidade de `documento`
+### 2.9 Tipologias de documento e extensibilidade de `documento`
 
-#### 2.5.1 Princípio: NDF-core é um envelope genérico, `documento` é tipado por schema próprio
+#### 2.9.1 Princípio: NDF-core é um envelope genérico, `documento` é tipado por schema próprio
 
 Esta especificação define a **estrutura comum** de qualquer NDF (campos de topo, envelope, avaliação, NDT-ref). O conteúdo de `documento` é **intencionalmente opaco** a este nível — a sua estrutura interna é definida por um **schema de tipo de documento** (`tipo_documento`), referenciado, não embutido, na especificação base. Isto permite que o mesmo formato NDF acomode, sem alterações a esta especificação:
 
@@ -312,7 +373,7 @@ Esta especificação define a **estrutura comum** de qualquer NDF (campos de top
 - **Formulários fiscais/declarativos complexos** — ex. Modelo 3 de IRS: estrutura profundamente aninhada, com múltiplos anexos/quadros/campos condicionais, validações cruzadas entre campos, e potencialmente centenas de elementos de dados.
 - Qualquer tipologia futura, incluindo formatos de outras administrações/domínios, sem necessidade de revisão major desta especificação.
 
-#### 2.5.2 Campo `tipo_documento_ref`
+#### 2.9.2 Campo `tipo_documento_ref`
 
 Adicionar a `metadados` (não a `documento`) uma referência ao schema que define a estrutura de `documento`:
 
@@ -330,7 +391,7 @@ Adicionar a `metadados` (não a `documento`) uma referência ao schema que defin
 - **Resolução**: o schema referenciado por `tipo_documento_ref` define a estrutura de `documento` (e tipicamente também orienta o NDT correspondente via `ndt_version_ref`, mas os dois são referências independentes — um mesmo `tipo_documento` pode ter múltiplas versões de NDT ao longo do tempo).
 - **Versionamento de schemas de tipo de documento**: segue o mesmo princípio de §7 (compatibilidade major/minor) — um leitor recusa processar `documento` cujo `tipo_documento_ref` tenha versão major não suportada; versões minor adicionam campos opcionais sem quebrar leitores antigos.
 
-#### 2.5.3 Perfis de complexidade — exemplos ilustrativos (não normativos)
+#### 2.9.3 Perfis de complexidade — exemplos ilustrativos (não normativos)
 
 Esta especificação não define os schemas de `documento` para tipos concretos (isso é responsabilidade de cada `tipo_documento_ref`), mas ilustra dois perfis para validar que a estrutura genérica acomoda ambos:
 
@@ -370,7 +431,7 @@ Estrutura plana, predominantemente textual, poucos níveis de aninhamento.
 
 Estrutura profundamente aninhada, com arrays de elementos repetíveis (anexos, sujeitos passivos), campos calculados, e dependências/validações entre secções. **Tudo isto permanece dentro de `documento`, sob `additionalProperties` livre ao nível desta especificação base** — a validação detalhada do conteúdo de `documento` é responsabilidade do schema de `tipo_documento_ref`, não desta especificação NDF-core.
 
-#### 2.5.4 Limites práticos a considerar na implementação
+#### 2.9.4 Limites práticos a considerar na implementação
 
 - **Profundidade de aninhamento e tamanho**: o JCS (RFC 8785) e o JSON em geral não impõem limites teóricos de profundidade/tamanho, mas implementações concretas (parsers, validadores de schema) podem ter limites práticos. Para tipos de documento muito complexos (Modelo 3 IRS pode ter milhares de campos preenchidos com múltiplos anexos), a implementação deve validar que: (a) a canonicalização JCS é determinística e performante mesmo para `documento` de grande dimensão; (b) os validadores JSON Schema dos `tipo_documento_ref` mais complexos não excedem limites de profundidade/recursão dos validadores escolhidos (ver prompt de implementação do schema/validador).
 - **Eficiência de armazenamento permanece válida**: mesmo um Modelo 3 IRS complexo, em JSON estruturado, é tipicamente muito mais compacto do que o PDF oficial equivalente (que inclui layout completo de todos os anexos, mesmo os não preenchidos). O argumento de economia de espaço (ver discussão de vantagens do NDF) mantém-se, possivelmente de forma ainda mais pronunciada para formulários longos com muitas secções não aplicáveis/vazias no PDF mas ausentes no NDF.
@@ -463,7 +524,7 @@ CAdES-B-LTA (Long Term Archival) garante:
 - **LT** (Long Term): inclusão da cadeia de certificados e dados de revogação, permitindo validação mesmo que o repositório de revogação original deixe de estar acessível.
 - **A** (Archive): timestamp de arquivo adicional sobre assinatura + dados LT, protegendo contra a expiração/comprometimento futuro dos algoritmos/certificados usados na assinatura original.
 
-### 4.5 Agility de algoritmo criptográfico
+### 4.3 Agility de algoritmo criptográfico
 
 O nível CAdES-B-LTA mitiga parcialmente o risco de comprometimento de algoritmos criptográficos (o timestamp de arquivo sela a assinatura original antes de o algoritmo ser posto em causa). Contudo, a especificação reconhece que:
 
@@ -472,11 +533,11 @@ O nível CAdES-B-LTA mitiga parcialmente o risco de comprometimento de algoritmo
 
 A mitigação completa deste risco faz parte do **roadmap desta especificação** (ver §9). A estratégia prevista é a re-selagem periódica: aplicação de um novo timestamp de arquivo com algoritmos mais recentes sobre o envelope existente, sem alterar `payload_bytes`. Esta operação não viola a imutabilidade do NDF-core — o conteúdo não muda, apenas a camada de prova temporal é reforçada.
 
-### 4.3 Múltiplas assinaturas
+### 4.4 Múltiplas assinaturas
 
 `assinaturas` é um array — um NDF pode ter mais do que uma assinatura (ex.: assinatura de autor + selo institucional/visto). Cada entrada do array é independente, todas sobre o mesmo `sha256(payload_bytes)`.
 
-### 4.4 Mecanismos de assinatura suportados
+### 4.5 Mecanismos de assinatura suportados
 
 A especificação do NDF não depende de um mecanismo específico — apenas exige que o resultado seja uma assinatura CAdES-B-LTA válida sobre `sha256(payload_bytes)`. Mecanismos previstos (ver especificação de implementação, §6): Cartão de Cidadão, smartcard ECCE (ECCE/ARTE — sucessora do CEGER), HSM institucional (selo eletrónico), Chave Móvel Digital.
 
@@ -490,9 +551,9 @@ A operação de finalização transforma um NDF-core completo (rascunho) num NDF
 
 A finalização **falha** se:
 
-- Qualquer campo obrigatório do NDF-core (§2.2) estiver ausente, incluindo `ndt_version_ref` e `avaliacao` completo (§3.2).
+- Qualquer campo obrigatório do NDF-core (§2.2) estiver ausente, incluindo `ndf_id`, `ndt_version_ref`, `payload_hash_alg` e `avaliacao` completo (§3.2).
 - `avaliacao.prazo_conservacao_administrativa` ou `avaliacao.destino_final` não puderem ser resolvidos a partir de `tipo_classificacao_ref` (Lista Consolidada indisponível ou sem entrada correspondente).
-- O conteúdo de `documento`/`metadados` violar as regras de tipos permitidos (§2.4).
+- O conteúdo de `documento`/`metadados` violar as regras de tipos permitidos (§2.8).
 
 ### 5.2 Pipeline (ordem estrita)
 
@@ -638,4 +699,4 @@ Itens previstos para versões futuras desta especificação. Não são normativo
 | MIP | (classificação documental institucional/processual — DGLAB) |
 | Lista Consolidada | Referencial suprainstitucional da DGLAB com classificação + avaliação (PCA/DF) |
 | CAdES-B-LTA | Nível de assinatura eletrónica avançada com timestamp de arquivo (ETSI EN 319 122) |
-| `tipo_documento_ref` | Referência ao schema versionado que define a estrutura interna de `documento` (ex.: `oficio@1.0`, `modelo3-irs@2025.1`) — ver §2.5 |
+| `tipo_documento_ref` | Referência ao schema versionado que define a estrutura interna de `documento` (ex.: `oficio@1.0.0`, `modelo3-irs@2025.1`) — ver §2.9.2 |
