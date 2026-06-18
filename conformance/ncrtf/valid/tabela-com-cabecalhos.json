@@ -1,31 +1,15 @@
 {
-  "_comment": "Tabela com linha de cabeçalho (header: true) e duas linhas de dados.",
-  "ncrtf_version": "1.0.0",
+  "_comment": "Tabela com linha de cabeçalho (head) e duas linhas de dados (body). Células são strings simples — v2.0.0.",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
       "type": "table",
-      "rows": [
-        {
-          "cells": [
-            { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Referência" } ] } ] },
-            { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data" } ] } ] },
-            { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Estado" } ] } ] }
-          ]
-        },
-        {
-          "cells": [
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "REF/2026/001" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-01" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Concluído" } ] } ] }
-          ]
-        },
-        {
-          "cells": [
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "REF/2026/002" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-15" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Em curso" } ] } ] }
-          ]
-        }
+      "head": [
+        { "cells": ["Referência", "Data", "Estado"] }
+      ],
+      "body": [
+        { "cells": ["REF/2026/001", "2026-06-01", "Concluído"] },
+        { "cells": ["REF/2026/002", "2026-06-15", "Em curso"] }
       ]
     }
   ]

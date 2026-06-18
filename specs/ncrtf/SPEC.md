@@ -1,6 +1,6 @@
 # NCRTF — NORMORDIS Canonical Rich Text Format
 
-**Versão**: 1.0.0
+**Versão**: 2.0.0
 **Estado**: Estável
 **Licença**: CC0 1.0 Universal
 **Repositório**: normordis-spec
@@ -15,13 +15,15 @@
 | §2 | Terminologia normativa |
 | §3 | Modelo de documento |
 | §4 | Nós bloco |
-| §5 | Nós inline e marcas |
-| §6 | Regras de canonicalização |
-| §7 | Integração com NDT |
-| §8 | Integração com `.ndfpkg` |
-| §9 | Extensibilidade |
-| §10 | Conformidade |
-| §11 | Glossário |
+| §5 | Nós inline |
+| §6 | Marcas de texto |
+| §7 | Famílias de tipo |
+| §8 | Regras de canonicalização |
+| §9 | Integração com NDT |
+| §10 | Integração com `.ndfpkg` |
+| §11 | Extensibilidade |
+| §12 | Conformidade |
+| §13 | Glossário |
 
 ---
 
@@ -32,17 +34,20 @@
 O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato de texto estruturado com os seguintes objectivos, por ordem de prioridade:
 
 1. **Canónico**: a mesma estrutura lógica produz sempre os mesmos bytes JSON, tornando-se compatível com JCS/RFC 8785 e assinável como parte de um NDF-core.
-2. **Independente de implementação**: não pressupõe nem depende de nenhum editor ou biblioteca de rich text (Lexical, ProseMirror, Tiptap, Quill, etc.). Editores podem adaptar-se ao NCRTF através de conversores; a spec não refere nenhum.
+2. **Independente de implementação**: não pressupõe nem depende de nenhum editor ou biblioteca de rich text (Lexical, ProseMirror, Tiptap, Quill, etc.). Editores adaptam-se ao NCRTF através de conversores; a spec não refere nenhum.
 3. **Eficiente como campo NDT**: um valor NCRTF é um objecto JSON armazenado directamente num campo do bloco `documento` de um NDF-core, sem codificação adicional (sem base64, sem JSON dentro de string). Está sujeito a canonicalização JCS como qualquer outro campo.
-4. **Legível por máquina sem renderizador**: a estrutura de nós é interpretável directamente — sem dependência de CSS, fonts ou motores de layout.
+4. **Legível por máquina sem renderizador**: a estrutura de nós é interpretável directamente — sem dependência de CSS, fontes ou motores de layout.
 
 ### 1.2 O que o NCRTF representa
 
-- Texto com formatação inline (negrito, itálico, sublinhado, subscrito, sobrescrito)
-- Parágrafos e títulos estruturados
-- Listas ordenadas e não-ordenadas (com suporte a aninhamento)
-- Tabelas com cabeçalhos e span
+- Texto com formatação inline (negrito, itálico, sublinhado, riscado, código, subscrito, sobrescrito)
+- Parágrafos, títulos estruturados e citações em bloco
+- Listas ordenadas, não-ordenadas e de verificação (com suporte a aninhamento real)
+- Tabelas com cabeçalho opcional e células de texto simples
 - Imagens referenciadas por caminho dentro do `.ndfpkg`
+- Ligações hipertexto inline
+- Quebras de linha forçadas
+- Controlo de alinhamento, indentação e família tipográfica por bloco ou por nó inline
 
 ### 1.3 O que o NCRTF não representa
 
@@ -54,6 +59,7 @@ O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato
 | Metadados do documento | NDF-core (`metadados`) |
 | Assinatura e envelope de custódia | Envelope NDF |
 | HTML, DOCX, PDF | Artefactos derivados — fora do scope |
+| Estado interno de editor | Formato proprietário do editor (ex: Lexical JSON) |
 
 ### 1.4 Relação com outros componentes NORMORDIS
 
@@ -74,10 +80,23 @@ Envelope NDF
 | Documento | Relevância |
 |---|---|
 | RFC 8785 (JCS) | Canonicalização JSON — base da assinabilidade NCRTF |
-| JSON Schema Draft 2020-12 | Schema de validação (§10) |
+| JSON Schema Draft 2020-12 | Schema de validação (§12) |
 | NORMORDIS NDF v1.x | Formato contentor que embebe valores NCRTF |
 | NORMORDIS NDT v2.x | Declaração de campos de tipo `ncrtf` |
-| RFC 4122 | UUIDs — não directamente usado, mas referenciado pelo NDF contentor |
+
+### 1.6 Alterações de v1.0.0 para v2.0.0
+
+Esta é uma versão **MAJOR** — documentos v1.0.0 NÃO são válidos contra este schema.
+
+| Área | Alteração |
+|---|---|
+| Listas | `ordered_list`/`unordered_list` unificados em `list` com campo `list_type`; `items` renomeado para `content`; `list_item` passa a ser um nó explícito com `type: "list_item"` e conteúdo inline (não blocos) |
+| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body`; células passam a ser strings simples (não objectos com `content`) |
+| Inline | Adicionados `link` e `hard_break`; `font_family` deixa de ser marca-objecto e passa a campo explícito nos nós `text` |
+| Marcas | Adicionadas `"code"` e `"strikethrough"`; ordem canónica actualizada |
+| Bloco | Adicionado `blockquote`; campos `alignment`, `indent`, `font_family` em `paragraph` e `heading` |
+| Imagem | Adicionados `caption` e `width_percent`; removidos `width`/`height` em pixéis |
+| Raiz | Mantém `ncrtf_version`/`content`; removido `meta`/`updated_at` (não determinístico) |
 
 ---
 
@@ -103,41 +122,41 @@ Um valor NCRTF é um objecto JSON com a seguinte estrutura:
 
 ```json
 {
-  "ncrtf_version": "1.0.0",
+  "ncrtf_version": "2.0.0",
   "content": [ <bloco>, <bloco>, ... ]
 }
 ```
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `ncrtf_version` | string | Sim | Versão da spec NCRTF. DEVE ser `"1.0.0"` para documentos conformes a esta versão. |
+| `ncrtf_version` | string | Sim | Versão da spec NCRTF. DEVE ser `"2.0.0"` para documentos conformes a esta versão. |
 | `content` | array de Bloco | Sim | Sequência de nós bloco. DEVE ter pelo menos 1 elemento. |
 
-Campos adicionais NÃO DEVEM estar presentes na raiz (valida `additionalProperties: false`).
+Campos adicionais NÃO DEVEM estar presentes na raiz (`additionalProperties: false`).
 
 ### 3.2 Hierarquia de nós
 
 ```
 Documento
 └── content: Bloco[]
-    ├── Paragraph      → content: Inline[]
-    ├── Heading        → content: Inline[]
-    ├── OrderedList    → items: ListItem[]
-    │                      └── content: Bloco[]
-    ├── UnorderedList  → items: ListItem[]
-    │                      └── content: Bloco[]
-    ├── Table          → rows: TableRow[]
-    │                      └── cells: TableCell[]
-    │                              └── content: Bloco[]
-    └── Image          (nó folha — sem filhos)
+    ├── paragraph     → content: Inline[]
+    │     alignment?, indent?, font_family?
+    ├── heading       → content: Inline[]
+    │     level, alignment?, font_family?
+    ├── list          → content: ListItem[]
+    │     list_type
+    │     ListItem  → content: (Inline | list)[]
+    │                  checked? (checklist apenas)
+    ├── blockquote    → content: Inline[]
+    ├── table         → head?: TableRow[], body: TableRow[]
+    │     TableRow  → cells: string[]
+    └── image         (nó folha)
+          ref, alt, caption?, width_percent?
 
-Inline = Text { text: string, marks?: Mark[] }
-Mark   = "bold" | "italic" | "subscript" | "superscript" | "underline"
+Inline = text | link | hard_break
+text   = { type, text, marks?, font_family? }
+link   = { type, href, content: text[], title?, target? }
 ```
-
-**Nós bloco** PODEM conter outros nós bloco (em `ListItem` e `TableCell`), permitindo listas aninhadas e conteúdo misto em células.
-
-**Nós inline** apenas PODEM conter `Text`. Nós inline NÃO DEVEM ser aninhados.
 
 ---
 
@@ -146,96 +165,145 @@ Mark   = "bold" | "italic" | "subscript" | "superscript" | "underline"
 ### 4.1 `paragraph`
 
 ```json
-{ "type": "paragraph", "content": [ <inline>, ... ] }
+{
+  "type": "paragraph",
+  "content": [
+    { "type": "text", "text": "Texto simples." }
+  ]
+}
 ```
 
-| Campo | Tipo | Obrigatório |
-|---|---|---|
-| `type` | `"paragraph"` | Sim |
-| `content` | array de Inline | Sim — mínimo 1 elemento |
+```json
+{
+  "type": "paragraph",
+  "alignment": "justify",
+  "indent": 1,
+  "font_family": "LiberationSerif",
+  "content": [
+    { "type": "text", "text": "Texto com formatação de bloco." }
+  ]
+}
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `type` | `"paragraph"` | Sim | |
+| `content` | array de Inline | Sim — mínimo 1 elemento | |
+| `alignment` | `"center"` \| `"justify"` \| `"right"` | OPCIONAL | Omitir quando `"left"` (default). |
+| `indent` | inteiro ≥ 1 | OPCIONAL | Nível de indentação. Omitir quando 0 (default). |
+| `font_family` | ver §7 | OPCIONAL | Família tipográfica do bloco. |
 
 ### 4.2 `heading`
 
 ```json
-{ "type": "heading", "level": 2, "content": [ <inline>, ... ] }
+{ "type": "heading", "level": 2, "content": [ { "type": "text", "text": "Título de nível 2" } ] }
 ```
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
 | `type` | `"heading"` | Sim | |
-| `level` | inteiro 1–3 | Sim | 1 = título principal, 2 = subtítulo, 3 = subtítulo de nível 3 |
+| `level` | inteiro 1–3 | Sim | 1 = título principal, 2 = subtítulo, 3 = subtítulo de nível 3. |
 | `content` | array de Inline | Sim — mínimo 1 elemento | |
+| `alignment` | `"center"` \| `"justify"` \| `"right"` | OPCIONAL | Omitir quando `"left"` (default). |
+| `font_family` | ver §7 | OPCIONAL | Família tipográfica do título. |
 
 Em documentos administrativos, nível 1 RECOMENDA-SE reservado ao NDT (layout); conteúdo editorial DEVE começar em `level: 2`.
 
-### 4.3 `ordered_list`
+### 4.3 `list` e `list_item`
+
+#### `list`
 
 ```json
 {
-  "type": "ordered_list",
-  "items": [
-    { "content": [ <bloco>, ... ] },
-    { "content": [ <bloco>, ... ] }
-  ]
-}
-```
-
-| Campo | Tipo | Obrigatório |
-|---|---|---|
-| `type` | `"ordered_list"` | Sim |
-| `items` | array de ListItem | Sim — mínimo 1 elemento |
-
-**ListItem**: `{ "content": [ <bloco>, ... ] }` com `content` obrigatório (mínimo 1 bloco). Um `ListItem` PODE conter outro `ordered_list` ou `unordered_list` no seu `content` para criar listas aninhadas.
-
-### 4.4 `unordered_list`
-
-Idêntico a `ordered_list` mas com `"type": "unordered_list"`. A renderização (marcadores vs. numeração) é determinada pelo tipo de nó, não pelo NDT.
-
-### 4.5 `table`
-
-```json
-{
-  "type": "table",
-  "rows": [
+  "type": "list",
+  "list_type": "ordered",
+  "content": [
     {
-      "cells": [
-        { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Coluna A" } ] } ] },
-        { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Coluna B" } ] } ] }
-      ]
+      "type": "list_item",
+      "content": [ { "type": "text", "text": "Primeiro item." } ]
     },
     {
-      "cells": [
-        { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Valor 1" } ] } ] },
-        { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Valor 2" } ] } ] }
+      "type": "list_item",
+      "content": [
+        { "type": "text", "text": "Segundo item com sub-lista:" },
+        {
+          "type": "list",
+          "list_type": "bullet",
+          "content": [
+            { "type": "list_item", "content": [ { "type": "text", "text": "Sub-item A." } ] },
+            { "type": "list_item", "content": [ { "type": "text", "text": "Sub-item B." } ] }
+          ]
+        }
       ]
     }
   ]
 }
 ```
 
-#### `table`
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `type` | `"list"` | Sim | |
+| `list_type` | `"bullet"` \| `"checklist"` \| `"ordered"` | Sim | Tipo de lista. |
+| `content` | array de `list_item` | Sim — mínimo 1 elemento | |
 
-| Campo | Tipo | Obrigatório |
-|---|---|---|
-| `type` | `"table"` | Sim |
-| `rows` | array de TableRow | Sim — mínimo 1 linha |
-
-#### `TableRow`
-
-| Campo | Tipo | Obrigatório |
-|---|---|---|
-| `cells` | array de TableCell | Sim — mínimo 1 célula |
-
-#### `TableCell`
+#### `list_item`
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `content` | array de Bloco | Sim — mínimo 1 bloco | Conteúdo da célula |
-| `header` | boolean | OPCIONAL | `true` indica célula de cabeçalho (renderizadores usam `<th>`). NÃO DEVE ser `false` — omitir quando não aplicável. |
-| `colspan` | inteiro ≥ 1 | OPCIONAL | Expansão horizontal. NÃO DEVE ser `1` — omitir quando não aplicável. |
-| `rowspan` | inteiro ≥ 1 | OPCIONAL | Expansão vertical. NÃO DEVE ser `1` — omitir quando não aplicável. |
+| `type` | `"list_item"` | Sim | |
+| `content` | array de (Inline \| `list`) | Sim — mínimo 1 elemento | Inlines e/ou listas aninhadas. |
+| `checked` | boolean | OPCIONAL | Apenas para `list_type: "checklist"`. `false` = não assinalado; `true` = assinalado. NÃO omitir `false` — o valor é semanticamente relevante. |
 
-**Nota sobre span**: valores `colspan`/`rowspan` NÃO implicam células fantasma na serialização NCRTF — o modelo declara apenas as células existentes. Renderizadores são responsáveis por calcular o layout de grelha.
+**Listas de verificação** (`list_type: "checklist"`): cada `list_item` DEVE ter o campo `checked` (explicitamente `true` ou `false`).
+
+**Listas aninhadas**: um `list_item.content` PODE conter um ou mais nós `list` adicionais para criar hierarquia. A lista aninhada aparece após os inlines do item pai.
+
+### 4.4 `blockquote`
+
+```json
+{
+  "type": "blockquote",
+  "content": [ { "type": "text", "text": "Citação de documento referenciado." } ]
+}
+```
+
+| Campo | Tipo | Obrigatório |
+|---|---|---|
+| `type` | `"blockquote"` | Sim |
+| `content` | array de Inline | Sim — mínimo 1 elemento |
+
+### 4.5 `table`
+
+Tabelas representam dados tabulares com células de texto simples. O conteúdo das células NÃO suporta formatação rich text — é texto plano.
+
+```json
+{
+  "type": "table",
+  "head": [
+    { "cells": ["Referência", "Data", "Estado"] }
+  ],
+  "body": [
+    { "cells": ["REF/2026/001", "2026-06-01", "Concluído"] },
+    { "cells": ["REF/2026/002", "2026-06-15", "Em curso"] }
+  ]
+}
+```
+
+#### `table`
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `type` | `"table"` | Sim | |
+| `body` | array de TableRow | Sim — mínimo 1 linha | Linhas de dados. |
+| `head` | array de TableRow | OPCIONAL | Linha(s) de cabeçalho. Omitir quando ausente (não usar `[]`). |
+
+#### `TableRow`
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `cells` | array de string | Sim — mínimo 1 célula | Cada elemento é o texto de uma célula. |
+
+Todas as linhas de uma tabela DEVEM ter o mesmo número de células.
 
 ### 4.6 `image`
 
@@ -244,109 +312,143 @@ Idêntico a `ordered_list` mas com `"type": "unordered_list"`. A renderização 
   "type": "image",
   "ref": "assets/grafico-1.png",
   "alt": "Gráfico de evolução trimestral de processos",
-  "width": 800,
-  "height": 450
+  "caption": "Figura 1 — Evolução 2024–2026",
+  "width_percent": 75
 }
 ```
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
 | `type` | `"image"` | Sim | |
-| `ref` | string | Sim | Caminho relativo dentro do `.ndfpkg`. Ver §8. |
-| `alt` | string | Sim | Texto alternativo — obrigatório para acessibilidade e preservação. |
-| `width` | inteiro ≥ 1 | OPCIONAL | Largura em píxeis do original (informativo). |
-| `height` | inteiro ≥ 1 | OPCIONAL | Altura em píxeis do original (informativo). |
+| `ref` | string | Sim | Caminho relativo dentro do `.ndfpkg`. Ver §10. |
+| `alt` | string | Sim | Texto alternativo — obrigatório para acessibilidade e preservação. Pode ser string vazia se a imagem for puramente decorativa. |
+| `caption` | string | OPCIONAL | Legenda da figura. |
+| `width_percent` | inteiro 25–100 | OPCIONAL | Largura como percentagem da largura disponível (sugestão editorial). |
 
-`image` é um nó folha — NÃO TEM `content`. Imagens NÃO DEVEM ser codificadas em base64 dentro do valor NCRTF (ver §8).
+`image` é um nó folha — NÃO TEM `content`. Imagens NÃO DEVEM ser codificadas em base64 dentro do valor NCRTF (ver §10.1).
 
 ---
 
-## 5. Nós inline e marcas
+## 5. Nós inline
 
 ### 5.1 `text`
 
-O único nó inline desta versão. Representa uma sequência de caracteres com formatação opcional.
+O nó inline de texto com formatação opcional.
 
 ```json
-{ "type": "text", "text": "conteúdo textual" }
-{ "type": "text", "text": "H", "marks": ["subscript"] }
+{ "type": "text", "text": "conteúdo simples" }
 { "type": "text", "text": "negrito e itálico", "marks": ["bold", "italic"] }
+{ "type": "text", "text": "H", "marks": ["subscript"], "font_family": "LiberationSerif" }
 ```
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
 | `type` | `"text"` | Sim | |
 | `text` | string | Sim — mínimo 1 caracter | Conteúdo textual. NÃO DEVE ser string vazia. |
-| `marks` | array de Mark | OPCIONAL | Formatação aplicada. Se presente, DEVE ter pelo menos 1 elemento. |
+| `marks` | array de Mark | OPCIONAL | Formatação aplicada. Se presente, DEVE ter pelo menos 1 elemento e DEVE estar em ordem canónica (§6). |
+| `font_family` | ver §7 | OPCIONAL | Família tipográfica do nó de texto, quando diferente do bloco pai. |
 
-### 5.2 Marcas disponíveis (`Mark`)
+### 5.2 `link`
+
+```json
+{
+  "type": "link",
+  "href": "https://dre.pt",
+  "content": [ { "type": "text", "text": "Diário da República Electrónico" } ],
+  "title": "Acesso ao DRE",
+  "target": "_blank"
+}
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `type` | `"link"` | Sim | |
+| `href` | string | Sim | URI da ligação. |
+| `content` | array de `text` | Sim — mínimo 1 elemento | Texto âncora (apenas nós `text`; não permite `link` aninhados). |
+| `title` | string | OPCIONAL | Texto do atributo `title`. |
+| `target` | `"_blank"` \| `"_self"` | OPCIONAL | Comportamento de abertura. |
+
+### 5.3 `hard_break`
+
+Quebra de linha forçada dentro de um bloco. Diferente de um novo parágrafo.
+
+```json
+{ "type": "hard_break" }
+```
+
+| Campo | Tipo | Obrigatório |
+|---|---|---|
+| `type` | `"hard_break"` | Sim |
+
+---
+
+## 6. Marcas de texto
+
+### 6.1 Marcas disponíveis
 
 | Mark | Renderização típica | Notas |
 |---|---|---|
 | `"bold"` | Negrito | |
+| `"code"` | Monospace inline | Para fragmentos de código ou identificadores técnicos. |
 | `"italic"` | Itálico | |
+| `"strikethrough"` | Riscado | Para correcções, actas, rectificações. |
+| `"subscript"` | Subscrito (ex: H₂O) | NÃO DEVE coexistir com `"superscript"` no mesmo nó. |
+| `"superscript"` | Sobrescrito (ex: m²) | NÃO DEVE coexistir com `"subscript"` no mesmo nó. |
 | `"underline"` | Sublinhado | |
-| `"subscript"` | Subscrito (ex: H₂O) | NÃO DEVE coexistir com `"superscript"` no mesmo nó |
-| `"superscript"` | Sobrescrito (ex: m²) | NÃO DEVE coexistir com `"subscript"` no mesmo nó |
 
-### 5.3 Ordem canónica das marcas
+### 6.2 Ordem canónica das marcas
 
-Para garantir canonicalização determinística (§6), o array `marks` **DEVE** estar ordenado alfabeticamente:
+Para garantir canonicalização determinística (§8), o array `marks` **DEVE** estar ordenado alfabeticamente:
 
 ```
-bold → italic → subscript → superscript → underline
+bold → code → italic → strikethrough → subscript → superscript → underline
 ```
 
 Implementações produtoras DEVEM ordenar as marcas antes de serializar. Leitores DEVEM rejeitar documentos com `marks` fora desta ordem.
 
-### 5.4 Contiguidade de texto
+---
 
-Nós `text` consecutivos com as mesmas marcas DEVEM ser fundidos num único nó. Exemplo não-conforme:
+## 7. Famílias de tipo
 
-```json
-// NÃO CONFORME — dois nós text com as mesmas marcas contíguos
-[
-  { "type": "text", "text": "ne", "marks": ["bold"] },
-  { "type": "text", "text": "grito", "marks": ["bold"] }
-]
+O campo `font_family` (em nós `text`, `paragraph` e `heading`) aceita os seguintes valores canónicos:
 
-// CONFORME
-[
-  { "type": "text", "text": "negrito", "marks": ["bold"] }
-]
-```
+| Valor | Classe | Intenção |
+|---|---|---|
+| `"LiberationMono"` | Monospace | Código, identificadores, dados tabulares em campos de texto |
+| `"LiberationSans"` | Sem serifas | Texto de corpo padrão |
+| `"LiberationSerif"` | Com serifas | Citações, referências, texto formal |
 
-Esta regra garante canonicalidade da estrutura, não apenas dos bytes JSON.
+Estes valores são nomes canónicos independentes de qualquer implementação. O renderizador é responsável por resolver o mapeamento para as fontes disponíveis no ambiente de saída.
+
+Quando `font_family` é especificado num bloco (`paragraph`, `heading`), aplica-se a todos os nós `text` filhos que não especifiquem `font_family` próprio. O `font_family` de um nó `text` tem precedência sobre o do bloco pai.
 
 ---
 
-## 6. Regras de canonicalização
+## 8. Regras de canonicalização
 
-A canonicalização NCRTF é uma pré-condição para a assinabilidade do campo quando embebido num NDF-core.
+A canonicalização NCRTF é pré-condição para a assinabilidade do campo quando embebido num NDF-core.
 
-### 6.1 Canonicalização JCS (RFC 8785)
+### 8.1 Canonicalização JCS (RFC 8785)
 
-Todo o valor NCRTF (incluindo o objecto raiz e todos os nós filhos) **DEVE** ser canonicalizado via JCS antes de ser incorporado no `payload_bytes` do NDF-core. JCS garante:
+Todo o valor NCRTF **DEVE** ser canonicalizado via JCS antes de ser incorporado no `payload_bytes` do NDF-core. JCS garante:
 
 - Chaves de objectos ordenadas lexicograficamente (Unicode code point)
 - Sem whitespace extra
 - Números em formato canónico
 - Strings em UTF-8 com escapes mínimos
 
-### 6.2 Restrições adicionais à estrutura
-
-As seguintes restrições complementam o JCS e asseguram unicidade da representação:
+### 8.2 Restrições adicionais à estrutura
 
 | Regra | Descrição |
 |---|---|
-| **R1** | `marks` DEVE estar ordenado conforme §5.3 |
-| **R2** | Nós `text` contíguos com marcas idênticas DEVEM ser fundidos (§5.4) |
-| **R3** | Campos booleanos opcionais com valor `false` NÃO DEVEM estar presentes (omitir) |
-| **R4** | Campos inteiros opcionais com valor `1` (`colspan`, `rowspan`) NÃO DEVEM estar presentes (omitir) |
-| **R5** | Arrays vazios NÃO DEVEM estar presentes — omitir o campo em vez de `[]` |
-| **R6** | `text` NÃO DEVE ser string vazia — dividir em nós separados ou omitir |
+| **R1** | `marks` DEVE estar em ordem canónica (§6.2). |
+| **R2** | Nós `text` contíguos com marcas idênticas E `font_family` idêntico DEVEM ser fundidos num único nó. |
+| **R3** | Campos com valor igual ao default NÃO DEVEM estar presentes: `alignment` quando `"left"`, `indent` quando `0`. |
+| **R4** | Arrays vazios NÃO DEVEM estar presentes — omitir o campo em vez de `[]`. Nota: `checked: false` em checklist é semanticamente relevante e NÃO deve ser omitido. |
+| **R5** | `text` NÃO DEVE ser string vazia. |
+| **R6** | `"subscript"` e `"superscript"` NÃO DEVEM coexistir no mesmo nó `text`. |
 
-### 6.3 Validação da canonicalização
+### 8.3 Verificação de canonicalização
 
 Um produtor conforme **DEVE** verificar, após serializar para JSON, que:
 
@@ -354,73 +456,54 @@ Um produtor conforme **DEVE** verificar, após serializar para JSON, que:
 JCS(parse(serialize(ncrtf))) == serialize(ncrtf)
 ```
 
-Ou seja, re-canonicalizar o valor já serializado produz bytes idênticos.
-
 ---
 
-## 7. Integração com NDT
+## 9. Integração com NDT
 
-### 7.1 Declaração de campo NCRTF num NDT
+### 9.1 Declaração de campo NCRTF num NDT
 
-Um campo de rich text num NDT DEVE ser declarado com `"type": "ncrtf"`:
+Um campo de rich text num NDT DEVE ser declarado com `"tipo": "ncrtf"`:
 
 ```json
 {
   "name": "corpo",
-  "type": "ncrtf",
+  "tipo": "ncrtf",
   "label": "Corpo do documento",
   "required": true
 }
 ```
 
-O sistema de validação do NDT usa o schema `specs/ncrtf/schemas/ncrtf.schema.json` para validar campos deste tipo.
-
-### 7.2 Exemplo — campo `corpo` num NDF-core
+### 9.2 Exemplo — campo `corpo` num NDF-core
 
 ```json
 {
   "documento": {
     "numero": "OF/2026/00123",
     "data": "2026-06-18",
-    "destinatario": { "nome": "Maria da Silva", "cargo": "Directora de Serviços" },
     "corpo": {
-      "ncrtf_version": "1.0.0",
+      "ncrtf_version": "2.0.0",
       "content": [
         {
           "type": "paragraph",
           "content": [
-            { "type": "text", "text": "Em resposta ao ofício n.º 45/2026, informamos que o processo se encontra em fase de análise." }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            { "type": "text", "text": "Apresentamos em anexo o quadro resumo das diligências efectuadas:" }
+            { "type": "text", "text": "Em resposta ao ofício n.º 45/2026, informamos que o prazo termina em " },
+            { "type": "text", "text": "30 de julho de 2026", "marks": ["bold"] },
+            { "type": "text", "text": "." }
           ]
         },
         {
           "type": "table",
-          "rows": [
-            {
-              "cells": [
-                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data" } ] } ] },
-                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Diligência" } ] } ] },
-                { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Estado" } ] } ] }
-              ]
-            },
-            {
-              "cells": [
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-01" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Notificação ao interessado" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Concluída" } ] } ] }
-              ]
-            }
+          "head": [
+            { "cells": ["Data", "Diligência", "Estado"] }
+          ],
+          "body": [
+            { "cells": ["2026-06-01", "Notificação ao interessado", "Concluída"] }
           ]
         },
         {
           "type": "paragraph",
           "content": [
-            { "type": "text", "text": "A fórmula aplicada foi: E = mc" },
+            { "type": "text", "text": "A fórmula aplicada: E = mc" },
             { "type": "text", "text": "2", "marks": ["superscript"] },
             { "type": "text", "text": "." }
           ]
@@ -431,17 +514,15 @@ O sistema de validação do NDT usa o schema `specs/ncrtf/schemas/ncrtf.schema.j
 }
 ```
 
-### 7.3 Retrocompatibilidade com campos `string`
+### 9.3 Retrocompatibilidade com campos `string`
 
-NDTs existentes que declarem `"type": "string"` para campos como `corpo` continuam a funcionar com plain text. A migração para `"type": "ncrtf"` requer um bump de versão do NDT (ex: `oficio-generico@1.0.0` → `oficio-generico@2.0.0`).
-
-O NDF-core que referenciar `oficio-generico@2.0.0` via `ndt_version_ref` terá o `corpo` como objecto NCRTF; o que referenciar `@1.0.0` terá string. Ambos os formatos são válidos para as respectivas versões do NDT — não há quebra de retrocompatibilidade ao nível do NDF.
+NDTs existentes com `"tipo": "string"` para campos como `corpo` continuam a funcionar com plain text. A migração para `"tipo": "ncrtf"` requer um bump de versão do NDT.
 
 ---
 
-## 8. Integração com `.ndfpkg`
+## 10. Integração com `.ndfpkg`
 
-### 8.1 Referências de imagem
+### 10.1 Referências de imagem
 
 O campo `ref` de um nó `image` é um caminho relativo dentro do arquivo `.ndfpkg`:
 
@@ -457,9 +538,13 @@ O caminho DEVE:
 - Referenciar um ficheiro presente no arquivo
 - Ter uma entrada correspondente no `manifest.inventario` do `.ndfpkg`
 
-Imagens NÃO DEVEM ser embutidas como base64 no valor NCRTF — fazê-lo tornaria o `payload_hash` instável a qualquer alteração da imagem e incharia o registo de base de dados.
+Imagens NÃO DEVEM ser embutidas como base64 no valor NCRTF. O valor `src` com data URL é um artefacto interno de editores; NÃO DEVE aparecer num NDF-core finalizado.
 
-### 8.2 Formatos de imagem suportados
+Fluxo recomendado para editores:
+1. Durante a edição: imagens mantidas internamente como data URL no estado do editor.
+2. Na finalização do NDF: imagens extraídas para `assets/` do `.ndfpkg`; `src` substituído por `ref` no valor NCRTF que vai para `ndf-core.json`.
+
+### 10.2 Formatos de imagem suportados
 
 | Formato | Extensão | Notas |
 |---|---|---|
@@ -468,12 +553,12 @@ Imagens NÃO DEVEM ser embutidas como base64 no valor NCRTF — fazê-lo tornari
 | JPEG | `.jpg` / `.jpeg` | RECOMENDADO para fotografias |
 | PDF/A | `.pdf` | OPCIONAL — para sub-documentos em imagem |
 
-### 8.3 Exemplo de estrutura `.ndfpkg` com imagens
+### 10.3 Exemplo de estrutura `.ndfpkg` com imagens
 
 ```
 oficio-OF-2026-00123.ndfpkg
-├── manifest.json          (inventário com hash das imagens)
-├── ndf-core.json          (contém o campo corpo em NCRTF)
+├── manifest.json
+├── ndf-core.json          (campo corpo em NCRTF — imagens com ref)
 ├── envelope.json
 ├── ndt/
 │   └── oficio-generico@2.0.0.ndt.json
@@ -483,11 +568,9 @@ oficio-OF-2026-00123.ndfpkg
 
 ---
 
-## 9. Extensibilidade
+## 11. Extensibilidade
 
-### 9.1 Política de extensão
-
-O NCRTF v1.0.0 define um subconjunto intencional. Novos tipos de nó e marcas podem ser adicionados em versões futuras:
+### 11.1 Política de extensão
 
 | Mudança | Versão SemVer |
 |---|---|
@@ -497,43 +580,39 @@ O NCRTF v1.0.0 define um subconjunto intencional. Novos tipos de nó e marcas po
 | Alteração de campo obrigatório / remoção de nó | MAJOR |
 | Alteração das regras de canonicalização | MAJOR |
 
-### 9.2 Nós desconhecidos
+### 11.2 Nós desconhecidos
 
-Um leitor conforme que encontre um `type` desconhecido num bloco ou inline:
-- Se a versão MAJOR de `ncrtf_version` for igual à suportada: **DEVE** ignorar o nó e continuar a processar os restantes.
-- Se a versão MAJOR for superior: **DEVE** rejeitar o documento inteiro.
+Um leitor conforme que encontre um `type` desconhecido:
+- Se MAJOR de `ncrtf_version` for igual ao suportado: **DEVE** ignorar o nó.
+- Se MAJOR for superior: **DEVE** rejeitar o documento inteiro.
 
-### 9.3 Candidatos a versões futuras
-
-Os seguintes elementos **não fazem parte de v1.0.0** mas estão antecipados para versões MINOR:
+### 11.3 Candidatos a versões futuras
 
 | Elemento | Tipo | Motivação |
 |---|---|---|
 | `code_block` | Bloco | Documentos técnicos com excertos de código |
-| `blockquote` | Bloco | Citações de documentos referenciados |
 | `horizontal_rule` | Bloco | Separador de secções |
-| `"strikethrough"` | Marca | Texto riscado (actas, rectificações) |
-| `"code"` | Marca | Inline monospace |
-| `caption` em `image` | Campo | Legenda de figura |
-| `start` em `ordered_list` | Campo | Numeração inicial diferente de 1 |
+| `caption` em `image` | Campo de bloco | Já definido; aguarda suporte no editor |
+| `start` em `list` | Campo | Numeração inicial diferente de 1 |
+| Rich text em células de tabela | Estrutura | Células como array de Inline em vez de string |
 
 ---
 
-## 10. Conformidade
+## 12. Conformidade
 
-### 10.1 Produtor conforme
+### 12.1 Produtor conforme
 
 Uma implementação é um **produtor NCRTF conforme** se:
 
 1. **DEVE** gerar valores NCRTF que validam contra `specs/ncrtf/schemas/ncrtf.schema.json`.
-2. **DEVE** aplicar todas as regras de canonicalização R1–R6 (§6.2).
+2. **DEVE** aplicar todas as regras de canonicalização R1–R6 (§8.2).
 3. **DEVE** verificar que `JCS(parse(serialize(ncrtf))) == serialize(ncrtf)` antes de incorporar o valor num NDF-core.
 4. **NÃO DEVE** incluir nós `image` com `ref` que não existam no `manifest.inventario` do `.ndfpkg`.
-5. **NÃO DEVE** codificar imagens em base64 dentro de valores NCRTF.
-6. **DEVE** ordenar `marks` conforme §5.3.
-7. **DEVE** fundir nós `text` contíguos com marcas idênticas (§5.4).
+5. **NÃO DEVE** incluir `src` com data URL num NDF-core finalizado — apenas `ref`.
+6. **DEVE** ordenar `marks` conforme §6.2.
+7. **DEVE** fundir nós `text` contíguos com marcas e `font_family` idênticos (R2).
 
-### 10.2 Leitor conforme
+### 12.2 Leitor conforme
 
 Uma implementação é um **leitor NCRTF conforme** se:
 
@@ -543,17 +622,28 @@ Uma implementação é um **leitor NCRTF conforme** se:
 4. **DEVE** rejeitar o documento quando `ncrtf_version` MAJOR for superior ao suportado.
 5. **DEVE** resolver referências `image.ref` dentro do `.ndfpkg` corrente.
 
+### 12.3 Suite de conformidade
+
+A suite de testes encontra-se em `conformance/ncrtf/`. Implementações conformes DEVEM passar todos os casos válidos sem erros e rejeitar todos os casos inválidos com erro.
+
+```
+conformance/ncrtf/
+├── valid/      — documentos NCRTF que DEVEM ser aceites
+└── invalid/    — documentos NCRTF que DEVEM ser rejeitados
+```
+
 ---
 
-## 11. Glossário
+## 13. Glossário
 
 | Termo | Definição |
 |---|---|
-| **Bloco** | Nó de nível superior na hierarquia NCRTF: `paragraph`, `heading`, `ordered_list`, `unordered_list`, `table`, `image`. |
+| **Bloco** | Nó de nível superior na hierarquia NCRTF: `paragraph`, `heading`, `list`, `blockquote`, `table`, `image`. |
 | **Canonicalização** | Processo de serialização determinística que produz sempre os mesmos bytes para a mesma estrutura lógica. |
-| **Inline** | Nó filho de um bloco que contém texto com formatação. Em v1.0.0, apenas `text`. |
+| **Font family** | Família tipográfica canónica (`LiberationSans`, `LiberationSerif`, `LiberationMono`). |
+| **Inline** | Nó filho de um bloco que contém texto ou ligação: `text`, `link`, `hard_break`. |
 | **JCS** | JSON Canonicalization Scheme, RFC 8785. Algoritmo de canonicalização JSON. |
-| **Marca** | Atributo de formatação aplicado a um nó `text`: `bold`, `italic`, `underline`, `subscript`, `superscript`. |
+| **Marca** | Atributo de formatação aplicado a um nó `text`: `bold`, `code`, `italic`, `strikethrough`, `subscript`, `superscript`, `underline`. |
 | **NDT** | NORMORDIS Document Template — declara campos de tipo `ncrtf`. |
 | **NDF-core** | NORMORDIS Document Format core — JSON assinável que contém valores NCRTF como campos. |
 | **`.ndfpkg`** | Arquivo ZIP que agrupa NDF-core, envelope, NDT e recursos (incluindo imagens referenciadas por NCRTF). |

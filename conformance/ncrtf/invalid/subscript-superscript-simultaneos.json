@@ -1,7 +1,7 @@
 {
   "_comment": "Inválido: subscript e superscript no mesmo nó text. Estão em ordem canónica (R1 passa) mas violam a exclusão mútua de §5.2.",
   "_expected_error": "subscript e superscript não podem coexistir no mesmo nó",
-  "ncrtf_version": "1.0.0",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
       "type": "paragraph",

@@ -1,6 +1,6 @@
 {
-  "_comment": "Exemplo de valor NCRTF v1.0.0 para o campo 'corpo' de um ofício. Demonstra: parágrafos, títulos, tabela com cabeçalhos, lista ordenada, marcas inline (bold, italic), subscrito e sobrescrito.",
-  "ncrtf_version": "1.0.0",
+  "_comment": "Exemplo de valor NCRTF v2.0.0 para o campo 'corpo' de um ofício. Demonstra: parágrafos, títulos, blockquote, tabela com cabeçalho (head/body), lista ordenada com sub-lista, marcas inline (bold, italic, code), subscrito e sobrescrito, link e hard_break.",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
       "type": "paragraph",
@@ -29,6 +29,14 @@
       ]
     },
     {
+      "type": "blockquote",
+      "content": [
+        { "type": "text", "text": "«A Administração deve decidir no prazo de 90 dias, salvo disposição legal em contrário.»" },
+        { "type": "hard_break" },
+        { "type": "text", "text": "— Artigo 62.º, n.º 1 do CPA", "marks": ["italic"] }
+      ]
+    },
+    {
       "type": "heading",
       "level": 2,
       "content": [
@@ -37,28 +45,12 @@
     },
     {
       "type": "table",
-      "rows": [
-        {
-          "cells": [
-            { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data" } ] } ] },
-            { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Diligência" } ] } ] },
-            { "header": true, "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Estado" } ] } ] }
-          ]
-        },
-        {
-          "cells": [
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-01" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Notificação ao requerente" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Concluída" } ] } ] }
-          ]
-        },
-        {
-          "cells": [
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "2026-06-10" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Parecer técnico" } ] } ] },
-            { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Em curso" } ] } ] }
-          ]
-        }
+      "head": [
+        { "cells": ["Data", "Diligência", "Estado"] }
+      ],
+      "body": [
+        { "cells": ["2026-06-01", "Notificação ao requerente", "Concluída"] },
+        { "cells": ["2026-06-10", "Parecer técnico", "Em curso"] }
       ]
     },
     {
@@ -69,18 +61,41 @@
       ]
     },
     {
-      "type": "ordered_list",
-      "items": [
-        { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Certidão de teor do registo predial" } ] } ] },
-        { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Comprovativo de NIF actualizado" } ] } ] },
+      "type": "list",
+      "list_type": "ordered",
+      "content": [
         {
+          "type": "list_item",
           "content": [
-            { "type": "paragraph", "content": [ { "type": "text", "text": "Declaração de conformidade (modelo DR n.º 42), contendo:" } ] },
+            { "type": "text", "text": "Certidão de teor do registo predial" }
+          ]
+        },
+        {
+          "type": "list_item",
+          "content": [
+            { "type": "text", "text": "Comprovativo de NIF actualizado (disponível em " },
+            { "type": "link", "href": "https://www.portaldasfinancas.gov.pt", "content": [ { "type": "text", "text": "Portal das Finanças" } ] },
+            { "type": "text", "text": ")" }
+          ]
+        },
+        {
+          "type": "list_item",
+          "content": [
+            { "type": "text", "text": "Declaração de conformidade (modelo " },
+            { "type": "text", "text": "DR n.º 42", "marks": ["code"] },
+            { "type": "text", "text": "), contendo:" },
             {
-              "type": "unordered_list",
-              "items": [
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Identificação do signatário" } ] } ] },
-                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Data e local de emissão" } ] } ] }
+              "type": "list",
+              "list_type": "bullet",
+              "content": [
+                {
+                  "type": "list_item",
+                  "content": [ { "type": "text", "text": "Identificação do signatário" } ]
+                },
+                {
+                  "type": "list_item",
+                  "content": [ { "type": "text", "text": "Data e local de emissão" } ]
+                }
               ]
             }
           ]

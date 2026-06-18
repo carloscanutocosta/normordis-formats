@@ -10,7 +10,7 @@ Estado em: 2026-06-18
 |---|---|---|
 | NDF — NORMORDIS Document Format | Draft para implementação | 1.0.0 |
 | NDT — NORMORDIS Document Template | Draft para implementação | 2.0.0 |
-| NCRTF — NORMORDIS Canonical Rich Text Format | Estável | 1.0.0 |
+| NCRTF — NORMORDIS Canonical Rich Text Format | Estável | 2.0.0 |
 | JSON Schema NDF-core | Draft | 1.0.0 |
 | Registry de tipos de documento | Draft (3 tipos canónicos) | 1.0.0 |
 | Suite de conformidade NDF | Draft | 1.0.0 |

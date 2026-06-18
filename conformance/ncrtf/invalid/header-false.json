@@ -1,20 +1,12 @@
 {
-  "_comment": "Inválido: header: false viola o schema (campo header é const:true — omitir quando não é cabeçalho, nunca serializar false). Viola R3.",
-  "_expected_error": "header: false não é válido — apenas true é aceite; omitir para células normais",
-  "ncrtf_version": "1.0.0",
+  "_comment": "Inválido: nó image com campo 'src' (data URL) em vez de 'ref'. Em v2.0.0, 'ref' é obrigatório e 'src' não é um campo permitido (additionalProperties: false). Viola §4.6 e §10.1.",
+  "_expected_error": "image: campo 'ref' obrigatório em falta; 'src' não é campo permitido em NCRTF canónico",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
-      "type": "table",
-      "rows": [
-        {
-          "cells": [
-            {
-              "header": false,
-              "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Célula normal com header:false" } ] } ]
-            }
-          ]
-        }
-      ]
+      "type": "image",
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "alt": "Pixel de teste"
     }
   ]
 }
