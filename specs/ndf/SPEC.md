@@ -1,6 +1,6 @@
 # Especificação NDF v1.0.0
 
-**NORDOCS — NORMORDIS Document Format — Especificação Formal**
+**NORMORDIS Document Format — Especificação Formal**
 
 Estado: Draft para implementação
 Âmbito: documentos gerados internamente pelo core-documental NORMORDIS e normalizados a NDF. Documentos importados/preservados bit-a-bit seguem um regime distinto, fora do âmbito desta especificação.
@@ -19,10 +19,26 @@ A **implementação de referência** (código-fonte: validadores, serializadores
 
 O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de documentos no core-documental. Garante:
 
-- **Integridade e validade jurídica** conforme eIDAS (Regulamento (UE) n.º 910/2014) e DL n.º 12/2021, com assinatura eletrónica qualificada de nível CAdES-B-LTA.
-- **Eficiência de armazenamento**, por ser dados estruturados (tipicamente uma a duas ordens de grandeza menor que um binário renderizado equivalente).
+- **Integridade e validade jurídica** conforme eIDAS (Regulamento (UE) n.º 910/2014) e DL n.º 12/2021, com assinatura eletrónica qualificada de nível CAdES-B-LTA (ETSI EN 319 122).
+- **Eficiência de armazenamento**, por ser dados estruturados (tipicamente uma a duas ordens de grandeza menor que um binário renderizado equivalente), otimizado para persistência em base de dados relacional (ver §1.4).
 - **Reprodutibilidade visual** em qualquer formato de apresentação (PDF, Word, ou formato futuro), através da combinação com o NDT (NORMORDIS Document Template — estrutura/layout).
-- **Conformidade arquivística** conforme o Modelo de Requisitos para Sistemas de Gestão de Arquivos Eletrónicos (MEG) e os instrumentos de avaliação da DGLAB (Lista Consolidada / Tabelas de Seleção).
+- **Conformidade arquivística** conforme ISO 15489:2016 (Records Management), MoReq2017, o Modelo de Requisitos para Sistemas de Gestão de Arquivos Eletrónicos (MEG/DGLAB) e os instrumentos de avaliação da DGLAB (Lista Consolidada / Tabelas de Seleção).
+- **Conformidade legal** com o RGPD (Regulamento (UE) 2016/679) e a Lei n.º 58/2019, respeitando os princípios de minimização de dados, limitação da conservação e os direitos dos titulares (ver §1.5).
+
+### 1.1.1 Normas e regulamentos de referência
+
+| Norma / Regulamento | Âmbito |
+|---|---|
+| eIDAS — Regulamento (UE) n.º 910/2014 | Assinaturas eletrónicas qualificadas, selos eletrónicos |
+| DL n.º 12/2021 | Transposição nacional de eIDAS |
+| ETSI EN 319 122 | CAdES — nível B-LTA (Long Term Archival) |
+| RFC 3161 | Timestamps de confiança |
+| RFC 8785 (JCS) | Canonicalização JSON para assinatura |
+| ISO 15489:2016 | Gestão de documentos de arquivo (Records Management) |
+| MoReq2017 | Modelo de requisitos para sistemas de gestão de arquivos eletrónicos (UE) |
+| MEG / DGLAB | Modelo de Requisitos nacional; Lista Consolidada; Tabelas de Seleção |
+| RGPD — Regulamento (UE) 2016/679 | Proteção de dados pessoais |
+| Lei n.º 58/2019 | Execução nacional do RGPD |
 
 ### 1.2 Composição
 
@@ -44,6 +60,82 @@ A separação não é arbitrária: o envelope **não pode** fazer parte do que �
 
 - **JSON**, não XML. Justificação: o NDF é formato de armazenamento interno do core-documental, não um formato de troca direta com terceiros. Interoperabilidade XML, quando necessária (ex.: SAFT-PT, UBL, eIDAS de outros Estados-Membros), é resolvida por adapters de exportação fora do âmbito desta especificação — o NDF-core é a fonte de verdade a partir da qual tais exportações são derivadas.
 - **Canonicalização**: JCS — JSON Canonicalization Scheme, conforme **RFC 8785**, estrito. Garante que a mesma estrutura lógica produz sempre os mesmos bytes, independentemente de ordem de inserção de chaves ou formatação de origem.
+
+### 1.4 Armazenamento em base de dados
+
+O NDF é concebido para persistência eficiente em base de dados relacional. O modelo recomendado para implementações PostgreSQL:
+
+#### Colunas obrigatórias (fonte de verdade)
+
+| Coluna | Tipo PostgreSQL | Conteúdo |
+|---|---|---|
+| `id` | `uuid` | Identificador único do NDF |
+| `payload_bytes` | `bytea` | Bytes canónicos do NDF-core (JCS/RFC 8785) — imutável após finalização; fonte de verdade para verificação de assinatura |
+| `envelope` | `jsonb` | Assinaturas, timestamps e material de validação |
+| `estado` | `text` | `rascunho` \| `finalizado` |
+| `criado_em` | `timestamptz` | Data/hora de criação |
+| `finalizado_em` | `timestamptz` | Data/hora de finalização; `null` se rascunho |
+
+#### Colunas desnormalizadas para indexação (extraídas de `payload_bytes`)
+
+Metadados estruturalmente estáveis são promovidos a colunas indexáveis para eficiência de pesquisa e filtragem, sem duplicar a fonte de verdade:
+
+| Coluna | Tipo | Origem em NDF-core |
+|---|---|---|
+| `ndf_version` | `text` | `ndf_version` |
+| `tipo_documento_ref` | `text` | `metadados.tipo_documento_ref` |
+| `schema_id` | `text` | Derivado de `ndt_version_ref` |
+| `destino_final` | `text` | `avaliacao.destino_final` |
+| `pca_valor` | `integer` | `avaliacao.prazo_conservacao_administrativa.valor` |
+| `pca_unidade` | `text` | `avaliacao.prazo_conservacao_administrativa.unidade` |
+| `elegivel_para_destino_em` | `date` | Calculado; não assinado |
+| `payload_hash` | `text` | `sha256(payload_bytes)` em hex — para verificação rápida sem reprocessar o payload |
+
+#### JSONB derivado (opcional, para queries ad-hoc)
+
+```sql
+-- Coluna gerada, derivada de payload_bytes, para queries ad-hoc
+ALTER TABLE ndf ADD COLUMN payload_jsonb jsonb
+  GENERATED ALWAYS AS (convert_from(payload_bytes, 'UTF8')::jsonb) STORED;
+```
+
+**Regra de integridade**: `payload_bytes` é a única fonte de verdade. O JSONB derivado e as colunas desnormalizadas não podem ser alterados diretamente — qualquer divergência entre `payload_bytes` e as colunas indexáveis é um erro de implementação. A verificação de integridade é feita sempre sobre `sha256(payload_bytes)`, não sobre o JSONB.
+
+### 1.5 Proteção de dados pessoais
+
+O NDF pode conter dados pessoais (NIF, dados fiscais, dados de saúde, dados processuais) sujeitos ao RGPD (Regulamento (UE) 2016/679) e à Lei n.º 58/2019. O princípio de imutabilidade do NDF (§2.1) cria uma tensão com o direito ao apagamento (Art.º 17.º RGPD).
+
+#### Resolução da tensão imutabilidade ↔ direito ao apagamento
+
+A tensão é resolvida pela articulação de três mecanismos legais e técnicos:
+
+1. **Base legal de conservação prevalente**: documentos da Administração Pública são conservados com base em obrigação legal (Art.º 6.º, n.º 1, al. c) RGPD) e missão de interesse público (al. e)). O direito ao apagamento cede face a obrigações legais de conservação (Art.º 17.º, n.º 3, al. b) RGPD) — o PCA/DF resolve esta decisão por tipo de documento.
+
+2. **Pseudonimização pré-arquivo**: quando aplicável, dados pessoais podem ser pseudonimizados antes da finalização. O NDF finalizado contém o pseudónimo; a tabela de correspondência é gerida fora do NDF com controlos de acesso próprios.
+
+3. **Eliminação no termo do PCA**: documentos com `destino_final: eliminacao` são eliminados integralmente (incluindo `payload_bytes` e colunas desnormalizadas) no termo do prazo de conservação administrativa — o mecanismo de arquivo já garante a limitação temporal exigida pelo RGPD.
+
+#### Campos de metadados obrigatórios relativos a proteção de dados
+
+O bloco `metadados` deve incluir:
+
+```json
+{
+  "metadados": {
+    "contem_dados_pessoais": true,
+    "categorias_dados_pessoais": ["identificacao_fiscal", "rendimentos"],
+    "base_legal_conservacao": "obrigacao_legal",
+    "responsavel_tratamento": "string (identificador da entidade)"
+  }
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `contem_dados_pessoais` | Sim | `true` \| `false` |
+| `categorias_dados_pessoais` | Condicional | Obrigatório se `contem_dados_pessoais: true`. Enum aberto: `identificacao_fiscal`, `rendimentos`, `saude`, `dados_processuais`, `outros`. |
+| `base_legal_conservacao` | Condicional | Obrigatório se `contem_dados_pessoais: true`. `obrigacao_legal` \| `interesse_publico` \| `consentimento` \| `contrato`. |
+| `responsavel_tratamento` | Sim | Identificador da entidade responsável pelo tratamento. |
 
 ---
 
@@ -261,6 +353,15 @@ CAdES-B-LTA (Long Term Archival) garante:
 - **LT** (Long Term): inclusão da cadeia de certificados e dados de revogação, permitindo validação mesmo que o repositório de revogação original deixe de estar acessível.
 - **A** (Archive): timestamp de arquivo adicional sobre assinatura + dados LT, protegendo contra a expiração/comprometimento futuro dos algoritmos/certificados usados na assinatura original.
 
+### 4.5 Agility de algoritmo criptográfico
+
+O nível CAdES-B-LTA mitiga parcialmente o risco de comprometimento de algoritmos criptográficos (o timestamp de arquivo sela a assinatura original antes de o algoritmo ser posto em causa). Contudo, a especificação reconhece que:
+
+- O SHA-256 usado em `payload_hash` pode ser comprometido no horizonte de 20+ anos de conservação.
+- Os algoritmos de assinatura dos certificados qualificados podem tornar-se obsoletos.
+
+A mitigação completa deste risco faz parte do **roadmap desta especificação** (ver §9). A estratégia prevista é a re-selagem periódica: aplicação de um novo timestamp de arquivo com algoritmos mais recentes sobre o envelope existente, sem alterar `payload_bytes`. Esta operação não viola a imutabilidade do NDF-core — o conteúdo não muda, apenas a camada de prova temporal é reforçada.
+
 ### 4.3 Múltiplas assinaturas
 
 `assinaturas` é um array — um NDF pode ter mais do que uma assinatura (ex.: assinatura de autor + selo institucional/visto). Cada entrada do array é independente, todas sobre o mesmo `sha256(payload_bytes)`.
@@ -316,31 +417,103 @@ O novo NDF regista, fora do NDF-core (metadados operacionais — ver especifica�
 
 Estes campos **não** entram na canonicalização/assinatura do novo NDF-core (são metadados operacionais sobre a relação entre documentos, não conteúdo do documento em si). Ficam disponíveis para reconstrução de cadeias de proveniência auditáveis.
 
-### 6.3 Implicação para `.ndfpkg` (exportação)
+### 6.3 Pacote de exportação (`.ndfpkg`)
 
-Cada NDF finalizado é autossuficiente e exportável individualmente (formato `.ndfpkg`, fora de âmbito desta especificação). A cadeia de proveniência de um processo documental é uma coleção de pacotes `.ndfpkg` independentes, ligados por referências leves (`versao_anterior`/`hash_anterior`), nunca por conteúdo embutido.
+O formato `.ndfpkg` é o **pacote de exportação auto-suficiente** de um NDF finalizado. É definido nesta especificação (§8) e garante que o documento pode ser verificado, renderizado e preservado independentemente da infraestrutura original.
+
+A cadeia de proveniência de um processo documental é uma coleção de pacotes `.ndfpkg` independentes, ligados por referências leves (`versao_anterior`/`hash_anterior`), nunca por conteúdo embutido.
 
 ---
 
 ## 7. Versionamento da especificação NDF
 
+A especificação NDF segue **Semantic Versioning 2.0.0** (SemVer — https://semver.org/), com as seguintes regras normativas:
+
 ### 7.1 `ndf_version`
 
-Cada NDF-core declara a versão da especificação NDF a que adere (`ndf_version`, semver). Isto permite:
+Cada NDF-core declara a versão da especificação NDF a que adere no campo `ndf_version` (string, formato `MAJOR.MINOR.PATCH`). Este campo é obrigatório, faz parte do NDF-core canonicalizado e assinado, e é imutável após finalização.
 
-- Introduzir novos campos opcionais em versões minor (`1.x.0`) sem quebrar a leitura de NDFs antigos.
-- Introduzir mudanças incompatíveis (remoção/renomeação de campos obrigatórios, mudança de semântica) apenas em versões major (`x.0.0`), exigindo lógica de leitura compatível com múltiplas versões major em paralelo, se NDFs de versões antigas continuarem em uso.
+| Componente | Quando muda | Impacto |
+|---|---|---|
+| `MAJOR` | Mudanças incompatíveis: remoção ou renomeação de campos obrigatórios, alteração de semântica existente, mudança de algoritmo de canonicalização | Leitores antigos recusam processar |
+| `MINOR` | Adição de campos opcionais ou novos blocos sem alterar semântica existente | Leitores antigos ignoram campos desconhecidos |
+| `PATCH` | Correções de clareza na especificação sem impacto comportamental | Sem impacto em leitores |
 
 ### 7.2 Compatibilidade retroativa
 
-Um leitor de NDF deve:
+Um leitor de NDF **deve**:
 
-- Recusar processar um NDF cuja `ndf_version` major seja superior à suportada pelo leitor (evolução futura desconhecida).
-- Processar corretamente NDFs com `ndf_version` major igual e minor igual ou inferior à suportada (campos minor mais recentes podem estar ausentes — tratados como `null`/omissos conforme definido em cada versão minor).
+- Recusar processar um NDF cuja `ndf_version` MAJOR seja superior à suportada (evolução futura com mudanças incompatíveis desconhecidas).
+- Processar corretamente NDFs com `ndf_version` MAJOR igual e MINOR igual ou inferior (campos adicionados em versões MINOR mais recentes são tratados como `null`/omissos).
+- Processar NDFs com qualquer `ndf_version` PATCH dentro do mesmo MAJOR.MINOR.
+
+### 7.3 Versionamento de schemas de tipo de documento
+
+O campo `tipo_documento_ref` em `metadados` segue o mesmo princípio SemVer (ex.: `oficio@1.2.0`, `modelo3-irs@2026.1.0`). A versão do schema de tipo de documento é independente da versão da especificação NDF — o mesmo tipo de documento pode ter múltiplas versões de schema sem que a especificação NDF mude.
 
 ---
 
-## 8. Glossário
+## 8. Pacote de exportação (`.ndfpkg`)
+
+O `.ndfpkg` é o formato de exportação auto-suficiente de um NDF finalizado. Garante que o documento pode ser verificado, renderizado e preservado independentemente da infraestrutura original do core-documental.
+
+### 8.1 Composição
+
+Um `.ndfpkg` é um arquivo ZIP com a seguinte estrutura:
+
+```
+documento.ndfpkg (ZIP)
+├── manifest.json          — metadados do pacote e inventário com hashes
+├── ndf-core.json          — payload_bytes do NDF-core (bytes canonicalizados, UTF-8)
+├── envelope.json          — assinaturas, timestamps, material de validação
+├── ndt/
+│   └── <schema_id>@<versao>.ndt.json   — NDT referenciado por ndt_version_ref
+└── recursos/              — recursos embebidos referenciados no NDT (se modo referenciado_por_hash)
+    └── <hash>.<ext>
+```
+
+### 8.2 `manifest.json`
+
+```json
+{
+  "ndfpkg_version": "1.0.0",
+  "ndf_id": "uuid",
+  "ndf_version": "1.0.0",
+  "schema_id": "oficio-generico",
+  "finalizado_em": "2026-06-18T10:30:00Z",
+  "payload_hash": "sha256:abc123...",
+  "inventario": [
+    { "ficheiro": "ndf-core.json", "hash_sha256": "..." },
+    { "ficheiro": "envelope.json", "hash_sha256": "..." },
+    { "ficheiro": "ndt/oficio-generico@1.0.0.ndt.json", "hash_sha256": "..." }
+  ]
+}
+```
+
+### 8.3 Garantias do `.ndfpkg`
+
+- **Auto-suficiência**: contém tudo o que é necessário para verificar a assinatura, reproduzir visualmente o documento e confirmar a avaliação arquivística — sem dependência de infraestrutura online.
+- **NDT embebido**: o NDT referenciado por `ndt_version_ref` é incluído no pacote, garantindo reprodutibilidade visual mesmo que o NDT evolua ou o repositório original deixe de existir.
+- **Verificabilidade**: qualquer implementação conforme pode verificar `sha256(ndf-core.json) == payload_hash` e validar a assinatura CAdES-B-LTA sem acesso ao core-documental original.
+- **Cadeia de proveniência**: o `manifest.json` regista `versao_anterior` e `hash_anterior` quando aplicável, permitindo reconstruir a cadeia de versões com múltiplos `.ndfpkg`.
+
+---
+
+## 9. Roadmap
+
+Itens previstos para versões futuras desta especificação. Não são normativos na versão atual.
+
+| Item | Versão prevista | Descrição |
+|---|---|---|
+| Agility de algoritmo criptográfico | 1.1.0 | Mecanismo formal de re-selagem periódica (re-timestamping) com algoritmos mais recentes, sem alterar `payload_bytes`. Inclui procedimento de migração e requisitos de notificação. |
+| Schema de RGPD para dados especiais | 1.1.0 | Extensão do bloco `metadados` para categorias especiais de dados (Art.º 9.º RGPD): dados de saúde, origem racial/étnica, dados biométricos. |
+| Validação formal do `.ndfpkg` | 1.1.0 | Conjunto de testes de conformidade para implementações do pacote de exportação (ver `conformance/ndf/`). |
+| Suporte multi-hash | 1.2.0 | Permitir `payload_hash` com múltiplos algoritmos em paralelo (`sha256`, `sha3-256`) para preparação de transição. |
+| Extensões de namespace | 2.0.0 | Mecanismo formal de extensão do NDF-core por organismos externos (ex.: `ext.at.pt`, `ext.ss.pt`) sem necessidade de revisão desta especificação base. |
+
+---
+
+## 10. Glossário
 
 | Termo | Significado |
 |---|---|
