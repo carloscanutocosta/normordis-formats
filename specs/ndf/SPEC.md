@@ -20,10 +20,10 @@ A **implementação de referência** (código-fonte: validadores, serializadores
 O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de documentos no core-documental. Garante:
 
 - **Integridade e validade jurídica** conforme eIDAS (Regulamento (UE) n.º 910/2014) e DL n.º 12/2021, com assinatura eletrónica qualificada de nível CAdES-B-LTA (ETSI EN 319 122).
-- **Eficiência de armazenamento**, por ser dados estruturados (tipicamente uma a duas ordens de grandeza menor que um binário renderizado equivalente), otimizado para persistência em base de dados relacional (ver §1.4).
+- **Eficiência de armazenamento**, por ser dados estruturados (tipicamente uma a duas ordens de grandeza menor que um binário renderizado equivalente), otimizado para persistência em base de dados relacional (ver §1.5).
 - **Reprodutibilidade visual** em qualquer formato de apresentação (PDF, Word, ou formato futuro), através da combinação com o NDT (NORMORDIS Document Template — estrutura/layout).
 - **Conformidade arquivística** conforme ISO 15489:2016 (Records Management), MoReq2017, o Modelo de Requisitos para Sistemas de Gestão de Arquivos Eletrónicos (MEG/DGLAB) e os instrumentos de avaliação da DGLAB (Lista Consolidada / Tabelas de Seleção).
-- **Conformidade legal** com o RGPD (Regulamento (UE) 2016/679) e a Lei n.º 58/2019, respeitando os princípios de minimização de dados, limitação da conservação e os direitos dos titulares (ver §1.5).
+- **Conformidade legal** com o RGPD (Regulamento (UE) 2016/679) e a Lei n.º 58/2019, respeitando os princípios de minimização de dados, limitação da conservação e os direitos dos titulares (ver §1.6).
 
 ### 1.1.1 Normas e regulamentos de referência
 
@@ -91,7 +91,87 @@ A separação não é arbitrária: o envelope **não pode** fazer parte do que �
 - **JSON**, não XML. Justificação: o NDF é formato de armazenamento interno do core-documental, não um formato de troca direta com terceiros. Interoperabilidade XML, quando necessária (ex.: SAFT-PT, UBL, eIDAS de outros Estados-Membros), é resolvida por adapters de exportação fora do âmbito desta especificação — o NDF-core é a fonte de verdade a partir da qual tais exportações são derivadas.
 - **Canonicalização**: JCS — JSON Canonicalization Scheme, conforme **RFC 8785**, estrito. Garante que a mesma estrutura lógica produz sempre os mesmos bytes, independentemente de ordem de inserção de chaves ou formatação de origem.
 
-### 1.4 Armazenamento em base de dados
+### 1.4 Conformidade jurídica e normativa
+
+#### 1.4.1 Matriz de conformidade
+
+A tabela seguinte mapeia cada requisito legal ou normativo à disposição concreta do NDF que o cumpre. Qualquer alteração ao enquadramento jurídico que invalide uma linha desta tabela implica uma actualização da especificação (ver §1.4.2).
+
+| Requisito | Instrumento legal / normativo | Disposição NDF | Secção |
+|---|---|---|---|
+| Assinatura eletrónica qualificada | eIDAS, Art.º 25.º; DL n.º 12/2021 | Envelope CAdES-B com certificado qualificado | §4 |
+| Preservação de longo prazo da assinatura | eIDAS, Art.º 34.º; ETSI EN 319 122 | Nível CAdES-B-LTA; timestamp de arquivo RFC 3161 | §4.2 |
+| Autenticidade e integridade do documento | ISO 15489:2016, §5.2; MoReq2017, R2 | JCS/RFC 8785 + SHA-256 + CAdES sobre `payload_bytes` | §1.3, §4 |
+| Imutabilidade do registo | MoReq2017, R3; MEG, R4 | Princípio de imutabilidade; proibição de edição de NDF finalizado | §2.1 |
+| Reprodutibilidade / renderização futura | MoReq2017, R5; OAIS/ISO 14721:2012 | `ndt_version_ref` embebido no NDF-core; NDT incluído no `.ndfpkg` | §2.3, §8 |
+| Prazo de conservação administrativa (PCA) | MEG/DGLAB, Lista Consolidada | Bloco `avaliacao.prazo_conservacao_administrativa` com `lista_consolidada_versao_ref` | §3 |
+| Destino final (conservação / eliminação) | MEG/DGLAB, Tabelas de Seleção | `avaliacao.destino_final`; eliminação no termo do PCA | §3.4 |
+| Classificação documental (MEF/MIP) | MEG/DGLAB, Macroestrutura Funcional | `metadados.tipo_classificacao_ref` | §2.2 |
+| Cadeia de custódia / proveniência | ISO 15489:2016, §5.3; MoReq2017, R6 | `versao_anterior` + `hash_anterior`; cadeia de NDF imutáveis | §6 |
+| Limitação da conservação de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. e) | PCA + `destino_final: eliminacao` aplicado no termo do prazo | §3, §1.6 |
+| Minimização de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. c) | NDF armazena apenas campos preenchidos; sem layout nem páginas vazias | §2.4 |
+| Direito ao apagamento | RGPD, Art.º 17.º | Eliminação integral no termo do PCA; base legal de conservação prevalente documentada | §1.6 |
+| Identificação do responsável pelo tratamento | RGPD, Art.º 13.º–14.º; Lei n.º 58/2019 | `metadados.responsavel_tratamento` obrigatório | §1.6 |
+| Categorias especiais de dados pessoais | RGPD, Art.º 9.º | `metadados.categorias_dados_pessoais` (roadmap §1.1.0) | §9 |
+| Interoperabilidade com sistemas da AP | Lei n.º 36/2011 (normas abertas); EIF | Formato JSON aberto; especificação CC0; sem dependência de fornecedor | Licenciamento |
+| Acesso à informação administrativa | Lei n.º 26/2016 | `.ndfpkg` auto-suficiente; reprodutibilidade sem infraestrutura original | §8 |
+| Agility de algoritmo criptográfico | eIDAS, Art.º 34.º (preservação); ETSI EN 319 122, §6 | Re-selagem periódica; roadmap multi-hash | §4.5, §9 |
+
+#### 1.4.2 Política de actualização por mudança de enquadramento jurídico
+
+O enquadramento jurídico e normativo aplicável ao NDF muda periodicamente. A política seguinte define como cada tipo de mudança se traduz numa versão SemVer desta especificação.
+
+**Tipo A — Mudança absorvida por campos de referência (sem nova versão da spec)**
+
+Certas mudanças são absolvidas pelos campos `*_ref` existentes, sem alterar o formato NDF:
+
+| Mudança | Campo absorvente | Acção |
+|---|---|---|
+| Nova versão da Lista Consolidada DGLAB | `avaliacao.lista_consolidada_versao_ref` | Implementações actualizam o valor; spec não muda |
+| Nova portaria de impressos fiscais | `impresso.versao_impresso` no NDT | NDT actualizado; NDF spec não muda |
+| Novo algoritmo de assinatura nos certificados qualificados | `envelope.assinaturas[].algoritmo` | Implementações suportam novo algoritmo; spec não muda |
+
+**Tipo B — Nova versão MINOR (campos opcionais adicionados)**
+
+| Mudança | Exemplo | Versão |
+|---|---|---|
+| Novo campo de metadados obrigatório por regulamento | RGPD Art.º 9.º — categorias especiais | MINOR |
+| Nova forma de contagem de PCA reconhecida pelo MEG | `forma_contagem: fim_mandato` | MINOR |
+| Novo mecanismo de assinatura suportado | QSCD via eIDAS 2.0 | MINOR |
+
+**Tipo C — Nova versão MAJOR (mudança incompatível)**
+
+| Mudança | Exemplo | Versão |
+|---|---|---|
+| Alteração de campo obrigatório existente | Renomeação de `avaliacao` exigida por nova regulação | MAJOR |
+| Substituição do algoritmo de canonicalização | RFC 8785 substituído por novo standard | MAJOR |
+| Mudança de nível de assinatura mínimo obrigatório | eIDAS exige nível superior a CAdES-B-LTA | MAJOR |
+| Alteração de semântica de campo existente | `destino_final` passa a ter novos valores incompatíveis | MAJOR |
+
+**Regra de rastreabilidade**: cada versão da especificação que resulte de uma mudança de enquadramento jurídico deve incluir no `CHANGELOG.md` a referência ao instrumento legal ou normativo que a motivou. Exemplo:
+
+```
+## [1.1.0] — 2027-01-15
+### Motivação legal
+- RGPD Art.º 9.º / Orientação CNPD n.º X/2026 — categorias especiais de dados pessoais
+### Alterações
+- Adicionado: `metadados.categorias_especiais_dados` (opcional)
+```
+
+#### 1.4.3 Monitorização do enquadramento jurídico
+
+Instrumentos legais com revisões previstas ou em curso que podem implicar actualizações à especificação:
+
+| Instrumento | Estado | Impacto previsto |
+|---|---|---|
+| eIDAS 2.0 — Regulamento (UE) 2024/1183 | Em vigor (transposição em curso) | Suporte a QSCD e European Digital Identity Wallet — MINOR |
+| Lista Consolidada DGLAB (revisão periódica) | Actualizações regulares | Absorvida por `lista_consolidada_versao_ref` — sem versão |
+| Norma MoReq (revisão prevista) | A confirmar | Avaliação quando publicada |
+| Revisão do RGPD / Lei n.º 58/2019 | Sem data | A avaliar conforme publicação |
+
+---
+
+### 1.5 Armazenamento em base de dados
 
 O NDF é concebido para persistência eficiente em base de dados relacional. O modelo recomendado para implementações PostgreSQL:
 
@@ -131,7 +211,7 @@ ALTER TABLE ndf ADD COLUMN payload_jsonb jsonb
 
 **Regra de integridade**: `payload_bytes` é a única fonte de verdade. O JSONB derivado e as colunas desnormalizadas não podem ser alterados diretamente — qualquer divergência entre `payload_bytes` e as colunas indexáveis é um erro de implementação. A verificação de integridade é feita sempre sobre `sha256(payload_bytes)`, não sobre o JSONB.
 
-### 1.5 Proteção de dados pessoais
+### 1.6 Proteção de dados pessoais
 
 O NDF pode conter dados pessoais (NIF, dados fiscais, dados de saúde, dados processuais) sujeitos ao RGPD (Regulamento (UE) 2016/679) e à Lei n.º 58/2019. O princípio de imutabilidade do NDF (§2.1) cria uma tensão com o direito ao apagamento (Art.º 17.º RGPD).
 
