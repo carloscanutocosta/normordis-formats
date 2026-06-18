@@ -1,0 +1,22 @@
+{
+  "_comment": "INVÁLIDO: campo obrigatório ndf_id ausente. Violação: §2.3, §5.1.",
+  "_expected_error": "Campo 'ndf_id' em falta. A finalização DEVE falhar.",
+  "ndf_version": "1.0.0",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "avancada",
+  "ndt_version_ref": "oficio-generico@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "oficio@1.0.0",
+    "entidade_produtora": { "designacao": "Entidade Teste" },
+    "contem_dados_pessoais": false,
+    "responsavel_tratamento": "Entidade Teste"
+  },
+  "documento": { "numero": "OF/2026/00006", "data": "2026-06-18", "destinatario": { "nome": "Teste" }, "assunto": "Teste", "corpo": "Teste" },
+  "avaliacao": {
+    "tipo_classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao_administrativa": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
+    "destino_final": "eliminacao",
+    "lista_consolidada_versao_ref": "lista-consolidada-dglab-2023-v3"
+  }
+}

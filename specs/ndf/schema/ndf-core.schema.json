@@ -32,8 +32,8 @@
     },
     "estado": {
       "type": "string",
-      "enum": ["ativo", "substituido", "em_conservacao", "conservado_permanentemente", "eliminado"],
-      "description": "Archival lifecycle state. Only 'estado' may be updated after finalisation without altering payload_bytes."
+      "enum": ["ativo"],
+      "description": "Document state at time of finalisation. Always 'ativo' in the NDF-core — immutable, signed. Archival lifecycle transitions (substituido, em_conservacao, etc.) are managed by the custodian system outside the NDF-core. See SPEC.md §2.4."
     },
     "payload_hash_alg": {
       "type": "string",
