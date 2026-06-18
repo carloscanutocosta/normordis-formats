@@ -1,0 +1,24 @@
+{
+  "_comment": "INVÁLIDO: contem_dados_pessoais: true mas base_legal_conservacao ausente. Violação: §2.7.2, §1.6.",
+  "_expected_error": "Quando contem_dados_pessoais é true, base_legal_conservacao é obrigatório.",
+  "ndf_version": "1.0.0",
+  "ndf_id": "b2c3d4e5-f6a7-4890-bcde-f01234567890",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "qualificada",
+  "ndt_version_ref": "oficio-generico@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "oficio@1.0.0",
+    "entidade_produtora": { "designacao": "Entidade Teste" },
+    "contem_dados_pessoais": true,
+    "categorias_dados_pessoais": ["identificacao_fiscal"],
+    "responsavel_tratamento": "Entidade Teste"
+  },
+  "documento": { "numero": "OF/2026/00002", "data": "2026-06-18", "destinatario": { "nome": "Teste" }, "assunto": "Teste", "corpo": "Teste" },
+  "avaliacao": {
+    "tipo_classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao_administrativa": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
+    "destino_final": "eliminacao",
+    "lista_consolidada_versao_ref": "lista-consolidada-dglab-2023-v3"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "_comment": "Caso de teste: registo interno sem assinatura eletrónica (nivel_assinatura: nenhuma), com destino_final conservacao_permanente. Requer CAdES-B-LTA para integridade de arquivo (§2.10.4).",
+  "ndf_version": "1.0.0",
+  "ndf_id": "d4e5f6a7-b8c9-4012-defa-123456789012",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "nenhuma",
+  "ndt_version_ref": "registo-interno@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "informacao-tecnica@1.0.0",
+    "entidade_produtora": {
+      "designacao": "Sistema de Gestão Documental NORMORDIS",
+      "nif": "000000000"
+    },
+    "assunto": "Registo de deliberação de reunião — 2026-06-18",
+    "numero_referencia": "REG/2026/00012",
+    "classificacao_seguranca": "uso_interno",
+    "contem_dados_pessoais": false,
+    "responsavel_tratamento": "Direção-Geral de Exemplo"
+  },
+  "documento": {
+    "numero": "REG/2026/00012",
+    "data": "2026-06-18",
+    "dirigido_a": "Arquivo Histórico",
+    "assunto": "Deliberação da reunião de Conselho de Direcção de 2026-06-18",
+    "corpo": "Deliberações aprovadas na reunião de Conselho de Direcção realizada em 18 de junho de 2026..."
+  },
+  "avaliacao": {
+    "tipo_classificacao_ref": "lc/010.10.001",
+    "prazo_conservacao_administrativa": {
+      "valor": 10,
+      "unidade": "anos",
+      "forma_contagem": "data_documento"
+    },
+    "destino_final": "conservacao_permanente",
+    "lista_consolidada_versao_ref": "lista-consolidada-dglab-2023-v3"
+  }
+}
