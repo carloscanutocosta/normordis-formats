@@ -245,6 +245,7 @@ Em documentos administrativos, nível 1 RECOMENDA-SE reservado ao NDT (layout); 
 | `type` | `"list"` | Sim | |
 | `list_type` | `"bullet"` \| `"checklist"` \| `"ordered"` | Sim | Tipo de lista. |
 | `content` | array de `list_item` | Sim — mínimo 1 elemento | |
+| `alignment` | `"center"` \| `"justify"` \| `"right"` | OPCIONAL | Alinhamento da lista. Omitir quando `"left"` (default). |
 
 #### `list_item`
 

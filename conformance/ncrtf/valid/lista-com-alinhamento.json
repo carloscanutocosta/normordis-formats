@@ -1,0 +1,15 @@
+{
+  "_comment": "Lista ordenada com alinhamento central — valida o campo 'alignment' em nós 'list' (adicionado em v2.0.0 para preservar fidelidade ao editor).",
+  "ncrtf_version": "2.0.0",
+  "content": [
+    {
+      "type": "list",
+      "list_type": "ordered",
+      "alignment": "center",
+      "content": [
+        { "type": "list_item", "content": [ { "type": "text", "text": "Primeiro item centrado." } ] },
+        { "type": "list_item", "content": [ { "type": "text", "text": "Segundo item centrado." } ] }
+      ]
+    }
+  ]
+}
