@@ -161,8 +161,8 @@
           "minItems": 1
         },
         "header": {
-          "type": "boolean",
-          "description": "True for header cells (<th>). Omit (do not set false) when not a header — see SPEC.md §4.5 R3."
+          "const": true,
+          "description": "Header cell marker. Only valid value is true — omit entirely when not a header (R3)."
         },
         "colspan": {
           "type": "integer",
