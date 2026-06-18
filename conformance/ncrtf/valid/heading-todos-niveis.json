@@ -1,6 +1,6 @@
 {
-  "_comment": "Valida os três níveis de heading suportados em v1.0.0.",
-  "ncrtf_version": "1.0.0",
+  "_comment": "Valida os três níveis de heading suportados.",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
       "type": "heading",

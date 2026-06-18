@@ -1,6 +1,6 @@
 {
-  "_comment": "Valida todas as marcas disponíveis em v1.0.0, na ordem canónica correcta. Subscrito e sobrescrito em nós separados.",
-  "ncrtf_version": "1.0.0",
+  "_comment": "Valida todas as 7 marcas disponíveis em v2.0.0, na ordem canónica correcta. Subscrito e sobrescrito em nós separados (não coexistem).",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
       "type": "paragraph",
@@ -8,11 +8,15 @@
         { "type": "text", "text": "Texto " },
         { "type": "text", "text": "negrito", "marks": ["bold"] },
         { "type": "text", "text": ", " },
+        { "type": "text", "text": "código inline", "marks": ["code"] },
+        { "type": "text", "text": ", " },
         { "type": "text", "text": "itálico", "marks": ["italic"] },
+        { "type": "text", "text": ", " },
+        { "type": "text", "text": "riscado", "marks": ["strikethrough"] },
         { "type": "text", "text": ", " },
         { "type": "text", "text": "sublinhado", "marks": ["underline"] },
         { "type": "text", "text": ", " },
-        { "type": "text", "text": "negrito e itálico", "marks": ["bold", "italic"] },
+        { "type": "text", "text": "negrito e itálico (ordem canónica)", "marks": ["bold", "italic"] },
         { "type": "text", "text": "." }
       ]
     },
@@ -23,6 +27,15 @@
         { "type": "text", "text": "2", "marks": ["subscript"] },
         { "type": "text", "text": "O e E = mc" },
         { "type": "text", "text": "2", "marks": ["superscript"] },
+        { "type": "text", "text": "." }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "Fonte diferente no bloco: ", "font_family": "LiberationSerif" },
+        { "type": "text", "text": "negrito serifado", "marks": ["bold"], "font_family": "LiberationSerif" },
+        { "type": "text", "text": " e monospace ", "font_family": "LiberationMono" },
         { "type": "text", "text": "." }
       ]
     }

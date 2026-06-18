@@ -35,7 +35,7 @@ NDF_INVALID_DIR   = REPO_ROOT / "conformance/ndf/invalid"
 NCRTF_VALID_DIR   = REPO_ROOT / "conformance/ncrtf/valid"
 NCRTF_INVALID_DIR = REPO_ROOT / "conformance/ncrtf/invalid"
 
-CANONICAL_MARKS_ORDER = ["bold", "italic", "subscript", "superscript", "underline"]
+CANONICAL_MARKS_ORDER = ["bold", "code", "italic", "strikethrough", "subscript", "superscript", "underline"]
 
 GREEN  = "\033[32m"
 RED    = "\033[31m"
@@ -89,20 +89,22 @@ def _check_ncrtf_nodes(nodes: list, path: str) -> list[str]:
         t  = node.get("type")
         if t == "text":
             errors.extend(_check_ncrtf_text(node, np))
-        elif t in ("paragraph", "heading"):
+        elif t in ("paragraph", "heading", "blockquote"):
             errors.extend(_check_ncrtf_nodes(node.get("content", []), f"{np}.content"))
-        elif t in ("ordered_list", "unordered_list"):
-            for j, item in enumerate(node.get("items", [])):
-                errors.extend(_check_ncrtf_nodes(item.get("content", []), f"{np}.items[{j}].content"))
-        elif t == "table":
-            for r, row in enumerate(node.get("rows", [])):
-                for c, cell in enumerate(row.get("cells", [])):
-                    errors.extend(_check_ncrtf_nodes(cell.get("content", []), f"{np}.rows[{r}].cells[{c}].content"))
+        elif t == "list":
+            for j, item in enumerate(node.get("content", [])):
+                if isinstance(item, dict) and item.get("type") == "list_item":
+                    errors.extend(_check_ncrtf_nodes(item.get("content", []), f"{np}.content[{j}].content"))
+        elif t == "list_item":
+            errors.extend(_check_ncrtf_nodes(node.get("content", []), f"{np}.content"))
+        elif t == "link":
+            errors.extend(_check_ncrtf_nodes(node.get("content", []), f"{np}.content"))
+        # table cells are plain strings in v2.0.0 — no NCRTF nodes inside
     return errors
 
 
 def _check_r2_contiguity(nodes: list, path: str) -> list[str]:
-    """R2: nós text contíguos com marcas idênticas devem ser fundidos."""
+    """R2: nós text contíguos com marcas idênticas E font_family idêntico devem ser fundidos."""
     errors = []
     for i in range(len(nodes) - 1):
         a, b = nodes[i], nodes[i + 1]
@@ -110,10 +112,12 @@ def _check_r2_contiguity(nodes: list, path: str) -> list[str]:
             continue
         if a.get("type") != "text" or b.get("type") != "text":
             continue
-        if tuple(a.get("marks") or []) == tuple(b.get("marks") or []):
+        same_marks = tuple(a.get("marks") or []) == tuple(b.get("marks") or [])
+        same_font  = a.get("font_family") == b.get("font_family")
+        if same_marks and same_font:
             errors.append(
-                f"{path}[{i}]+[{i+1}]: nós 'text' contíguos com marcas idênticas "
-                f"devem ser fundidos — '{a.get('text','')}' e '{b.get('text','')}' (SPEC.md §5.4, R2)"
+                f"{path}[{i}]+[{i+1}]: nós 'text' contíguos com marcas e font_family idênticos "
+                f"devem ser fundidos — '{a.get('text','')}' e '{b.get('text','')}' (SPEC.md §8.2, R2)"
             )
     return errors
 
@@ -124,18 +128,18 @@ def _check_ncrtf_text(node: dict, path: str) -> list[str]:
     if not marks:
         return errors
 
-    # R1 — ordem canónica
+    # R1 — ordem canónica (bold, code, italic, strikethrough, subscript, superscript, underline)
     expected = [m for m in CANONICAL_MARKS_ORDER if m in marks]
     if marks != expected:
         errors.append(
             f"{path}: marks fora da ordem canónica — encontrado {marks}, "
-            f"esperado {expected} (SPEC.md §5.3, R1)"
+            f"esperado {expected} (SPEC.md §6.2, R1)"
         )
 
-    # exclusão mútua subscript / superscript
+    # R6 — exclusão mútua subscript / superscript
     if "subscript" in marks and "superscript" in marks:
         errors.append(
-            f"{path}: 'subscript' e 'superscript' não podem coexistir no mesmo nó (SPEC.md §5.2)"
+            f"{path}: 'subscript' e 'superscript' não podem coexistir no mesmo nó (SPEC.md §6.1, R6)"
         )
 
     return errors

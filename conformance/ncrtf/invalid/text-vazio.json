@@ -1,7 +1,7 @@
 {
   "_comment": "Inválido: nó text com string vazia. Viola minLength:1 no schema (R6).",
   "_expected_error": "text não pode ser string vazia",
-  "ncrtf_version": "1.0.0",
+  "ncrtf_version": "2.0.0",
   "content": [
     {
       "type": "paragraph",

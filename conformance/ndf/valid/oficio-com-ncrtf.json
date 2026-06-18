@@ -29,7 +29,7 @@
     },
     "assunto": "Informação sobre prazo de decisão",
     "corpo": {
-      "ncrtf_version": "1.0.0",
+      "ncrtf_version": "2.0.0",
       "content": [
         {
           "type": "paragraph",
