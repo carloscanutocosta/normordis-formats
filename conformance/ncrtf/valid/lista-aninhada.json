@@ -1,0 +1,33 @@
+{
+  "_comment": "Lista ordenada com um item que contém uma lista não-ordenada aninhada.",
+  "ncrtf_version": "1.0.0",
+  "content": [
+    {
+      "type": "ordered_list",
+      "items": [
+        {
+          "content": [
+            { "type": "paragraph", "content": [ { "type": "text", "text": "Primeiro item simples." } ] }
+          ]
+        },
+        {
+          "content": [
+            { "type": "paragraph", "content": [ { "type": "text", "text": "Segundo item com sub-lista:" } ] },
+            {
+              "type": "unordered_list",
+              "items": [
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Sub-item A" } ] } ] },
+                { "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Sub-item B" } ] } ] }
+              ]
+            }
+          ]
+        },
+        {
+          "content": [
+            { "type": "paragraph", "content": [ { "type": "text", "text": "Terceiro item simples." } ] }
+          ]
+        }
+      ]
+    }
+  ]
+}

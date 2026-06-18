@@ -1,0 +1,14 @@
+{
+  "_comment": "Inválido: dois nós text contíguos com as mesmas marcas ['bold']. Viola R2 — devem ser fundidos num único nó.",
+  "_expected_error": "R2: nós text contíguos com marcas idênticas devem ser fundidos",
+  "ncrtf_version": "1.0.0",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "ne",    "marks": ["bold"] },
+        { "type": "text", "text": "grito", "marks": ["bold"] }
+      ]
+    }
+  ]
+}

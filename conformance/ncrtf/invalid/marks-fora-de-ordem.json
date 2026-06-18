@@ -1,0 +1,13 @@
+{
+  "_comment": "Inválido: marks em ordem errada — ['italic', 'bold'] viola R1. Ordem canónica: bold, italic, subscript, superscript, underline.",
+  "_expected_error": "R1: marks fora da ordem canónica",
+  "ncrtf_version": "1.0.0",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        { "type": "text", "text": "texto mal ordenado", "marks": ["italic", "bold"] }
+      ]
+    }
+  ]
+}
