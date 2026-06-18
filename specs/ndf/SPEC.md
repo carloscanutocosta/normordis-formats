@@ -514,6 +514,7 @@ A partir de `avaliacao.prazo_conservacao_administrativa` e da data de finalizaç
 | `assinaturas` | Uma ou mais assinaturas CAdES (CMS/PKCS#7, ASN.1 DER) sobre `sha256(payload_bytes)`, mais metadados (signatário, certificado, nível) | CAdES (ETSI EN 319 122), nível B-LTA |
 | `timestamps` | Timestamps RFC 3161 — de assinatura (B-T) e de arquivo (B-LTA) | RFC 3161 |
 | `validation_material` | Cadeia de certificados (signatário → raiz) + respostas de revogação (OCSP/CRL) capturadas no momento da assinatura | LT/LTA (ETSI EN 319 122) |
+| `validation_code` | Código de verificação canónico — derivado de `ndf_id` + `payload_hash`. Ver §4.6. | Esta especificação |
 
 ### 4.2 Nível alvo: CAdES-B-LTA
 
@@ -541,6 +542,77 @@ A mitigação completa deste risco faz parte do **roadmap desta especificação*
 
 A especificação do NDF não depende de um mecanismo específico — apenas exige que o resultado seja uma assinatura CAdES-B-LTA válida sobre `sha256(payload_bytes)`. Mecanismos previstos (ver especificação de implementação, §6): Cartão de Cidadão, smartcard ECCE (ECCE/ARTE — sucessora do CEGER), HSM institucional (selo eletrónico), Chave Móvel Digital.
 
+### 4.6 `validation_code` — Código de verificação canónico
+
+#### 4.6.1 Propósito
+
+O `validation_code` é um identificador curto, único e verificável que permite referenciar e confirmar a autenticidade de um NDF finalizado por qualquer meio — impresso em papel, citado em correspondência, lido por QR code, ou consultado num portal de verificação público. É derivado deterministicamente do NDF, não requer segredo do servidor, e pode ser verificado offline por qualquer implementação conforme.
+
+#### 4.6.2 Algoritmo de derivação
+
+```
+input      = ndf_id + "|" + payload_hash
+digest     = SHA-256( input )          -- SHA-256, NIST FIPS 180-4
+code_bytes = digest[:12.5 bytes]       -- primeiros 100 bits do digest
+code_b32   = BASE32_NOPAD( code_bytes ) -- RFC 4648 §6, sem padding, maiúsculas
+validation_code = "NDF-" + code_b32   -- prefixo fixo + 20 chars Base32
+```
+
+**Formato resultante**: `NDF-` + 20 caracteres Base32 (A–Z, 2–7)
+
+**Exemplo**: `NDF-A3F7K2MXPQR9ZTNW8VJ`
+
+**Formato legível** (grupos de 5 separados por hífen): `NDF-A3F7K-2MXPQ-R9ZTN-W8VJX`
+
+#### 4.6.3 Propriedades do espaço de endereçamento
+
+| Propriedade | Valor |
+|---|---|
+| Bits de entropia | 100 bits |
+| Combinações possíveis | 2¹⁰⁰ ≈ 1.27 × 10³⁰ |
+| Probabilidade de colisão com 10⁸ documentos | ≈ 3.9 × 10⁻¹⁵ (negligenciável) |
+| Probabilidade de colisão com 10¹² documentos | ≈ 3.9 × 10⁻⁷ (negligenciável) |
+| Tentativas médias para adivinhar um código válido | 2⁹⁹ ≈ 6.3 × 10²⁹ |
+| Caracteres Base32 (RFC 4648) | A–Z, 2–7 — sem caracteres ambíguos (0/O, 1/I/l) |
+| Comprimento com prefixo, sem separadores | 24 caracteres |
+| Comprimento com prefixo e separadores | 28 caracteres (`NDF-XXXXX-XXXXX-XXXXX-XXXXX`) |
+
+O espaço de endereçamento de 2¹⁰⁰ suporta a totalidade dos documentos da Administração Pública portuguesa para os próximos séculos sem qualquer pressão de colisão.
+
+#### 4.6.4 Verificabilidade
+
+O `validation_code` é **self-verifiable**: qualquer implementação conforme pode verificar que um dado código corresponde a um dado NDF recalculando o digest a partir de `ndf_id` e `payload_hash`. Não é necessário acesso a um servidor ou segredo privado.
+
+O portal de verificação (`https://validar.normordis.pt/<validation_code>`) serve como ponto de acesso público para verificação online, mas não é o único mecanismo — a verificação offline é igualmente válida e prevista para contextos de arquivo de longo prazo.
+
+#### 4.6.5 Representações
+
+**Texto** (para impressão, correspondência, citação):
+```
+NDF-A3F7K-2MXPQ-R9ZTN-W8VJX
+```
+
+**QR code** (elemento `codigo_barras` no NDT, §8.3.6 da spec NDT):
+```
+https://validar.normordis.pt/NDF-A3F7K-2MXPQ-R9ZTN-W8VJX
+```
+
+O NDT referencia o `validation_code` através do placeholder `{{ndf.codigo_validacao}}` no elemento `codigo_barras`. Ambas as representações são obrigatórias em documentos emitidos para o exterior — a forma texto para leitura humana e o QR code para leitura por dispositivo.
+
+#### 4.6.6 Posição no pipeline de finalização
+
+O `validation_code` é calculado **após** a canonicalização e o cálculo do `payload_hash`, sendo adicionado ao envelope antes da assinatura CAdES-B:
+
+```
+1. Canonicalizar NDF-core → payload_bytes
+2. payload_hash = SHA-256(payload_bytes)
+3. validation_code = "NDF-" + BASE32_NOPAD(SHA-256(ndf_id + "|" + payload_hash))[:20]
+4. Assinar payload_hash (CAdES-B)  ← validation_code não faz parte do que é assinado
+5. ...
+```
+
+O `validation_code` não faz parte do NDF-core canonicalizado — evita a referência circular (o código depende do hash do conteúdo; se fosse conteúdo, alteraria o hash). Fica no envelope como campo operacional, par do `payload_hash`.
+
 ---
 
 ## 5. Regras de finalização
@@ -557,13 +629,14 @@ A finalização **falha** se:
 
 ### 5.2 Pipeline (ordem estrita)
 
-1. Canonicalizar o NDF-core completo (incluindo `ndt_version_ref` e `avaliacao`) via JCS (RFC 8785) → `payload_bytes`.
-2. Calcular `payload_hash = sha256(payload_bytes)`.
-3. Assinar `payload_hash` (CAdES-B).
-4. Obter timestamp de assinatura (CAdES-B-T).
-5. Recolher material de validação — cadeia de certificados + revogação (CAdES-B-LT).
-6. Obter timestamp de arquivo selando assinatura + material de validação (CAdES-B-LTA).
-7. Persistir atomicamente: `payload_bytes` (imutável a partir daqui) + envelope completo.
+1. Canonicalizar o NDF-core completo (incluindo `ndf_id`, `ndt_version_ref` e `avaliacao`) via JCS (RFC 8785) → `payload_bytes`.
+2. Calcular `payload_hash = SHA-256(payload_bytes)`.
+3. Calcular `validation_code = "NDF-" + BASE32_NOPAD(SHA-256(ndf_id + "|" + payload_hash))[:20]` (ver §4.6).
+4. Assinar `payload_hash` (CAdES-B).
+5. Obter timestamp de assinatura (CAdES-B-T).
+6. Recolher material de validação — cadeia de certificados + revogação (CAdES-B-LT).
+7. Obter timestamp de arquivo selando assinatura + material de validação (CAdES-B-LTA).
+8. Persistir atomicamente: `payload_bytes` (imutável a partir daqui) + envelope completo (incluindo `validation_code`).
 
 ### 5.3 Pós-condições
 
