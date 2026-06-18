@@ -127,7 +127,7 @@ A tabela seguinte mapeia cada requisito legal ou normativo à disposição concr
 | Autenticidade e integridade do documento | ISO 15489:2016, §5.2; MoReq2017, R2 | JCS/RFC 8785 + SHA-256 + CAdES sobre `payload_bytes` | §1.3, §4 |
 | Imutabilidade do registo | MoReq2017, R3; MEG, R4 | Princípio de imutabilidade; proibição de edição de NDF finalizado | §2.1 |
 | Reprodutibilidade / renderização futura | MoReq2017, R5; OAIS/ISO 14721:2012 | `ndt_version_ref` embebido no NDF-core; NDT incluído no `.ndfpkg` | §2.6, §8 |
-| Prazo de conservação administrativa (PCA) | MEG/DGLAB, Lista Consolidada | Bloco `avaliacao.prazo_conservacao_administrativa` com `lista_consolidada_versao_ref` | §3 |
+| Prazo de conservação administrativa (PCA) | MEG/DGLAB, Lista Consolidada | Bloco `avaliacao.prazo_conservacao_administrativa` com `instrumento_avaliacao_versao_ref` | §3 |
 | Destino final (conservação / eliminação) | MEG/DGLAB, Tabelas de Seleção | `avaliacao.destino_final`; eliminação no termo do PCA | §3.4 |
 | Classificação documental (MEF/MIP) | MEG/DGLAB, Macroestrutura Funcional | `metadados.tipo_classificacao_ref` | §2.7 |
 | Cadeia de custódia / proveniência | ISO 15489:2016, §5.3; MoReq2017, R6 | `versao_anterior` + `hash_anterior`; cadeia de NDF imutáveis | §6 |
@@ -150,7 +150,7 @@ Certas mudanças são absolvidas pelos campos `*_ref` existentes, sem alterar o 
 
 | Mudança | Campo absorvente | Acção |
 |---|---|---|
-| Nova versão da Lista Consolidada DGLAB | `avaliacao.lista_consolidada_versao_ref` | Implementações actualizam o valor; spec não muda |
+| Nova versão da Lista Consolidada DGLAB | `avaliacao.instrumento_avaliacao_versao_ref` | Implementações actualizam o valor; spec não muda |
 | Nova portaria de impressos fiscais | `impresso.versao_impresso` no NDT | NDT actualizado; NDF spec não muda |
 | Novo algoritmo de assinatura nos certificados qualificados | `envelope.assinaturas[].algoritmo` | Implementações suportam novo algoritmo; spec não muda |
 
@@ -188,7 +188,7 @@ Instrumentos legais com revisões previstas ou em curso que podem implicar actua
 | Instrumento | Estado | Impacto previsto |
 |---|---|---|
 | eIDAS 2.0 — Regulamento (UE) 2024/1183 | Em vigor (transposição em curso) | Suporte a QSCD e European Digital Identity Wallet — MINOR |
-| Lista Consolidada DGLAB (revisão periódica) | Actualizações regulares | Absorvida por `lista_consolidada_versao_ref` — sem versão |
+| Lista Consolidada DGLAB (revisão periódica) | Actualizações regulares | Absorvida por `instrumento_avaliacao_versao_ref` — sem versão |
 | Norma MoReq (revisão prevista) | A confirmar | Avaliação quando publicada |
 | Revisão do RGPD / Lei n.º 58/2019 | Sem data | A avaliar conforme publicação |
 
@@ -395,7 +395,7 @@ Quando `estado` transita para `"eliminado"`, o sistema de custódia DEVE:
   "validation_code": "NDF-XXXXX-XXXXX-XXXXX-XXXXX",
   "data_eliminacao": "2031-06-18T10:30:00Z",
   "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
-  "lista_consolidada_versao_ref": "lista-consolidada-dglab-2023-v3",
+  "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3",
   "tipo_classificacao_ref": "lc/450.10.001"
 }
 ```
@@ -641,7 +641,7 @@ A Lista Consolidada da DGLAB integra estas decisões de avaliação para os proc
       "forma_contagem": "string (enum)"
     },
     "destino_final": "string (enum)",
-    "lista_consolidada_versao_ref": "string"
+    "instrumento_avaliacao_versao_ref": "string"
   }
 }
 ```
@@ -653,7 +653,7 @@ A Lista Consolidada da DGLAB integra estas decisões de avaliação para os proc
 | `prazo_conservacao_administrativa.unidade` | string (enum) | `dias \| meses \| anos`. |
 | `prazo_conservacao_administrativa.forma_contagem` | string (enum) | Ver §3.3. |
 | `destino_final` | string (enum) | `conservacao_permanente \| eliminacao \| conservacao_parcial_por_amostragem`. |
-| `lista_consolidada_versao_ref` | string | Identificador/versão da Lista Consolidada (ou tabela de seleção derivada) usada para resolver PCA/DF no momento da finalização. |
+| `instrumento_avaliacao_versao_ref` | string | Instrumento de avaliação e versão usada para resolver PCA/DF no momento da finalização. Formato: `"<instrumento>/<versao>"`. Ver §3.2.2. |
 
 ### 3.2.1 Formato normativo de `tipo_classificacao_ref`
 
@@ -672,9 +672,28 @@ A string segue o formato `"<instrumento>/<codigo_classe>"`:
 "portaria/1253-A/2009/II-3"  — série II-3 da Portaria n.º 1253-A/2009
 ```
 
-A versão do instrumento consultada é registada em `lista_consolidada_versao_ref`, permitindo que a regra aplicável seja rastreável mesmo após actualização do instrumento.
+O instrumento e a versão consultados são registados em `instrumento_avaliacao_versao_ref`, permitindo que a regra aplicável seja rastreável mesmo após actualização do instrumento.
 
 `tipo_classificacao_ref` é **resolvido automaticamente** pelo sistema produtor a partir do tipo de documento — nunca introduzido manualmente por documento.
+
+### 3.2.2 Formato normativo de `instrumento_avaliacao_versao_ref`
+
+A string segue o formato `"<instrumento>/<versao>"`:
+
+| Componente | Descrição |
+|---|---|
+| `instrumento` | Identificador do instrumento. Valores canónicos: `"lc"` (Lista Consolidada DGLAB), `"pgd"` (Plano de Gestão de Documentos), `"portaria"` (Portaria de Gestão de Documentos), `"ts"` (Tabela de Seleção institucional). Extensível por entidades com instrumentos próprios. |
+| `versao` | Identificador da versão ou edição consultada — suficiente para localizar o instrumento exacto. Não há formato imposto; RECOMENDA-SE incluir ano e número de revisão. |
+
+**Exemplos válidos**:
+```
+"lc/lista-consolidada-dglab-2023-v3"   — Lista Consolidada DGLAB, edição 2023 v3
+"pgd/pgd-mf-2019-v2"                  — PGD do Ministério das Finanças, v2
+"portaria/1253-A-2009"                 — Portaria n.º 1253-A/2009
+"ts/at/tabela-2022"                    — Tabela de Seleção da AT, edição 2022
+```
+
+`tipo_classificacao_ref` e `instrumento_avaliacao_versao_ref` DEVEM referenciar o mesmo instrumento: o prefixo de `tipo_classificacao_ref` DEVE corresponder ao `instrumento` de `instrumento_avaliacao_versao_ref`. Exemplo: `"lc/450.10.001"` exige `"lc/..."` em `instrumento_avaliacao_versao_ref`.
 
 ### 3.3 Enum `forma_contagem`
 
@@ -694,7 +713,7 @@ Conjunto fechado, alinhado com as formas de contagem de prazo previstas pela Lis
 
 ### 3.5 Resolução automática
 
-`prazo_conservacao_administrativa` e `destino_final` devem ser **resolvidos automaticamente** a partir de `tipo_classificacao_ref`, consultando a Lista Consolidada/Tabela de Seleção carregada no sistema no momento da finalização — não introduzidos manualmente por documento. `lista_consolidada_versao_ref` regista qual a versão consultada, preservando a regra aplicável mesmo que a Lista Consolidada seja atualizada posteriormente.
+`prazo_conservacao_administrativa` e `destino_final` devem ser **resolvidos automaticamente** a partir de `tipo_classificacao_ref`, consultando o instrumento de avaliação carregado no sistema no momento da finalização — não introduzidos manualmente por documento. `instrumento_avaliacao_versao_ref` regista qual o instrumento e versão consultados, preservando a regra aplicável mesmo que o instrumento seja actualizado posteriormente.
 
 ### 3.6 Dados derivados (fora do NDF-core)
 

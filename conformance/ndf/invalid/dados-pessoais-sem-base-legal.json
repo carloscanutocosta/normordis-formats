@@ -19,6 +19,6 @@
     "tipo_classificacao_ref": "lc/450.10.001",
     "prazo_conservacao_administrativa": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
     "destino_final": "eliminacao",
-    "lista_consolidada_versao_ref": "lista-consolidada-dglab-2023-v3"
+    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }

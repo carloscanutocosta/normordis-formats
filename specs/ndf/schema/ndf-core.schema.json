@@ -161,7 +161,7 @@
         "tipo_classificacao_ref",
         "prazo_conservacao_administrativa",
         "destino_final",
-        "lista_consolidada_versao_ref"
+        "instrumento_avaliacao_versao_ref"
       ],
       "properties": {
         "tipo_classificacao_ref": {
@@ -217,11 +217,11 @@
           ],
           "description": "Final disposition after PCA. See SPEC.md §3.4."
         },
-        "lista_consolidada_versao_ref": {
+        "instrumento_avaliacao_versao_ref": {
           "type": "string",
-          "minLength": 1,
-          "description": "Version identifier of the Lista Consolidada (or derived selection table) used to resolve PCA/DF at finalisation time.",
-          "examples": ["lista-consolidada-dglab-2023-v3", "tabela-selecao-at-2022"]
+          "pattern": "^[a-z][a-z0-9-]*/[^/\\s]+$",
+          "description": "Instrument and version used to resolve PCA/DF at finalisation time. Format: '<instrumento>/<versao>'. See SPEC.md §3.2.2.",
+          "examples": ["lc/lista-consolidada-dglab-2023-v3", "pgd/pgd-mf-2019-v2", "portaria/1253-A-2009"]
         }
       },
       "additionalProperties": false
