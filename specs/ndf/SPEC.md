@@ -40,6 +40,36 @@ O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de doc
 | RGPD — Regulamento (UE) 2016/679 | Proteção de dados pessoais |
 | Lei n.º 58/2019 | Execução nacional do RGPD |
 
+### 1.1.2 Eficiência de armazenamento face a formatos binários
+
+O NDF armazena apenas dados estruturados — sem layout, fontes, imagens de fundo ou páginas não preenchidas. Esta diferença produz ganhos de armazenamento substanciais face a PDF/A.
+
+As estimativas abaixo são calculadas a partir de rácios empíricos observados em documentos reais de referência e estão pendentes de validação formal com corpus representativo da Administração Pública portuguesa. Os valores serão actualizados quando forem disponibilizados dados de medição real.
+
+#### Estimativas por tipo de documento
+
+| Tipo de documento | PDF/A típico | NDF estimado | Rácio estimado |
+|---|---|---|---|
+| Ofício simples (1–2 pág.) | 80–150 KB | 3–6 KB | 20×–40× |
+| Informação técnica (3–5 pág.) | 150–300 KB | 6–12 KB | 15×–30× |
+| Despacho / Parecer | 100–250 KB | 4–8 KB | 20×–35× |
+| Modelo 3 IRS (rosto + anexos preenchidos) | 800 KB–2 MB | 30–80 KB | 15×–40× |
+| Formulário fiscal genérico (1 pág.) | 200–500 KB | 8–20 KB | 15×–30× |
+
+> **Nota metodológica**: o PDF/A inclui fontes embebidas, elementos gráficos do impresso, e todas as páginas de anexos (incluindo as não preenchidas). O NDF contém exclusivamente os campos preenchidos, metadados e avaliação arquivística — não inclui layout nem recursos visuais. O rácio depende da densidade de preenchimento: documentos com muitas secções opcionais vazias têm rácios mais favoráveis ao NDF.
+
+#### Impacto a escala institucional (estimativas)
+
+| Cenário | Volume anual | Armazenamento PDF/A | Armazenamento NDF | Poupança estimada |
+|---|---|---|---|---|
+| Município médio | 50 000 docs | ~7,5 GB/ano | ~400 MB/ano | ~95% |
+| Ministério / Direção-Geral | 500 000 docs | ~75 GB/ano | ~4 GB/ano | ~95% |
+| AT — Modelo 3 IRS | 3 500 000 declarações | ~3,5 TB/ano | ~175 GB/ano | ~95% |
+
+Projecção a 10 anos para um município médio: ~75 GB (PDF/A) vs. ~4 GB (NDF) — diferença de uma a duas ordens de grandeza que impacta directamente custos de armazenamento, backup, replicação e transferência para arquivo digital definitivo.
+
+> **Validação empírica pendente**: os valores acima serão substituídos por medições reais quando estiverem disponíveis amostras representativas de documentos produzidos pelo core-documental NORMORDIS. A metodologia de medição (corpus, tipos de documento, densidade de preenchimento) será publicada em `docs/benchmarks/` desta especificação.
+
 ### 1.2 Composição
 
 Um NDF completo é composto por três partes logicamente distintas:
