@@ -1,7 +1,7 @@
 {
   "_comment": "Caso de teste: registo interno sem assinatura eletrónica (nivel_assinatura: nenhuma), com destino_final conservacao_permanente. Requer CAdES-B-LTA para integridade de arquivo (§2.10.4).",
   "ndf_version": "1.0.0",
-  "ndf_id": "d4e5f6a7-b8c9-4012-defa-123456789012",
+  "ndf_id": "d4e5f6a7-b8c9-4012-9efa-123456789012",
   "estado": "ativo",
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "nenhuma",

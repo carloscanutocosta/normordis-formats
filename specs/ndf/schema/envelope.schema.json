@@ -4,8 +4,13 @@
   "title": "NDF Envelope v1.0.0",
   "description": "NDF envelope structure — produced after NDF-core finalisation. Not signed; contains signatures over NDF-core, timestamps, validation material, and operational fields.",
   "type": "object",
-  "required": ["validation_code", "payload_hash"],
+  "required": ["validation_code", "payload_hash", "estado"],
   "properties": {
+    "estado": {
+      "type": "string",
+      "enum": ["ativo", "substituido", "em_conservacao", "conservado_permanentemente", "eliminado"],
+      "description": "Current archival lifecycle state, managed by the custodian system. Reflects the document's operational state, which may differ from the NDF-core's 'estado' (always 'ativo'). See SPEC.md §2.4.1."
+    },
     "validation_code": {
       "type": "string",
       "pattern": "^NDF-[A-Z2-7]{20}$",

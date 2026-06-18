@@ -312,28 +312,83 @@ Identificador permanente do documento no ecossistema NORMORDIS.
 - **Unicidade**: o sistema produtor garante que não existem dois NDF com o mesmo `ndf_id`.
 - **Uso**: referência primária em `versao_anterior`, no manifest do `.ndfpkg`, e como chave primária no modelo de DB (§1.5).
 
-### 2.4 Estados de arquivo (`estado`)
+### 2.4 Estado de arquivo (`estado`)
 
-O NDF representa exclusivamente documentos finalizados. Não existe estado `rascunho` — o período de edição é responsabilidade da aplicação produtora e não produz NDF. Os estados válidos reflectem o ciclo de vida **arquivístico** do documento após finalização.
+O campo `estado` no NDF-core declara o estado do documento **no momento da finalização** — é sempre `"ativo"`. É canonicalizado e assinado como parte do NDF-core e é **imutável** tal como todos os outros campos.
+
+O estado arquivístico corrente ao longo do ciclo de vida do documento é uma propriedade operacional gerida fora do NDF-core: na coluna `estado` da base de dados (§1.5) e no campo `estado` do manifesto `.ndfpkg` (§8.2). O valor no NDF-core não reflecte transições posteriores à finalização.
+
+**Valor normativo**: `"ativo"` — único valor válido no NDF-core no momento da finalização.
+
+#### 2.4.1 Ciclo de vida arquivístico (camada operacional)
+
+Os estados do ciclo de vida são geridos pelo sistema de custódia (GED/GCA) fora do NDF-core. As transições válidas são:
+
+```
+ativo → substituido          (nova versão NDF criada — §6)
+ativo → em_conservacao       (PCA decorrido)
+em_conservacao → conservado_permanentemente   (DF: conservação — transferência para arquivo)
+em_conservacao → eliminado                    (DF: eliminação — destruição autorizada)
+```
 
 | Estado | Descrição |
 |---|---|
-| `"ativo"` | Documento em uso activo, dentro do prazo de conservação administrativa (PCA). |
-| `"substituido"` | Documento supersedido por uma versão posterior na cadeia de proveniência (§6). Permanece no arquivo mas não é o documento corrente. |
-| `"em_conservacao"` | PCA decorrido; aguarda aplicação do destino final (DF) — transferência para arquivo definitivo ou eliminação. |
-| `"conservado_permanentemente"` | Destino final: conservação permanente. Documento transferido para arquivo definitivo (ex.: DGLAB). |
-| `"eliminado"` | Destino final: eliminação aplicada. O NDF-core e envelope são destruídos; pode subsistir um registo tombstone com `ndf_id`, `payload_hash` e data de eliminação para rastreabilidade. |
+| `"ativo"` | Documento em uso activo, dentro do PCA. Estado inicial de todos os NDF. |
+| `"substituido"` | Documento supersedido por nova versão na cadeia de proveniência (§6). Imutável no arquivo; não é o documento corrente. |
+| `"em_conservacao"` | PCA decorrido; aguarda aplicação do destino final — transferência para arquivo definitivo ou eliminação. |
+| `"conservado_permanentemente"` | DF aplicado: conservação permanente. Documento transferido para arquivo definitivo (ex.: DGLAB). |
+| `"eliminado"` | DF aplicado: eliminação. `payload_bytes` e envelope destruídos; subsiste um registo tombstone (ver §2.4.3). |
 
-**Transições válidas**:
+#### 2.4.2 Mecanismo de transição de estado
 
+Cada transição de estado deve ser registada num **log de auditoria imutável**, separado do NDF e da sua base de dados operacional. O log é da responsabilidade do sistema de custódia.
+
+**Estrutura mínima de cada entrada do log de auditoria**:
+
+```json
+{
+  "ndf_id": "uuid-v4",
+  "estado_anterior": "ativo",
+  "estado_novo": "em_conservacao",
+  "timestamp": "2031-06-18T10:30:00Z",
+  "motivo": "PCA de 5 anos decorrido desde 2026-06-18",
+  "actualizador": "sistema-gca-v2.1 / utilizador-id-456",
+  "instrumento_legal": "lista-consolidada-dglab-2023-v3/lc/450.10.001"
+}
 ```
-ativo → substituido          (nova versão criada)
-ativo → em_conservacao       (PCA decorrido)
-em_conservacao → conservado_permanentemente   (DF: conservação)
-em_conservacao → eliminado                    (DF: eliminação)
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `ndf_id` | Sim | Identificador do NDF cujo estado transita. |
+| `estado_anterior` | Sim | Estado antes da transição. |
+| `estado_novo` | Sim | Estado após a transição. |
+| `timestamp` | Sim | Data/hora da transição (ISO 8601, UTC). |
+| `motivo` | Sim | Justificação textual — rastreável para auditoria. |
+| `actualizador` | Sim | Identidade do sistema e/ou utilizador que efectuou a transição. |
+| `instrumento_legal` | Recomendado | Referência ao instrumento (Lista Consolidada, despacho, portaria) que autoriza a transição. |
+
+**Autorização**: a transição `em_conservacao → eliminado` requer autorização formal do `responsavel_tratamento` (§2.7.2) e deve referenciar explicitamente o instrumento de avaliação que suporta a decisão de eliminação.
+
+#### 2.4.3 Tombstone de eliminação
+
+Quando `estado` transita para `"eliminado"`, o sistema de custódia deve:
+
+1. Destruir `payload_bytes` e todos os campos do envelope excepto `validation_code` e `payload_hash`.
+2. Criar um registo tombstone imutável com os seguintes campos mínimos:
+
+```json
+{
+  "ndf_id": "uuid-v4",
+  "payload_hash": "sha256:<hex>",
+  "validation_code": "NDF-XXXXX-XXXXX-XXXXX-XXXXX",
+  "data_eliminacao": "2031-06-18T10:30:00Z",
+  "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
+  "lista_consolidada_versao_ref": "lista-consolidada-dglab-2023-v3",
+  "tipo_classificacao_ref": "lc/450.10.001"
+}
 ```
 
-O campo `estado` é o único campo do NDF-core que pode ser actualizado após finalização, por ser operacional. A actualização de `estado` não constitui alteração ao conteúdo do documento — o `payload_bytes` permanece inalterado.
+O tombstone garante rastreabilidade sem preservar os dados eliminados: `validation_code` e `payload_hash` permitem confirmar que o documento existiu e foi destruído de forma autorizada.
 
 ### 2.5 Algoritmo de hash (`payload_hash_alg`)
 

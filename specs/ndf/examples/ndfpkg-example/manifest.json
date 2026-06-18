@@ -1,0 +1,25 @@
+{
+  "ndfpkg_version": "1.0.0",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "ndf_version": "1.0.0",
+  "schema_id": "oficio-generico",
+  "estado": "ativo",
+  "nivel_assinatura": "qualificada",
+  "finalizado_em": "2026-06-18T10:30:00Z",
+  "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
+  "validation_code": "NDF-A3F7K2MXPQR9ZTNW8VJ",
+  "inventario": [
+    {
+      "ficheiro": "ndf-core.json",
+      "hash_sha256": "sha256:<hash-do-ficheiro-ndf-core.json>"
+    },
+    {
+      "ficheiro": "envelope.json",
+      "hash_sha256": "sha256:<hash-do-ficheiro-envelope.json>"
+    },
+    {
+      "ficheiro": "ndt/oficio-generico@1.0.0.ndt.json",
+      "hash_sha256": "sha256:<hash-do-ficheiro-ndt>"
+    }
+  ]
+}
