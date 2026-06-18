@@ -1,0 +1,27 @@
+NORMORDIS Specification License
+================================
+
+The specifications in this repository (text, JSON Schemas, and examples)
+are released under CC0 1.0 Universal (Public Domain Dedication).
+
+  https://creativecommons.org/publicdomain/zero/1.0/
+
+To the extent possible under law, the authors have waived all copyright
+and related or neighbouring rights to these specifications. This work is
+published from Portugal.
+
+You may use, implement, copy, modify, and distribute these specifications
+for any purpose — commercial or non-commercial — without any condition,
+attribution, or licensing obligation.
+
+The intent is to allow any software producer, public organisation, or
+open source project to implement NDF, NDT, and NCRTF freely, without
+any contractual dependency on the authors of this specification.
+
+-------------------------------------------------------------------------------
+
+Reference implementations (normordis-pdf, normordis-viewer, and related
+tools) are distributed under separate licenses (EUPL v1.2), indicated in
+their respective repositories. The format specification and the reference
+implementation are licensed independently so that adoption of the format
+does not depend on the license of the code.
