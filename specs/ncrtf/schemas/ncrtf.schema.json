@@ -137,7 +137,9 @@
           "type": "array",
           "minItems": 1,
           "items": { "$ref": "#/$defs/inline" }
-        }
+        },
+        "alignment": { "$ref": "#/$defs/alignment" },
+        "font_family": { "$ref": "#/$defs/font_family" }
       }
     },
     "table": {

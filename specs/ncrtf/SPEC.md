@@ -268,10 +268,12 @@ Em documentos administrativos, nível 1 RECOMENDA-SE reservado ao NDT (layout); 
 }
 ```
 
-| Campo | Tipo | Obrigatório |
-|---|---|---|
-| `type` | `"blockquote"` | Sim |
-| `content` | array de Inline | Sim — mínimo 1 elemento |
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `type` | `"blockquote"` | Sim | |
+| `content` | array de Inline | Sim — mínimo 1 elemento | |
+| `alignment` | `"center"` \| `"justify"` \| `"right"` | OPCIONAL | Omitir quando `"left"` (default). |
+| `font_family` | ver §7 | OPCIONAL | Família tipográfica da citação. |
 
 ### 4.5 `table`
 
