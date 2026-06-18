@@ -10,7 +10,7 @@ Estado em: 2026-06-18
 |---|---|---|
 | NDF — NORMORDIS Document Format | Draft para implementação | 1.0.0 |
 | NDT — NORMORDIS Document Template | Draft para implementação | 2.0.0 |
-| NCRTF — NORMORDIS Canonical Rich Text Format | Stub | — |
+| NCRTF — NORMORDIS Canonical Rich Text Format | Estável | 1.0.0 |
 | JSON Schema NDF-core | Draft | 1.0.0 |
 | Registry de tipos de documento | Draft (3 tipos canónicos) | 1.0.0 |
 | Suite de conformidade NDF | Draft | 1.0.0 |
@@ -195,9 +195,9 @@ normordis-migrate --batch *.ndfpkg --out-dir migrado/
 | Extensões de namespace (`ext.<entidade>`) | Permite que AT, SS, Municípios estendam o NDF-core com campos próprios sem alterar esta spec base |
 | Revisão de `tipo_documento_ref` para URI formal | Alinhamento com Linked Data / European Interoperability Framework |
 
-### NCRTF v1.0.0
+### NCRTF v1.0.0 ✅
 
-Especificação do NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado (para o campo `corpo` de documentos que hoje usam plain text). Substitui a referência a plain text em `oficio.schema.json` e similares. Alinhamento com subset do formato interno do NORMORDIS.
+Especificação do NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado para campos `corpo` e equivalentes. Independente de editores (Lexical, ProseMirror, etc.); canonicalizável via JCS/RFC 8785; armazenado directamente como campo JSON no NDF-core. Suporta parágrafos, títulos, listas, tabelas, imagens (por `ref` no `.ndfpkg`), e marcas inline (bold, italic, underline, subscript, superscript). NDTs adoptam o tipo de campo `"type": "ncrtf"` com bump de versão.
 
 ---
 
