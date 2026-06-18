@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spec.normordis.pt/ncrtf/1.0.0/ncrtf.schema.json",
+  "title": "NCRTF v1.0.0",
+  "description": "NORMORDIS Canonical Rich Text Format — structured rich text field value, canonicalisable via JCS/RFC 8785.",
+  "type": "object",
+  "required": ["ncrtf_version", "content"],
+  "properties": {
+    "ncrtf_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "NCRTF spec version. Must be '1.0.0' for documents conforming to this version."
+    },
+    "content": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/block" },
+      "minItems": 1,
+      "description": "Top-level sequence of block nodes."
+    }
+  },
+  "additionalProperties": false,
+
+  "$defs": {
+
+    "block": {
+      "description": "Any block-level node.",
+      "oneOf": [
+        { "$ref": "#/$defs/paragraph" },
+        { "$ref": "#/$defs/heading" },
+        { "$ref": "#/$defs/ordered_list" },
+        { "$ref": "#/$defs/unordered_list" },
+        { "$ref": "#/$defs/table" },
+        { "$ref": "#/$defs/image" }
+      ]
+    },
+
+    "inline": {
+      "description": "Any inline node. In v1.0.0 only 'text' is defined.",
+      "oneOf": [
+        { "$ref": "#/$defs/text" }
+      ]
+    },
+
+    "paragraph": {
+      "type": "object",
+      "description": "A block of inline content.",
+      "required": ["type", "content"],
+      "properties": {
+        "type": { "type": "string", "const": "paragraph" },
+        "content": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/inline" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "heading": {
+      "type": "object",
+      "description": "A titled section. Level 1–3.",
+      "required": ["type", "level", "content"],
+      "properties": {
+        "type": { "type": "string", "const": "heading" },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Heading depth: 1 = top, 3 = deepest supported."
+        },
+        "content": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/inline" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "ordered_list": {
+      "type": "object",
+      "description": "A numbered list.",
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "type": "string", "const": "ordered_list" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/list_item" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "unordered_list": {
+      "type": "object",
+      "description": "A bulleted list.",
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "type": "string", "const": "unordered_list" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/list_item" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "list_item": {
+      "type": "object",
+      "description": "A single item within an ordered or unordered list. Content may include nested lists.",
+      "required": ["content"],
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/block" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "table": {
+      "type": "object",
+      "description": "A tabular data structure.",
+      "required": ["type", "rows"],
+      "properties": {
+        "type": { "type": "string", "const": "table" },
+        "rows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/table_row" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "table_row": {
+      "type": "object",
+      "description": "A row within a table.",
+      "required": ["cells"],
+      "properties": {
+        "cells": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/table_cell" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "table_cell": {
+      "type": "object",
+      "description": "A cell within a table row. Optional header, colspan, rowspan.",
+      "required": ["content"],
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/block" },
+          "minItems": 1
+        },
+        "header": {
+          "type": "boolean",
+          "description": "True for header cells (<th>). Omit (do not set false) when not a header — see SPEC.md §4.5 R3."
+        },
+        "colspan": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Horizontal span. Omit when 1 — see SPEC.md §4.5 R4."
+        },
+        "rowspan": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Vertical span. Omit when 1 — see SPEC.md §4.5 R4."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "image": {
+      "type": "object",
+      "description": "A block-level image referenced by path within the .ndfpkg archive.",
+      "required": ["type", "ref", "alt"],
+      "properties": {
+        "type": { "type": "string", "const": "image" },
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Relative path within the .ndfpkg archive (e.g. 'assets/fig-1.png'). Must match an entry in manifest.inventario."
+        },
+        "alt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Mandatory alternative text for accessibility and long-term preservation."
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Source image width in pixels (informative)."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Source image height in pixels (informative)."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "text": {
+      "type": "object",
+      "description": "An inline text run with optional formatting marks.",
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "type": "string", "const": "text" },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The text content. Must not be empty."
+        },
+        "marks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["bold", "italic", "subscript", "superscript", "underline"]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Applied formatting marks. Must be sorted alphabetically (canonical order): bold, italic, subscript, superscript, underline. See SPEC.md §5.3."
+        }
+      },
+      "additionalProperties": false
+    }
+
+  }
+}
