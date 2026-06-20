@@ -54,26 +54,29 @@ O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato
 | O quê | Onde fica |
 |---|---|
 | O acto jurídico completo | NDF-core (`documento`) |
-| Regras de validação e cálculo | NDT |
+| Regras de validação e cálculo | App de domínio (fora do âmbito NORMORDIS-spec) |
 | Layout de página (margens, tipografia, logótipos) | Bloco `layout` do NDT |
 | Metadados do documento | NDF-core (`metadados`) |
 | Assinatura e envelope de custódia | Envelope NDF |
-| HTML, DOCX, PDF | Artefactos derivados — fora do scope |
+| PDF/UA-2, ODF, HTML | Artefactos derivados — fora do scope |
 | Estado interno de editor | Formato proprietário do editor (ex: Lexical JSON) |
 
 ### 1.4 Relação com outros componentes NORMORDIS
 
 ```
-NCRTF (este formato)
-  ↓  valor de campo num NDT
-NDT [bloco layout define renderização]
+NDF-core.documento.campo_corpo  ←  valor NCRTF (este formato)
+  │  canonicalizado via JCS + assinado via CAdES
+  │
   ↓
-PDF/A-3 | HTML | outros artefactos derivados
-
-NDF-core (contém o campo NCRTF como parte de `documento`)
-  ↓  canonicalizado via JCS + assinado via CAdES
 Envelope NDF
+
+NDT: bloco tipo "corpo", referencia: "caminho.ndf"
+  │  o renderer lê o caminho NDF, obtém o valor NCRTF, renderiza
+  ↓
+PDF/UA-2 + PDF/A-3  |  ODF  |  HTML  |  outros artefactos derivados
 ```
+
+**Leitura**: o NCRTF é um valor armazenado no **NDF** (como parte de `documento`). O **NDT** não contém NCRTF — declara apenas a posição e o caminho NDF onde o valor NCRTF reside. O renderer combina os dois para produzir o output.
 
 ### 1.5 Referências normativas
 
@@ -313,7 +316,7 @@ Todas as linhas de uma tabela DEVEM ter o mesmo número de células.
 ```json
 {
   "type": "image",
-  "ref": "assets/grafico-1.png",
+  "ref": "recursos/grafico-1.png",
   "alt": "Gráfico de evolução trimestral de processos",
   "caption": "Figura 1 — Evolução 2024–2026",
   "width_percent": 75
@@ -463,63 +466,105 @@ JCS(parse(serialize(ncrtf))) == serialize(ncrtf)
 
 ## 9. Integração com NDT
 
-### 9.1 Declaração de campo NCRTF num NDT
+### 9.1 Como o NDT referencia um campo NCRTF
 
-Um campo de rich text num NDT DEVE ser declarado com `"tipo": "ncrtf"`:
+O NDT v2.0.0 é um formato de **layout puro** — não contém dados nem declara tipos de campo. Um campo NCRTF num documento é referenciado no NDT através de um bloco `tipo: "corpo"` com um caminho NDF:
 
 ```json
 {
-  "name": "corpo",
-  "tipo": "ncrtf",
-  "label": "Corpo do documento",
-  "required": true
+  "blocos": [
+    {
+      "tipo": "corpo",
+      "referencia": "conteudo.corpo",
+      "posicao": { "x": 15, "y": 60 },
+      "largura": 180
+    }
+  ]
 }
 ```
 
-### 9.2 Exemplo — campo `corpo` num NDF-core
+Ou, em layout de fluxo:
 
 ```json
 {
-  "documento": {
-    "numero": "OF/2026/00123",
-    "data": "2026-06-18",
-    "corpo": {
-      "ncrtf_version": "2.0.0",
-      "content": [
-        {
-          "type": "paragraph",
-          "content": [
-            { "type": "text", "text": "Em resposta ao ofício n.º 45/2026, informamos que o prazo termina em " },
-            { "type": "text", "text": "30 de julho de 2026", "marks": ["bold"] },
-            { "type": "text", "text": "." }
-          ]
-        },
-        {
-          "type": "table",
-          "head": [
-            { "cells": ["Data", "Diligência", "Estado"] }
-          ],
-          "body": [
-            { "cells": ["2026-06-01", "Notificação ao interessado", "Concluída"] }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            { "type": "text", "text": "A fórmula aplicada: E = mc" },
-            { "type": "text", "text": "2", "marks": ["superscript"] },
-            { "type": "text", "text": "." }
-          ]
-        }
-      ]
-    }
+  "fluxo": {
+    "y_inicio": 60,
+    "elementos": [
+      { "tipo": "corpo", "referencia": "conteudo.corpo" }
+    ]
   }
 }
 ```
 
-### 9.3 Retrocompatibilidade com campos `string`
+O campo `referencia` é um caminho canónico NDF (ex.: `"conteudo.corpo"`, `"parecer.texto"`) que aponta para o campo do NDF-core onde o valor NCRTF está armazenado. O renderer lê o valor NCRTF nesse caminho e renderiza-o segundo as regras de layout do NDT (`largura`, `fonte_base` herdada de `estilos`, etc.).
 
-NDTs existentes com `"tipo": "string"` para campos como `corpo` continuam a funcionar com plain text. A migração para `"tipo": "ncrtf"` requer um bump de versão do NDT.
+**Princípio**: o NCRTF vive no NDF. O NDT descreve onde e como renderizá-lo. O renderer é o único componente que conhece ambos.
+
+### 9.2 Exemplo completo — NDF-core com campo NCRTF
+
+```json
+{
+  "ndf_version": "1.0.0",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "avancada",
+  "ndt_version_ref": "oficio-generico@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "oficio@1.0.0",
+    "entidade_produtora": { "designacao": "Direção-Geral de Exemplo", "nif": "123456789" },
+    "assunto": "Resposta ao ofício n.º 45/2026",
+    "numero_referencia": "OF/2026/00123",
+    "contem_dados_pessoais": false,
+    "responsavel_tratamento": "Direção-Geral de Exemplo"
+  },
+  "documento": {
+    "numero": "OF/2026/00123",
+    "data": "2026-06-18",
+    "destinatario": { "nome": "Entidade Destinatária", "identificacao": "NIF 987654321" },
+    "conteudo": {
+      "corpo": {
+        "ncrtf_version": "2.0.0",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              { "type": "text", "text": "Em resposta ao ofício n.º 45/2026, informamos que o prazo termina em " },
+              { "type": "text", "text": "30 de julho de 2026", "marks": ["bold"] },
+              { "type": "text", "text": "." }
+            ]
+          },
+          {
+            "type": "table",
+            "head": [ { "cells": ["Data", "Diligência", "Estado"] } ],
+            "body": [
+              { "cells": ["2026-06-01", "Notificação ao interessado", "Concluída"] }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              { "type": "text", "text": "Aguardamos o vosso contacto." }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "avaliacao": {
+    "tipo_classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao_administrativa": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
+    "destino_final": "eliminacao",
+    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+  }
+}
+```
+
+O campo `documento.conteudo.corpo` é um valor NCRTF completo — canonicalizado como parte do NDF-core e assinado via CAdES. O NDT referencia-o com `"referencia": "conteudo.corpo"`.
+
+### 9.3 Famílias tipográficas: NCRTF e NDT
+
+O NCRTF usa nomes canónicos de famílias tipográficas independentes de implementação (§7). O NDT usa nomes de fontes PDF para elementos de layout. A tabela de equivalência canónica está definida no NDT v2.0.0 §5.8. O renderer é responsável por aplicar o mapeamento ao combinar conteúdo NCRTF com estilos NDT.
 
 ---
 
@@ -530,8 +575,8 @@ NDTs existentes com `"tipo": "string"` para campos como `corpo` continuam a func
 O campo `ref` de um nó `image` é um caminho relativo dentro do arquivo `.ndfpkg`:
 
 ```
-assets/grafico-evolucao.png
-assets/organograma-2026.svg
+recursos/grafico-evolucao.png
+recursos/organograma-2026.svg
 recursos/foto-assinatura.jpg
 ```
 
@@ -545,7 +590,7 @@ Imagens NÃO DEVEM ser embutidas como base64 no valor NCRTF. O valor `src` com d
 
 Fluxo recomendado para editores:
 1. Durante a edição: imagens mantidas internamente como data URL no estado do editor.
-2. Na finalização do NDF: imagens extraídas para `assets/` do `.ndfpkg`; `src` substituído por `ref` no valor NCRTF que vai para `ndf-core.json`.
+2. Na finalização do NDF: imagens extraídas para `recursos/` do `.ndfpkg`; `src` substituído por `ref` no valor NCRTF que vai para `ndf-core.json`.
 
 ### 10.2 Formatos de imagem suportados
 
@@ -565,7 +610,7 @@ oficio-OF-2026-00123.ndfpkg
 ├── envelope.json
 ├── ndt/
 │   └── oficio-generico@2.0.0.ndt.json
-└── assets/
+└── recursos/
     └── grafico-evolucao.png
 ```
 

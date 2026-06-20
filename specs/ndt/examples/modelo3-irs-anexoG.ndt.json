@@ -1,0 +1,548 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "modelo3-irs-anexoG",
+  "versao_ndt": "2026.1",
+  "titulo": "Modelo 3 IRS — Anexo G",
+  "emissor": "AT",
+  "referencia_legal": "Portaria n.º .../2026",
+  "estilos": {
+    "fonte_padrao": { "familia": "Helvetica", "tamanho": 8 },
+    "cor_texto": "#000000",
+    "cor_primaria": "#003366",
+    "espacamento_entre_paragrafos_mm": 2,
+    "identacao_lista_mm": 4
+  },
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": { "topo": 15, "fundo": 15, "esq": 15, "dir": 15 }
+  },
+  "paginas_def": [
+    {
+      "id": "anexoG_rosto",
+      "graficos": [
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 180,
+          "altura": 18,
+          "preenchimento": "#003366",
+          "contorno": { "espessura": 0, "cor": "#003366" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "MODELO 3",
+          "posicao": { "x": 2, "y": 5 },
+          "fonte": { "familia": "Helvetica", "tamanho": 16, "peso": "bold", "cor": "#FFFFFF" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "ANEXO G — Mais-valias e outros incrementos patrimoniais",
+          "posicao": { "x": 2, "y": 12 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#FFFFFF" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "AUTORIDADE TRIBUTÁRIA E ADUANEIRA",
+          "posicao": { "x": 120, "y": 4 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold", "cor": "#FFFFFF" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "{{versao_ndt}}",
+          "posicao": { "x": 120, "y": 10 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#FFFFFF" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 24 },
+          "para": { "x": 180, "y": 24 },
+          "espessura": 0.3,
+          "cor": "#000000",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "IDENTIFICAÇÃO DO SUJEITO PASSIVO",
+          "posicao": { "x": 0, "y": 27 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold", "cor": "#003366" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "NIF do Sujeito Passivo (A)",
+          "posicao": { "x": 0, "y": 33 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "grelha_digitos",
+          "referencia": "identificacao.nif_titular",
+          "posicao": { "x": 0, "y": 36 },
+          "num_caixas": 9,
+          "largura_caixa": 6,
+          "altura_caixa": 7,
+          "espacamento": 0.5,
+          "cor_contorno": "#000000",
+          "espessura_contorno": 0.3,
+          "rotulo_acessivel": "NIF do Sujeito Passivo"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "NIF do Cônjuge / Unido de Facto (B)",
+          "posicao": { "x": 70, "y": 33 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "grelha_digitos",
+          "referencia": "identificacao.nif_conjuge",
+          "posicao": { "x": 70, "y": 36 },
+          "num_caixas": 9,
+          "largura_caixa": 6,
+          "altura_caixa": 7,
+          "espacamento": 0.5,
+          "cor_contorno": "#000000",
+          "espessura_contorno": 0.3,
+          "rotulo_acessivel": "NIF do Cônjuge ou Unido de Facto"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Ano fiscal",
+          "posicao": { "x": 145, "y": 33 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "grelha_digitos",
+          "referencia": "identificacao.ano_fiscal",
+          "posicao": { "x": 145, "y": 36 },
+          "num_caixas": 4,
+          "largura_caixa": 7,
+          "altura_caixa": 7,
+          "espacamento": 0.5,
+          "cor_contorno": "#000000",
+          "espessura_contorno": 0.3,
+          "rotulo_acessivel": "Ano fiscal a que respeita a declaração"
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 50 },
+          "para": { "x": 180, "y": 50 },
+          "espessura": 0.3,
+          "cor": "#000000",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 53 },
+          "largura": 180,
+          "altura": 8,
+          "preenchimento": "#EEEEEE",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "QUADRO 1 — INSTRUÇÕES",
+          "posicao": { "x": 2, "y": 57 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Este anexo destina-se a declarar os rendimentos da Categoria G — Mais-valias e outros incrementos patrimoniais — auferidos no ano a que respeita a declaração, quando o sujeito passivo não opta pelo englobamento.",
+          "posicao": { "x": 0, "y": 65 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 80 },
+          "para": { "x": 180, "y": 80 },
+          "espessura": 0.3,
+          "cor": "#000000",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 83 },
+          "largura": 180,
+          "altura": 8,
+          "preenchimento": "#EEEEEE",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "QUADRO 2 — TITULAR DOS RENDIMENTOS",
+          "posicao": { "x": 2, "y": 87 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Titular",
+          "posicao": { "x": 0, "y": 95 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 98 },
+          "largura": 60,
+          "altura": 7,
+          "preenchimento": "none",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Regime de tributação",
+          "posicao": { "x": 80, "y": 95 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Taxa especial (art.º 72.º CIRS)",
+          "posicao": { "x": 80, "y": 100 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 75, "y": 99 },
+          "largura": 4,
+          "altura": 4,
+          "preenchimento": "none",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Englobamento (art.º 22.º CIRS)",
+          "posicao": { "x": 80, "y": 107 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 75, "y": 106 },
+          "largura": 4,
+          "altura": 4,
+          "preenchimento": "none",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 116 },
+          "para": { "x": 180, "y": 116 },
+          "espessura": 0.3,
+          "cor": "#000000",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "codigo_barras",
+          "formato_barras": "qrcode",
+          "conteudo": "https://validar.at.gov.pt/{{validation_code}}",
+          "posicao": { "x": 153, "y": 245 },
+          "largura": 27,
+          "altura": 27,
+          "nivel_correcao": "M"
+        }
+      ],
+      "campos": [
+        {
+          "referencia": "quadro2.titular",
+          "posicao": { "x": 0, "y": 98 },
+          "largura": 60,
+          "altura": 7,
+          "formato": "texto",
+          "fonte": { "familia": "Helvetica", "tamanho": 8 },
+          "alinhamento": "esquerda",
+          "rotulo_acessivel": "Titular dos rendimentos (A ou B)"
+        },
+        {
+          "referencia": "quadro2.regime_taxa_especial",
+          "posicao": { "x": 75, "y": 99 },
+          "largura": 4,
+          "altura": 4,
+          "formato": "checkbox",
+          "rotulo_acessivel": "Opção por taxa especial (art.º 72.º CIRS)"
+        },
+        {
+          "referencia": "quadro2.regime_englobamento",
+          "posicao": { "x": 75, "y": 106 },
+          "largura": 4,
+          "altura": 4,
+          "formato": "checkbox",
+          "rotulo_acessivel": "Opção por englobamento (art.º 22.º CIRS)"
+        },
+        {
+          "referencia": "metadados.entidade_emissora",
+          "posicao": { "x": 120, "y": 272 },
+          "largura": 30,
+          "altura": 5,
+          "formato": "texto",
+          "fonte": { "familia": "Helvetica", "tamanho": 7 },
+          "alinhamento": "esquerda"
+        }
+      ],
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "{n}/{total}",
+          "posicao": { "x": 168, "y": 276 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" }
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Modelo 3 — Anexo G — {{versao_ndt}}",
+          "posicao": { "x": 0, "y": 276 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" }
+        }
+      ]
+    },
+    {
+      "id": "anexoG_dados",
+      "graficos": [
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 180,
+          "altura": 8,
+          "preenchimento": "#003366",
+          "contorno": { "espessura": 0, "cor": "#003366" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "MODELO 3 — ANEXO G — {{versao_ndt}}",
+          "posicao": { "x": 2, "y": 5 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold", "cor": "#FFFFFF" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 14 },
+          "para": { "x": 180, "y": 14 },
+          "espessura": 0.3,
+          "cor": "#000000",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 17 },
+          "largura": 180,
+          "altura": 8,
+          "preenchimento": "#EEEEEE",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "QUADRO 4 — ALIENAÇÕES DE IMÓVEIS E DIREITOS SOBRE IMÓVEIS (art.º 10.º, n.º 1, alínea a) do CIRS)",
+          "posicao": { "x": 2, "y": 22 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 26 },
+          "largura": 180,
+          "altura": 160,
+          "preenchimento": "none",
+          "contorno": { "espessura": 0.3, "cor": "#000000" },
+          "raio_canto": 0
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Cód.\nFreguesia",
+          "posicao": { "x": 1, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Artigo\nMatricial",
+          "posicao": { "x": 22, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Data\nAquisição",
+          "posicao": { "x": 48, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Valor de\nAquisição (€)",
+          "posicao": { "x": 73, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Data\nAlienação",
+          "posicao": { "x": 103, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Valor de\nRealização (€)",
+          "posicao": { "x": 128, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Mais-valia\nBruta (€)",
+          "posicao": { "x": 155, "y": 28 },
+          "fonte": { "familia": "Helvetica", "tamanho": 6, "peso": "bold" },
+          "alinhamento": "centro"
+        }
+      ],
+      "campos": [
+        {
+          "referencia": "quadro4.total_realizacao",
+          "posicao": { "x": 120, "y": 192 },
+          "largura": 55,
+          "altura": 7,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Total do valor de realização — Quadro 4"
+        },
+        {
+          "referencia": "quadro4.total_mais_valias",
+          "posicao": { "x": 120, "y": 202 },
+          "largura": 55,
+          "altura": 7,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Total das mais-valias brutas — Quadro 4"
+        },
+        {
+          "referencia": "quadro4.saldo_mais_menos_valias",
+          "posicao": { "x": 120, "y": 212 },
+          "largura": 55,
+          "altura": 7,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Saldo de mais-valias e menos-valias — Quadro 4"
+        }
+      ],
+      "blocos": [
+        {
+          "tipo": "tabela",
+          "referencia": "quadro4.imoveis",
+          "posicao": { "x": 0, "y": 36 },
+          "largura": 180,
+          "altura_linha": 6,
+          "min_linhas_visivel": 8,
+          "repete_cabecalho": true,
+          "estilo_cabecalho": {
+            "fundo": "#CCCCCC",
+            "fonte": { "tamanho": 6, "peso": "bold" }
+          },
+          "colunas": [
+            {
+              "id": "freguesia",
+              "cabecalho": "Cód. Freguesia",
+              "largura": 22,
+              "alinhamento": "centro",
+              "formato": "texto"
+            },
+            {
+              "id": "artigo",
+              "cabecalho": "Artigo Matricial",
+              "largura": 25,
+              "alinhamento": "esquerda",
+              "formato": "texto"
+            },
+            {
+              "id": "data_aquisicao",
+              "cabecalho": "Data Aquisição",
+              "largura": 25,
+              "alinhamento": "centro",
+              "formato": "data"
+            },
+            {
+              "id": "valor_aquisicao",
+              "cabecalho": "Val. Aquisição (€)",
+              "largura": 30,
+              "alinhamento": "direita",
+              "formato": "monetario",
+              "casas_decimais": 2
+            },
+            {
+              "id": "data_alienacao",
+              "cabecalho": "Data Alienação",
+              "largura": 25,
+              "alinhamento": "centro",
+              "formato": "data"
+            },
+            {
+              "id": "valor_realizacao",
+              "cabecalho": "Val. Realização (€)",
+              "largura": 30,
+              "alinhamento": "direita",
+              "formato": "monetario",
+              "casas_decimais": 2
+            },
+            {
+              "id": "mais_valia",
+              "cabecalho": "Mais-valia (€)",
+              "largura": 23,
+              "alinhamento": "direita",
+              "formato": "monetario",
+              "casas_decimais": 2
+            }
+          ]
+        }
+      ],
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "{n}/{total}",
+          "posicao": { "x": 168, "y": 276 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" }
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Modelo 3 — Anexo G — {{versao_ndt}}",
+          "posicao": { "x": 0, "y": 276 },
+          "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" }
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "anexoG_rosto",
+      "repeticao": "unica"
+    },
+    {
+      "pagina_def": "anexoG_dados",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "quadro4.imoveis",
+      "linhas_por_pagina": 8,
+      "incluir_se": "flags.incluir_anexoG"
+    }
+  ]
+}
