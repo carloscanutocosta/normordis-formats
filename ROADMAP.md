@@ -1,6 +1,6 @@
 # NORMORDIS Roadmap
 
-Estado em: 2026-06-18
+Estado em: 2026-06-20
 
 ---
 
@@ -41,12 +41,20 @@ Objectivo: spec auto-suficiente e implementável por terceiros sem acesso ao cor
 
 ### NDT
 
-- [x] `perfil` — `administrativo_simples` / `impresso_complexo` / `misto`
-- [x] Primitivas gráficas completas (§8.3.1–8.3.13)
-- [x] `campos[]` como mecanismo canónico de posicionamento NDF→NDT
-- [x] `funcoes_externas[]` — puras, versionadas, auditáveis
-- [x] `resolver` explícito para composição documental
-- [x] Recursos `embebido` e `referenciado_por_hash`
+NDT v2.0.0 está especificado e estável. Ver [specs/ndt/SPEC.md](specs/ndt/SPEC.md) e [specs/ndt/CHANGELOG.md](specs/ndt/CHANGELOG.md).
+
+- [x] Axioma layout-puro (sem expressões, sem validação, sem lógica de negócio)
+- [x] `paginas_def[]` + `sequencia[]` — modelo multi-página com definições distintas
+- [x] Primitivas gráficas: linha, rectangulo, grelha_digitos, imagem, texto_fixo, codigo_barras, poligono, elipse, svg, tabela_visual, assinatura
+- [x] `campos[]` — valores NDF escalares posicionados em coordenadas absolutas
+- [x] `blocos[]` — tabela (com `min_linhas_visivel`), corpo (NCRTF), cabecalho, rodape
+- [x] `fluxo` — layout relativo para documentos administrativos, com `linha_lateral` e `quebra_pagina`
+- [x] `estilos` — fonte principal de estilo para renderers ODF/HTML
+- [x] Modelo de assinatura híbrida CAdES + PAdES (`modo: "hibrido"`)
+- [x] Acessibilidade PDF/UA-2 (`alt`, `rotulo_acessivel`, AcroForm `/TU`)
+- [x] `incluir_se` em `campos[]`, `blocos[]`, `fluxo.elementos` e `sequencia[]`
+- [x] JSON Schema Draft 2020-12 (`specs/ndt/schemas/ndt.schema.json`)
+- [x] Exemplos concretos validados (`specs/ndt/examples/`)
 
 ---
 
@@ -195,9 +203,73 @@ normordis-migrate --batch *.ndfpkg --out-dir migrado/
 | Extensões de namespace (`ext.<entidade>`) | Permite que AT, SS, Municípios estendam o NDF-core com campos próprios sem alterar esta spec base |
 | Revisão de `tipo_documento_ref` para URI formal | Alinhamento com Linked Data / European Interoperability Framework |
 
-### NCRTF v1.0.0 ✅
+### NCRTF v2.0.0 ✅
 
-Especificação do NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado para campos `corpo` e equivalentes. Independente de editores (Lexical, ProseMirror, etc.); canonicalizável via JCS/RFC 8785; armazenado directamente como campo JSON no NDF-core. Suporta parágrafos, títulos, listas, tabelas, imagens (por `ref` no `.ndfpkg`), e marcas inline (bold, italic, underline, subscript, superscript). NDTs adoptam o tipo de campo `"type": "ncrtf"` com bump de versão.
+NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado para campos `corpo` e equivalentes. Independente de editores (Lexical, ProseMirror, etc.); canonicalizável via JCS/RFC 8785; armazenado directamente como valor JSON no NDF-core (`documento.conteudo.corpo`). Suporta parágrafos, títulos (h1–h3), listas (ul/ol/list_item), tabelas (com head/body), imagens (por `ref` em `recursos/` do `.ndfpkg`), citações em bloco, e marcas inline (bold, italic, underline, subscript, superscript, code, link). Alinhamento e `font_family` disponíveis em todos os blocos. NDTs referenciam conteúdo NCRTF via `blocos[].tipo:"corpo"` com caminho NDF.
+
+---
+
+## Fase 6 — Normalização técnica
+
+**Objectivo expresso do projecto**: NDF, NDT e NCRTF tornarem-se standards técnicos sérios — NP (Norma Portuguesa), EN (Norma Europeia), ou ISO/IEC — adoptáveis por terceiros sem dependência da implementação NORMORDIS.
+
+### Estado da maturidade arquitectural (2026-06-20)
+
+O conjunto NDF + NDT + NCRTF tem hoje a profundidade técnica necessária:
+
+| Critério | Estado |
+|---|---|
+| Separação de âmbitos sem sobreposição | ✅ Completo |
+| Referências a standards reais (ISO 14289-2, ISO 19005-3, ETSI EN 319 122, ISO/IEC 26300) | ✅ Completo |
+| Cláusulas de conformidade com comportamento observável | ✅ Completo |
+| Schema machine-readable (JSON Schema Draft 2020-12) | ✅ NDF + NDT |
+| Exemplos concretos validados contra schema | ✅ NDT; NDF parcial |
+| Glossários e modelo de endereçamento canónico | ✅ Completo |
+
+### Gaps editoriais para normalização
+
+O trabalho restante é **editorial e processual**, não arquitectural:
+
+| Gap | O que é necessário |
+|---|---|
+| **Linguagem normativa** | RFC 2119 / ISO Directives Part 2 — DEVE/DEVE-SE/PODE em maiúsculas, consistente em todo o texto dos três specs |
+| **Secção "Termos e definições"** | Formato ISO 10241 (não glossário livre) — entradas com forma verbal, domínio, definição, nota |
+| **Secção "Referências normativas"** | Secção própria com citações ISO formais (número, título, ano); separar de referências informativas |
+| **Conformance test suite executável** | Casos de teste positivos e negativos para cada requisito SHALL; runner automatizado |
+| **Múltiplas implementações independentes** | ISO exige pelo menos duas implementações independentes antes de publicação; uma delas pode ser a ferramenta de referência normordis-tools |
+| **Estrutura de anexos** | Distinguir Annex A normativo de Annex B informativo; mover exemplos para anexo informativo |
+
+### Caminho de normalização
+
+```
+NP (Norma Portuguesa)        — via IPQ / APCER
+  │   Mais rápido; alinhado com RNID e AP portuguesa.
+  │   Pré-requisito: spec estável + suite de conformidade.
+  │
+  └── EN (Norma Europeia)    — via CEN (Comité Técnico relevante)
+        │   Adopção europeia; compatível com European Interoperability Framework.
+        │   Pré-requisito: NP publicada + duas implementações independentes.
+        │
+        └── ISO/IEC          — via ISO/TC 46 (Informação e Documentação)
+              Pré-requisito: EN aprovada + interesse de outros países-membro.
+```
+
+### Pré-requisitos antes de submeter a NP
+
+1. **Spec freeze v1.0.0** — NDF, NDT, NCRTF com linguagem RFC 2119 e secções ISO
+2. **Suite de conformidade executável** — depende de T1 (`normordis-validate`) de Fase 2
+3. **Duas implementações independentes** — `normordis-pdf` (Fase 4) + uma implementação de terceiro ou `normordis-tools` como implementação de referência
+4. **Tradução do glossário** — termos em PT e EN (requisito ISO)
+
+### Estimativa de esforço editorial (passagem de spec draft → NP)
+
+| Tarefa | Estimativa |
+|---|---|
+| Reformatar linguagem RFC 2119 nos três specs | 2–3 sessões |
+| Criar secção "Termos e definições" ISO | 1 sessão |
+| Criar secção "Referências normativas" | 1 sessão |
+| Reorganizar anexos (normativos vs. informativos) | 1 sessão |
+| Suite de conformidade executável (requer T1) | depende de Fase 2 |
 
 ---
 

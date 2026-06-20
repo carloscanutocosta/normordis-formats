@@ -1,0 +1,254 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "oficio-generico",
+  "versao_ndt": "1.0.0",
+  "titulo": "Ofício Genérico",
+  "estilos": {
+    "fonte_padrao": { "familia": "Times", "tamanho": 11 },
+    "cor_texto": "#1A1A1A",
+    "cor_primaria": "#003366",
+    "espacamento_entre_paragrafos_mm": 4,
+    "identacao_lista_mm": 6,
+    "cabecalhos": [
+      { "nivel": 1, "fonte": { "tamanho": 14, "peso": "bold" } },
+      { "nivel": 2, "fonte": { "tamanho": 12, "peso": "bold" } },
+      { "nivel": 3, "fonte": { "tamanho": 11, "peso": "bold", "estilo": "italico" } }
+    ]
+  },
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": { "topo": 20, "fundo": 20, "esq": 20, "dir": 20 }
+  },
+  "recursos": [
+    {
+      "id": "brasao-republica.svg",
+      "tipo": "svg",
+      "modo": "embebido",
+      "dados": "base64:PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzAwMzM2NiIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UlA8L3RleHQ+PC9zdmc+"
+    }
+  ],
+  "paginas_def": [
+    {
+      "id": "oficio_pag1",
+      "graficos": [
+        {
+          "tipo": "imagem",
+          "referencia_recurso": "brasao-republica.svg",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 25,
+          "altura": 25,
+          "manter_proporcao": true,
+          "alt": "Brasão da República Portuguesa"
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 35 },
+          "para": { "x": 170, "y": 35 },
+          "espessura": 0.5,
+          "cor": "#003366",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "codigo_barras",
+          "formato_barras": "qrcode",
+          "conteudo": "https://validar.normordis.pt/{{validation_code}}",
+          "posicao": { "x": 145, "y": 5 },
+          "largura": 22,
+          "altura": 22,
+          "nivel_correcao": "M"
+        }
+      ],
+      "campos": [
+        {
+          "referencia": "cabecalho.referencia",
+          "posicao": { "x": 30, "y": 2 },
+          "largura": 110,
+          "altura": 6,
+          "fonte": { "familia": "Helvetica", "tamanho": 9 },
+          "alinhamento": "esquerda"
+        },
+        {
+          "referencia": "cabecalho.entidade",
+          "posicao": { "x": 30, "y": 10 },
+          "largura": 110,
+          "altura": 6,
+          "fonte": { "familia": "Helvetica", "tamanho": 9, "peso": "bold" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "referencia": "cabecalho.data",
+          "posicao": { "x": 30, "y": 18 },
+          "largura": 110,
+          "altura": 6,
+          "formato": "data",
+          "fonte": { "familia": "Helvetica", "tamanho": 9 },
+          "alinhamento": "esquerda"
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 65,
+        "elementos": [
+          {
+            "tipo": "campo",
+            "referencia": "destinatario.nome",
+            "fonte": { "familia": "Times", "tamanho": 11, "peso": "bold" }
+          },
+          {
+            "tipo": "campo",
+            "referencia": "destinatario.morada"
+          },
+          {
+            "tipo": "campo",
+            "referencia": "destinatario.localidade"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 10
+          },
+          {
+            "tipo": "corpo",
+            "referencia": "conteudo.corpo"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 12
+          },
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "Com os melhores cumprimentos,"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 22
+          },
+          {
+            "tipo": "linha_lateral",
+            "elementos": [
+              {
+                "largura": 85,
+                "conteudo": [
+                  {
+                    "tipo": "assinatura",
+                    "id": "sig_dirigente",
+                    "rotulo": "O Dirigente",
+                    "largura": 75,
+                    "altura": 20,
+                    "modo": "hibrido"
+                  },
+                  {
+                    "tipo": "campo",
+                    "referencia": "signatario_a.nome",
+                    "fonte": { "familia": "Times", "tamanho": 10, "peso": "bold" }
+                  },
+                  {
+                    "tipo": "campo",
+                    "referencia": "signatario_a.cargo",
+                    "fonte": { "familia": "Times", "tamanho": 9 }
+                  }
+                ]
+              },
+              {
+                "largura": 85,
+                "conteudo": [
+                  {
+                    "tipo": "assinatura",
+                    "id": "sig_vogal",
+                    "rotulo": "O Vogal",
+                    "largura": 75,
+                    "altura": 20,
+                    "modo": "hibrido"
+                  },
+                  {
+                    "tipo": "campo",
+                    "referencia": "signatario_b.nome",
+                    "fonte": { "familia": "Times", "tamanho": 10, "peso": "bold" }
+                  },
+                  {
+                    "tipo": "campo",
+                    "referencia": "signatario_b.cargo",
+                    "fonte": { "familia": "Times", "tamanho": 9 }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": { "x": 145, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Proc. {ndf:cabecalho.referencia} — {ndf:cabecalho.entidade}",
+          "posicao": { "x": 0, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        }
+      ]
+    },
+    {
+      "id": "oficio_pag_cont",
+      "graficos": [
+        {
+          "tipo": "imagem",
+          "referencia_recurso": "brasao-republica.svg",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 15,
+          "altura": 15,
+          "manter_proporcao": true,
+          "alt": "Brasão da República Portuguesa"
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 20 },
+          "para": { "x": 170, "y": 20 },
+          "espessura": 0.3,
+          "cor": "#003366",
+          "estilo": "solido"
+        }
+      ],
+      "campos": [],
+      "fluxo": {
+        "y_inicio": 25,
+        "elementos": [
+          {
+            "tipo": "corpo",
+            "referencia": "conteudo.corpo"
+          }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": { "x": 145, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        },
+        {
+          "tipo": "campo_ndf",
+          "referencia": "cabecalho.referencia",
+          "posicao": { "x": 0, "y": 281 },
+          "largura": 100,
+          "altura": 5,
+          "alinhamento": "esquerda",
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "oficio_pag1",
+      "repeticao": "unica"
+    },
+    {
+      "pagina_def": "oficio_pag_cont",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "conteudo.corpo"
+    }
+  ]
+}

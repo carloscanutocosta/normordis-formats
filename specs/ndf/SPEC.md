@@ -33,7 +33,7 @@ O NDF (NORMORDIS Document Format) é o formato canónico de armazenamento de doc
 
 - **Integridade e validade jurídica** conforme eIDAS (Regulamento (UE) n.º 910/2014) e DL n.º 12/2021. O nível de assinatura eletrónica é declarado no NDF-core (`nivel_assinatura` — ver §2.10) e varia conforme a natureza jurídica do acto: `"nenhuma"`, `"avancada"` (SEA/AES) ou `"qualificada"` (SEQ/QES). Quando requerido, o envelope CAdES-B-LTA (ETSI EN 319 122) garante validade de longo prazo.
 - **Eficiência de armazenamento**, por ser dados estruturados (tipicamente uma a duas ordens de grandeza menor que um binário renderizado equivalente), otimizado para persistência em base de dados relacional (ver §1.5).
-- **Reprodutibilidade visual** em qualquer formato de apresentação (PDF, Word, ou formato futuro), através da combinação com o NDT (NORMORDIS Document Template — estrutura/layout).
+- **Reprodutibilidade visual** em qualquer formato de apresentação (PDF/UA-2 como formato primário, ODF e HTML como formatos secundários, ou formato futuro), através da combinação com o NDT (NORMORDIS Document Template — estrutura/layout).
 - **Conformidade arquivística** conforme ISO 15489:2016 (Records Management), MoReq2017, o Modelo de Requisitos para Sistemas de Gestão de Arquivos Eletrónicos (MEG/DGLAB) e os instrumentos de avaliação da DGLAB (Lista Consolidada / Tabelas de Seleção).
 - **Conformidade legal** com o RGPD (Regulamento (UE) 2016/679) e a Lei n.º 58/2019, respeitando os princípios de minimização de dados, limitação da conservação e os direitos dos titulares (ver §1.6).
 
@@ -416,9 +416,9 @@ A transição para suporte a múltiplos algoritmos em paralelo (`"sha256"` + `"s
 
 Identifica univocamente a versão do NDT com que o NDF-core deve ser combinado para reprodução visual.
 
-**Formato normativo**: `"<schema_id>@<versao_impresso>"`, onde:
+**Formato normativo**: `"<schema_id>@<versao_ndt>"`, onde:
 - `schema_id` é o identificador estável do tipo de documento no NDT (ex.: `"oficio-generico"`, `"modelo3-irs"`).
-- `versao_impresso` é a versão do impresso/template (ex.: `"1.0.0"` para documentos administrativos; `"2026.1"` para impressos fiscais com versão anual).
+- `versao_ndt` é a versão do template NDT (ex.: `"1.0.0"` para documentos administrativos; `"2026.1"` para impressos fiscais com versão anual).
 
 Exemplos válidos:
 ```
@@ -429,6 +429,23 @@ Exemplos válidos:
 
 - **Imutabilidade**: faz parte do NDF-core canonicalizado e assinado.
 - **Resolução**: o NDT referenciado deve estar disponível no `.ndfpkg` (§8) ou num registry conforme.
+
+#### 2.6.1 Distinção entre `ndt_version_ref` e `tipo_documento_ref`
+
+Estes dois campos referenciam conceitos distintos e independentes:
+
+| Campo | Referencia | Determina |
+|---|---|---|
+| `metadados.tipo_documento_ref` | Schema do tipo de documento (ex.: `"oficio@1.0.0"`) | Estrutura de `documento` no NDF-core — o modelo de dados |
+| `ndt_version_ref` | Template de layout (ex.: `"oficio-generico@1.0.0"`) | Como o documento é renderizado visualmente — o layout |
+
+Para a maioria dos tipos de documento, os dois são 1:1 — um único NDT serve um único schema. No entanto, são referências independentes porque:
+
+- O mesmo tipo de documento pode ter **múltiplos NDTs** (ex.: versão simplificada e versão completa de um formulário; versão A4 e versão Letter para exportação).
+- O schema de `documento` (`tipo_documento_ref`) evolui independentemente do layout (`ndt_version_ref`) — uma actualização visual do impresso não altera a estrutura de dados e vice-versa.
+- Um mesmo NDT pode, em teoria, servir múltiplas versões patch do mesmo schema de documento.
+
+O registry (`specs/registry/`) mantém a correspondência canónica entre tipos de documento e os seus NDTs de referência.
 
 ### 2.7 `metadados` — schema normativo
 
@@ -542,15 +559,25 @@ Esta especificação não define os schemas de `documento` para tipos concretos 
   "documento": {
     "numero": "OF/2026/00123",
     "data": "2026-06-15",
-    "destinatario": { "nome": "...", "identificacao": "..." },
-    "assunto": "...",
-    "corpo": "...",
+    "destinatario": { "nome": "Entidade Destinatária", "identificacao": "NIF 987654321" },
+    "assunto": "Resposta ao ofício n.º 45/2026",
+    "conteudo": {
+      "corpo": {
+        "ncrtf_version": "2.0.0",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [ { "type": "text", "text": "Texto do ofício..." } ]
+          }
+        ]
+      }
+    },
     "referencias_processuais": ["proc.º 123/2026"]
   }
 }
 ```
 
-Estrutura plana, predominantemente textual, poucos níveis de aninhamento.
+O campo `conteudo.corpo` é um valor **NCRTF** (NORMORDIS Canonical Rich Text Format, spec separada) — não uma string plana. Estrutura predominantemente textual, poucos níveis de aninhamento fora do NCRTF.
 
 **Perfil "formulário fiscal/declarativo complexo"** (ex. `tipo_documento_ref: "modelo3-irs@2025.1"`):
 
@@ -825,12 +852,12 @@ O portal de verificação (`https://validar.normordis.pt/<validation_code>`) ser
 NDF-A3F7K-2MXPQ-R9ZTN-W8VJX
 ```
 
-**QR code** (elemento `codigo_barras` no NDT, §8.3.6 da spec NDT):
+**QR code** (elemento `codigo_barras` no NDT, §5.3.7 da spec NDT):
 ```
 https://validar.normordis.pt/NDF-A3F7K-2MXPQ-R9ZTN-W8VJX
 ```
 
-O NDT referencia o `validation_code` através do placeholder `{{ndf.codigo_validacao}}` no elemento `codigo_barras`. Ambas as representações são obrigatórias em documentos emitidos para o exterior — a forma texto para leitura humana e o QR code para leitura por dispositivo.
+O NDT referencia o `validation_code` através do placeholder `{{validation_code}}` no elemento `codigo_barras` (e em qualquer `texto_fixo` ou `mobilia[]` que o necessite). Este placeholder é resolvido pelo renderer a partir do envelope — não é um dado do NDF-core nem um metadado do NDT, mas um valor computado no momento da finalização. Ambas as representações são obrigatórias em documentos emitidos para o exterior — a forma texto para leitura humana e o QR code para leitura por dispositivo.
 
 #### 4.6.6 Posição no pipeline de finalização
 
@@ -962,8 +989,9 @@ documento.ndfpkg (ZIP)
 ├── envelope.json          — assinaturas, timestamps, material de validação
 ├── ndt/
 │   └── <schema_id>@<versao>.ndt.json   — NDT referenciado por ndt_version_ref
-└── recursos/              — recursos embebidos referenciados no NDT (se modo referenciado_por_hash)
-    └── <hash>.<ext>
+└── recursos/              — recursos visuais partilhados por NDT e NCRTF
+    ├── <sha256>.<ext>     — recursos NDT com modo referenciado_por_hash (nome = hash)
+    └── <nome>.<ext>       — imagens NCRTF referenciadas por image.ref (nome declarado no campo)
 ```
 
 ### 8.2 `manifest.json`
