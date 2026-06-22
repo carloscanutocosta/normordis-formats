@@ -91,9 +91,20 @@
         { "tipo": "linha", "de": { "x": 0, "y": 12 }, "para": { "x": 190, "y": 12 }, "espessura": 0.3, "cor": "#000000" },
 
         { "tipo": "rectangulo", "posicao": { "x": 0, "y": 15 }, "largura": 190, "altura": 7, "preenchimento": "#EEEEEE", "contorno": { "espessura": 0.3, "cor": "#000000" } },
-        { "tipo": "texto_fixo", "conteudo": "QUADRO 3 — RENDIMENTOS, RETENÇÕES E DEDUÇÕES (continuação)", "posicao": { "x": 2, "y": 20 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } }
+        { "tipo": "texto_fixo", "conteudo": "QUADRO 3 — RENDIMENTOS, RETENÇÕES E DEDUÇÕES (continuação)", "posicao": { "x": 2, "y": 20 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+
+        { "tipo": "linha", "de": { "x": 0, "y": 196 }, "para": { "x": 190, "y": 196 }, "espessura": 0.5, "cor": "#000000" },
+        { "tipo": "texto_fixo", "conteudo": "Total SP A — Rendimentos brutos", "posicao": { "x": 0, "y": 202 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+        { "tipo": "texto_fixo", "conteudo": "Total SP A — Retenção na fonte",  "posicao": { "x": 0, "y": 212 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+        { "tipo": "texto_fixo", "conteudo": "Total SP B — Rendimentos brutos", "posicao": { "x": 0, "y": 222 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+        { "tipo": "texto_fixo", "conteudo": "Total SP B — Retenção na fonte",  "posicao": { "x": 0, "y": 232 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } }
       ],
-      "campos": [],
+      "campos": [
+        { "referencia": "quadro3.totais_a.rend_bruto", "posicao": { "x": 143, "y": 199 }, "largura": 47, "altura": 6, "formato": "monetario", "casas_decimais": 2, "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" }, "alinhamento": "direita", "rotulo_acessivel": "Total rendimentos brutos — SP A" },
+        { "referencia": "quadro3.totais_a.retencao",   "posicao": { "x": 143, "y": 209 }, "largura": 47, "altura": 6, "formato": "monetario", "casas_decimais": 2, "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" }, "alinhamento": "direita", "rotulo_acessivel": "Total retenção na fonte — SP A" },
+        { "referencia": "quadro3.totais_b.rend_bruto", "posicao": { "x": 143, "y": 219 }, "largura": 47, "altura": 6, "formato": "monetario", "casas_decimais": 2, "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" }, "alinhamento": "direita", "rotulo_acessivel": "Total rendimentos brutos — SP B" },
+        { "referencia": "quadro3.totais_b.retencao",   "posicao": { "x": 143, "y": 229 }, "largura": 47, "altura": 6, "formato": "monetario", "casas_decimais": 2, "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" }, "alinhamento": "direita", "rotulo_acessivel": "Total retenção na fonte — SP B" }
+      ],
       "blocos": [
         {
           "tipo": "tabela",
@@ -117,60 +128,6 @@
           ]
         }
       ],
-      "campos_pos_tabela": [
-        {
-          "label": "Total SP A — Rendimentos brutos",
-          "referencia": "quadro3.totais_a.rend_bruto",
-          "posicao_label": { "x": 0, "y": 4 },
-          "posicao_campo": { "x": 143, "y": 1 },
-          "largura": 47,
-          "altura": 6,
-          "formato": "monetario",
-          "casas_decimais": 2,
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
-          "alinhamento": "direita",
-          "rotulo_acessivel": "Total rendimentos brutos — SP A"
-        },
-        {
-          "label": "Total SP A — Retenção na fonte",
-          "referencia": "quadro3.totais_a.retencao",
-          "posicao_label": { "x": 0, "y": 12 },
-          "posicao_campo": { "x": 143, "y": 9 },
-          "largura": 47,
-          "altura": 6,
-          "formato": "monetario",
-          "casas_decimais": 2,
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
-          "alinhamento": "direita",
-          "rotulo_acessivel": "Total retenção na fonte — SP A"
-        },
-        {
-          "label": "Total SP B — Rendimentos brutos",
-          "referencia": "quadro3.totais_b.rend_bruto",
-          "posicao_label": { "x": 0, "y": 20 },
-          "posicao_campo": { "x": 143, "y": 17 },
-          "largura": 47,
-          "altura": 6,
-          "formato": "monetario",
-          "casas_decimais": 2,
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
-          "alinhamento": "direita",
-          "rotulo_acessivel": "Total rendimentos brutos — SP B"
-        },
-        {
-          "label": "Total SP B — Retenção na fonte",
-          "referencia": "quadro3.totais_b.retencao",
-          "posicao_label": { "x": 0, "y": 28 },
-          "posicao_campo": { "x": 143, "y": 25 },
-          "largura": 47,
-          "altura": 6,
-          "formato": "monetario",
-          "casas_decimais": 2,
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
-          "alinhamento": "direita",
-          "rotulo_acessivel": "Total retenção na fonte — SP B"
-        }
-      ],
       "mobilia": [
         { "tipo": "numero_pagina", "formato": "{n}/{total}", "posicao": { "x": 178, "y": 278 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" } },
         { "tipo": "texto_fixo", "conteudo": "Modelo 3 — Anexo A — {{versao_ndt}}", "posicao": { "x": 0, "y": 278 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" } }
@@ -187,7 +144,7 @@
       "pagina_def": "anexoA_pn",
       "repeticao": "conforme_necessario",
       "fonte_overflow": "quadro3.entidades",
-      "linhas_por_pagina": 30,
+      "linhas_por_pagina": 25,
       "incluir_se": "flags.incluir_anexoA"
     }
   ]
