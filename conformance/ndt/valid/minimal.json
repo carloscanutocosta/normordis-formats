@@ -1,0 +1,12 @@
+{
+  "_comment": "NDT mínimo válido — apenas campos obrigatórios: ndt_version, schema_id, versao_ndt, paginas_def e sequencia. Verifica que o schema aceita um template sem graficos, campos, blocos ou fluxo.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-minimo",
+  "versao_ndt": "1.0",
+  "paginas_def": [
+    { "id": "p1" }
+  ],
+  "sequencia": [
+    { "pagina_def": "p1", "repeticao": "unica" }
+  ]
+}

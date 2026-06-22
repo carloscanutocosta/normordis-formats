@@ -1,0 +1,47 @@
+{
+  "_comment": "Sequência com página de continuação (repeticao: conforme_necessario). Verifica fonte_overflow, linhas_por_pagina e incluir_se em SequenciaEntrada.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-overflow",
+  "versao_ndt": "1.0",
+  "paginas_def": [
+    {
+      "id": "pag1",
+      "campos": [
+        {
+          "referencia": "cabecalho.titulo",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 170,
+          "altura": 10,
+          "formato": "texto",
+          "rotulo_acessivel": "Título"
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 20,
+        "elementos": [
+          { "tipo": "corpo", "referencia": "corpo" }
+        ]
+      }
+    },
+    {
+      "id": "pag_cont",
+      "fluxo": {
+        "y_inicio": 5,
+        "elementos": [
+          { "tipo": "corpo", "referencia": "corpo" }
+        ]
+      }
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "pag1",
+      "repeticao": "unica"
+    },
+    {
+      "pagina_def": "pag_cont",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "corpo"
+    }
+  ]
+}

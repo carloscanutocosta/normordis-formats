@@ -1,0 +1,34 @@
+{
+  "_comment": "Recurso SVG referenciado por hash SHA-256 (modo: referenciado_por_hash). Verifica RecursoReferenciadoPorHash com hash_sha256 e content_type.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-recurso-hash",
+  "versao_ndt": "1.0",
+  "recursos": [
+    {
+      "id": "brasao.svg",
+      "tipo": "svg",
+      "modo": "referenciado_por_hash",
+      "hash_sha256": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316",
+      "content_type": "image/svg+xml"
+    }
+  ],
+  "paginas_def": [
+    {
+      "id": "p1",
+      "graficos": [
+        {
+          "tipo": "imagem",
+          "referencia_recurso": "brasao.svg",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 25,
+          "altura": 25,
+          "manter_proporcao": true,
+          "alt": "Brasão para teste"
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    { "pagina_def": "p1", "repeticao": "unica" }
+  ]
+}
