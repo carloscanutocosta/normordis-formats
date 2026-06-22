@@ -1,4 +1,4 @@
-# normordis-spec
+# NORMORDIS Formats
 
 [![License: CC0-1.0](https://img.shields.io/badge/license-CC0%201.0-lightgrey.svg)](LICENSE)
 [![NDF](https://img.shields.io/badge/NDF-v1.0.0-blue)](specs/ndf/SPEC.md)
@@ -30,7 +30,7 @@ integrity, custody, institutional seals and personal signatures, is defined in
 [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md).
 
 ```
-normordis-spec
+NORMORDIS Formats
        │
        ├── NDF   — immutable signed document instance
        ├── NDT   — declarative layout template
@@ -47,48 +47,16 @@ Any software producer, public organisation, or open source project may implement
 
 ## Repository structure
 
-```
-normordis-spec/
-│
-├── specs/
-│   ├── ndf/          NDF specification, schemas, examples
-│   ├── ndt/          NDT specification, schemas, examples
-│   ├── ncrtf/        NCRTF specification, schemas, examples
-│   └── registry/     Canonical identifier registry
-│
-├── conformance/      Official conformance test suites
-│   ├── ndf/
-│   ├── ndt/
-│   ├── ncrtf/
-│   ├── jcs/
-│   ├── custody/
-│   └── cades/
-│
-├── docs/             Conceptual documentation
-│   ├── architecture/ Normative architecture and ADRs
-│   ├── normalization/ Normalization gates, traceability and references
-│   └── benchmarks/  Storage efficiency methodology
-│
-├── benchmarks/       Benchmark results (reproducible measurements)
-│
-└── tools/            Reference validator and utilities
-```
-
-Normalization gates and external-review requirements are tracked in
-[docs/normalization/READINESS.md](docs/normalization/READINESS.md). The public
-verification protocol is defined by [specs/portal/SPEC.md](specs/portal/SPEC.md)
-and its OpenAPI contract.
+See repository documentation.
 
 ## Licensing
 
-Specifications (text, schemas, examples) are released under [CC0 1.0](LICENSE) — public domain. No conditions, no attribution required.
-
-Reference implementations are distributed under separate licenses (EUPL v1.2) in their respective repositories.
+Specifications (text, schemas, examples) are released under CC0 1.0.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See CONTRIBUTING.md.
 
 ## Governance
 
-See [GOVERNANCE.md](GOVERNANCE.md).
+See GOVERNANCE.md.
