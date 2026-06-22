@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/registry/modelo3-irs/2026/schema.json",
+  "title": "Modelo 3 IRS 2026",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'modelo3-irs@2026'. Declaração de rendimentos IRS (Modelo 3 AT) — dados canónicos do Rosto e dos Anexos A e G. As versões de cada campanha fiscal constituem versões distintas neste registry.",
+  "type": "object",
+  "required": ["identificacao"],
+  "additionalProperties": true,
+  "properties": {
+    "identificacao": {
+      "type": "object",
+      "required": ["nif_titular", "ano_fiscal"],
+      "additionalProperties": true,
+      "properties": {
+        "nif_titular": {
+          "type": "string",
+          "pattern": "^[0-9]{9}$",
+          "description": "NIF do sujeito passivo A (9 dígitos)."
+        },
+        "nif_conjuge": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9]{9}$",
+          "description": "NIF do cônjuge ou unido de facto (B). Null quando não existe."
+        },
+        "ano_fiscal": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$",
+          "description": "Ano a que respeita a declaração (4 dígitos, ex.: '2025')."
+        },
+        "primeira_entrega": {
+          "type": "boolean",
+          "description": "True se é a primeira entrega para este ano fiscal."
+        },
+        "declaracao_substitutiva": {
+          "type": "boolean",
+          "description": "True se substitui uma declaração anteriormente entregue."
+        }
+      }
+    },
+    "contacto": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "morada":          { "type": "string", "description": "Morada fiscal completa do sujeito passivo A." },
+        "codigo_postal_num": { "type": "string", "pattern": "^[0-9]{7}$", "description": "Código postal (7 dígitos numéricos, sem hífen)." },
+        "localidade":      { "type": "string" },
+        "telefone":        { "type": "string" },
+        "email":           { "type": "string", "format": "email" }
+      }
+    },
+    "situacao": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Situação pessoal dos sujeitos passivos A e B (deficiência, pensão, RNH)."
+    },
+    "agregado": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "membros": {
+          "type": "array",
+          "description": "Membros do agregado familiar (dependentes, afilhados civis, ascendentes).",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["nif", "grau"],
+            "properties": {
+              "nif":      { "type": "string", "pattern": "^[0-9]{9}$" },
+              "grau":     { "type": "string", "description": "Grau de parentesco (ex.: 'D' dependente, 'A' ascendente)." },
+              "ano_nasc": { "type": "integer", "minimum": 1900, "maximum": 2030 },
+              "def_60":   { "type": "boolean" },
+              "def_90":   { "type": "boolean" },
+              "asc_comum":    { "type": "boolean" },
+              "asc_sem_rend": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "flags": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Flags de inclusão de anexos (incluir_anexoA, incluir_anexoB, …)."
+    },
+    "declaracao": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "data_assinatura": {
+          "type": "string",
+          "format": "date",
+          "description": "Data de assinatura/submissão da declaração (ISO 8601)."
+        }
+      }
+    },
+    "substituicao": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "ano_original": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$",
+          "description": "Ano da declaração substituída (só relevante quando declaracao_substitutiva é true)."
+        }
+      }
+    },
+    "quadro2": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "titular": {
+          "type": "string",
+          "enum": ["A", "B"],
+          "description": "Titular dos rendimentos declarados nos Anexos (A ou B)."
+        }
+      }
+    },
+    "quadro3": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Rendimentos, retenções e deduções declarados no Anexo A.",
+      "properties": {
+        "entidades": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["nif_entidade", "cod_rendimento"],
+            "properties": {
+              "nif_entidade":    { "type": "string", "pattern": "^[0-9]{9}$", "description": "NIF da entidade pagadora." },
+              "cod_rendimento":  { "type": "string", "description": "Código de rendimento AT (ex.: 'A01', 'H01')." },
+              "rend_bruto":      { "type": "number", "minimum": 0 },
+              "retencao":        { "type": "number", "minimum": 0 },
+              "quot_sindicais":  { "type": "number", "minimum": 0 },
+              "contrib_saude":   { "type": "number", "minimum": 0 },
+              "contrib_pensoes": { "type": "number", "minimum": 0 },
+              "subs_alim_isento":{ "type": "number", "minimum": 0 },
+              "subs_alim_suj":   { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        "totais_a": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "rend_bruto": { "type": "number", "minimum": 0 },
+            "retencao":   { "type": "number", "minimum": 0 }
+          }
+        },
+        "totais_b": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "rend_bruto": { "type": "number", "minimum": 0 },
+            "retencao":   { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,23 +1,24 @@
-# Versioning Policy
+# Política de Versões
 
-## Principles
+## Princípios
 
-Specifications follow semantic versioning (semver):
+As especificações seguem versionamento semântico (semver):
 
-- **Major** (`x.0.0`): incompatible changes — removed or renamed mandatory fields, changed semantics. Readers must explicitly support each major version.
-- **Minor** (`1.x.0`): backward-compatible additions — new optional fields. Existing readers continue to work.
-- **Patch** (`1.0.x`): clarifications, typo fixes, non-normative changes. No behavioural impact.
+- **Major** (`x.0.0`): alterações incompatíveis — campos obrigatórios removidos ou renomeados, semântica alterada. Leitores devem declarar suporte explícito a cada versão major.
+- **Minor** (`1.x.0`): adições compatíveis — novos campos opcionais. Leitores existentes continuam a funcionar.
+- **Patch** (`1.0.x`): clarificações, correcção de erros tipográficos, alterações não normativas. Sem impacto comportamental.
 
-## Spec vs. document version
+## Versão da especificação vs. versão do template
 
-`ndf_version` / `ndt_version` tracks the **format specification** version — it changes only when the format itself changes.
+`ndf_version` / `ndt_version` rastreia a **versão da especificação de formato** — muda apenas quando o próprio formato muda.
 
-`impresso.versao_impresso` (NDT) tracks the **template instance** version — it changes annually for fiscal forms without altering the format version.
+`versao_ndt` (NDT) rastreia a **versão da instância do template** — pode mudar anualmente para formulários fiscais sem alterar a versão da especificação. Exemplo: `modelo3-irs-rosto@2026.1` é o template de 2026 numa especificação NDT 2.0.0 inalterada.
 
-## Stability guarantees
+## Garantias de estabilidade
 
-- Canonical field paths (`id`s) are never renamed between minor versions.
-- Discontinued fields are marked `"descontinuado": true` rather than removed, preserving readability of older documents.
+- Caminhos canónicos de campo (`id`s) nunca são renomeados entre versões minor.
+- Campos descontinuados são marcados `"descontinuado": true` em vez de removidos, preservando a legibilidade de documentos mais antigos.
+- URLs, hashes e artefactos de releases anteriores permanecem disponíveis.
 
 ## Compatibilidade e schemas
 
@@ -29,6 +30,16 @@ Uma versão minor pode acrescentar campos ou nós opcionais, mas um documento qu
 os use declara a nova versão. Leitores antigos não devem ignorar silenciosamente
 conteúdo assinado desconhecido. Podem recusar o documento ou operá-lo apenas em
 modo opaco, sem afirmar interpretação completa.
+
+## Versões do registry
+
+O registry de tipos de documento (`specs/registry/schemas/`) segue um esquema de
+versão próprio, independente das versões NDF/NDT/NCRTF:
+
+- Cada tipo canónico tem um identificador estável: `oficio`, `despacho`, `modelo3-irs`, etc.
+- A versão de campanha ou de publicação é declarada no `tipo_documento_ref` do NDF-core: `"modelo3-irs@2026"`, `"oficio@1.0.0"`.
+- Uma nova campanha fiscal (e.g., `modelo3-irs@2027`) constitui uma versão nova no registry, mas não implica uma versão nova de NDF ou NDT, a não ser que o formato em si mude.
+- Schemas do registry com `additionalProperties: true` permitem campos futuros sem quebra de versão; schemas com `additionalProperties: false` exigem uma nova versão registry para cada adição de campo.
 
 ## Artefactos abrangidos
 

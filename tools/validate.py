@@ -46,7 +46,8 @@ NDF_VALID_DIR     = REPO_ROOT / "conformance/ndf/valid"
 NDF_INVALID_DIR   = REPO_ROOT / "conformance/ndf/invalid"
 NCRTF_VALID_DIR   = REPO_ROOT / "conformance/ncrtf/valid"
 NCRTF_INVALID_DIR = REPO_ROOT / "conformance/ncrtf/invalid"
-NDT_VALID_DIR     = REPO_ROOT / "specs/ndt/examples"
+NDT_VALID_DIR     = REPO_ROOT / "conformance/ndt/valid"
+NDT_EXAMPLES_DIR  = REPO_ROOT / "specs/ndt/examples"
 NDT_INVALID_DIR   = REPO_ROOT / "conformance/ndt/invalid"
 
 CANONICAL_MARKS_ORDER = ["bold", "code", "italic", "strikethrough", "subscript", "superscript", "underline"]
@@ -416,15 +417,16 @@ def run_ndt_suite(valid_only=False, invalid_only=False) -> tuple[int, int]:
     passed = failed = 0
     print(f"\n{BOLD}{SEP}{RESET}\n{BOLD}NDT — CONFORMIDADE{RESET}\n{SEP}")
     if not invalid_only:
-        for path in sorted(NDT_VALID_DIR.glob("*.json")):
-            raw = json.loads(path.read_text(encoding="utf-8"))
-            schema_ok = _validate_schema_file(path, schema, True)
-            semantic = check_ndt_semantic(raw)
-            if schema_ok and not semantic: passed += 1
-            else:
-                if semantic:
-                    for error in semantic: print(f"        → {error}")
-                failed += 1
+        for valid_dir in (NDT_VALID_DIR, NDT_EXAMPLES_DIR):
+            for path in sorted(valid_dir.glob("*.json")):
+                raw = json.loads(path.read_text(encoding="utf-8"))
+                schema_ok = _validate_schema_file(path, schema, True)
+                semantic = check_ndt_semantic(raw)
+                if schema_ok and not semantic: passed += 1
+                else:
+                    if semantic:
+                        for error in semantic: print(f"        → {error}")
+                    failed += 1
     if not valid_only:
         for path in sorted(NDT_INVALID_DIR.glob("*.json")):
             raw = json.loads(path.read_text(encoding="utf-8"))

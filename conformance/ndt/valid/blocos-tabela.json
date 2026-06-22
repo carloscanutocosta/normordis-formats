@@ -1,0 +1,44 @@
+{
+  "_comment": "BlocoTabela com colunas de múltiplos formatos. Verifica BlocoTabela, ColunaDef, estilo_cabecalho e todos os FormatoDisplay usados em colunas.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-bloco-tabela",
+  "versao_ndt": "1.0",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "graficos": [
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Lista de itens",
+          "posicao": { "x": 0, "y": 5 },
+          "fonte": { "familia": "Helvetica", "tamanho": 10, "peso": "bold" }
+        }
+      ],
+      "blocos": [
+        {
+          "tipo": "tabela",
+          "referencia": "items",
+          "posicao": { "x": 0, "y": 15 },
+          "largura": 170,
+          "altura_linha": 6,
+          "min_linhas_visivel": 5,
+          "repete_cabecalho": true,
+          "estilo_cabecalho": {
+            "fundo": "#CCCCCC",
+            "fonte": { "tamanho": 8, "peso": "bold" }
+          },
+          "colunas": [
+            { "id": "designacao", "cabecalho": "Designação",  "largura": 70, "alinhamento": "esquerda", "formato": "texto" },
+            { "id": "quantidade", "cabecalho": "Qtd.",         "largura": 20, "alinhamento": "centro",  "formato": "inteiro" },
+            { "id": "valor",      "cabecalho": "Valor (€)",   "largura": 35, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "data",       "cabecalho": "Data",         "largura": 25, "alinhamento": "centro",  "formato": "data" },
+            { "id": "ativo",      "cabecalho": "Activo",       "largura": 20, "alinhamento": "centro",  "formato": "booleano" }
+          ]
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    { "pagina_def": "p1", "repeticao": "unica" }
+  ]
+}

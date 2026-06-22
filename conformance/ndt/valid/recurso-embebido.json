@@ -1,0 +1,33 @@
+{
+  "_comment": "Recurso SVG embebido em base64 (modo: embebido). Verifica RecursoEmbebido e referencia_recurso em GraficoImagem.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-recurso-embebido",
+  "versao_ndt": "1.0",
+  "recursos": [
+    {
+      "id": "logo.svg",
+      "tipo": "svg",
+      "modo": "embebido",
+      "dados": "base64:PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4="
+    }
+  ],
+  "paginas_def": [
+    {
+      "id": "p1",
+      "graficos": [
+        {
+          "tipo": "imagem",
+          "referencia_recurso": "logo.svg",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 30,
+          "altura": 30,
+          "manter_proporcao": true,
+          "alt": "Logótipo de teste"
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    { "pagina_def": "p1", "repeticao": "unica" }
+  ]
+}
