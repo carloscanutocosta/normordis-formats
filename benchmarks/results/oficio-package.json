@@ -1,0 +1,14 @@
+{
+  "benchmark_version": "1.0.0",
+  "fixture": "specs/ndf/examples/ndfpkg-example",
+  "command": "python3 tools/measure.py specs/ndf/examples/ndfpkg-example",
+  "note": "Includes README because the source fixture directory was measured; a packaged ZIP omits README.",
+  "total_bytes": 71211,
+  "total_gzip_bytes": 16308,
+  "key_components": {
+    "ndf-core.json": 3377,
+    "envelope.json": 1304,
+    "manifest.json": 1960,
+    "ndt/oficio-generico@2.0.0.ndt.json": 7447
+  }
+}

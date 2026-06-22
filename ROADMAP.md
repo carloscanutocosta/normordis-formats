@@ -14,6 +14,9 @@ Estado em: 2026-06-20
 | JSON Schema NDF-core | Draft | 1.0.0 |
 | Registry de tipos de documento | Draft (3 tipos canónicos) | 1.0.0 |
 | Suite de conformidade NDF | Draft | 1.0.0 |
+| Suite semântica NDT | Draft executável | 2.0.0 |
+| Cadeia de custódia | Schema + vectores draft | 1.0.0 |
+| Portal de verificação | Contrato OpenAPI draft | 1.0.0 |
 
 ---
 
@@ -37,7 +40,7 @@ Objectivo: spec auto-suficiente e implementável por terceiros sem acesso ao cor
 - [x] Registry de tipos (`oficio`, `informacao-tecnica`, `despacho`)
 - [x] Suite de conformidade (válidos + inválidos)
 - [x] Exemplo `.ndfpkg` auto-suficiente
-- [ ] Conformance test runner (`tools/validate.py`)
+- [x] Conformance test runner NDF + NDT + NCRTF e verificação de pacote (`tools/validate.py`)
 
 ### NDT
 
@@ -139,7 +142,13 @@ normordis-verify --at "2030-01-01" documento.ndfpkg  # verifica como se fosse ne
 Interface pública de verificação de `validation_code`. Um cidadão, auditor, ou sistema automatizado insere o código impresso num documento e obtém confirmação de autenticidade.
 
 - Lookup de `validation_code` em base de dados de NDFs publicados
-- Devolve: entidade produtora, data, tipo de documento, estado actual
+- Recalcula e compara `payload_hash` antes de responder
+- Valida assinatura ou selo CAdES quando existente e distingue claramente
+  documento assinado, selado e apenas sob custódia
+- Devolve: entidade produtora, data, tipo, estado actual, resultado de
+  integridade, resultado de autenticidade e nível de assinatura
+- Para `nivel_assinatura: "nenhuma"`, a autenticidade institucional resulta da
+  custódia do registo pelo portal; não é apresentada como assinatura pessoal
 - API REST documentada (OpenAPI) para integração com outros sistemas
 - Verificação offline descrita na página (não requer o portal)
 
@@ -205,7 +214,7 @@ normordis-migrate --batch *.ndfpkg --out-dir migrado/
 
 ### NCRTF v2.0.0 ✅
 
-NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado para campos `corpo` e equivalentes. Independente de editores (Lexical, ProseMirror, etc.); canonicalizável via JCS/RFC 8785; armazenado directamente como valor JSON no NDF-core (`documento.conteudo.corpo`). Suporta parágrafos, títulos (h1–h3), listas (ul/ol/list_item), tabelas (com head/body), imagens (por `ref` em `recursos/` do `.ndfpkg`), citações em bloco, e marcas inline (bold, italic, underline, subscript, superscript, code, link). Alinhamento e `font_family` disponíveis em todos os blocos. NDTs referenciam conteúdo NCRTF via `blocos[].tipo:"corpo"` com caminho NDF.
+NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado para campos `corpo` e equivalentes. Independente de editores (Lexical, ProseMirror, etc.); canonicalizável via JCS/RFC 8785; armazenado directamente como valor JSON no NDF-core (por exemplo, `documento.corpo`). Suporta parágrafos, títulos, listas, tabelas, imagens por referência, citações e marcas inline. NDTs referenciam conteúdo NCRTF por caminhos relativos a `NDF-core.documento`.
 
 ---
 
@@ -222,7 +231,7 @@ O conjunto NDF + NDT + NCRTF tem hoje a profundidade técnica necessária:
 | Separação de âmbitos sem sobreposição | ✅ Completo |
 | Referências a standards reais (ISO 14289-2, ISO 19005-3, ETSI EN 319 122, ISO/IEC 26300) | ✅ Completo |
 | Cláusulas de conformidade com comportamento observável | ✅ Completo |
-| Schema machine-readable (JSON Schema Draft 2020-12) | ✅ NDF + NDT |
+| Schema machine-readable (JSON Schema Draft 2020-12) | ✅ NDF-core + envelope + manifest + NDT + NCRTF + registry inicial |
 | Exemplos concretos validados contra schema | ✅ NDT; NDF parcial |
 | Glossários e modelo de endereçamento canónico | ✅ Completo |
 
@@ -236,29 +245,27 @@ O trabalho restante é **editorial e processual**, não arquitectural:
 | **Secção "Termos e definições"** | Formato ISO 10241 (não glossário livre) — entradas com forma verbal, domínio, definição, nota |
 | **Secção "Referências normativas"** | Secção própria com citações ISO formais (número, título, ano); separar de referências informativas |
 | **Conformance test suite executável** | Casos de teste positivos e negativos para cada requisito SHALL; runner automatizado |
-| **Múltiplas implementações independentes** | ISO exige pelo menos duas implementações independentes antes de publicação; uma delas pode ser a ferramenta de referência normordis-tools |
+| **Implementações e adopção independente** | Produzir evidência de implementabilidade e necessidade de mercado; múltiplas implementações são desejáveis, mas não constituem requisito ISO universal |
 | **Estrutura de anexos** | Distinguir Annex A normativo de Annex B informativo; mover exemplos para anexo informativo |
 
 ### Caminho de normalização
 
 ```
-NP (Norma Portuguesa)        — via IPQ / APCER
-  │   Mais rápido; alinhado com RNID e AP portuguesa.
-  │   Pré-requisito: spec estável + suite de conformidade.
-  │
-  └── EN (Norma Europeia)    — via CEN (Comité Técnico relevante)
-        │   Adopção europeia; compatível com European Interoperability Framework.
-        │   Pré-requisito: NP publicada + duas implementações independentes.
-        │
-        └── ISO/IEC          — via ISO/TC 46 (Informação e Documentação)
-              Pré-requisito: EN aprovada + interesse de outros países-membro.
+NP — via IPQ/Comissão Técnica competente
+EN — via CEN/Comité Técnico competente
+ISO — via membro nacional e ISO/TC competente (provavelmente TC 46/SC 11 e/ou TC 171)
+
+Estas vias não formam uma sequência obrigatória. O projecto pode começar em
+Portugal, seguir em paralelo com CEN ou ser proposto directamente ao comité ISO
+competente, desde que demonstre necessidade de mercado e obtenha apoio dos
+membros.
 ```
 
 ### Pré-requisitos antes de submeter a NP
 
 1. **Spec freeze v1.0.0** — NDF, NDT, NCRTF com linguagem RFC 2119 e secções ISO
-2. **Suite de conformidade executável** — depende de T1 (`normordis-validate`) de Fase 2
-3. **Duas implementações independentes** — `normordis-pdf` (Fase 4) + uma implementação de terceiro ou `normordis-tools` como implementação de referência
+2. **Suite de conformidade executável** — runner existente, a expandir até cobrir cada requisito normativo
+3. **Implementação e pilotos independentes** — evidência recomendada de implementabilidade, interoperabilidade e necessidade real
 4. **Tradução do glossário** — termos em PT e EN (requisito ISO)
 
 ### Estimativa de esforço editorial (passagem de spec draft → NP)

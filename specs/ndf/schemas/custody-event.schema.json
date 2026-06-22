@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/ndf/1.0.0/custody-event.schema.json",
+  "title": "NDF Custody Event v1.0.0",
+  "type": "object",
+  "required": [
+    "custody_event_version", "event_id", "ndf_id", "sequence",
+    "event_type", "occurred_at", "actor", "previous_event_hash", "event_hash"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "custody_event_version": { "const": "1.0.0" },
+    "event_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "ndf_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "event_type": {
+      "enum": [
+        "finalizado", "verificado", "exportado", "estado_alterado",
+        "assinatura_renovada", "selo_acrescentado", "transferido", "eliminado"
+      ]
+    },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "actor": {
+      "type": "object",
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["sistema", "utilizador", "entidade"] },
+        "id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "details": { "type": "object" },
+    "previous_event_hash": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      ]
+    },
+    "event_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

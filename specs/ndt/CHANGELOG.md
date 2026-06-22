@@ -1,5 +1,9 @@
 # NDT Changelog
 
+> Nota: descrições históricas de `ndt_hash`, `NDF.outputs[]` e reutilização do
+> mesmo CAdES foram substituídas pelo modelo normativo comum em
+> `docs/architecture/ARCHITECTURE.md`. Não constituem requisitos actuais.
+
 ## [2.0.0] — Draft
 
 ### Axioma e papel do NDT (revisão fundamental)

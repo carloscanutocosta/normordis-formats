@@ -1,0 +1,72 @@
+openapi: 3.1.0
+info:
+  title: NORMORDIS Public Verification API
+  version: 1.0.0-draft
+  description: >-
+    Contrato agnóstico de implementação para resolver um validation_code num
+    registo NDF sob custódia. A resposta não expõe conteúdo nem dados pessoais.
+servers:
+  - url: https://validar.normordis.pt
+paths:
+  /v1/documents/{validationCode}:
+    get:
+      operationId: verifyDocument
+      parameters:
+        - name: validationCode
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^NDF-[A-Z2-7]{20}$
+      responses:
+        "200":
+          description: Código resolvido; consultar os estados, que podem indicar invalidade.
+          headers:
+            Cache-Control:
+              schema: { type: string }
+              description: Deve impedir cache de estados susceptíveis de mudança.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VerificationResult" }
+        "404":
+          description: Código desconhecido; não distingue inexistência de informação protegida.
+        "429":
+          description: Limite de consultas excedido.
+components:
+  schemas:
+    VerificationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - validation_code
+        - ndf_id
+        - document_state
+        - integrity_status
+        - authenticity_status
+        - checked_at
+      properties:
+        validation_code:
+          type: string
+          pattern: ^NDF-[A-Z2-7]{20}$
+        ndf_id: { type: string, format: uuid }
+        producer_name: { type: string }
+        document_type: { type: string }
+        finalized_at: { type: string, format: date-time }
+        document_state:
+          enum: [ativo, substituido, em_conservacao, conservado_permanentemente, eliminado]
+        integrity_status:
+          enum: [valid, invalid, unavailable]
+        authenticity_status:
+          enum:
+            - qualified_signature
+            - advanced_signature
+            - institutional_seal
+            - trusted_custody
+            - integrity_only
+            - invalid
+            - unavailable
+        signature_status:
+          enum: [valid, invalid, expired_but_valid_at_signing, not_present, unavailable]
+        checked_at: { type: string, format: date-time }
+        superseded_by: { type: string, format: uuid }
+        message: { type: string }

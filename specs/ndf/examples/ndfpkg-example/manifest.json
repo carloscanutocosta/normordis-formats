@@ -6,20 +6,48 @@
   "estado": "ativo",
   "nivel_assinatura": "qualificada",
   "finalizado_em": "2026-06-18T10:30:00Z",
-  "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
-  "validation_code": "NDF-A3F7K2MXPQR9ZTNW8VJ",
+  "payload_hash": "sha256:7196abc4d62371c2fea9da9d409d72d8d128244f4447b0cf8121b5d0fcbfce5f",
+  "validation_code": "NDF-COXWCCZKZUUKRS76N7OJ",
   "inventario": [
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:<hash-do-ficheiro-ndf-core.json>"
+      "hash_sha256": "sha256:7196abc4d62371c2fea9da9d409d72d8d128244f4447b0cf8121b5d0fcbfce5f"
     },
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:<hash-do-ficheiro-envelope.json>"
+      "hash_sha256": "sha256:75e87fffddb53a784b00a47c3396546d7f21db2c3ca25d167de06591453d493c"
     },
     {
-      "ficheiro": "ndt/oficio-generico@1.0.0.ndt.json",
-      "hash_sha256": "sha256:<hash-do-ficheiro-ndt>"
+      "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
+      "hash_sha256": "sha256:15a3b68b0dec1b174d42263b34a1077279d7e5f00d98c641e5572ab7397f2491"
+    },
+    {
+      "ficheiro": "schemas/ndf-core.schema.json",
+      "hash_sha256": "sha256:9bad9eeb51d50128424622cd7d9d3796dbe7920bb1cf652a21969419824293c3"
+    },
+    {
+      "ficheiro": "schemas/envelope.schema.json",
+      "hash_sha256": "sha256:e8156cc62df32f4fa7ca5c0292515e0b9f7428c8aff2ebc22be7769d29612244"
+    },
+    {
+      "ficheiro": "schemas/manifest.schema.json",
+      "hash_sha256": "sha256:00952847af735496bbad543cca842c1b0194fde8e289635f582997e4dc6265c7"
+    },
+    {
+      "ficheiro": "schemas/ndt.schema.json",
+      "hash_sha256": "sha256:f262c3aa819230be7e966528839e6e9e59a6daf4275942a2db9d92969d0c08f3"
+    },
+    {
+      "ficheiro": "schemas/ncrtf.schema.json",
+      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+    },
+    {
+      "ficheiro": "schemas/oficio.schema.json",
+      "hash_sha256": "sha256:feb7ec1d3206c0696453fb7f8b25ad5e443949b8d3a9971a9b8d7647e0233ead"
+    },
+    {
+      "ficheiro": "schemas/custody-event.schema.json",
+      "hash_sha256": "sha256:2350b86c87d04d523cd86a66b09fdfd0062200e0d9799621d0ab97d81d3b5382"
     }
   ]
 }

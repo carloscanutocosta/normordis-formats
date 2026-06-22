@@ -1,7 +1,5 @@
 # Versioning Policy
 
-> This document is a stub. Versioning policy to be defined.
-
 ## Principles
 
 Specifications follow semantic versioning (semver):
@@ -20,3 +18,27 @@ Specifications follow semantic versioning (semver):
 
 - Canonical field paths (`id`s) are never renamed between minor versions.
 - Discontinued fields are marked `"descontinuado": true` rather than removed, preserving readability of older documents.
+
+## Compatibilidade e schemas
+
+Cada schema valida exactamente a versão indicada no seu `$id`; o campo de
+versão usa `const`, não um padrão SemVer genérico. Um leitor só declara suporte
+a versões que reconheça explicitamente.
+
+Uma versão minor pode acrescentar campos ou nós opcionais, mas um documento que
+os use declara a nova versão. Leitores antigos não devem ignorar silenciosamente
+conteúdo assinado desconhecido. Podem recusar o documento ou operá-lo apenas em
+modo opaco, sem afirmar interpretação completa.
+
+## Artefactos abrangidos
+
+Uma release inclui como unidade indivisível:
+
+- texto normativo;
+- JSON Schemas;
+- registry e schemas de tipos canónicos;
+- exemplos e vectores canónicos;
+- suite e runner de conformidade.
+
+Alterar comportamento observável de qualquer destes artefactos exige uma nova
+versão. URLs, hashes e artefactos de releases anteriores permanecem disponíveis.
