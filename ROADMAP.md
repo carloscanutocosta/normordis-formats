@@ -1,6 +1,6 @@
 # NORMORDIS Roadmap
 
-Estado em: 2026-06-20
+Estado em: 2026-06-22
 
 ---
 
@@ -12,11 +12,13 @@ Estado em: 2026-06-20
 | NDT — NORMORDIS Document Template | Draft para implementação | 2.0.0 |
 | NCRTF — NORMORDIS Canonical Rich Text Format | Estável | 2.0.0 |
 | JSON Schema NDF-core | Draft | 1.0.0 |
-| Registry de tipos de documento | Draft (3 tipos canónicos) | 1.0.0 |
-| Suite de conformidade NDF | Draft | 1.0.0 |
-| Suite semântica NDT | Draft executável | 2.0.0 |
+| Registry de tipos de documento | Draft (4 tipos canónicos) | 1.0.0 |
+| Suite de conformidade NDF | Draft + CI verde | 1.0.0 |
+| Suite conformidade NDT (válidos + inválidos) | Draft executável + CI verde | 2.0.0 |
+| Suite conformidade NCRTF | Draft executável + CI verde | 2.0.0 |
 | Cadeia de custódia | Schema + vectores draft | 1.0.0 |
 | Portal de verificação | Contrato OpenAPI draft | 1.0.0 |
+| CI/GitHub Actions | Operacional (3 jobs) | — |
 
 ---
 
@@ -37,10 +39,12 @@ Objectivo: spec auto-suficiente e implementável por terceiros sem acesso ao cor
 - [x] `versao_anterior` / `hash_anterior` — localização no envelope (§6.2)
 - [x] Integridade de arquivo para `nivel_assinatura: "nenhuma"` (§2.10.4)
 - [x] JSON Schema machine-readable (`ndf-core.schema.json`, `envelope.schema.json`)
-- [x] Registry de tipos (`oficio`, `informacao-tecnica`, `despacho`)
-- [x] Suite de conformidade (válidos + inválidos)
-- [x] Exemplo `.ndfpkg` auto-suficiente
-- [x] Conformance test runner NDF + NDT + NCRTF e verificação de pacote (`tools/validate.py`)
+- [x] Registry de tipos (`oficio`, `informacao-tecnica`, `despacho`, `modelo3-irs`)
+- [x] Suite de conformidade (válidos + inválidos) — `conformance/ndf/`
+- [x] Exemplo `.ndfpkg` auto-suficiente e verificável por hash
+- [x] Exemplo render-ready NDF Modelo 3 IRS — `specs/ndf/examples/modelo3-irs-2025.json`
+- [x] Conformance test runner NDF + NDT + NCRTF + verificação de pacote (`tools/validate.py`)
+- [x] CI/GitHub Actions — pipeline verde em cada push (`50/50` testes)
 
 ### NDT
 
@@ -57,7 +61,8 @@ NDT v2.0.0 está especificado e estável. Ver [specs/ndt/SPEC.md](specs/ndt/SPEC
 - [x] Acessibilidade PDF/UA-2 (`alt`, `rotulo_acessivel`, AcroForm `/TU`)
 - [x] `incluir_se` em `campos[]`, `blocos[]`, `fluxo.elementos` e `sequencia[]`
 - [x] JSON Schema Draft 2020-12 (`specs/ndt/schemas/ndt.schema.json`)
-- [x] Exemplos concretos validados (`specs/ndt/examples/`)
+- [x] Exemplos render-ready validados (`specs/ndt/examples/`) — ofício, Modelo 3 Rosto, Anexo A, Anexo G
+- [x] Suite de conformidade NDT (`conformance/ndt/valid/` + `conformance/ndt/invalid/`)
 
 ---
 
@@ -107,7 +112,7 @@ normordis-canonicalize --all ndf-core.json             # imprime os três
 
 ```
 normordis-pack --core ndf-core.json --envelope envelope.json \
-               --ndt oficio-generico@1.0.0.ndt.json -o documento.ndfpkg
+               --ndt oficio-generico@2.0.0.ndt.json -o documento.ndfpkg
 
 normordis-inspect documento.ndfpkg
 normordis-inspect --verify documento.ndfpkg   # verifica hashes do inventário
@@ -174,12 +179,14 @@ Interface pública de verificação de `validation_code`. Um cidadão, auditor, 
 Renderizador NDF + NDT → PDF/A-3 (ISO 19005-3). O PDF/A-3 é escolhido para que o NDF-core possa ser embebido como ficheiro anexo ao PDF, tornando o PDF auto-suficiente (PDF + NDF-core no mesmo ficheiro).
 
 ```
-normordis-pdf --core ndf-core.json --ndt oficio-generico@1.0.0.ndt.json -o documento.pdf
+normordis-pdf --core ndf-core.json --ndt oficio-generico@2.0.0.ndt.json -o documento.pdf
 normordis-pdf --pkg documento.ndfpkg -o documento.pdf
 normordis-pdf --embed-ndf --core ndf-core.json --ndt *.ndt.json -o documento.pdf  # PDF/A-3 com NDF embebido
 ```
 
-**Dependências**: T3; motor de layout (Pango/cairo ou equivalente); engine NDT-expr.
+**Ponto de partida**: os exemplos render-ready em `specs/ndf/examples/` e os NDTs em `specs/ndt/examples/` são o input de referência para validar o renderer.
+
+**Dependências**: T3; motor de layout (Pango/cairo ou equivalente); engine NDT.
 
 ---
 
@@ -222,32 +229,6 @@ NORMORDIS Canonical Rich Text Format — conteúdo de texto estruturado para cam
 
 **Objectivo expresso do projecto**: NDF, NDT e NCRTF tornarem-se standards técnicos sérios — NP (Norma Portuguesa), EN (Norma Europeia), ou ISO/IEC — adoptáveis por terceiros sem dependência da implementação NORMORDIS.
 
-### Estado da maturidade arquitectural (2026-06-20)
-
-O conjunto NDF + NDT + NCRTF tem hoje a profundidade técnica necessária:
-
-| Critério | Estado |
-|---|---|
-| Separação de âmbitos sem sobreposição | ✅ Completo |
-| Referências a standards reais (ISO 14289-2, ISO 19005-3, ETSI EN 319 122, ISO/IEC 26300) | ✅ Completo |
-| Cláusulas de conformidade com comportamento observável | ✅ Completo |
-| Schema machine-readable (JSON Schema Draft 2020-12) | ✅ NDF-core + envelope + manifest + NDT + NCRTF + registry inicial |
-| Exemplos concretos validados contra schema | ✅ NDT; NDF parcial |
-| Glossários e modelo de endereçamento canónico | ✅ Completo |
-
-### Gaps editoriais para normalização
-
-O trabalho restante é **editorial e processual**, não arquitectural:
-
-| Gap | O que é necessário |
-|---|---|
-| **Linguagem normativa** | RFC 2119 / ISO Directives Part 2 — DEVE/DEVE-SE/PODE em maiúsculas, consistente em todo o texto dos três specs |
-| **Secção "Termos e definições"** | Formato ISO 10241 (não glossário livre) — entradas com forma verbal, domínio, definição, nota |
-| **Secção "Referências normativas"** | Secção própria com citações ISO formais (número, título, ano); separar de referências informativas |
-| **Conformance test suite executável** | Casos de teste positivos e negativos para cada requisito SHALL; runner automatizado |
-| **Implementações e adopção independente** | Produzir evidência de implementabilidade e necessidade de mercado; múltiplas implementações são desejáveis, mas não constituem requisito ISO universal |
-| **Estrutura de anexos** | Distinguir Annex A normativo de Annex B informativo; mover exemplos para anexo informativo |
-
 ### Caminho de normalização
 
 ```
@@ -261,10 +242,37 @@ competente, desde que demonstre necessidade de mercado e obtenha apoio dos
 membros.
 ```
 
+### Estado da maturidade arquitectural (2026-06-22)
+
+O conjunto NDF + NDT + NCRTF tem hoje a profundidade técnica necessária:
+
+| Critério | Estado |
+|---|---|
+| Separação de âmbitos sem sobreposição | ✅ Completo |
+| Referências a standards reais (ISO 14289-2, ISO 19005-3, ETSI EN 319 122, ISO/IEC 26300) | ✅ Completo |
+| Cláusulas de conformidade com comportamento observável | ✅ Completo |
+| Schema machine-readable (JSON Schema Draft 2020-12) | ✅ NDF-core + envelope + manifest + NDT + NCRTF + registry (4 tipos) |
+| Exemplos concretos validados contra schema | ✅ NDT + NDF, incluindo render-ready Modelo 3 IRS |
+| Suite de conformidade executável com CI | ✅ 50/50 testes, pipeline verde em cada push |
+| Glossários e modelo de endereçamento canónico | ✅ Completo |
+
+### Gaps editoriais para normalização
+
+O trabalho restante é **editorial e processual**, não arquitectural:
+
+| Gap | O que é necessário |
+|---|---|
+| **Linguagem normativa** | RFC 2119 / ISO Directives Part 2 — DEVE/DEVE-SE/PODE em maiúsculas, consistente em todo o texto dos três specs |
+| **Secção "Termos e definições"** | Formato ISO 10241 (não glossário livre) — entradas com forma verbal, domínio, definição, nota |
+| **Secção "Referências normativas"** | Secção própria com citações ISO formais (número, título, ano); separar de referências informativas |
+| **Conformance test suite executável** | ✅ Runner automatizado existente; expandir até cobrir cada requisito SHALL individualmente |
+| **Implementações e adopção independente** | Produzir evidência de implementabilidade e necessidade de mercado; múltiplas implementações são desejáveis, mas não constituem requisito ISO universal |
+| **Estrutura de anexos** | Distinguir Annex A normativo de Annex B informativo; mover exemplos para anexo informativo |
+
 ### Pré-requisitos antes de submeter a NP
 
 1. **Spec freeze v1.0.0** — NDF, NDT, NCRTF com linguagem RFC 2119 e secções ISO
-2. **Suite de conformidade executável** — runner existente, a expandir até cobrir cada requisito normativo
+2. **Suite de conformidade executável** — runner existente ✅, a expandir até cobrir cada requisito normativo
 3. **Implementação e pilotos independentes** — evidência recomendada de implementabilidade, interoperabilidade e necessidade real
 4. **Tradução do glossário** — termos em PT e EN (requisito ISO)
 
