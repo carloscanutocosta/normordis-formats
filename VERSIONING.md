@@ -8,6 +8,24 @@ As especificações seguem versionamento semântico (semver):
 - **Minor** (`1.x.0`): adições compatíveis — novos campos opcionais. Leitores existentes continuam a funcionar.
 - **Patch** (`1.0.x`): clarificações, correcção de erros tipográficos, alterações não normativas. Sem impacto comportamental.
 
+## Estado da especificação
+
+Cada versão publicada pode assumir um dos seguintes estados:
+
+- Draft
+- Candidate
+- Stable
+- Deprecated
+- Retired
+
+O estado é independente da versão.
+
+Exemplos:
+
+- NDF v1.0.0 Draft
+- NDF v1.0.0 Stable
+- NDF v1.1.0 Candidate
+
 ## Versão da especificação vs. versão do template
 
 `ndf_version` / `ndt_version` rastreia a **versão da especificação de formato** — muda apenas quando o próprio formato muda.
@@ -22,19 +40,34 @@ As especificações seguem versionamento semântico (semver):
 
 ## Compatibilidade e schemas
 
-Cada schema valida exactamente a versão indicada no seu `$id`; o campo de
-versão usa `const`, não um padrão SemVer genérico. Um leitor só declara suporte
-a versões que reconheça explicitamente.
+Cada schema valida exactamente a versão indicada no seu `$id`; o campo de versão usa `const`, não um padrão SemVer genérico. Um leitor só declara suporte a versões que reconheça explicitamente.
 
-Uma versão minor pode acrescentar campos ou nós opcionais, mas um documento que
-os use declara a nova versão. Leitores antigos não devem ignorar silenciosamente
-conteúdo assinado desconhecido. Podem recusar o documento ou operá-lo apenas em
-modo opaco, sem afirmar interpretação completa.
+Uma versão minor pode acrescentar campos ou nós opcionais, mas um documento que os use declara a nova versão. Leitores antigos não devem ignorar silenciosamente conteúdo assinado desconhecido. Podem recusar o documento ou operá-lo apenas em modo opaco, sem afirmar interpretação completa.
+
+## Declaração de conformidade
+
+Uma implementação deve declarar explicitamente o âmbito da conformidade que afirma suportar.
+
+Exemplo:
+
+```text
+Specification: NDF
+Version: 1.0
+Role: Producer
+Conformance Suite: 1.0.0
+```
+
+Sempre que possível, a declaração deve indicar:
+
+- especificação;
+- versão;
+- papel (produtor, leitor, renderer ou verificador);
+- perfil suportado;
+- versão da suite de conformidade utilizada.
 
 ## Versões do registry
 
-O registry de tipos de documento (`specs/registry/schemas/`) segue um esquema de
-versão próprio, independente das versões NDF/NDT/NCRTF:
+O registry de tipos de documento (`specs/registry/schemas/`) segue um esquema de versão próprio, independente das versões NDF/NDT/NCRTF:
 
 - Cada tipo canónico tem um identificador estável: `oficio`, `despacho`, `modelo3-irs`, etc.
 - A versão de campanha ou de publicação é declarada no `tipo_documento_ref` do NDF-core: `"modelo3-irs@2026"`, `"oficio@1.0.0"`.
@@ -51,5 +84,4 @@ Uma release inclui como unidade indivisível:
 - exemplos e vectores canónicos;
 - suite e runner de conformidade.
 
-Alterar comportamento observável de qualquer destes artefactos exige uma nova
-versão. URLs, hashes e artefactos de releases anteriores permanecem disponíveis.
+Alterar comportamento observável de qualquer destes artefactos exige uma nova versão. URLs, hashes e artefactos de releases anteriores permanecem disponíveis.
