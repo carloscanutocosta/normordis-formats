@@ -1,7 +1,7 @@
 {
   "ndt_version": "2.0.0",
   "schema_id": "oficio-generico",
-  "versao_ndt": "2.0.0",
+  "versao_ndt": "1.0.0",
   "titulo": "Ofício Genérico",
   "estilos": {
     "fonte_padrao": { "familia": "Times", "tamanho": 11 },
@@ -24,8 +24,8 @@
     {
       "id": "brasao-republica.svg",
       "tipo": "svg",
-      "modo": "embebido",
-      "dados": "base64:PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzAwMzM2NiIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UlA8L3RleHQ+PC9zdmc+"
+      "modo": "referenciado_por_hash",
+      "dados": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
     }
   ],
   "paginas_def": [

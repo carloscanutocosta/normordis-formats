@@ -1,0 +1,194 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "modelo3-irs-anexoA",
+  "versao_ndt": "2026.1",
+  "titulo": "Modelo 3 IRS — Anexo A",
+  "emissor": "AT",
+  "referencia_legal": "Portaria n.º .../2026",
+  "estilos": {
+    "fonte_padrao": { "familia": "Helvetica", "tamanho": 8 },
+    "cor_texto": "#000000",
+    "cor_primaria": "#003366",
+    "espacamento_entre_paragrafos_mm": 2,
+    "identacao_lista_mm": 4
+  },
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": { "topo": 10, "fundo": 10, "esq": 10, "dir": 10 }
+  },
+  "paginas_def": [
+    {
+      "id": "anexoA_p1",
+      "graficos": [
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 0 }, "largura": 190, "altura": 18, "preenchimento": "#003366", "contorno": { "espessura": 0, "cor": "#003366" } },
+        { "tipo": "texto_fixo", "conteudo": "MODELO 3", "posicao": { "x": 2, "y": 5 }, "fonte": { "familia": "Helvetica", "tamanho": 16, "peso": "bold", "cor": "#FFFFFF" } },
+        { "tipo": "texto_fixo", "conteudo": "ANEXO A — Rendimentos do Trabalho Dependente e Pensões (Categoria A e H)", "posicao": { "x": 2, "y": 13 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#FFFFFF" } },
+        { "tipo": "texto_fixo", "conteudo": "AUTORIDADE TRIBUTÁRIA E ADUANEIRA", "posicao": { "x": 120, "y": 5 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold", "cor": "#FFFFFF" } },
+        { "tipo": "texto_fixo", "conteudo": "{{versao_ndt}}", "posicao": { "x": 120, "y": 12 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#FFFFFF" } },
+        { "tipo": "linha", "de": { "x": 0, "y": 22 }, "para": { "x": 190, "y": 22 }, "espessura": 0.3, "cor": "#000000" },
+
+        { "tipo": "texto_fixo", "conteudo": "NIF do Sujeito Passivo (A)", "posicao": { "x": 0, "y": 26 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
+        { "tipo": "grelha_digitos", "referencia": "identificacao.nif_titular", "posicao": { "x": 0, "y": 29 }, "num_caixas": 9, "largura_caixa": 6, "altura_caixa": 7, "espacamento": 0.5, "cor_contorno": "#000000", "espessura_contorno": 0.3, "rotulo_acessivel": "NIF do Sujeito Passivo A" },
+        { "tipo": "texto_fixo", "conteudo": "NIF do Cônjuge / Unido de Facto (B)", "posicao": { "x": 80, "y": 26 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
+        { "tipo": "grelha_digitos", "referencia": "identificacao.nif_conjuge", "posicao": { "x": 80, "y": 29 }, "num_caixas": 9, "largura_caixa": 6, "altura_caixa": 7, "espacamento": 0.5, "cor_contorno": "#000000", "espessura_contorno": 0.3, "rotulo_acessivel": "NIF do Cônjuge ou Unido de Facto" },
+        { "tipo": "texto_fixo", "conteudo": "Ano fiscal", "posicao": { "x": 155, "y": 26 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
+        { "tipo": "grelha_digitos", "referencia": "identificacao.ano_fiscal", "posicao": { "x": 155, "y": 29 }, "num_caixas": 4, "largura_caixa": 7, "altura_caixa": 7, "espacamento": 0.5, "cor_contorno": "#000000", "espessura_contorno": 0.3, "rotulo_acessivel": "Ano fiscal" },
+        { "tipo": "linha", "de": { "x": 0, "y": 42 }, "para": { "x": 190, "y": 42 }, "espessura": 0.3, "cor": "#000000" },
+
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 45 }, "largura": 190, "altura": 7, "preenchimento": "#EEEEEE", "contorno": { "espessura": 0.3, "cor": "#000000" } },
+        { "tipo": "texto_fixo", "conteudo": "QUADRO 1 — INSTRUÇÕES", "posicao": { "x": 2, "y": 50 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+        { "tipo": "texto_fixo", "conteudo": "Este anexo destina-se a declarar os rendimentos da Categoria A (trabalho dependente) e da Categoria H (pensões) auferidos em território português.", "posicao": { "x": 0, "y": 57 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
+        { "tipo": "texto_fixo", "conteudo": "Deve ser preenchido um Quadro 3 por cada sujeito passivo (A ou B). Quando os rendimentos de um titular excedam o número de linhas disponíveis, utilize folha adicional.", "posicao": { "x": 0, "y": 64 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
+        { "tipo": "linha", "de": { "x": 0, "y": 73 }, "para": { "x": 190, "y": 73 }, "espessura": 0.3, "cor": "#000000" },
+
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 76 }, "largura": 190, "altura": 7, "preenchimento": "#EEEEEE", "contorno": { "espessura": 0.3, "cor": "#000000" } },
+        { "tipo": "texto_fixo", "conteudo": "QUADRO 2 — TITULAR DOS RENDIMENTOS", "posicao": { "x": 2, "y": 81 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+        { "tipo": "texto_fixo", "conteudo": "Titular", "posicao": { "x": 0, "y": 89 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 92 }, "largura": 60, "altura": 7, "preenchimento": "none", "contorno": { "espessura": 0.3, "cor": "#000000" } },
+        { "tipo": "linha", "de": { "x": 0, "y": 104 }, "para": { "x": 190, "y": 104 }, "espessura": 0.3, "cor": "#000000" },
+
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 107 }, "largura": 190, "altura": 7, "preenchimento": "#EEEEEE", "contorno": { "espessura": 0.3, "cor": "#000000" } },
+        { "tipo": "texto_fixo", "conteudo": "QUADRO 3 — RENDIMENTOS, RETENÇÕES E DEDUÇÕES", "posicao": { "x": 2, "y": 112 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
+        { "tipo": "codigo_barras", "formato_barras": "qrcode", "conteudo": "https://validar.at.gov.pt/{{validation_code}}", "posicao": { "x": 163, "y": 248 }, "largura": 27, "altura": 27, "nivel_correcao": "M" }
+      ],
+      "campos": [
+        { "referencia": "quadro2.titular", "posicao": { "x": 0, "y": 92 }, "largura": 60, "altura": 7, "formato": "texto", "fonte": { "familia": "Helvetica", "tamanho": 8 }, "rotulo_acessivel": "Titular dos rendimentos (A ou B)" }
+      ],
+      "blocos": [
+        {
+          "tipo": "tabela",
+          "referencia": "quadro3.entidades",
+          "posicao": { "x": 0, "y": 116 },
+          "largura": 190,
+          "altura_linha": 6,
+          "min_linhas_visivel": 6,
+          "repete_cabecalho": true,
+          "estilo_cabecalho": { "fundo": "#CCCCCC", "fonte": { "tamanho": 6, "peso": "bold" } },
+          "colunas": [
+            { "id": "nif_entidade",    "cabecalho": "NIF Entidade Pagadora",                  "largura": 30, "alinhamento": "centro",  "formato": "texto" },
+            { "id": "cod_rendimento",  "cabecalho": "Cód. Rend.",                              "largura": 13, "alinhamento": "centro",  "formato": "texto" },
+            { "id": "rend_bruto",      "cabecalho": "Rendimentos\nBrutos (€)",                "largura": 23, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "retencao",        "cabecalho": "Retenção\nna Fonte (€)",                 "largura": 23, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "quot_sindicais",  "cabecalho": "Quotizações\nSindicais (€)",             "largura": 20, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "contrib_saude",   "cabecalho": "Contrib.\nSaúde (€)",                    "largura": 18, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "contrib_pensoes", "cabecalho": "Contrib.\nPensões (€)",                  "largura": 18, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "subs_alim_isento","cabecalho": "Subs. Alim.\nIsento (€)",               "largura": 22, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "subs_alim_suj",   "cabecalho": "Subs. Alim.\nSujeito (€)",              "largura": 23, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 }
+          ]
+        }
+      ],
+      "mobilia": [
+        { "tipo": "numero_pagina", "formato": "{n}/{total}", "posicao": { "x": 178, "y": 278 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" } },
+        { "tipo": "texto_fixo", "conteudo": "Modelo 3 — Anexo A — {{versao_ndt}}", "posicao": { "x": 0, "y": 278 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" } }
+      ]
+    },
+    {
+      "id": "anexoA_pn",
+      "graficos": [
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 0 }, "largura": 190, "altura": 8, "preenchimento": "#003366", "contorno": { "espessura": 0, "cor": "#003366" } },
+        { "tipo": "texto_fixo", "conteudo": "MODELO 3 — ANEXO A — {{versao_ndt}}", "posicao": { "x": 2, "y": 5.5 }, "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold", "cor": "#FFFFFF" } },
+        { "tipo": "linha", "de": { "x": 0, "y": 12 }, "para": { "x": 190, "y": 12 }, "espessura": 0.3, "cor": "#000000" },
+
+        { "tipo": "rectangulo", "posicao": { "x": 0, "y": 15 }, "largura": 190, "altura": 7, "preenchimento": "#EEEEEE", "contorno": { "espessura": 0.3, "cor": "#000000" } },
+        { "tipo": "texto_fixo", "conteudo": "QUADRO 3 — RENDIMENTOS, RETENÇÕES E DEDUÇÕES (continuação)", "posicao": { "x": 2, "y": 20 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } }
+      ],
+      "campos": [],
+      "blocos": [
+        {
+          "tipo": "tabela",
+          "referencia": "quadro3.entidades",
+          "posicao": { "x": 0, "y": 24 },
+          "largura": 190,
+          "altura_linha": 6,
+          "min_linhas_visivel": 10,
+          "repete_cabecalho": true,
+          "estilo_cabecalho": { "fundo": "#CCCCCC", "fonte": { "tamanho": 6, "peso": "bold" } },
+          "colunas": [
+            { "id": "nif_entidade",    "cabecalho": "NIF Entidade Pagadora",                  "largura": 30, "alinhamento": "centro",  "formato": "texto" },
+            { "id": "cod_rendimento",  "cabecalho": "Cód. Rend.",                              "largura": 13, "alinhamento": "centro",  "formato": "texto" },
+            { "id": "rend_bruto",      "cabecalho": "Rendimentos\nBrutos (€)",                "largura": 23, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "retencao",        "cabecalho": "Retenção\nna Fonte (€)",                 "largura": 23, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "quot_sindicais",  "cabecalho": "Quotizações\nSindicais (€)",             "largura": 20, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "contrib_saude",   "cabecalho": "Contrib.\nSaúde (€)",                    "largura": 18, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "contrib_pensoes", "cabecalho": "Contrib.\nPensões (€)",                  "largura": 18, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "subs_alim_isento","cabecalho": "Subs. Alim.\nIsento (€)",               "largura": 22, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 },
+            { "id": "subs_alim_suj",   "cabecalho": "Subs. Alim.\nSujeito (€)",              "largura": 23, "alinhamento": "direita", "formato": "monetario", "casas_decimais": 2 }
+          ]
+        }
+      ],
+      "campos_pos_tabela": [
+        {
+          "label": "Total SP A — Rendimentos brutos",
+          "referencia": "quadro3.totais_a.rend_bruto",
+          "posicao_label": { "x": 0, "y": 4 },
+          "posicao_campo": { "x": 143, "y": 1 },
+          "largura": 47,
+          "altura": 6,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Total rendimentos brutos — SP A"
+        },
+        {
+          "label": "Total SP A — Retenção na fonte",
+          "referencia": "quadro3.totais_a.retencao",
+          "posicao_label": { "x": 0, "y": 12 },
+          "posicao_campo": { "x": 143, "y": 9 },
+          "largura": 47,
+          "altura": 6,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Total retenção na fonte — SP A"
+        },
+        {
+          "label": "Total SP B — Rendimentos brutos",
+          "referencia": "quadro3.totais_b.rend_bruto",
+          "posicao_label": { "x": 0, "y": 20 },
+          "posicao_campo": { "x": 143, "y": 17 },
+          "largura": 47,
+          "altura": 6,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Total rendimentos brutos — SP B"
+        },
+        {
+          "label": "Total SP B — Retenção na fonte",
+          "referencia": "quadro3.totais_b.retencao",
+          "posicao_label": { "x": 0, "y": 28 },
+          "posicao_campo": { "x": 143, "y": 25 },
+          "largura": 47,
+          "altura": 6,
+          "formato": "monetario",
+          "casas_decimais": 2,
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "peso": "bold" },
+          "alinhamento": "direita",
+          "rotulo_acessivel": "Total retenção na fonte — SP B"
+        }
+      ],
+      "mobilia": [
+        { "tipo": "numero_pagina", "formato": "{n}/{total}", "posicao": { "x": 178, "y": 278 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" } },
+        { "tipo": "texto_fixo", "conteudo": "Modelo 3 — Anexo A — {{versao_ndt}}", "posicao": { "x": 0, "y": 278 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "cor": "#666666" } }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "anexoA_p1",
+      "repeticao": "unica",
+      "incluir_se": "flags.incluir_anexoA"
+    },
+    {
+      "pagina_def": "anexoA_pn",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "quadro3.entidades",
+      "linhas_por_pagina": 30,
+      "incluir_se": "flags.incluir_anexoA"
+    }
+  ]
+}

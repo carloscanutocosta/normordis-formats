@@ -19,7 +19,11 @@
     },
     {
       "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
-      "hash_sha256": "sha256:15a3b68b0dec1b174d42263b34a1077279d7e5f00d98c641e5572ab7397f2491"
+      "hash_sha256": "sha256:4b78a58ba803099eb135fdb75ef634810906a73816eb858583fadc41243347ec"
+    },
+    {
+      "ficheiro": "recursos/brasao-republica.svg",
+      "hash_sha256": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
