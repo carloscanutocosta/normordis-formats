@@ -14,6 +14,18 @@ a uma Comissão Técnica de Normalização.
 - Nenhuma implementação de referência tem autoridade para contradizer o texto
   normativo, schemas e vectores de conformidade publicados.
 
+## Ciclo de Vida das Especificações
+
+As especificações podem assumir os seguintes estados:
+
+- Draft
+- Candidate
+- Stable
+- Deprecated
+- Retired
+
+O estado deve ser indicado explicitamente em cada especificação publicada.
+
 ## Papéis
 
 - **Maintainers:** gerem propostas e releases; não podem declarar conformidade
@@ -36,6 +48,16 @@ aprovada apenas pelo seu autor.
    especialista do domínio antes de release estável.
 5. A decisão e alternativas rejeitadas são registadas num ADR ou na proposta.
 
+## Compatibilidade
+
+Salvo indicação explícita em contrário:
+
+- versões PATCH não quebram compatibilidade;
+- versões MINOR apenas acrescentam capacidades opcionais;
+- versões MAJOR podem introduzir alterações incompatíveis.
+
+Uma alteração incompatível deve ser documentada e acompanhada de estratégia de migração.
+
 ## Releases e congelamento
 
 - Um release estável exige schemas válidos, exemplos válidos, suite integral
@@ -47,8 +69,19 @@ aprovada apenas pelo seu autor.
 ## Conformidade
 
 O projecto publica testes e vectores, mas não concede certificação formal. Uma
-declaração de conformidade deve indicar formato, versão, papel (produtor,
-leitor, renderer ou verificador), perfil e versão da suite utilizada.
+ declaração de conformidade deve indicar formato, versão, papel (produtor,
+ leitor, renderer ou verificador), perfil e versão da suite utilizada.
+
+## Transparência
+
+Todas as decisões normativas relevantes devem permanecer publicamente acessíveis através de:
+
+- ADRs
+- Issues
+- Pull Requests
+- Historial Git
+
+A rastreabilidade das decisões faz parte integrante da governação do projecto.
 
 ## Normalização futura
 
