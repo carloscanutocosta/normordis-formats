@@ -104,8 +104,8 @@ A separação não é arbitrária: o envelope **não pode** fazer parte do que �
 
 | Recurso | Localização | Descrição |
 |---|---|---|
-| JSON Schema (NDF-core) | `specs/ndf/schema/ndf-core.schema.json` | Schema machine-readable do NDF-core completo |
-| JSON Schema (Envelope) | `specs/ndf/schema/envelope.schema.json` | Schema machine-readable do envelope |
+| JSON Schema (NDF-core) | `specs/ndf/schemas/ndf-core.schema.json` | Schema machine-readable do NDF-core completo |
+| JSON Schema (Envelope) | `specs/ndf/schemas/envelope.schema.json` | Schema machine-readable do envelope |
 | Registry de tipos de documento | `specs/registry/` | Schemas dos tipos canónicos (`oficio`, `informacao-tecnica`, `despacho`) |
 | Suite de conformidade | `conformance/ndf/` | Casos de teste válidos e inválidos para implementações |
 
@@ -1042,7 +1042,7 @@ Itens previstos para versões futuras desta especificação. Não são normativo
 
 Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer todos os seguintes requisitos:
 
-1. **DEVE** gerar NDF-core JSON que valida contra o schema `specs/ndf/schema/ndf-core.schema.json` (JSON Schema Draft 2020-12).
+1. **DEVE** gerar NDF-core JSON que valida contra o schema `specs/ndf/schemas/ndf-core.schema.json` (JSON Schema Draft 2020-12).
 2. **DEVE** canonicalizar o NDF-core via JCS (RFC 8785) produzindo `payload_bytes` determinísticos — bytes idênticos para a mesma estrutura lógica independentemente da ordem de inserção de chaves ou formatação de origem.
 3. **DEVE** calcular `payload_hash = SHA-256(payload_bytes)` conforme NIST FIPS 180-4.
 4. **DEVE** calcular `validation_code` conforme o algoritmo definido em §4.6.2.
