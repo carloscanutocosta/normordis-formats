@@ -46,7 +46,7 @@ Um **leitor NDF** é conforme se:
 - Processar sem erro todos os exemplos em `valid/` (após remoção dos campos `_*`)
 - Emitir erro e recusar processar todos os exemplos em `invalid/`
 
-A validação estrutural usa `specs/ndf/schema/ndf-core.schema.json` (JSON Schema Draft 2020-12). Os testes de `invalid/` cobrem também regras semânticas que o schema sozinho não captura (RGPD, formatos de referência, etc.). A definição normativa de conformidade encontra-se em **§10 da SPEC.md**.
+A validação estrutural usa `specs/ndf/schemas/ndf-core.schema.json` (JSON Schema Draft 2020-12). Os testes de `invalid/` cobrem também regras semânticas que o schema sozinho não captura (RGPD, formatos de referência, etc.). A definição normativa de conformidade encontra-se em **§10 da SPEC.md**.
 
 ## Casos de teste
 
