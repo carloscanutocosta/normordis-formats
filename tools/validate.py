@@ -19,21 +19,35 @@ Requisitos:
 import json
 import sys
 import argparse
+import base64
+import hashlib
+import re
 from pathlib import Path
 
 try:
-    from jsonschema import Draft202012Validator, SchemaError
+    from jsonschema import Draft202012Validator, SchemaError, FormatChecker
 except ImportError:
-    print("ERRO: jsonschema não instalado. Execute: pip install jsonschema")
+    print("ERRO: jsonschema não instalado. Execute: pip install -r tools/requirements.txt")
     sys.exit(1)
 
+try:
+    import rfc8785
+except ImportError:
+    rfc8785 = None
+
 REPO_ROOT = Path(__file__).parent.parent
-NDF_SCHEMA_PATH   = REPO_ROOT / "specs/ndf/schema/ndf-core.schema.json"
+NDF_SCHEMA_PATH   = REPO_ROOT / "specs/ndf/schemas/ndf-core.schema.json"
 NCRTF_SCHEMA_PATH = REPO_ROOT / "specs/ncrtf/schemas/ncrtf.schema.json"
+REGISTRY_SCHEMA_DIR = REPO_ROOT / "specs/registry/schemas"
+MANIFEST_SCHEMA_PATH = REPO_ROOT / "specs/ndf/schemas/manifest.schema.json"
+ENVELOPE_SCHEMA_PATH = REPO_ROOT / "specs/ndf/schemas/envelope.schema.json"
+NDT_SCHEMA_PATH = REPO_ROOT / "specs/ndt/schemas/ndt.schema.json"
 NDF_VALID_DIR     = REPO_ROOT / "conformance/ndf/valid"
 NDF_INVALID_DIR   = REPO_ROOT / "conformance/ndf/invalid"
 NCRTF_VALID_DIR   = REPO_ROOT / "conformance/ncrtf/valid"
 NCRTF_INVALID_DIR = REPO_ROOT / "conformance/ncrtf/invalid"
+NDT_VALID_DIR     = REPO_ROOT / "specs/ndt/examples"
+NDT_INVALID_DIR   = REPO_ROOT / "conformance/ndt/invalid"
 
 CANONICAL_MARKS_ORDER = ["bold", "code", "italic", "strikethrough", "subscript", "superscript", "underline"]
 
@@ -181,6 +195,13 @@ def check_ndf_semantic(doc: dict) -> list[str]:
             "'<instrumento>/<codigo_classe>' (§3.2.1)"
         )
 
+    iar = avaliacao.get("instrumento_avaliacao_versao_ref", "")
+    if tcr and iar and tcr.split("/", 1)[0] != iar.split("/", 1)[0]:
+        errors.append(
+            "avaliacao.tipo_classificacao_ref e instrumento_avaliacao_versao_ref "
+            "devem referenciar o mesmo instrumento (§3.2.2)"
+        )
+
     pca = avaliacao.get("prazo_conservacao_administrativa", {})
     if pca.get("forma_contagem") == "outro" and not pca.get("forma_contagem_detalhe"):
         errors.append(
@@ -195,6 +216,17 @@ def check_ndf_semantic(doc: dict) -> list[str]:
         )
 
     documento = doc.get("documento", {})
+    tipo_ref = meta.get("tipo_documento_ref", "")
+    tipo_id = tipo_ref.rsplit("@", 1)[0] if "@" in tipo_ref else ""
+    registry_schema = _load_schema(REGISTRY_SCHEMA_DIR / f"{tipo_id}.schema.json") if tipo_id else None
+    if registry_schema is not None:
+        for e in Draft202012Validator(registry_schema, format_checker=FormatChecker()).iter_errors(documento):
+            field = "/".join(str(p) for p in e.absolute_path)
+            errors.append(
+                f"documento não valida contra {tipo_ref}: {e.message}" +
+                (f" (campo: {field})" if field else "")
+            )
+
     if isinstance(documento, dict):
         for field_name, field_value in documento.items():
             if isinstance(field_value, dict) and "ncrtf_version" in field_value:
@@ -331,6 +363,82 @@ def run_ncrtf_suite(valid_only=False, invalid_only=False) -> tuple[int, int]:
     return passed, failed
 
 
+def _validate_schema_file(path: Path, schema: dict, expect_valid: bool) -> bool:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    expected_error = raw.get("_expected_error", "")
+    doc = strip_meta(raw)
+    errors = [e.message for e in Draft202012Validator(schema).iter_errors(doc)]
+    _print_result(path.name, not errors, expect_valid, errors, expected_error)
+    return (not errors) == expect_valid
+
+
+NDT_PATH_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*$")
+
+
+def check_ndt_semantic(doc: dict) -> list[str]:
+    errors = []
+    pages = [p.get("id") for p in doc.get("paginas_def", []) if isinstance(p, dict)]
+    if len(pages) != len(set(pages)):
+        errors.append("paginas_def contém ids duplicados")
+    page_ids = set(pages)
+    for i, entry in enumerate(doc.get("sequencia", [])):
+        if entry.get("pagina_def") not in page_ids:
+            errors.append(f"sequencia[{i}].pagina_def referencia página inexistente")
+
+    resources = [r.get("id") for r in doc.get("recursos", []) if isinstance(r, dict)]
+    if len(resources) != len(set(resources)):
+        errors.append("recursos contém ids duplicados")
+    resource_ids = set(resources)
+
+    def walk(value, path=""):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                here = f"{path}.{key}" if path else key
+                if key == "referencia_recurso" and child not in resource_ids:
+                    errors.append(f"{here} referencia recurso inexistente")
+                if key in {"largura", "altura", "tamanho"} and isinstance(child, (int, float)):
+                    if child <= 0:
+                        errors.append(f"{here} deve ser maior que zero")
+                if key in {"referencia", "incluir_se", "fonte_overflow"} and isinstance(child, str):
+                    if "{{" not in child and not NDT_PATH_RE.fullmatch(child):
+                        errors.append(f"{here} não é um caminho NDF canónico")
+                walk(child, here)
+        elif isinstance(value, list):
+            for i, child in enumerate(value):
+                walk(child, f"{path}[{i}]")
+
+    walk(doc)
+    return errors
+
+
+def run_ndt_suite(valid_only=False, invalid_only=False) -> tuple[int, int]:
+    schema = _load_schema(NDT_SCHEMA_PATH)
+    passed = failed = 0
+    print(f"\n{BOLD}{SEP}{RESET}\n{BOLD}NDT — CONFORMIDADE{RESET}\n{SEP}")
+    if not invalid_only:
+        for path in sorted(NDT_VALID_DIR.glob("*.json")):
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            schema_ok = _validate_schema_file(path, schema, True)
+            semantic = check_ndt_semantic(raw)
+            if schema_ok and not semantic: passed += 1
+            else:
+                if semantic:
+                    for error in semantic: print(f"        → {error}")
+                failed += 1
+    if not valid_only:
+        for path in sorted(NDT_INVALID_DIR.glob("*.json")):
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            schema_errors = list(Draft202012Validator(schema).iter_errors(strip_meta(raw)))
+            semantic = check_ndt_semantic(strip_meta(raw)) if not schema_errors else []
+            ok = bool(schema_errors or semantic)
+            _print_result(path.name, not ok, False,
+                          [e.message for e in schema_errors] + semantic,
+                          raw.get("_expected_error", ""))
+            if ok: passed += 1
+            else: failed += 1
+    return passed, failed
+
+
 def _print_total(passed: int, failed: int):
     colour = GREEN if failed == 0 else RED
     print(f"\n{BOLD}{SEP}{RESET}")
@@ -350,16 +458,115 @@ def validate_single(path: Path) -> bool:
     return validate_ndf_file(path, schema, expect_valid=True)
 
 
+def validate_package_dir(root: Path) -> bool:
+    """Valida um directório com o conteúdo descomprimido de um .ndfpkg."""
+    errors = []
+    try:
+        manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+        core_bytes = (root / "ndf-core.json").read_bytes()
+        core = json.loads(core_bytes)
+        envelope = json.loads((root / "envelope.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"ERRO: pacote ilegível — {e}")
+        return False
+
+    for name, value, schema_path in (
+        ("manifest", manifest, MANIFEST_SCHEMA_PATH),
+        ("NDF-core", core, NDF_SCHEMA_PATH),
+        ("envelope", envelope, ENVELOPE_SCHEMA_PATH),
+    ):
+        schema = _load_schema(schema_path)
+        for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(value):
+            errors.append(f"{name}: {e.message}")
+
+    errors.extend(check_ndf_semantic(core))
+
+    required_level = core.get("nivel_assinatura")
+    signatures = envelope.get("assinaturas") or []
+    if required_level in {"avancada", "qualificada"}:
+        if not any(s.get("nivel") == required_level for s in signatures):
+            errors.append(f"envelope não contém assinatura pessoal {required_level} exigida")
+        if not envelope.get("timestamps"):
+            errors.append("envelope assinado sem timestamps B-LTA")
+        if not envelope.get("validation_material"):
+            errors.append("envelope assinado sem material de validação")
+
+    items = manifest.get("inventario", [])
+    inventory = {item["ficheiro"]: item["hash_sha256"] for item in items}
+    if len(inventory) != len(items):
+        errors.append("inventário contém nomes de ficheiro duplicados")
+    actual_files = {
+        str(path.relative_to(root))
+        for path in root.rglob("*") if path.is_file()
+    } - {"manifest.json", "README.md"}
+    unlisted = actual_files - set(inventory)
+    if unlisted:
+        errors.append("ficheiros não inventariados: " + ", ".join(sorted(unlisted)))
+    for rel, declared in inventory.items():
+        path = Path(rel)
+        if path.is_absolute() or ".." in path.parts:
+            errors.append(f"inventário: caminho inseguro '{rel}'")
+            continue
+        target = root / path
+        if not target.is_file():
+            errors.append(f"inventário: ficheiro ausente '{rel}'")
+            continue
+        actual = "sha256:" + hashlib.sha256(target.read_bytes()).hexdigest()
+        if actual != declared:
+            errors.append(f"inventário: hash incorrecto para '{rel}'")
+
+    payload_hash = "sha256:" + hashlib.sha256(core_bytes).hexdigest()
+    if rfc8785 is not None:
+        try:
+            canonical = rfc8785.dumps(core)
+            if canonical != core_bytes:
+                errors.append("ndf-core.json não contém exactamente os bytes JCS/RFC 8785")
+        except rfc8785.CanonicalizationError as exc:
+            errors.append(f"NDF-core não canonicalizável por RFC 8785: {exc}")
+    if envelope.get("payload_hash") != payload_hash or manifest.get("payload_hash") != payload_hash:
+        errors.append("payload_hash não corresponde aos bytes de ndf-core.json")
+
+    digest = hashlib.sha256((core.get("ndf_id", "") + "|" + payload_hash).encode("utf-8")).digest()
+    code = "NDF-" + base64.b32encode(digest).decode("ascii").rstrip("=")[:20]
+    if envelope.get("validation_code") != code or manifest.get("validation_code") != code:
+        errors.append("validation_code incorrecto")
+
+    ndt_ref = core.get("ndt_version_ref", "")
+    ndt_path = root / "ndt" / f"{ndt_ref}.ndt.json"
+    if not ndt_path.is_file():
+        errors.append(f"NDT referenciado ausente: {ndt_path.relative_to(root)}")
+    else:
+        ndt = json.loads(ndt_path.read_text(encoding="utf-8"))
+        for e in Draft202012Validator(_load_schema(NDT_SCHEMA_PATH)).iter_errors(ndt):
+            errors.append(f"NDT: {e.message}")
+        errors.extend(f"NDT: {e}" for e in check_ndt_semantic(ndt))
+        expected_ref = f"{ndt.get('schema_id', '')}@{ndt.get('versao_ndt', '')}"
+        if expected_ref != ndt_ref:
+            errors.append("ndt_version_ref não corresponde à identidade do NDT")
+
+    if errors:
+        print(f"{RED}FAIL{RESET}  pacote {root}")
+        for e in errors:
+            print(f"      → {e}")
+        return False
+    print(f"{GREEN}PASS{RESET}  pacote {root}")
+    return True
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="NORMORDIS Conformance Test Runner")
     parser.add_argument("file", nargs="?", type=Path, help="Ficheiro NDF-core a validar.")
+    parser.add_argument("--package", type=Path, help="Directório descomprimido de um .ndfpkg a validar.")
     parser.add_argument("--valid-only",   action="store_true")
     parser.add_argument("--invalid-only", action="store_true")
-    parser.add_argument("--format", choices=["ndf", "ncrtf", "all"], default="all",
+    parser.add_argument("--format", choices=["ndf", "ndt", "ncrtf", "all"], default="all",
                         help="Suite a correr (default: all)")
     args = parser.parse_args()
+
+    if args.package:
+        sys.exit(0 if validate_package_dir(args.package) else 1)
 
     if args.file:
         ok = validate_single(args.file)
@@ -368,6 +575,9 @@ def main():
     p = f = 0
     if args.format in ("ndf", "all"):
         np, nf = run_ndf_suite(args.valid_only, args.invalid_only)
+        p += np; f += nf
+    if args.format in ("ndt", "all"):
+        np, nf = run_ndt_suite(args.valid_only, args.invalid_only)
         p += np; f += nf
     if args.format in ("ncrtf", "all"):
         np, nf = run_ncrtf_suite(args.valid_only, args.invalid_only)

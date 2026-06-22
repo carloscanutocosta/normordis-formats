@@ -1,0 +1,7 @@
+{
+  "_expected_error": "sequencia é obrigatória",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [{ "id": "p1" }]
+}

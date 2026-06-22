@@ -15,7 +15,7 @@ A **implementação de referência** (`normordis-pdf`, bibliotecas Rust) é dist
 
 ## 1. Axioma e papel do NDT
 
-**NDT + NDF = documento físico determinístico e rico.**
+**NDF + NDT + renderer = representação visual do documento.**
 
 - **NDT** (este formato) — descreve *como* o documento é composto visualmente: estrutura de páginas, posições, elementos gráficos, tipografia, tabelas de dados, mobília.
 - **NDF** (spec NDF v1.0.0) — fornece *o quê*: os dados a apresentar, já computados e materializados pela app de domínio.
@@ -25,18 +25,28 @@ A **implementação de referência** (`normordis-pdf`, bibliotecas Rust) é dist
 
 1. O NDT não contém regras de validação, fórmulas de cálculo, obrigatoriedade de campos, nem qualquer lógica de negócio. Esses são responsabilidade exclusiva da app de domínio que produz o NDF.
 2. O NDF que chega ao renderer está completo nos seus dados. O renderer não precisa de saber que `valor_realizacao` é monetário obrigatório — só precisa de saber onde o colocar e como formatá-lo.
-3. O mesmo NDT + mesmo NDF produz sempre o mesmo documento, independentemente de renderer, data ou contexto de execução.
+3. O mesmo NDT + NDF produz uma representação semanticamente equivalente. A
+   identidade byte a byte só pode ser exigida por um perfil de renderer que
+   fixe motor, fontes, recursos, versões e parâmetros de serialização.
 
 ### 1.1 Referência NDF ↔ NDT
 
-O NDF referencia o NDT necessário para a sua renderização, mas não o incorpora — mantém-se eficiente (apenas dados e metadados). O renderer busca o NDT no registry no momento da renderização.
+O NDF-core referencia o NDT mas não o incorpora. No perfil de custódia, o NDT
+pode ser deduplicado por hash. O `.ndfpkg` portátil DEVE incorporar a versão
+exacta do NDT, os schemas e os recursos necessários à renderização.
 
 | NDF-core | NDT | Significado |
 |---|---|---|
 | `metadados.tipo_documento_ref` | `schema_id` | Identifica o tipo de documento |
 | `ndt_version_ref` | `schema_id@versao_ndt` | Identifica a versão concreta do template |
 
-Para documentos **fechados/assinados**, o NDF guarda adicionalmente `ndt_hash` (SHA-256 do NDT no momento do fecho), garantindo reprodutibilidade bit-perfeita mesmo que o registry evolua.
+O hash do ficheiro NDT é registado no inventário do `.ndfpkg`. Não existe um
+campo `ndt_hash` no NDF-core v1.0.0.
+
+Todos os caminhos de dados declarados pelo NDT são relativos a
+`NDF-core.documento`. Por exemplo, `corpo` resolve para
+`NDF-core.documento.corpo`. Valores do envelope usam tokens reservados
+explicitamente definidos, como `{{validation_code}}`.
 
 ### 1.2 Duas fases de uso do NDT
 
@@ -53,7 +63,7 @@ O NDT define um layout prescritivo para PDF/impressão. Para outros formatos, o 
 
 | Formato | Momento no ciclo de vida | Fidelidade de layout | Fidelidade de conteúdo | Fonte de layout |
 |---|---|---|---|---|
-| **PDF / PDF/A** | Arquivo, prova, entrega formal | **Normativa** — bit-idêntico para o mesmo NDT+NDF | Total | Bloco `layout` do NDT (§5) |
+| **PDF / PDF/A** | Arquivo, prova, entrega formal | **Normativa segundo o perfil de renderer** | Total | Bloco `layout` do NDT (§5) |
 | **ODF** | Intercâmbio, edição, revisão | Best-effort — renderer usa `estilos` NDT (§3) | Total | Bloco `estilos` do NDT (§3) |
 | **HTML** | Publicação, intranet, consulta | Best-effort — layout é CSS flow | Total | Bloco `estilos` do NDT (§3) |
 | **Typst** | Composição tipográfica avançada | Alta — mm coords são dicas; renderer adapta | Total | Bloco `layout` do NDT (§5) |
@@ -61,7 +71,11 @@ O NDT define um layout prescritivo para PDF/impressão. Para outros formatos, o 
 
 **Fidelidade de conteúdo** significa que o texto, tabelas, listas, imagens e estrutura semântica do documento são preservados identicamente. **Fidelidade de layout** significa que posições, fontes, margens e paginação são reproduzidas com exactidão.
 
-**PDF/A e ODF servem momentos distintos** — não são equivalentes. PDF/A é o artefacto de arquivo e prova legal: imutável, bit-idêntico, verificável por hash. ODF é o formato de intercâmbio e trabalho: editável por qualquer implementação conforme (LibreOffice, Collabora, OpenOffice, EuroOffice, OnlyOffice) sem dependência de licença proprietária. Um documento finalizado produz ambos a partir do mesmo NDT+NDF; são duas projecções da mesma fonte de verdade.
+**PDF/A e ODF servem momentos distintos** — não são equivalentes. PDF/A pode
+ser preservado como representação fixa verificável por hash. ODF é um formato
+de intercâmbio e trabalho editável. Ambos são projecções da mesma fonte de
+verdade; a identidade binária de um PDF só é garantida por um perfil de
+renderer que fixe todo o ambiente de produção.
 
 **ODF como formato secundário** alinha-se com os princípios de soberania digital da spec NDF e com o RNID (Regulamento Nacional de Interoperabilidade Digital). Para a Administração Pública portuguesa, ODF é o formato de intercâmbio recomendado para documentos editáveis.
 
@@ -136,6 +150,12 @@ Um renderer ODF mapeia `estilos` para estilos de parágrafo nativos (`Default Pa
 O NDT referencia valores do NDF através de **caminhos canónicos** — strings que identificam um valor pelo seu percurso hierárquico de identificadores. O NDF armazena valores nessas mesmas posições.
 
 A hierarquia é uma **convenção de endereçamento**, não um schema. O NDT não valida se o caminho existe no NDF nem o tipo do valor — o renderer escreve o que encontrar, ou deixa em branco se o caminho não existir.
+
+A sintaxe canónica é uma sequência de segmentos separados por `.`, em que cada
+segmento cumpre `[A-Za-z_][A-Za-z0-9_-]*`. A raiz implícita é sempre
+`NDF-core.documento`; os prefixos `documento.` e `NDF-core.` NÃO DEVEM aparecer
+no NDT. Tokens de envelope, como `{{validation_code}}`, pertencem a um espaço
+reservado separado.
 
 ### 4.1 Caminhos simples
 
@@ -247,7 +267,7 @@ O objecto `fluxo` declara uma **região de fluxo vertical** dentro da `pagina_de
   "fluxo": {
     "y_inicio": 60,
     "elementos": [
-      { "tipo": "corpo", "referencia": "conteudo.corpo" },
+      { "tipo": "corpo", "referencia": "corpo" },
       { "tipo": "espaco", "altura": 10 },
       { "tipo": "texto_fixo", "conteudo": "Com os melhores cumprimentos," },
       { "tipo": "espaco", "altura": 20 },
@@ -447,8 +467,8 @@ Campo de assinatura electrónica ou manuscrita. O campo `modo` controla a relaç
 
 | Valor | Comportamento no PDF gerado |
 |---|---|
-| `"visual_apenas"` | Placeholder visual sem campo AcroForm. A assinatura vive exclusivamente no NDF (CAdES cobre NDF + `pdf_hash`). Adequado quando o receptor verifica via NDF. |
-| `"hibrido"` | **(Default)** Cria campo AcroForm PAdES no PDF, preenchido com o mesmo CAdES do NDF (que inclui `pdf_hash` como atributo assinado). O CAdES do NDF é também embutido como attachment PDF/A-3. O PDF é autossuficiente para validadores eIDAS; o NDF é a fonte de verdade. |
+| `"visual_apenas"` | Placeholder visual sem campo AcroForm. A assinatura ou selo, se existente, vive no envelope NDF. |
+| `"hibrido"` | **(Default)** Cria campo AcroForm que pode receber uma operação PAdES independente. O `.ndfpkg` pode também ser embutido como attachment PDF/A. |
 | `"ndf_attachment"` | Sem AcroForm. O CAdES do NDF é embutido como attachment PDF/A-3 (`ndf-signature.p7s`). Útil quando o validador de destino suporta PDF/A-3 mas não requer AcroForm. |
 
 Em ODF, `assinatura` é renderizada como linha de assinatura com campo de formulário (`com.sun.star.text.TextField.Input`) e legenda. Em HTML, como `<div class="signature-field" data-id="{{id}}">`. O `modo` é ignorado em formatos de fluxo — aplica-se apenas ao renderer PDF.
@@ -703,7 +723,7 @@ Bloco de texto com fluxo em formato NCRTF, a coordenadas absolutas. Para documen
 ```json
 {
   "tipo": "corpo",
-  "referencia": "conteudo.corpo",
+  "referencia": "corpo",
   "posicao": { "x": 15, "y": 60 },
   "largura": 180,
   "fonte_base": { "familia": "Times", "tamanho": 11 },
@@ -845,7 +865,7 @@ Elementos fixos de cada `pagina_def`. Cada `pagina_def` tem a sua própria `mobi
 {
   "sequencia": [
     { "pagina_def": "oficio_pag1", "repeticao": "unica" },
-    { "pagina_def": "oficio_pag_seguinte", "repeticao": "conforme_necessario", "fonte_overflow": "conteudo.corpo" }
+    { "pagina_def": "oficio_pag_seguinte", "repeticao": "conforme_necessario", "fonte_overflow": "corpo" }
   ]
 }
 ```
@@ -987,30 +1007,29 @@ Permite que um documento principal seja entregue com outros documentos independe
 
 ## 7. NDF e NDT: referência e reprodutibilidade
 
-O NDF referencia o NDT necessário para a sua renderização, mas não o incorpora.
+O NDF-core contém `ndt_version_ref` no topo:
 
 ```json
 {
+  "ndt_version_ref": "modelo3-irs-anexoG@2026.1",
   "metadados": {
-    "tipo_documento_ref": "modelo3-irs-anexoG",
-    "ndt_version_ref": "modelo3-irs-anexoG@2026.1"
+    "tipo_documento_ref": "modelo3-irs@2026.1"
   }
 }
 ```
 
-Para documentos **fechados/assinados**, o NDF guarda adicionalmente o hash do NDT:
-
-```json
-{
-  "ndt_hash": "sha256:a1b2c3..."
-}
-```
-
 **Fluxo de renderização:**
-1. O renderer recebe o NDF
-2. Lê `ndt_version_ref` → busca o NDT no registry
-3. Se o NDF está fechado: verifica `sha256(NDT) == ndt_hash`
-4. Combina NDT + NDF → renderiza
+
+1. O renderer valida o NDF e lê `ndt_version_ref`.
+2. Resolve o NDT no `.ndfpkg` ou no domínio de custódia.
+3. Verifica o hash do NDT contra o manifesto ou catálogo imutável.
+4. Confirma `schema_id@versao_ndt == ndt_version_ref`.
+5. Resolve caminhos NDT relativamente a `NDF-core.documento`.
+6. Combina NDT + NDF e produz o formato de saída pedido.
+
+Sem o NDT exacto, os dados continuam legíveis, mas a renderização não pode ser
+declarada reprodutível. Reprodutibilidade visual não implica identidade binária;
+esta última exige um perfil de renderer adicional.
 
 ---
 
@@ -1024,47 +1043,26 @@ Para documentos **fechados/assinados**, o NDF guarda adicionalmente o hash do ND
 - Implementa `fluxo` e garante que os elementos após `corpo` aparecem na última página do overflow.
 - O formato de saída alvo é **PDF/UA-2** (ISO 14289-2) — ver §8.2.
 
-### 8.1 Modelo de assinatura CAdES ↔ PDF
+### 8.1 Assinatura do NDF e assinatura de representações
 
-A assinatura aposta ao documento NORMORDIS é **CAdES-B-LTA** (ETSI EN 319 122), guardada no NDF. PAdES (ETSI EN 319 132) é um perfil de CAdES para PDF — a infraestrutura criptográfica é a mesma; o objecto assinado difere.
+O NDF e as suas representações são objectos distintos:
 
-**Workflow de fecho e assinatura:**
+- CAdES no envelope NDF assina os `payload_bytes` canónicos;
+- uma assinatura PAdES, quando produzida, assina os bytes do PDF através do seu
+  `ByteRange`;
+- as duas assinaturas podem usar o mesmo certificado, mas são operações,
+  valores criptográficos e timestamps distintos.
 
-```
-1. App de domínio → NDF completo (dados + metadados)
-2. Renderer → gera PDF/UA-2 deterministicamente
-3. pdf_hash = sha256(PDF gerado)
-4. pdf_hash adicionado a NDF.outputs[].sha256
-5. CAdES-B-LTA assina NDF canónico (que inclui pdf_hash)
-6. CAdES guardado em NDF.signatures[]
-```
+CAdES NÃO é obrigatório quando `nivel_assinatura` é `"nenhuma"`. Todo o NDF
+continua sujeito a JCS, hash, custódia append-only/WORM e auditoria. Um selo
+institucional CAdES pode ser acrescentado para tornar a prova de origem
+portátil, sem representar assinatura pessoal.
 
-**Workflow de verificação:**
-
-```
-1. Verificador lê NDF → valida CAdES (chain, timestamp, revogação)
-2. Regenera PDF a partir de NDT + NDF
-3. Confirma sha256(PDF regenerado) == NDF.outputs[].sha256
-   → PDF autêntico: é a projecção determinística dos dados assinados
-```
-
-**Modelo híbrido (`modo: "hibrido"`, default):**
-
-O mesmo CAdES do NDF é também usado para preencher o campo AcroForm PAdES no PDF. O contentor CAdES inclui `pdf_hash` como atributo assinado (`id-aa-ets-signerAttr` ou atributo proprietário NORMORDIS). O PDF resultante:
-
-```
-PDF/UA-2
-├── conteúdo visual (acessível, tagged)
-├── /Sig  ←  campo AcroForm PAdES
-│   └── CAdES-B-LTA (mesmo cert; signed attribute: ndf_ref + pdf_hash)
-└── /EmbeddedFiles (PDF/A-3)
-    ├── source.ndf  ←  NDF completo com o seu CAdES
-    └── ndf-signature.p7s  ←  contentor CAdES standalone
-```
-
-O PDF é **autossuficiente** para qualquer validador PDF/eIDAS (Adobe, DSS, EJBCA). O NDF embutido permite verificação completa da cadeia de dados. A assinatura cobre a fonte de verdade (NDF + `pdf_hash`), não apenas a projecção.
-
-**Nota sobre dois objectos de assinatura**: tecnicamente, o PAdES embutido no PDF assina os bytes do PDF (ByteRange); o CAdES no NDF assina o JSON canónico do NDF. São instâncias distintas do mesmo algoritmo (CMS/CAdES), com o mesmo certificado, que se cross-referenciam via `pdf_hash` (no NDF) e `ndf_ref` (no atributo assinado do PAdES). Não é uma re-assinatura — o material criptográfico e o timestamp são os mesmos.
+Um renderer PODE produzir PDF sem PAdES, PDF com PAdES, ou PDF/A com o
+`.ndfpkg` embebido. A ausência de PAdES não altera a validade estrutural do NDF.
+Se houver referências cruzadas entre NDF e PDF, estas pertencem a um perfil de
+saída versionado; não são campos implícitos `outputs[]` ou `signatures[]` do
+NDF-core v1.0.0.
 
 ### 8.2 PDF/UA-2 como formato alvo
 
@@ -1127,14 +1125,14 @@ Elementos puramente decorativos (linhas, rectângulos, fundos SVG) devem ser mar
 | Renderer | Executor puro que combina NDT + NDF → documento. Não aplica regras de negócio. |
 | `schema_id` | Identificador estável do tipo de documento; corresponde a `tipo_documento_ref` no NDF |
 | `versao_ndt` | Versão desta instância do template; parte de `ndt_version_ref` no NDF |
-| `ndt_hash` | SHA-256 do NDT no momento do fecho do NDF — garante reprodutibilidade bit-perfeita |
+| Hash do NDT | SHA-256 do ficheiro NDT registado no manifesto ou catálogo de custódia; não é campo do NDF-core |
 | `estilos` | Bloco de estilos globais do documento; fonte principal para renderers ODF/HTML |
 | `pagina_def` | Modelo de página instanciado por `sequencia[]` |
 | `grafico` | Elemento visual puro de uma `pagina_def`, a coordenadas absolutas |
 | `grelha_digitos` | Primitiva de caixas por carácter, ligada a um caminho NDF |
 | `assinatura` | Campo de assinatura electrónica/manuscrita; AcroForm PAdES em PDF; modos: `visual_apenas`, `hibrido` (default), `ndf_attachment` |
 | CAdES | CMS Advanced Electronic Signatures (ETSI EN 319 122); algoritmo de assinatura usado pelo NDF (`CAdES-B-LTA`) |
-| PAdES | PDF Advanced Electronic Signatures (ETSI EN 319 132); perfil de CAdES para PDF; usado no campo AcroForm do modo `hibrido` |
+| PAdES | PDF Advanced Electronic Signatures (ETSI EN 319 142-1); assinatura opcional e independente da assinatura CAdES do NDF |
 | PDF/UA-2 | ISO 14289-2 — perfil de acessibilidade universal para PDF 2.0; formato alvo do renderer normordis-pdf |
 | PDF/A-3 | ISO 19005-3 — perfil de arquivo a longo prazo com suporte a attachments; compatível com PDF/UA-2 |
 | `pdf_hash` | SHA-256 do PDF gerado, incluído no NDF antes de assinar; permite verificação determinística sem nova assinatura |
@@ -1157,6 +1155,6 @@ Elementos puramente decorativos (linhas, rectângulos, fundos SVG) devem ser mar
 | Formato de display | Hint de renderização visual (monetario, data, checkbox, etc.) sem semântica de validação |
 | Token de paginação | `{n}`, `{total}` — resolvidos pelo renderer; distintos de placeholders NDT e caminhos NDF |
 | Placeholder NDT | `{{versao_ndt}}`, `{{schema_id}}` — metadados do próprio NDT, em `texto_fixo` |
-| Fidelidade normativa | Garantia de output bit-idêntico para o mesmo NDT+NDF; aplica-se a PDF/A |
+| Fidelidade normativa | Equivalência visual e semântica segundo um perfil de renderer; identidade binária exige perfil determinístico específico |
 | Fidelidade best-effort | Conteúdo fiel; layout adaptado às convenções do formato; aplica-se a ODF e HTML |
 | ODF | OpenDocument Format — ISO/IEC 26300; formato secundário para intercâmbio e edição |

@@ -33,7 +33,17 @@
     },
     "assunto": "Resposta ao ofício n.º 45/2026",
     "referencias": ["OF n.º 45/2026", "proc.º 456/2026"],
-    "corpo": "Em resposta ao vosso ofício n.º 45/2026, de 10 de junho de 2026, informamos que...",
+    "corpo": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "Em resposta ao vosso ofício n.º 45/2026, de 10 de junho de 2026, informamos que..." }
+          ]
+        }
+      ]
+    },
     "signatario": {
       "nome": "João Costa",
       "cargo": "Director-Geral"

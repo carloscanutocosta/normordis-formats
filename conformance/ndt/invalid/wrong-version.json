@@ -1,0 +1,8 @@
+{
+  "_expected_error": "ndt_version deve ser 2.0.0",
+  "ndt_version": "3.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [{ "id": "p1" }],
+  "sequencia": [{ "pagina_def": "p1" }]
+}

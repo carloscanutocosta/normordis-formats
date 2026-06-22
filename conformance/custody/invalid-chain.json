@@ -1,0 +1,14 @@
+[
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "123e4567-e89b-42d3-a456-426614174000",
+    "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+    "sequence": 0,
+    "event_type": "finalizado",
+    "occurred_at": "2026-06-22T10:00:00Z",
+    "actor": { "type": "sistema", "id": "normordis-test" },
+    "details": {},
+    "previous_event_hash": null,
+    "event_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  }
+]

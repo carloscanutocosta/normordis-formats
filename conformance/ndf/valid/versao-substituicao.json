@@ -30,7 +30,17 @@
     },
     "assunto": "Retificação do ofício n.º OF/2026/00123",
     "referencias": ["OF n.º OF/2026/00123", "proc.º 456/2026"],
-    "corpo": "Em rectificação ao ofício n.º OF/2026/00123, de 18 de junho de 2026, corrige-se o destinatário para Dr. João Pereira, mantendo-se todo o restante conteúdo.",
+    "corpo": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "Em rectificação ao ofício n.º OF/2026/00123, de 18 de junho de 2026, corrige-se o destinatário para Dr. João Pereira, mantendo-se todo o restante conteúdo." }
+          ]
+        }
+      ]
+    },
     "signatario": {
       "nome": "João Costa",
       "cargo": "Director-Geral"

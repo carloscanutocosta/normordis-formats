@@ -1,0 +1,8 @@
+{
+  "_expected_error": "ids de pagina devem ser únicos",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [{ "id": "p1" }, { "id": "p1" }],
+  "sequencia": [{ "pagina_def": "p1" }]
+}

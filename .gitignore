@@ -3,3 +3,5 @@ Thumbs.db
 *.swp
 *.bak
 .claude/
+__pycache__/
+*.py[cod]

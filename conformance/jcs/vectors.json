@@ -1,0 +1,23 @@
+{
+  "specification": "RFC 8785",
+  "encoding": "UTF-8",
+  "vectors": [
+    {
+      "id": "unicode-and-key-order",
+      "value": { "b": 1, "a": "á" },
+      "canonical_utf8_hex": "7b2261223a22c3a1222c2262223a317d",
+      "sha256": "f23b76828443e613bd20cafe0c3ac3ad19b31005e1dfd3d7610b3e7ef380e6f2"
+    },
+    {
+      "id": "nested-values",
+      "value": {
+        "key": "value",
+        "another-key": 2,
+        "a-third": [1, 2, 3, [4], [5, 6, "this works too"]],
+        "more": [null, true, false]
+      },
+      "canonical_utf8_hex": "7b22612d7468697264223a5b312c322c332c5b345d2c5b352c362c227468697320776f726b7320746f6f225d5d2c22616e6f746865722d6b6579223a322c226b6579223a2276616c7565222c226d6f7265223a5b6e756c6c2c747275652c66616c73655d7d",
+      "sha256": "5c501fde87caad7c535344b17a3c460c85867fef1939e0e362251ca7b6178275"
+    }
+  ]
+}

@@ -21,6 +21,14 @@ Open specifications for document templates, document instances, and rich text co
 
 Specifications are sovereign. Implementations are replaceable.
 
+The formats are language- and runtime-neutral. C#, Rust, Go, Python, Java or
+any other implementation is conformant when it produces the normative bytes
+and observable results defined by the schemas and conformance vectors.
+
+The shared normative architecture, including the distinction between
+integrity, custody, institutional seals and personal signatures, is defined in
+[docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md).
+
 ```
 normordis-spec
        │
@@ -51,13 +59,25 @@ normordis-spec/
 ├── conformance/      Official conformance test suites
 │   ├── ndf/
 │   ├── ndt/
-│   └── ncrtf/
+│   ├── ncrtf/
+│   ├── jcs/
+│   ├── custody/
+│   └── cades/
 │
 ├── docs/             Conceptual documentation
-│   └── architecture/ Architecture decision records (ADRs)
+│   ├── architecture/ Normative architecture and ADRs
+│   ├── normalization/ Normalization gates, traceability and references
+│   └── benchmarks/  Storage efficiency methodology
 │
-└── tools/            Reference validator
+├── benchmarks/       Benchmark results (reproducible measurements)
+│
+└── tools/            Reference validator and utilities
 ```
+
+Normalization gates and external-review requirements are tracked in
+[docs/normalization/READINESS.md](docs/normalization/READINESS.md). The public
+verification protocol is defined by [specs/portal/SPEC.md](specs/portal/SPEC.md)
+and its OpenAPI contract.
 
 ## Licensing
 

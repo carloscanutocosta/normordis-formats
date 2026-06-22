@@ -1,0 +1,20 @@
+{
+  "_expected_error": "dimensões devem ser positivas",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "graficos": [
+        {
+          "tipo": "rectangulo",
+          "posicao": { "x": 0, "y": 0 },
+          "largura": 0,
+          "altura": 10
+        }
+      ]
+    }
+  ],
+  "sequencia": [{ "pagina_def": "p1" }]
+}

@@ -475,7 +475,7 @@ O NDT v2.0.0 é um formato de **layout puro** — não contém dados nem declara
   "blocos": [
     {
       "tipo": "corpo",
-      "referencia": "conteudo.corpo",
+      "referencia": "corpo",
       "posicao": { "x": 15, "y": 60 },
       "largura": 180
     }
@@ -490,13 +490,15 @@ Ou, em layout de fluxo:
   "fluxo": {
     "y_inicio": 60,
     "elementos": [
-      { "tipo": "corpo", "referencia": "conteudo.corpo" }
+      { "tipo": "corpo", "referencia": "corpo" }
     ]
   }
 }
 ```
 
-O campo `referencia` é um caminho canónico NDF (ex.: `"conteudo.corpo"`, `"parecer.texto"`) que aponta para o campo do NDF-core onde o valor NCRTF está armazenado. O renderer lê o valor NCRTF nesse caminho e renderiza-o segundo as regras de layout do NDT (`largura`, `fonte_base` herdada de `estilos`, etc.).
+O campo `referencia` é um caminho relativo a `NDF-core.documento` (ex.:
+`"corpo"`, `"parecer.texto"`). O renderer lê o valor NCRTF nesse caminho e
+renderiza-o segundo as regras de layout do NDT.
 
 **Princípio**: o NCRTF vive no NDF. O NDT descreve onde e como renderizá-lo. O renderer é o único componente que conhece ambos.
 
@@ -560,7 +562,9 @@ O campo `referencia` é um caminho canónico NDF (ex.: `"conteudo.corpo"`, `"par
 }
 ```
 
-O campo `documento.conteudo.corpo` é um valor NCRTF completo — canonicalizado como parte do NDF-core e assinado via CAdES. O NDT referencia-o com `"referencia": "conteudo.corpo"`.
+O campo NCRTF é canonicalizado como parte do NDF-core. Se existir CAdES, fica
+coberto pela assinatura ou selo do NDF. O caminho NDT é relativo a
+`NDF-core.documento`.
 
 ### 9.3 Famílias tipográficas: NCRTF e NDT
 
@@ -630,9 +634,10 @@ oficio-OF-2026-00123.ndfpkg
 
 ### 11.2 Nós desconhecidos
 
-Um leitor conforme que encontre um `type` desconhecido:
-- Se MAJOR de `ncrtf_version` for igual ao suportado: **DEVE** ignorar o nó.
-- Se MAJOR for superior: **DEVE** rejeitar o documento inteiro.
+O schema NCRTF é fechado. Um leitor conforme DEVE rejeitar tipos de nó
+desconhecidos. Uma versão MINOR pode acrescentar um nó opcional, mas o documento
+que o utilize declara essa versão e requer um leitor/schema que a suporte. Um
+leitor nunca ignora silenciosamente conteúdo assinado que não compreende.
 
 ### 11.3 Candidatos a versões futuras
 
@@ -666,8 +671,8 @@ Uma implementação é um **leitor NCRTF conforme** se:
 
 1. **DEVE** rejeitar qualquer valor NCRTF que não valide contra o schema desta versão.
 2. **DEVE** rejeitar documentos com `marks` fora da ordem canónica (R1).
-3. **DEVE** ignorar nós de tipo desconhecido quando `ncrtf_version` MAJOR for igual ao suportado.
-4. **DEVE** rejeitar o documento quando `ncrtf_version` MAJOR for superior ao suportado.
+3. **DEVE** rejeitar nós de tipo desconhecido.
+4. **DEVE** rejeitar versões NCRTF que não suporte explicitamente.
 5. **DEVE** resolver referências `image.ref` dentro do `.ndfpkg` corrente.
 
 ### 12.3 Suite de conformidade
