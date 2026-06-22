@@ -1,0 +1,79 @@
+name: Conformance Suite
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+
+jobs:
+  conformance-python:
+    name: Python conformance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r tools/requirements.txt
+
+      - name: NDF / NDT / NCRTF suites
+        run: python3 tools/validate.py
+
+      - name: Package integrity (ndfpkg-example)
+        run: python3 tools/validate.py --package specs/ndf/examples/ndfpkg-example
+
+      - name: JCS vectors — Python
+        run: python3 tools/check_jcs_vectors.py
+
+      - name: Custody chain — valid (must pass)
+        run: python3 tools/check_custody.py conformance/custody/valid-chain.json
+
+      - name: Custody chain — invalid (must reject)
+        run: "! python3 tools/check_custody.py conformance/custody/invalid-chain.json"
+
+  conformance-js:
+    name: JavaScript conformance (cross-language)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: JCS vectors — Node.js
+        run: node tools/check-jcs-vectors.mjs
+
+      - name: Custody chain — valid (must pass)
+        run: node tools/check-custody.mjs conformance/custody/valid-chain.json
+
+      - name: Custody chain — invalid (must reject)
+        run: "! node tools/check-custody.mjs conformance/custody/invalid-chain.json"
+
+  json-lint:
+    name: JSON well-formedness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate all JSON files parse correctly
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          from pathlib import Path
+          failed = []
+          files = sorted(Path(".").rglob("*.json"))
+          for p in files:
+              try:
+                  json.loads(p.read_text(encoding="utf-8"))
+              except json.JSONDecodeError as e:
+                  print(f"FAIL  {p}: {e}")
+                  failed.append(str(p))
+          if failed:
+              sys.exit(1)
+          print(f"OK — {len(files)} JSON files well-formed")
+          EOF

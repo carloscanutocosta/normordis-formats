@@ -179,7 +179,7 @@
         { "tipo": "rectangulo", "posicao": { "x": 0, "y": 143 }, "largura": 190, "altura": 7, "preenchimento": "#EEEEEE", "contorno": { "espessura": 0.3, "cor": "#000000" } },
         { "tipo": "texto_fixo", "conteudo": "QUADRO 10 — DECLARAÇÃO SUBSTITUTIVA", "posicao": { "x": 2, "y": 148 }, "fonte": { "familia": "Helvetica", "tamanho": 7, "peso": "bold" } },
         { "tipo": "texto_fixo", "conteudo": "Esta declaração substitui a entregue anteriormente para o ano:", "posicao": { "x": 0, "y": 156 }, "fonte": { "familia": "Helvetica", "tamanho": 7 } },
-        { "tipo": "grelha_digitos", "referencia": "substituicao.ano_original", "posicao": { "x": 110, "y": 153 }, "num_caixas": 4, "largura_caixa": 7, "altura_caixa": 7, "espacamento": 0.5, "cor_contorno": "#000000", "espessura_contorno": 0.3, "rotulo_acessivel": "Ano da declaração substituída", "incluir_se": "identificacao.declaracao_substitutiva" },
+        { "tipo": "grelha_digitos", "referencia": "substituicao.ano_original", "posicao": { "x": 110, "y": 153 }, "num_caixas": 4, "largura_caixa": 7, "altura_caixa": 7, "espacamento": 0.5, "cor_contorno": "#000000", "espessura_contorno": 0.3, "rotulo_acessivel": "Ano da declaração substituída" },
         { "tipo": "linha", "de": { "x": 0, "y": 167 }, "para": { "x": 190, "y": 167 }, "espessura": 0.3, "cor": "#000000" },
 
         { "tipo": "texto_fixo", "conteudo": "Data:", "posicao": { "x": 0, "y": 180 }, "fonte": { "familia": "Helvetica", "tamanho": 8 } },
