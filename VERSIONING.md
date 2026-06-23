@@ -6,25 +6,21 @@ As especificações seguem versionamento semântico (semver):
 
 - **Major** (`x.0.0`): alterações incompatíveis — campos obrigatórios removidos ou renomeados, semântica alterada. Leitores devem declarar suporte explícito a cada versão major.
 - **Minor** (`1.x.0`): adições compatíveis — novos campos opcionais. Leitores existentes continuam a funcionar.
-- **Patch** (`1.0.x`): clarificações, correcção de erros tipográficos, alterações não normativas. Sem impacto comportamental.
+- **Patch** (`1.0.x`): clarificações, correção de erros tipográficos, alterações não normativas. Sem impacto comportamental.
 
 ## Estado da especificação
 
-Cada versão publicada pode assumir um dos seguintes estados:
-
-- Draft
-- Candidate
-- Stable
-- Deprecated
-- Retired
+Cada versão publicada assume um dos níveis definidos em
+[NORMALIZATION.md](NORMALIZATION.md). Não são mantidas taxonomias de estado
+paralelas.
 
 O estado é independente da versão.
 
 Exemplos:
 
-- NDF v1.0.0 Draft
-- NDF v1.0.0 Stable
-- NDF v1.1.0 Candidate
+- NDF v1.0.0 — Draft
+- NDF v1.0.0 — Revisão pública
+- NDF v1.1.0 — Candidata
 
 ## Versão da especificação vs. versão do template
 
@@ -36,7 +32,7 @@ Exemplos:
 
 - Caminhos canónicos de campo (`id`s) nunca são renomeados entre versões minor.
 - Campos descontinuados são marcados `"descontinuado": true` em vez de removidos, preservando a legibilidade de documentos mais antigos.
-- URLs, hashes e artefactos de releases anteriores permanecem disponíveis.
+- URLs, hashes e artefactos de versões publicadas anteriores permanecem disponíveis.
 
 ## Compatibilidade e schemas
 
@@ -61,27 +57,27 @@ Sempre que possível, a declaração deve indicar:
 
 - especificação;
 - versão;
-- papel (produtor, leitor, renderer ou verificador);
+- papel (produtor, leitor, renderizador ou verificador);
 - perfil suportado;
 - versão da suite de conformidade utilizada.
 
-## Versões do registry
+## Versões do registo
 
-O registry de tipos de documento (`specs/registry/schemas/`) segue um esquema de versão próprio, independente das versões NDF/NDT/NCRTF:
+O registo de tipos de documento (`specs/registo/schemas/`) segue um esquema de versão próprio, independente das versões NDF/NDT/NCRTF:
 
 - Cada tipo canónico tem um identificador estável: `oficio`, `despacho`, `modelo3-irs`, etc.
 - A versão de campanha ou de publicação é declarada no `tipo_documento_ref` do NDF-core: `"modelo3-irs@2026"`, `"oficio@1.0.0"`.
-- Uma nova campanha fiscal (e.g., `modelo3-irs@2027`) constitui uma versão nova no registry, mas não implica uma versão nova de NDF ou NDT, a não ser que o formato em si mude.
-- Schemas do registry com `additionalProperties: true` permitem campos futuros sem quebra de versão; schemas com `additionalProperties: false` exigem uma nova versão registry para cada adição de campo.
+- Uma nova campanha fiscal (e.g., `modelo3-irs@2027`) constitui uma versão nova no registo, mas não implica uma versão nova de NDF ou NDT, a não ser que o formato em si mude.
+- Schemas do registo com `additionalProperties: true` permitem campos futuros sem quebra de versão; schemas com `additionalProperties: false` exigem uma nova versão do registo para cada adição de campo.
 
 ## Artefactos abrangidos
 
-Uma release inclui como unidade indivisível:
+Uma versão publicada inclui como unidade indivisível:
 
 - texto normativo;
 - JSON Schemas;
-- registry e schemas de tipos canónicos;
-- exemplos e vectores canónicos;
+- registo e schemas de tipos canónicos;
+- exemplos e vetores canónicos;
 - suite e runner de conformidade.
 
-Alterar comportamento observável de qualquer destes artefactos exige uma nova versão. URLs, hashes e artefactos de releases anteriores permanecem disponíveis.
+Alterar comportamento observável de qualquer destes artefactos exige uma nova versão. URLs, hashes e artefactos de versões publicadas anteriores permanecem disponíveis.

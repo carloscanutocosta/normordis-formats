@@ -1,20 +1,13 @@
-# RFC 8785 / JCS conformance
+# Conformidade RFC 8785 / JCS
 
-`vectors.json` is the language-neutral structural contract: implementations compare the
-exact UTF-8 bytes and SHA-256 digest, not textual JSON formatting. Additional
-IEEE-754 serialization cases from RFC 8785 Appendix B are in `numbers.json`.
-
-The Python convenience check is:
+`vectors.json` é o contrato estrutural independente da linguagem. As
+implementações comparam bytes UTF-8 exatos e o digest SHA-256, não a formatação
+textual do JSON. Os casos numéricos IEEE-754 do apêndice B da RFC 8785 estão em
+`numbers.json`.
 
 ```bash
 python3 tools/check_jcs_vectors.py
-```
-
-An independent JavaScript check is also provided:
-
-```bash
 node tools/check-jcs-vectors.mjs
 ```
 
-C#, Rust, Go, Java and other implementations consume the same JSON vectors and
-must produce identical bytes.
+Implementações noutras linguagens DEVEM produzir os mesmos bytes.

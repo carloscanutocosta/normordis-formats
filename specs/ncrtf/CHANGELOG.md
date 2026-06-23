@@ -9,7 +9,7 @@
 **Correcções críticas**:
 - Removido `meta.updated_at` — não determinístico, quebrava a canonicalização JCS
 - `image.ref` obrigatório (em vez de `src` com base64) — base64 tornava o hash instável e inchaça o payload
-- `font_family` passa de marca-objecto para campo explícito em `text`, `paragraph`, `heading` — eliminando tipos mistos no array `marks`
+- `font_family` passa de marca-objeto para campo explícito em `text`, `paragraph`, `heading` — eliminando tipos mistos no array `marks`
 
 **Novas capacidades**:
 - Nós inline: `link` (hiperligação) e `hard_break` (quebra de linha forçada)
@@ -22,7 +22,7 @@
 - Listas unificadas: `ordered_list`/`unordered_list` → `list` com `list_type: "ordered"|"bullet"|"checklist"`; `items` → `content`; `list_item` passa a nó explícito com `type: "list_item"` e conteúdo inline (não blocos)
 - Tabelas simplificadas: `rows`/`cells` com `header: true`/`content` → `head`/`body` com `cells: string[]`; células são texto simples (não rich text)
 - Ordem canónica das marcas actualizada: `bold`, `code`, `italic`, `strikethrough`, `subscript`, `superscript`, `underline`
-- R2 actualizado: contiguidade exige marcas E `font_family` idênticos
+- R2 atualizado: contiguidade exige marcas E `font_family` idênticos
 
 ---
 

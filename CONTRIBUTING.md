@@ -1,45 +1,55 @@
-# Contributing
+# Contribuir
 
-Thank you for your interest in NORMORDIS format specifications.
+Este repositório contém especificações, schemas e vetores de conformidade. As
+implementações de referência vivem em repositórios separados.
 
-## What lives here
+## Comunicar um problema
 
-This repository contains **format specifications only** — text, JSON Schemas, and conformance fixtures. Reference implementations live in separate repositories.
+Abra uma issue para ambiguidades, contradições, erros de schema, vetores
+incorretos, falhas de interoperabilidade ou correções editoriais.
 
-## How to contribute
+## Propor uma alteração
 
-### Reporting issues
+1. Abra primeiro uma issue com o problema e o caso de uso.
+2. Identifique impacto em compatibilidade, segurança, arquivo, acessibilidade e
+   proteção de dados.
+3. Para alterações normativas, atualize conjuntamente texto, schemas, exemplos,
+   testes, rastreabilidade e changelog.
+4. Abra um pull request ligado à issue.
+5. Declare conflitos de interesse e patentes conhecidas potencialmente
+   essenciais à proposta.
 
-Open a GitHub issue for:
-- Ambiguities or contradictions in specification text
-- Conformance fixture errors (a valid fixture that should be invalid, or vice versa)
-- Schema gaps or inconsistencies
-- Typos and editorial corrections
+## Classes de alteração
 
-### Proposing changes
+- **Major**: alteração incompatível de estrutura ou semântica.
+- **Minor**: capacidade opcional compatível.
+- **Patch**: correção sem impacto no comportamento observável.
 
-1. Open an issue first to discuss the change before writing anything.
-2. For normative changes (anything that affects what a conforming implementation must do), explain the use case and the impact on existing implementations.
-3. Fork the repository, make your changes on a branch, and open a pull request referencing the issue.
+A classificação segue [VERSIONING.md](VERSIONING.md). Chamar “clarificação” a
+uma alteração não a torna editorial se modificar uma interpretação conforme.
 
-### What counts as a normative change
+## Vetores de conformidade
 
-A normative change requires a version bump under the [versioning policy](VERSIONING.md):
+- Um vetor `valid/` DEVE satisfazer schema e regras semânticas.
+- Um vetor `invalid/` DEVE isolar, sempre que possível, um único requisito.
+- O nome, metadados ou documentação do vetor DEVEM identificar o requisito.
+- Resultados dependentes de criptografia, renderização ou ambiente DEVEM fixar
+  ferramentas, versões e parâmetros relevantes.
 
-- **Breaking (major)**: removes or renames a mandatory field, changes semantics of an existing field.
-- **Additive (minor)**: adds a new optional field or capability; existing readers continue to work.
-- **Clarification (patch)**: rewording, typo fixes, non-normative note additions — no behavioural impact.
+## Língua e estilo
 
-### Conformance fixtures
+O texto normativo segue
+[a política editorial](docs/normalization/EDITORIAL-POLICY.md). Traduções não
+podem introduzir requisitos novos.
 
-When adding or modifying fixtures under `conformance/`:
-- `valid/` fixtures must satisfy the JSON Schema and all normative rules in the specification.
-- `invalid/` fixtures must violate exactly one rule; the filename should name the violated rule.
+## Licença e propriedade intelectual
 
-## Licensing
+Ao contribuir, o participante aceita os termos de [`LICENSE-SPEC`](LICENSE-SPEC)
+para o material abrangido e confirma ter autoridade para disponibilizar a sua
+contribuição. Não existe CLA neste momento. A aceitação de uma contribuição não
+constitui decisão sobre validade ou essencialidade de patentes.
 
-By contributing to this repository you agree that your contributions are dedicated to the public domain under [CC0 1.0](LICENSE). No CLA is required.
+## Conduta
 
-## Code of conduct
-
-Be respectful and constructive. This is a technical specification project; discussions should stay focused on correctness, interoperability, and implementer needs.
+As discussões devem ser respeitadoras, fundamentadas, rastreáveis e orientadas
+à correção técnica e à interoperabilidade.

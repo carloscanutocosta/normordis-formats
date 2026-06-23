@@ -1,8 +1,8 @@
 # Exemplo `.ndfpkg`
 
-Este directório representa o conteúdo interno de um ficheiro `documento.ndfpkg`.
+Este diretório representa o conteúdo interno de um ficheiro `documento.ndfpkg`.
 
-Um `.ndfpkg` é um arquivo ZIP com esta estrutura exacta. Para criar o pacote:
+Um `.ndfpkg` é um arquivo ZIP com esta estrutura exata. Para criar o pacote:
 
 ```bash
 cd ndfpkg-example/

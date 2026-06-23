@@ -8,7 +8,7 @@ Spec estável. Ver [SPEC.md](SPEC.md) e [CHANGELOG.md](CHANGELOG.md).
 - Layout prescritivo para PDF/UA-2 (graficos[], campos[], blocos[], fluxo, sequencia[])
 - Modelo de fluxo para documentos administrativos (fluxo + linha_lateral + quebra_pagina)
 - Assinatura híbrida CAdES-B-LTA + PAdES (modo: "hibrido")
-- Estilos globais para renderers ODF/HTML (estilos)
+- Estilos globais para renderizadores ODF/HTML (estilos)
 - Dados NDF em cabeçalhos de página (campo_ndf, {ndf:caminho} em mobilia[])
 - Acessibilidade PDF/UA-2 + arquivo PDF/A-3 (alt, rotulo_acessivel)
 - Composição de documentos (composicao[])
@@ -76,9 +76,9 @@ O rodapé renderiza sempre após a última linha de dados, em todas as páginas 
 }
 ```
 
-O NDF estrutura o array com itens marcados como `"tipo_linha": "cabecalho_grupo"` (e.g. `{ "tipo_linha": "cabecalho_grupo", "descricao": "Prédios Urbanos" }`) intercalados com linhas de dados normais. O renderer detecta os itens marcados e renderiza-os como linhas de cabeçalho de grupo.
+O NDF estrutura o array com itens marcados como `"tipo_linha": "cabecalho_grupo"` (e.g. `{ "tipo_linha": "cabecalho_grupo", "descricao": "Prédios Urbanos" }`) intercalados com linhas de dados normais. O renderizador detecta os itens marcados e renderiza-os como linhas de cabeçalho de grupo.
 
-**Nota de design**: o campo `campo_discriminante` não é lógica de negócio no NDT — é uma instrução de renderização sobre como interpretar estrutura já presente no NDF. A decisão de quais itens são cabeçalhos é da app de domínio.
+**Nota de design**: o campo `campo_discriminante` não é lógica de negócio no NDT — é uma instrução de renderização sobre como interpretar estrutura já presente no NDF. A decisão de quais itens são cabeçalhos é da aplicação de domínio.
 
 **Casos de uso**: mapas de pessoal por categoria, balanços por natureza de rubrica, relatórios financeiros com grupos de contas.
 
@@ -86,7 +86,7 @@ O NDF estrutura o array com itens marcados como `"tipo_linha": "cabecalho_grupo"
 
 ### T3. Verificação de cobertura NCRTF v2.0.0
 
-**Problema**: o `corpo` do NDT referencia conteúdo NCRTF do NDF. A qualidade do output ODF/HTML para documentos administrativos depende directamente do que o NCRTF expressa. Padrões a verificar antes de implementar o renderer ODF:
+**Problema**: o `corpo` do NDT referencia conteúdo NCRTF do NDF. A qualidade do saída ODF/HTML para documentos administrativos depende diretamente do que o NCRTF expressa. Padrões a verificar antes de implementar o renderizador ODF:
 
 | Padrão | Status NCRTF v2.0.0 | Impacto se ausente |
 |---|---|---|
@@ -110,5 +110,5 @@ Os seguintes padrões foram analisados e excluídos deliberadamente:
 | Texto em múltiplas colunas (newspaper) | Raro em AP; sem pedido documentado |
 | Herança de template (NDT estende NDT) | Preocupação de ferramentas, não de formato; resolve-se ao nível do editor/SDK |
 | Hiperligações em `campos[]` | NCRTF no `corpo` cobre links; campos posicionados raramente são hiperligáveis em documentos oficiais |
-| Estilos condicionais por valor (ex.: vermelho se negativo) | Lógica de apresentação baseada em dados = lógica de negócio; responsabilidade da app de domínio |
-| Numeração automática de linhas de tabela | A app de domínio inclui o número no NDF; o renderer não computa valores |
+| Estilos condicionais por valor (ex.: vermelho se negativo) | Lógica de apresentação baseada em dados = lógica de negócio; responsabilidade da aplicação de domínio |
+| Numeração automática de linhas de tabela | A aplicação de domínio inclui o número no NDF; o renderizador não computa valores |

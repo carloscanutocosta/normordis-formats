@@ -1,52 +1,53 @@
-# NORMORDIS Public Verification Portal — Draft 1.0.0
+# Portal público de verificação NORMORDIS
 
-## 1. Scope
+**Versão:** 1.0.0
+**Estado:** Draft — Revisão pública
 
-The portal is a trusted custody service that resolves a `validation_code`. It
-does not make the code itself a signature and does not expose the NDF content.
-`openapi.yaml` is the language-neutral machine-readable contract.
+## 1. Objetivo e âmbito
 
-## 2. Verification procedure
+O portal é um serviço de custódia que resolve um `validation_code`. O código
+não constitui uma assinatura e o portal não expõe o conteúdo NDF. O contrato
+machine-readable independente da língua encontra-se em `openapi.yaml`.
 
-For every successful lookup the service MUST:
+## 2. Procedimento de verificação
 
-1. resolve the exact NDF custody record without relying on user-supplied
-   metadata;
-2. recompute JCS and `payload_hash` from the preserved NDF-core;
-3. recompute and compare `validation_code`;
-4. validate the custody chain and its latest external anchor;
-5. validate CAdES, timestamps, revocation material and trust status when
-   present;
-6. retrieve the current archival state;
-7. return separate integrity, authenticity and signature states.
+Para cada consulta bem-sucedida, o serviço DEVE:
 
-`trusted_custody` means the portal attests that the record was issued and
-preserved by the identified institution. It MUST NOT be described as a
-personal electronic signature. `integrity_only` MUST NOT be presented as proof
-of issuer identity.
+1. resolver o registo exato sem depender de metadados fornecidos pelo
+   utilizador;
+2. recalcular JCS e `payload_hash` a partir do NDF-core preservado;
+3. recalcular e comparar `validation_code`;
+4. validar a cadeia de custódia e a última âncora externa;
+5. validar CAdES, timestamps, revogação e confiança, quando presentes;
+6. obter o estado arquivístico corrente;
+7. devolver separadamente os estados de integridade, autenticidade e
+   assinatura.
 
-## 3. Privacy and abuse resistance
+`trusted_custody` significa que o portal atesta emissão e preservação pela
+instituição identificada. NÃO DEVE ser apresentado como assinatura eletrónica
+pessoal. `integrity_only` NÃO DEVE ser apresentado como prova da identidade do
+emissor.
 
-The public response MUST contain only the minimum metadata needed to identify
-the document: producing entity, type, finalization date and state. Subject,
-recipient, personal identifiers, classification, content and retention details
-MUST NOT be exposed by this endpoint.
+## 3. Privacidade e resistência a abuso
 
-The service MUST rate-limit enumeration, log abusive access and return the same
-not-found response for unknown and non-public records. Logs are subject to a
-documented retention period. Public responses MUST NOT be cached when the
-document state can change.
+A resposta pública DEVE conter apenas entidade produtora, tipo, data de
+finalização e estado. Assunto, destinatário, identificadores pessoais,
+classificação, conteúdo e detalhes de conservação NÃO DEVEM ser expostos.
 
-## 4. Availability and offline verification
+O serviço DEVE limitar enumeração, registar abuso e devolver a mesma resposta
+para registos desconhecidos e não públicos. Os logs DEVEM ter prazo de
+conservação documentado. Respostas cujo estado possa mudar NÃO DEVEM usar cache
+pública incompatível com essa mudança.
 
-Portal unavailability produces `unavailable`, never `invalid`. Signed or sealed
-packages remain independently verifiable offline. Documents authenticated only
-by custody require another trusted custody replica or a verifiable exported
-custody anchor for offline authenticity.
+## 4. Disponibilidade e verificação offline
 
-## 5. Operational trust
+Indisponibilidade do portal produz `unavailable`, nunca `invalid`. Pacotes
+assinados ou selados permanecem verificáveis offline. Autenticidade baseada
+apenas em custódia exige réplica confiável ou âncora exportada verificável.
 
-The portal operator MUST publish its identity, security contact, incident
-policy, supported NDF versions, trust-list update policy and audit history. The
-service SHOULD sign API responses or publish a transparency log so that a
-response can be evidenced independently of a screenshot.
+## 5. Confiança operacional
+
+O operador DEVE publicar identidade, contacto de segurança, política de
+incidentes, versões suportadas, atualização de listas de confiança e histórico
+de auditoria. RECOMENDA-SE assinar respostas ou publicar um log de
+transparência que permita provar uma resposta sem depender de captura de ecrã.

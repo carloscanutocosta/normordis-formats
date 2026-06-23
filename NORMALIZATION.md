@@ -1,62 +1,72 @@
-# Normalization
+# Percurso de normalização
 
-## Purpose
+## Finalidade
 
-This document defines the normalization path for NORMORDIS specifications.
+Este documento define o percurso de maturidade das especificações NORMORDIS.
+Os níveis são internos ao projeto e não equivalem aos estádios formais do IPQ,
+do CEN, da ISO ou da IEC.
 
-## Objectives
+## Objetivos
 
-- Stable public specifications
-- Independent implementations
-- Interoperability
-- Long-term preservation
-- Open governance
+- Especificações públicas estáveis
+- Implementações independentes
+- Interoperabilidade verificável
+- Preservação a longo prazo
+- Governação aberta e baseada em consenso
 
-## Maturity Levels
+## Níveis de maturidade
 
-### Level 0 — Concept
+### Nível 0 — Conceito
 
-Initial proposal.
+Proposta inicial.
 
-### Level 1 — Draft
+### Nível 1 — Draft
 
-Public specification under active development.
+Especificação pública em desenvolvimento ativo.
 
-### Level 2 — Public Review
+### Nível 2 — Revisão pública
 
-Specification available for external review.
+Especificação disponibilizada para comentários externos, com registo e
+resolução pública dos comentários recebidos.
 
-### Level 3 — Candidate
+### Nível 3 — Candidata
 
-Feature-complete specification awaiting implementation feedback.
+Especificação funcionalmente completa, congelada para alterações incompatíveis
+e em validação por implementações e pilotos independentes.
 
-### Level 4 — Stable
+### Nível 4 — Estável
 
-Specification validated through implementations and conformance testing.
+Especificação validada por implementações independentes, testes de
+interoperabilidade e conclusão dos gates externos aplicáveis.
 
-### Level 5 — Normative Baseline
+### Nível 5 — Base candidata a normalização
 
-Specification suitable for submission to a formal standards body or technical committee.
+Base documental considerada adequada para apresentação a um organismo de
+normalização ou comissão técnica. Apenas esse organismo pode atribuir-lhe um
+estatuto normativo oficial.
 
-## Stable Release Requirements
+## Requisitos de uma versão estável
 
-A Stable specification requires:
+Uma especificação estável requer cumulativamente:
 
-- normative text;
-- schemas;
-- examples;
-- conformance vectors;
-- governance documentation;
-- versioning policy.
+- texto normativo conforme à política editorial;
+- schemas e exemplos sincronizados;
+- vetores e suite de conformidade com cobertura rastreável;
+- pelo menos uma implementação ou piloto independente;
+- conclusão dos gates externos aplicáveis;
+- documentação de governação, IPR e versionamento;
+- período de revisão pública e resolução documentada dos comentários.
 
-## Future Standardization
+## Normalização futura
 
-Should a competent standards body adopt the specification, its governance processes take precedence.
+Caso um organismo competente aceite o trabalho, os seus procedimentos,
+templates, regras linguísticas, de consenso e de propriedade intelectual
+prevalecem.
 
-The transition should preserve:
+A transição deve preservar:
 
-- version history;
-- ADRs;
-- issues;
-- conformance vectors;
-- open licensing.
+- histórico de versões;
+- ADR;
+- issues, comentários e respetivas resoluções;
+- vetores de conformidade;
+- proveniência das contribuições e informação de licenciamento.

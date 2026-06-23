@@ -2,38 +2,72 @@
 
 **NORMORDIS Document Template — Especificação Formal**
 
-Estado: Draft para implementação
+Estado: Draft — Revisão pública
 Âmbito: formato declarativo de layout para descrever a composição visual de qualquer documento institucional — desde impressos fiscais complexos (ex.: Modelo 3 IRS) a documentos administrativos correntes (ofícios, informações, despachos).
+
+Objetivo de interoperabilidade: permitir que renderizadores independentes
+interpretem o mesmo template e produzam saídas equivalentes segundo um perfil
+de conformidade, sem dependência do sistema que criou o NDT.
+
+Convenções editoriais: aplica-se
+[`docs/normalization/EDITORIAL-POLICY.md`](../../docs/normalization/EDITORIAL-POLICY.md).
+A língua normativa é o português europeu. As palavras **DEVE**, **NÃO DEVE**,
+**RECOMENDA-SE**, **NÃO SE RECOMENDA** e **PODE** seguem o BCP 14 (RFC 2119 e
+RFC 8174) quando aparecem em maiúsculas. Formas em minúsculas são narrativas.
+As referências comuns encontram-se em
+[`docs/normalization/NORMATIVE-REFERENCES.md`](../../docs/normalization/NORMATIVE-REFERENCES.md).
 
 ## Licenciamento
 
-Esta especificação (texto, estrutura, JSON Schemas e exemplos associados) é disponibilizada sob **CC0 1.0** (domínio público). O objetivo é que qualquer produtor de software para a Administração Pública — open source ou proprietário — possa implementar leitura e renderização de NDT livremente, sem qualquer obrigação contratual ou de licenciamento para com o autor da especificação.
+Esta especificação (texto, estrutura, JSON Schemas e exemplos associados) é disponibilizada sob **CC0 1.0** (domínio público). O objetivo é que qualquer produtor de software para a Administração Pública — código aberto ou proprietário — possa implementar leitura e renderização de NDT livremente, sem qualquer obrigação contratual ou de licenciamento para com o autor da especificação.
 
 A **implementação de referência** (`normordis-pdf`, bibliotecas Rust) é distribuída sob licença separada (EUPL v1.2), indicada no respetivo repositório. Esta especificação é licenciada separadamente (`LICENSE-SPEC`) precisamente para que a adoção do formato não dependa da licença do código.
 
 ---
 
-## 1. Axioma e papel do NDT
+## Referências normativas
 
-**NDF + NDT + renderer = representação visual do documento.**
+Aplicam-se BCP 14, JSON Schema Draft 2020-12 e, quando invocados por um perfil
+de saída, os documentos identificados no
+[registo de referências](../../docs/normalization/NORMATIVE-REFERENCES.md).
+NDF 1.x e NCRTF 2.x são dependências normativas versionadas para resolução de
+dados e conteúdo. Referências PDF/A, PDF/UA, ODF, CAdES e PAdES só são
+normativas para o perfil que expressamente as declare.
+
+## Termos e definições
+
+Aplicam-se os termos da
+[base terminológica comum](../../docs/normalization/TERMINOLOGY.md). Termos NDT
+específicos são definidos na cláusula em que são introduzidos. O Anexo A reúne
+um glossário informativo.
+
+## 1. Objetivo, âmbito e papel do NDT
+
+**NDF + NDT + renderizador = representação visual do documento.**
 
 - **NDT** (este formato) — descreve *como* o documento é composto visualmente: estrutura de páginas, posições, elementos gráficos, tipografia, tabelas de dados, mobília.
-- **NDF** (spec NDF v1.0.0) — fornece *o quê*: os dados a apresentar, já computados e materializados pela app de domínio.
-- **Renderer** (normordis-pdf, typst, ou qualquer implementação conforme) — combina NDT + NDF para produzir o documento. É um executor puro: não valida dados, não computa valores, não aplica regras de negócio.
+- **NDF** (especificação NDF v1.0.0) — fornece *o quê*: os dados a apresentar, já computados e materializados pela aplicação de domínio.
+- **Renderizador** (qualquer implementação conforme) — combina NDT + NDF para
+  produzir o documento. Verifica a conformidade estrutural necessária à
+  renderização, mas não aplica validações nem regras do domínio.
 
 **Implicações directas:**
 
-1. O NDT não contém regras de validação, fórmulas de cálculo, obrigatoriedade de campos, nem qualquer lógica de negócio. Esses são responsabilidade exclusiva da app de domínio que produz o NDF.
-2. O NDF que chega ao renderer está completo nos seus dados. O renderer não precisa de saber que `valor_realizacao` é monetário obrigatório — só precisa de saber onde o colocar e como formatá-lo.
+1. O NDT não contém regras de validação do domínio, fórmulas de cálculo,
+   obrigatoriedade material de campos nem lógica de negócio. Essas regras são
+   responsabilidade da aplicação que produz o NDF.
+2. O renderizador verifica versões, referências, integridade e estrutura
+   necessárias para interpretar NDF e NDT. Não decide se um dado satisfaz uma
+   regra jurídica ou de negócio.
 3. O mesmo NDT + NDF produz uma representação semanticamente equivalente. A
-   identidade byte a byte só pode ser exigida por um perfil de renderer que
+   a identidade byte a byte é exigível apenas por um perfil de renderizador que
    fixe motor, fontes, recursos, versões e parâmetros de serialização.
 
 ### 1.1 Referência NDF ↔ NDT
 
 O NDF-core referencia o NDT mas não o incorpora. No perfil de custódia, o NDT
-pode ser deduplicado por hash. O `.ndfpkg` portátil DEVE incorporar a versão
-exacta do NDT, os schemas e os recursos necessários à renderização.
+**PODE** ser deduplicado por hash. O `.ndfpkg` portátil DEVE incorporar a versão
+exata do NDT, os schemas e os recursos necessários à renderização.
 
 | NDF-core | NDT | Significado |
 |---|---|---|
@@ -52,8 +86,8 @@ explicitamente definidos, como `{{validation_code}}`.
 
 | Fase | Estado NDF | Papel do NDT |
 |---|---|---|
-| **Apresentação de formulário** | `rascunho` | A app de domínio usa o NDT para saber que campos existem e como estruturar a UI de preenchimento. O NDF está incompleto. |
-| **Renderização** | qualquer | O NDT é o único guia visual. O NDF fornece os dados. O renderer segue o NDT à risca. |
+| **Apresentação de formulário** | `rascunho` | A aplicação de domínio usa o NDT para saber que campos existem e como estruturar a UI de preenchimento. O NDF está incompleto. |
+| **Renderização** | qualquer | O NDT é o único guia visual. O NDF fornece os dados. O renderizador segue o NDT à risca. |
 
 Após o fecho do NDF, o NDT é irrelevante para qualquer operação sobre o conteúdo — é relevante apenas para re-renderização.
 
@@ -63,25 +97,28 @@ O NDT define um layout prescritivo para PDF/impressão. Para outros formatos, o 
 
 | Formato | Momento no ciclo de vida | Fidelidade de layout | Fidelidade de conteúdo | Fonte de layout |
 |---|---|---|---|---|
-| **PDF / PDF/A** | Arquivo, prova, entrega formal | **Normativa segundo o perfil de renderer** | Total | Bloco `layout` do NDT (§5) |
-| **ODF** | Intercâmbio, edição, revisão | Best-effort — renderer usa `estilos` NDT (§3) | Total | Bloco `estilos` do NDT (§3) |
+| **PDF / PDF/A** | Arquivo, prova, entrega formal | **Normativa segundo o perfil de renderizador** | Total | Bloco `layout` do NDT (§5) |
+| **ODF** | Intercâmbio, edição, revisão | Best-effort — renderizador usa `estilos` NDT (§3) | Total | Bloco `estilos` do NDT (§3) |
 | **HTML** | Publicação, intranet, consulta | Best-effort — layout é CSS flow | Total | Bloco `estilos` do NDT (§3) |
-| **Typst** | Composição tipográfica avançada | Alta — mm coords são dicas; renderer adapta | Total | Bloco `layout` do NDT (§5) |
+| **Typst** | Composição tipográfica avançada | Alta — mm coords são dicas; renderizador adapta | Total | Bloco `layout` do NDT (§5) |
 | **Outros** | Não especificado | Não especificado | Via NCRTF no NDF | — |
 
 **Fidelidade de conteúdo** significa que o texto, tabelas, listas, imagens e estrutura semântica do documento são preservados identicamente. **Fidelidade de layout** significa que posições, fontes, margens e paginação são reproduzidas com exactidão.
 
-**PDF/A e ODF servem momentos distintos** — não são equivalentes. PDF/A pode
-ser preservado como representação fixa verificável por hash. ODF é um formato
-de intercâmbio e trabalho editável. Ambos são projecções da mesma fonte de
+**PDF/A e ODF servem momentos distintos** — não são equivalentes. PDF/A é uma
+representação fixa preservável e verificável por hash. ODF é um formato
+de intercâmbio e trabalho editável. Ambos são projeções da mesma fonte de
 verdade; a identidade binária de um PDF só é garantida por um perfil de
-renderer que fixe todo o ambiente de produção.
+renderizador que fixe todo o ambiente de produção.
 
-**ODF como formato secundário** alinha-se com os princípios de soberania digital da spec NDF e com o RNID (Regulamento Nacional de Interoperabilidade Digital). Para a Administração Pública portuguesa, ODF é o formato de intercâmbio recomendado para documentos editáveis.
+**ODF como formato secundário** alinha-se com os princípios de soberania digital da especificação NDF e com o RNID (Regulamento Nacional de Interoperabilidade Digital). Para a Administração Pública portuguesa, ODF é o formato de intercâmbio recomendado para documentos editáveis.
 
-Para ODF e HTML, o bloco `layout` do NDT pode ser ignorado pelo renderer; o bloco `estilos` (§3) é a fonte de verdade para estilo. Um renderer ODF conforme produz um documento profissional e fiel no conteúdo — não uma cópia pixel-perfect do PDF.
+Para ODF e HTML, o renderizador **PODE** ignorar o bloco `layout` do NDT; o
+bloco `estilos` (§3) é a fonte de verdade para estilo. Um renderizador ODF
+conforme produz conteúdo semanticamente fiel, não uma cópia pixel a pixel do
+PDF.
 
-**Elementos sem equivalente em formatos de fluxo**: `grelha_digitos`, `tabela_visual`, `rectangulo`, `linha`, `min_linhas_visivel` e `assinatura` (como AcroForm PDF) não têm equivalente directo em ODF/HTML. Renderers de fluxo podem ignorá-los ou usar aproximações (ex.: `grelha_digitos` → campo de texto ODF; `assinatura` → linha de assinatura ODF com macro de captura).
+**Elementos sem equivalente em formatos de fluxo**: `grelha_digitos`, `tabela_visual`, `rectangulo`, `linha`, `min_linhas_visivel` e `assinatura` (como AcroForm PDF) não têm equivalente direto em ODF/HTML. Renderizadores de fluxo PODEM ignorá-los ou usar aproximações (ex.: `grelha_digitos` → campo de texto ODF; `assinatura` → linha de assinatura ODF com macro de captura).
 
 ---
 
@@ -113,7 +150,7 @@ Para ODF e HTML, o bloco `layout` do NDT pode ser ignorado pelo renderer; o bloc
 
 ## 3. Estilos globais do documento
 
-O bloco `estilos` declara os valores por defeito de tipografia e espaçamento para o documento inteiro. É a **fonte principal de estilo para renderers de fluxo** (ODF, HTML) e serve como fallback para renderers PDF onde elementos não declarem fonte própria.
+O bloco `estilos` declara os valores por defeito de tipografia e espaçamento para o documento inteiro. É a **fonte principal de estilo para renderizadores de fluxo** (ODF, HTML) e serve como alternativa para renderizadores PDF onde elementos não declarem fonte própria.
 
 ```json
 {
@@ -141,7 +178,7 @@ O bloco `estilos` declara os valores por defeito de tipografia e espaçamento pa
 | `identacao_lista_mm` | Indentação por nível de lista NCRTF. |
 | `cabecalhos[]` | Estilos por nível de heading NCRTF (1–6). |
 
-Um renderer ODF mapeia `estilos` para estilos de parágrafo nativos (`Default Paragraph Style`, `Heading 1`, etc.). Um renderer HTML mapeia para variáveis CSS (`--font-primary`, `--color-text`, etc.). Um renderer PDF usa `fonte_padrao` como fallback onde nenhum elemento declara fonte própria.
+Um renderizador ODF mapeia `estilos` para estilos de parágrafo nativos (`Default Paragraph Style`, `Heading 1`, etc.). Um renderizador HTML mapeia para variáveis CSS (`--font-primary`, `--color-text`, etc.). Um renderizador PDF usa `fonte_padrao` como alternativa onde nenhum elemento declara fonte própria.
 
 ---
 
@@ -149,7 +186,7 @@ Um renderer ODF mapeia `estilos` para estilos de parágrafo nativos (`Default Pa
 
 O NDT referencia valores do NDF através de **caminhos canónicos** — strings que identificam um valor pelo seu percurso hierárquico de identificadores. O NDF armazena valores nessas mesmas posições.
 
-A hierarquia é uma **convenção de endereçamento**, não um schema. O NDT não valida se o caminho existe no NDF nem o tipo do valor — o renderer escreve o que encontrar, ou deixa em branco se o caminho não existir.
+A hierarquia é uma **convenção de endereçamento**, não um schema. O NDT não valida se o caminho existe no NDF nem o tipo do valor — o renderizador escreve o que encontrar, ou deixa em branco se o caminho não existir.
 
 A sintaxe canónica é uma sequência de segmentos separados por `.`, em que cada
 segmento cumpre `[A-Za-z_][A-Za-z0-9_-]*`. A raiz implícita é sempre
@@ -174,11 +211,12 @@ quadro4.imoveis              → array de linhas
 quadro4.imoveis[i].freguesia → propriedade de uma linha
 ```
 
-O NDT não precisa de conhecer o comprimento do array — o renderer itera sobre os itens presentes no NDF.
+O NDT não precisa de conhecer o comprimento do array — o renderizador itera sobre os itens presentes no NDF.
 
 ### 4.3 Formatos de display
 
-O NDT pode declarar um **formato de display** para orientar o renderer na apresentação visual de um valor. Não é um tipo de dados com validação — é uma hint de renderização.
+O NDT **PODE** declarar um **formato de apresentação** para orientar o
+renderizador. Não é um tipo de dados com validação; é uma indicação visual.
 
 | Formato | Apresentação visual |
 |---|---|
@@ -191,13 +229,13 @@ O NDT pode declarar um **formato de display** para orientar o renderer na aprese
 | `"checkbox"` | Caixa de verificação marcada/desmarcada |
 | `"radio"` | Ponto de seleção ativo/inativo |
 
-Formatos numéricos aceitam o parâmetro opcional `"casas_decimais"` (inteiro). Default: `2` para `"monetario"`, `0` para `"inteiro"`, variável para `"numero"`.
+Formatos numéricos aceitam o parâmetro opcional `"casas_decimais"` (inteiro). Predefinição: `2` para `"monetario"`, `0` para `"inteiro"`, variável para `"numero"`.
 
 ---
 
 ## 5. Layout (PDF e impressão)
 
-O bloco `layout` descreve a composição visual prescritiva do documento para PDF e impressão. É **normativo para renderers PDF**; renderers de fluxo (ODF, HTML) podem ignorá-lo em favor de `estilos` (§3).
+O bloco `layout` descreve a composição visual prescritiva do documento para PDF e impressão. É **normativo para renderizadores PDF**; renderizadores de fluxo (ODF, HTML) PODEM ignorá-lo em favor de `estilos` (§3).
 
 ### 5.1 Configuração global de página
 
@@ -252,7 +290,7 @@ Cada `pagina_def` organiza os seus elementos em cinco colecções. Todas partilh
 
 Para documentos administrativos onde o corpo tem extensão variável (ofícios, relatórios, informações), os elementos que se seguem ao corpo — fórmula de encerramento, bloco de assinatura, data — precisam de aparecer *depois de onde o corpo terminar*, não em coordenadas absolutas fixas.
 
-O objecto `fluxo` declara uma **região de fluxo vertical** dentro da `pagina_def`: os seus elementos empilham-se de cima para baixo a partir de `y_inicio`, ocupando a altura que o conteúdo requerer.
+O objeto `fluxo` declara uma **região de fluxo vertical** dentro da `pagina_def`: os seus elementos empilham-se de cima para baixo a partir de `y_inicio`, ocupando a altura que o conteúdo requerer.
 
 ```json
 {
@@ -282,13 +320,13 @@ O objecto `fluxo` declara uma **região de fluxo vertical** dentro da `pagina_de
 }
 ```
 
-**Comportamento de overflow do `corpo` dentro do `fluxo`**: quando o conteúdo NCRTF de um elemento `tipo: "corpo"` não cabe na área disponível (entre `y_inicio` e o limite inferior da área útil), o overflow é gerido por `sequencia[]` (§5.7) da mesma forma que um `bloco corpo` absoluto. Os elementos de `fluxo.elementos` que aparecem **depois** do `corpo` são renderizados na **última página** da sequência de overflow, imediatamente após o fim do corpo. Os elementos **antes** do `corpo` são renderizados apenas na primeira instância da `pagina_def`.
+**Comportamento de extravasamento do `corpo` dentro do `fluxo`**: quando o conteúdo NCRTF de um elemento `tipo: "corpo"` não cabe na área disponível (entre `y_inicio` e o limite inferior da área útil), o extravasamento é gerido por `sequencia[]` (§5.7) da mesma forma que um `bloco corpo` absoluto. Os elementos de `fluxo.elementos` que aparecem **depois** do `corpo` são renderizados na **última página** da sequência de extravasamento, imediatamente após o fim do corpo. Os elementos **antes** do `corpo` são renderizados apenas na primeira instância da `pagina_def`.
 
 **Elementos suportados em `fluxo.elementos`:**
 
 | `tipo` | Descrição |
 |---|---|
-| `corpo` | Bloco de texto NCRTF com fluxo (`referencia` = caminho NDF). Único por `fluxo`; o overflow propaga-se pela `sequencia[]`. |
+| `corpo` | Bloco de texto NCRTF com fluxo (`referencia` = caminho NDF). Único por `fluxo`; o extravasamento propaga-se pela `sequencia[]`. |
 | `tabela` | Tabela de dados NDF (mesma estrutura de `blocos[]` tipo tabela, §5.5.1). Sem `posicao` — posicionada automaticamente. |
 | `texto_fixo` | Texto estático ou com placeholders NDT (`{{versao_ndt}}`). Faz wrapping automático na largura disponível. |
 | `campo` | Valor NDF escalar (mesma semântica de `campos[]`, §5.4, sem `posicao`). |
@@ -297,7 +335,7 @@ O objecto `fluxo` declara uma **região de fluxo vertical** dentro da `pagina_de
 | `separador` | Linha horizontal. Campos: `espessura` (mm, default 0.3), `cor` (hex). |
 | `assinatura` | Campo de assinatura (§5.3.6). Sem `posicao` — posicionado em fluxo. |
 | `linha_lateral` | Agrupa dois ou mais elementos lado a lado numa mesma linha horizontal. Ver §5.2.2. |
-| `quebra_pagina` | Força início de nova página. O renderer termina a instância actual da `pagina_def` e avança para a seguinte entrada em `sequencia[]`. Sem campos adicionais. |
+| `quebra_pagina` | Força início de nova página. O renderizador termina a instância actual da `pagina_def` e avança para a seguinte entrada em `sequencia[]`. Sem campos adicionais. |
 
 Todos os elementos de `fluxo.elementos` aceitam `"incluir_se"` (ver §5.4) para renderização condicional.
 
@@ -305,7 +343,9 @@ Todos os elementos de `fluxo.elementos` aceitam `"incluir_se"` (ver §5.4) para 
 
 #### 5.2.2 Layout lateral em fluxo (`linha_lateral`)
 
-Agrupa elementos de `fluxo` lado a lado numa mesma linha horizontal. Útil para blocos de dupla assinatura, datas com referências, ou qualquer par/grupo de elementos que devem partilhar a largura disponível.
+Agrupa elementos de `fluxo` lado a lado numa mesma linha horizontal. É usado
+para blocos de dupla assinatura, datas com referências ou outros elementos que
+partilham a largura disponível.
 
 ```json
 {
@@ -334,7 +374,7 @@ Agrupa elementos de `fluxo` lado a lado numa mesma linha horizontal. Útil para 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
 | `elementos[]` | Sim | Array de colunas laterais. |
-| `elementos[].largura` | Sim | Largura da coluna (mm). A soma das larguras não deve exceder a largura útil da `pagina_def`. |
+| `elementos[].largura` | Sim | Largura da coluna (mm). A soma das larguras NÃO DEVE exceder a largura útil da `pagina_def`. |
 | `elementos[].conteudo[]` | Sim | Lista de elementos de fluxo dentro desta coluna. Aceita todos os tipos de `fluxo.elementos` excepto `corpo` e `linha_lateral` (não aninhável). |
 
 **Comportamento de altura**: a `linha_lateral` tem a altura do elemento mais alto entre as suas colunas. As colunas mais curtas deixam espaço em branco abaixo. Cada coluna empilha os seus elementos verticalmente da mesma forma que `fluxo.elementos`.
@@ -434,13 +474,13 @@ Texto estático não proveniente do NDF — títulos, legendas, texto do impress
 
 `conteudo` aceita dois tipos de placeholders:
 - **Metadados NDT** (resolvidos a partir do cabeçalho do NDT): `{{schema_id}}`, `{{versao_ndt}}`, `{{titulo}}`, `{{emissor}}`
-- **Valores de envelope** (resolvidos pelo renderer a partir do envelope NDF no momento da renderização): `{{validation_code}}`
+- **Valores de envelope** (resolvidos pelo renderizador a partir do envelope NDF no momento da renderização): `{{validation_code}}`
 
-`{{validation_code}}` é o código de verificação canónico do NDF (ver NDF spec §4.6). Não é um dado do NDF-core nem um metadado do NDT — é computado durante a finalização e fornecido ao renderer pelo envelope. Deve ser usado no elemento `codigo_barras` e/ou em `texto_fixo` de mobília para emissão de documentos para o exterior.
+`{{validation_code}}` é o código de verificação canónico do NDF (ver NDF especificação §4.6). Não é um dado do NDF-core nem um metadado do NDT — é computado durante a finalização e fornecido ao renderizador pelo envelope. Deve ser usado no elemento `codigo_barras` e/ou em `texto_fixo` de mobília para emissão de documentos para o exterior.
 
 #### 5.3.6 `assinatura`
 
-Campo de assinatura electrónica ou manuscrita. O campo `modo` controla a relação entre a assinatura CAdES guardada no NDF e o PDF gerado — ver §8.1 para o modelo completo de assinatura.
+Campo de assinatura eletrónica ou manuscrita. O campo `modo` controla a relação entre a assinatura CAdES guardada no NDF e o PDF gerado — ver §8.1 para o modelo completo de assinatura.
 
 ```json
 {
@@ -461,17 +501,17 @@ Campo de assinatura electrónica ou manuscrita. O campo `modo` controla a relaç
 | `posicao` | Cond. | Coordenadas de origem (mm). Obrigatório em `graficos[]`; omitido em `fluxo.elementos`. |
 | `largura` | Sim | Largura do campo (mm). |
 | `altura` | Sim | Altura do campo (mm). |
-| `modo` | Não | Modo de integração CAdES↔PDF. Default: `"hibrido"`. Ver §8.1. |
+| `modo` | Não | Modo de integração CAdES↔PDF. Predefinição: `"hibrido"`. Ver §8.1. |
 
 **Valores de `modo`:**
 
 | Valor | Comportamento no PDF gerado |
 |---|---|
 | `"visual_apenas"` | Placeholder visual sem campo AcroForm. A assinatura ou selo, se existente, vive no envelope NDF. |
-| `"hibrido"` | **(Default)** Cria campo AcroForm que pode receber uma operação PAdES independente. O `.ndfpkg` pode também ser embutido como attachment PDF/A. |
-| `"ndf_attachment"` | Sem AcroForm. O CAdES do NDF é embutido como attachment PDF/A-3 (`ndf-signature.p7s`). Útil quando o validador de destino suporta PDF/A-3 mas não requer AcroForm. |
+| `"hibrido"` | **(Predefinido)** Cria campo AcroForm que suporta uma operação PAdES independente. O `.ndfpkg` **PODE** também ser incorporado como anexo PDF/A. |
+| `"ndf_attachment"` | Sem AcroForm. O CAdES do NDF é embutido comoanexo PDF/A-3 (`ndf-signature.p7s`). Útil quando o validador de destino suporta PDF/A-3 mas não requer AcroForm. |
 
-Em ODF, `assinatura` é renderizada como linha de assinatura com campo de formulário (`com.sun.star.text.TextField.Input`) e legenda. Em HTML, como `<div class="signature-field" data-id="{{id}}">`. O `modo` é ignorado em formatos de fluxo — aplica-se apenas ao renderer PDF.
+Em ODF, `assinatura` é renderizada como linha de assinatura com campo de formulário (`com.sun.star.text.TextField.Input`) e legenda. Em HTML, como `<div class="signature-field" data-id="{{id}}">`. O `modo` é ignorado em formatos de fluxo — aplica-se apenas ao renderizador PDF.
 
 #### 5.3.7 `codigo_barras`
 
@@ -488,7 +528,7 @@ Em ODF, `assinatura` é renderizada como linha de assinatura com campo de formul
 ```
 
 `formato_barras`: `"qrcode"` | `"code128"` | `"ean13"`.
-`referencia`: caminho NDF com o valor a codificar. Para conteúdo composto, usar `"conteudo"` (string com interpolações `{{caminho_ndf}}`). Para o código de validação do documento, usar `{{validation_code}}` (resolvido pelo renderer a partir do envelope NDF):
+`referencia`: caminho NDF com o valor a codificar. Para conteúdo composto, usar `"conteudo"` (string com interpolações `{{caminho_ndf}}`). Para o código de validação do documento, usar `{{validation_code}}` (resolvido pelo renderizador a partir do envelope NDF):
 
 ```json
 {
@@ -567,7 +607,7 @@ Grelha de linhas e colunas fixas — estrutura visual do impresso sem dados.
 }
 ```
 
-`colunas`: array de larguras (mm); a soma deve igualar `largura`.
+`colunas`: array de larguras (mm); a soma DEVE igualar `largura`.
 
 #### 5.3.12 Sumário de tipos gráficos
 
@@ -578,7 +618,7 @@ Grelha de linhas e colunas fixas — estrutura visual do impresso sem dados.
 | `grelha_digitos` | Sim — valor do campo | NIFs, datas, códigos em caixas |
 | `imagem` | Não | Logótipos, brasões |
 | `texto_fixo` | Não (placeholders NDT) | Títulos, legendas do impresso |
-| `assinatura` | Não (registada no NDF) | Campo de assinatura electrónica/manuscrita |
+| `assinatura` | Não (registada no NDF) | Campo de assinatura eletrónica/manuscrita |
 | `codigo_barras` | Sim — valor a codificar | Código de validação |
 | `poligono` | Não | Setas, formas personalizadas |
 | `elipse` | Não | Círculos decorativos |
@@ -628,16 +668,16 @@ Valores NDF escalares a coordenadas absolutas. Cada entrada em `campos[]` é um 
 | `posicao` | Sim | Coordenadas de origem da caixa (mm). |
 | `largura` | Sim | Largura da caixa (mm). |
 | `altura` | Sim | Altura da caixa (mm). |
-| `formato` | Não | Formato de display (§4.3). Default: `"texto"`. |
+| `formato` | Não | Formato de apresentação (§4.3). Predefinição: `"texto"`. |
 | `casas_decimais` | Não | Para `"monetario"` e `"numero"`. |
 | `fonte` | Não | Ver §5.8. Herda de `estilos.fonte_padrao` se omitido. |
-| `alinhamento` | Não | `"esquerda"` \| `"centro"` \| `"direita"`. Default: `"esquerda"`. |
+| `alinhamento` | Não | `"esquerda"` \| `"centro"` \| `"direita"`. Predefinição: `"esquerda"`. |
 | `preenchimento_fundo` | Não | `"none"` ou cor hex. |
-| `rotulo_acessivel` | Não | Texto legível por leitores de ecrã (PDF/UA-2 `/TU`). Obrigatório para campos interactivos (`"checkbox"`, `"radio"`). Se omitido em campos de texto, o renderer usa o valor de `referencia` como fallback. |
+| `rotulo_acessivel` | Não | Texto legível por leitores de ecrã (PDF/UA-2 `/TU`). Obrigatório para campos interativos (`"checkbox"`, `"radio"`). Se omitido em campos de texto, o renderizador usa o valor de `referencia` como alternativa. |
 | `incluir_se` | Não | Caminho NDF de booleano. Se `false` ou ausente, o elemento é omitido. Ver regra abaixo. |
 | `descontinuado` | Não | Default `false`. Ver §8. |
 
-**Regra `incluir_se`**: aceita apenas um caminho NDF directo para um campo booleano. Não é uma expressão — não suporta operadores nem funções. Se o caminho não existir ou o valor não for booleano, o renderer inclui o elemento. Aplica-se a `campos[]`, a `blocos[]` e a `fluxo.elementos`.
+**Regra `incluir_se`**: aceita apenas um caminho NDF direto para um campo booleano. Não é uma expressão — não suporta operadores nem funções. Se o caminho não existir ou o valor não for booleano, o renderizador inclui o elemento. Aplica-se a `campos[]`, a `blocos[]` e a `fluxo.elementos`.
 
 **Regra de ausência**: se o caminho NDF não existir ou o valor for nulo, o campo renderiza em branco — sem erro, sem aviso.
 
@@ -704,17 +744,17 @@ Renderiza um array NDF como tabela de linhas e colunas. As colunas são definida
 | `posicao` | Sim (em `blocos[]`; omitido em `fluxo`) | Coordenadas de origem (mm). |
 | `largura` | Sim | Largura total (mm). |
 | `altura_linha` | Não | Altura de cada linha de dados (mm). |
-| `min_linhas_visivel` | Não | Número mínimo de linhas a renderizar. Default: `0`. |
+| `min_linhas_visivel` | Não | Número mínimo de linhas a renderizar. Predefinição: `0`. |
 | `repete_cabecalho` | Não | Se `true`, cabeçalho repete no topo de cada página quando a tabela transborda. |
 | `incluir_se` | Não | Caminho NDF de booleano (ver §5.4). |
 | `colunas[].id` | Sim | Propriedade do item NDF para esta coluna. |
 | `colunas[].cabecalho` | Não | Texto do cabeçalho da coluna. |
 | `colunas[].largura` | Sim | Largura da coluna (mm). |
 | `colunas[].alinhamento` | Não | `"esquerda"` \| `"centro"` \| `"direita"`. |
-| `colunas[].formato` | Não | Formato de display (§4.3). Default: `"texto"`. |
+| `colunas[].formato` | Não | Formato de apresentação (§4.3). Predefinição: `"texto"`. |
 | `colunas[].descontinuado` | Não | Default `false`. Ver §8. |
 
-**Regra `min_linhas_visivel`**: o renderer DEVE sempre desenhar a estrutura da tabela (frame, cabeçalho, linhas) e preencher com os itens do NDF. Se o NDF tiver menos itens do que `min_linhas_visivel`, o renderer completa com linhas em branco. Esta regra garante que impressos fiscais apresentam as linhas oficiais mesmo sem dados.
+**Regra `min_linhas_visivel`**: o renderizador DEVE sempre desenhar a estrutura da tabela (frame, cabeçalho, linhas) e preencher com os itens do NDF. Se o NDF tiver menos itens do que `min_linhas_visivel`, o renderizador completa com linhas em branco. Esta regra garante que impressos fiscais apresentam as linhas oficiais mesmo sem dados.
 
 #### 5.5.2 `corpo`
 
@@ -731,7 +771,7 @@ Bloco de texto com fluxo em formato NCRTF, a coordenadas absolutas. Para documen
 }
 ```
 
-O renderer renderiza o NCRTF do caminho NDF referenciado a partir de `posicao`, até ao limite inferior da área útil. Overflow gerido por `sequencia[]` (§5.7).
+O renderizador renderiza o NCRTF do caminho NDF referenciado a partir de `posicao`, até ao limite inferior da área útil. Overflow gerido por `sequencia[]` (§5.7).
 
 #### 5.5.3 `cabecalho` e `rodape`
 
@@ -751,7 +791,8 @@ Blocos de cabeçalho ou rodapé de documento (não de página — para mobília 
 
 ### 5.6 Mobília de página (`mobilia[]`)
 
-Elementos fixos de cada `pagina_def`. Cada `pagina_def` tem a sua própria `mobilia` — páginas diferentes podem ter numerações e marcas de água distintas.
+Elementos fixos de cada `pagina_def`. Cada `pagina_def` tem a sua própria
+`mobilia`, permitindo numerações e marcas de água distintas.
 
 ```json
 {
@@ -781,7 +822,7 @@ Elementos fixos de cada `pagina_def`. Cada `pagina_def` tem a sua própria `mobi
 
 | `tipo` | Tokens | Notas |
 |---|---|---|
-| `"numero_pagina"` | `{n}`, `{total}` | Tokens de paginação resolvidos pelo renderer |
+| `"numero_pagina"` | `{n}`, `{total}` | Tokens de paginação resolvidos pelo renderizador |
 | `"texto_fixo"` | `{{versao_ndt}}`, `{ndf:caminho}`, `{n}`, `{total}` | Placeholders NDT, valores NDF e tokens de paginação |
 | `"campo_ndf"` | — | Valor NDF escalar formatado; mesma semântica de `campos[]` sem `posicao` |
 | `"marca_agua"` | — | Renderizada apenas quando o NDF está em estado `rascunho` |
@@ -872,7 +913,7 @@ Elementos fixos de cada `pagina_def`. Cada `pagina_def` tem a sua própria `mobi
 
 ### 5.8 Tipografia
 
-O objecto `fonte` é partilhado por `texto_fixo`, `campos[]`, `blocos[]` e `mobilia[]`. Quando omitido, herda de `estilos.fonte_padrao` (§3).
+O objeto `fonte` é partilhado por `texto_fixo`, `campos[]`, `blocos[]` e `mobilia[]`. Quando omitido, herda de `estilos.fonte_padrao` (§3).
 
 ```json
 {
@@ -886,7 +927,7 @@ O objecto `fonte` é partilhado por `texto_fixo`, `campos[]`, `blocos[]` e `mobi
 }
 ```
 
-| Campo | Valores | Default |
+| Campo | Valores | Predefinição |
 |---|---|---|
 | `familia` | Nome da fonte | Herda de `estilos.fonte_padrao` |
 | `tamanho` | Pontos tipográficos | Herda de `estilos.fonte_padrao` |
@@ -894,11 +935,11 @@ O objecto `fonte` é partilhado por `texto_fixo`, `campos[]`, `blocos[]` e `mobi
 | `estilo` | `"normal"` \| `"italico"` | `"normal"` |
 | `cor` | Hex `"#RRGGBB"` | Herda de `estilos.cor_texto` |
 
-**Famílias base** (suportadas por qualquer renderer conforme): `"Helvetica"`, `"Times"`, `"Courier"`. Fontes adicionais são declaradas como recursos (§5.9).
+**Famílias base** (suportadas por qualquer renderizador conforme): `"Helvetica"`, `"Times"`, `"Courier"`. Fontes adicionais são declaradas como recursos (§5.9).
 
 #### Mapeamento NCRTF ↔ NDT
 
-O NCRTF usa nomes canónicos independentes de implementação (famílias Liberation). O NDT usa nomes de fontes PDF. O renderer é responsável pela resolução, usando a seguinte tabela canónica:
+O NCRTF usa nomes canónicos independentes de implementação (famílias Liberation). O NDT usa nomes de fontes PDF. O renderizador é responsável pela resolução, usando a seguinte tabela canónica:
 
 | NCRTF `font_family` | NDT `familia` equivalente | Classe tipográfica |
 |---|---|---|
@@ -906,13 +947,14 @@ O NCRTF usa nomes canónicos independentes de implementação (famílias Liberat
 | `"LiberationSerif"` | `"Times"` | Com serifas |
 | `"LiberationMono"` | `"Courier"` | Monospace |
 
-Quando um bloco NCRTF com `font_family: "LiberationSerif"` é renderizado numa `pagina_def` que declara `estilos.fonte_padrao.familia: "Times"`, o resultado é consistente — ambos referem a mesma família tipográfica através das suas denominações canónicas em cada spec.
+Quando um bloco NCRTF com `font_family: "LiberationSerif"` é renderizado numa `pagina_def` que declara `estilos.fonte_padrao.familia: "Times"`, o resultado é consistente — ambos referem a mesma família tipográfica através das suas denominações canónicas em cada especificação.
 
-Fontes declaradas em `recursos[]` (§5.9) com campo `familia` têm precedência sobre esta tabela para o mesmo nome canónico NCRTF, se o renderer suportar substituição.
+Fontes declaradas em `recursos[]` (§5.9) com campo `familia` têm precedência sobre esta tabela para o mesmo nome canónico NCRTF, se o renderizador suportar substituição.
 
 ### 5.9 Recursos (`recursos[]`)
 
-Imagens e fontes referenciadas no layout. Um recurso pode ser **embebido** (template autossuficiente) ou **referenciado por hash** (infraestrutura controlada).
+Imagens e fontes referenciadas no layout. Um recurso usa um dos modos
+**embebido** ou **referenciado por hash**.
 
 ```json
 {
@@ -1020,66 +1062,67 @@ O NDF-core contém `ndt_version_ref` no topo:
 
 **Fluxo de renderização:**
 
-1. O renderer valida o NDF e lê `ndt_version_ref`.
+1. O renderizador verifica a conformidade estrutural do NDF e lê `ndt_version_ref`.
 2. Resolve o NDT no `.ndfpkg` ou no domínio de custódia.
 3. Verifica o hash do NDT contra o manifesto ou catálogo imutável.
 4. Confirma `schema_id@versao_ndt == ndt_version_ref`.
 5. Resolve caminhos NDT relativamente a `NDF-core.documento`.
 6. Combina NDT + NDF e produz o formato de saída pedido.
 
-Sem o NDT exacto, os dados continuam legíveis, mas a renderização não pode ser
+Sem o NDT exato, os dados continuam legíveis, mas a renderização NÃO DEVE ser
 declarada reprodutível. Reprodutibilidade visual não implica identidade binária;
-esta última exige um perfil de renderer adicional.
+esta última exige um perfil de renderizador adicional.
 
 ---
 
 ## 8. Conformidade e migração
 
-**Para renderers PDF:**
-- Um renderer conforme não recusa renderizar por dados ausentes ou incorrectos — renderiza o que tem, deixa em branco o que falta.
-- Respeita `min_linhas_visivel`, desenhando linhas em branco quando necessário.
-- Respeita `incluir_se` ao nível de elemento e de sequência: ausência de caminho NDF ou valor não booleano trata-se como `true` (incluir).
-- Implementa `assinatura` de acordo com o `modo` declarado (ver §8.1).
-- Implementa `fluxo` e garante que os elementos após `corpo` aparecem na última página do overflow.
-- O formato de saída alvo é **PDF/UA-2** (ISO 14289-2) — ver §8.2.
+Os requisitos por papel encontram-se em
+[`RENDERER-CONFORMANCE.md`](RENDERER-CONFORMANCE.md), com identificadores
+`NDT-RENDER-*`. Esta cláusula descreve a articulação dos perfis e não duplica a
+declaração de conformidade.
 
 ### 8.1 Assinatura do NDF e assinatura de representações
 
-O NDF e as suas representações são objectos distintos:
+O NDF e as suas representações são objetos distintos:
 
 - CAdES no envelope NDF assina os `payload_bytes` canónicos;
 - uma assinatura PAdES, quando produzida, assina os bytes do PDF através do seu
   `ByteRange`;
-- as duas assinaturas podem usar o mesmo certificado, mas são operações,
+- as duas assinaturas **PODEM** usar o mesmo certificado, mas são operações,
   valores criptográficos e timestamps distintos.
 
 CAdES NÃO é obrigatório quando `nivel_assinatura` é `"nenhuma"`. Todo o NDF
 continua sujeito a JCS, hash, custódia append-only/WORM e auditoria. Um selo
-institucional CAdES pode ser acrescentado para tornar a prova de origem
+institucional CAdES **PODE** ser acrescentado para tornar a prova de origem
 portátil, sem representar assinatura pessoal.
 
-Um renderer PODE produzir PDF sem PAdES, PDF com PAdES, ou PDF/A com o
+Um renderizador PODE produzir PDF sem PAdES, PDF com PAdES, ou PDF/A com o
 `.ndfpkg` embebido. A ausência de PAdES não altera a validade estrutural do NDF.
 Se houver referências cruzadas entre NDF e PDF, estas pertencem a um perfil de
-saída versionado; não são campos implícitos `outputs[]` ou `signatures[]` do
+saída versionado; não são campos implícitos `saídas[]` ou `signatures[]` do
 NDF-core v1.0.0.
 
 ### 8.2 PDF/UA-2 como formato alvo
 
-O renderer PDF conforme produz **PDF/UA-2** (ISO 14289-2, baseado em PDF 2.0 / ISO 32000-2). PDF/UA-2 incorpora os requisitos de acessibilidade universal — obrigação legal na Administração Pública portuguesa (DL n.º 83/2018, transposição da Directiva EU 2016/2102) e condição de conformidade eIDAS para documentos electrónicos acessíveis.
+O perfil PDF acessível tem como alvo **PDF/UA-2** (ISO 14289-2, baseado em PDF
+2.0 / ISO 32000-2). Este perfil apoia requisitos de acessibilidade aplicáveis à
+Administração Pública, mas a conformidade legal depende do serviço, conteúdo e
+contexto concretos e requer avaliação própria.
 
-**Implicações para o renderer:**
+**Implicações para o renderizador:**
 
 | Requisito PDF/UA-2 | Implicação NDT/NDF |
 |---|---|
-| Estrutura lógica com tags (`/Document`, `/Sect`, `/P`, `/Table`, `/TH`, `/TD`, etc.) | O renderer infere tags a partir dos `blocos[]` e `fluxo.elementos`; tabelas NDT geram `/Table` com `/THead` e `/TBody` |
-| Ordem de leitura (`/Order` na `StructTreeRoot`) | O renderer gera a ordem a partir da sequência lógica: `graficos[]` (decorativos → marcados `Artifact`), depois `campos[]` e `blocos[]` por ordem de leitura natural |
+| Estrutura lógica com tags (`/Document`, `/Sect`, `/P`, `/Table`, `/TH`, `/TD`, etc.) | O renderizador infere tags a partir dos `blocos[]` e `fluxo.elementos`; tabelas NDT geram `/Table` com `/THead` e `/TBody` |
+| Ordem de leitura (`/Order` na `StructTreeRoot`) | O renderizador gera a ordem a partir da sequência lógica: `graficos[]` (decorativos → marcados `Artifact`), depois `campos[]` e `blocos[]` por ordem de leitura natural |
 | Texto alternativo para imagens | `graficos[].imagem` e `graficos[].svg` aceitam campo `alt` (texto alternativo); obrigatório para conformidade UA |
-| Idioma do documento | Derivado de `NDF.metadados.idioma` (ex.: `"pt-PT"`) |
-| Fontes embebidas | Todas as fontes usadas devem estar em `recursos[]` ou ser fontes standard com `ToUnicode` |
+| Idioma do documento | Derivado de `NDF.metadados.idioma` (ex.: `"pt"`, conforme ISO 639-1 no NDF v1.0.0) |
+| Fontes embebidas | Todas as fontes usadas DEVEM estar em `recursos[]` ou ser fontes standard com `ToUnicode` |
 | Campos de formulário com legenda | `assinatura`, `grelha_digitos` e `campos[]` com `formato: "checkbox"/"radio"` geram campos AcroForm com `/TU` (tooltip legível) |
 
-**PDF/UA-2 e PDF/A-3 são compatíveis**: o mesmo ficheiro pode conformar com ambos simultaneamente — PDF/UA-2 para acessibilidade, PDF/A-3 para arquivo a longo prazo com attachments (necessário para o modelo híbrido §8.1).
+**PDF/UA-2 e PDF/A-3 são compatíveis**: um mesmo ficheiro admite conformidade
+simultânea, sujeita à validação independente de cada perfil.
 
 Para o campo `alt` em elementos visuais:
 
@@ -1094,17 +1137,17 @@ Para o campo `alt` em elementos visuais:
 }
 ```
 
-Elementos puramente decorativos (linhas, rectângulos, fundos SVG) devem ser marcados `"alt": ""` — o renderer emite-os como `Artifact`, invisíveis para leitores de ecrã.
+Elementos puramente decorativos (linhas, retângulos, fundos SVG) DEVEM ser marcados `"alt": ""` — o renderizador emite-os como `Artifact`, invisíveis para leitores de ecrã.
 
-**Para renderers ODF (LibreOffice, Collabora, OnlyOffice, etc.):**
-- O bloco `layout` é opcional — pode ser ignorado.
-- `estilos` é a fonte principal; o renderer mapeia `fonte_padrao` → estilo `Default Paragraph Style`; `cabecalhos[]` → estilos `Heading 1`–`Heading N`; `cor_primaria` → cor de parágrafo de destaque.
-- Elementos sem equivalente ODF (`grelha_digitos`, `tabela_visual`, `min_linhas_visivel`) podem ser omitidos ou aproximados (ex.: `grelha_digitos` → campo de texto com comprimento máximo; tabela com `min_linhas_visivel` → tabela com o número de linhas do NDF sem linhas em branco adicionais).
-- `assinatura` pode ser renderizada como linha de assinatura ODF com campo de formulário (`com.sun.star.text.TextField.Input`) e legenda.
-- A fidelidade de conteúdo (NCRTF) é normativa; a fidelidade de layout é best-effort.
-- O output ODF destina-se a intercâmbio e edição — não a arquivo. Para arquivo, usar PDF/A.
+**Para renderizadores ODF (LibreOffice, Collabora, OnlyOffice, etc.):**
+- O renderizador ODF **PODE** ignorar o bloco `layout`.
+- `estilos` é a fonte principal; o renderizador mapeia `fonte_padrao` → estilo `Default Paragraph Style`; `cabecalhos[]` → estilos `Heading 1`–`Heading N`; `cor_primaria` → cor de parágrafo de destaque.
+- O renderizador ODF **PODE** omitir ou aproximar elementos sem equivalente ODF (`grelha_digitos`, `tabela_visual`, `min_linhas_visivel`), mas **DEVE** declarar essas aproximações no relatório de renderização.
+- O renderizador ODF **PODE** representar `assinatura` como linha de assinatura com campo de formulário (`com.sun.star.text.TextField.Input`) e legenda.
+- A fidelidade de conteúdo (NCRTF) é normativa; a fidelidade de layout é melhor esforço.
+- A saída ODF destina-se a intercâmbio e edição — não a arquivo. Para arquivo, usar PDF/A.
 
-**Para renderers HTML:**
+**Para renderizadores HTML:**
 - O bloco `layout` é ignorado.
 - `estilos` mapeia para variáveis CSS (`--font-family`, `--color-primary`, `--color-text`, `--spacing-paragraph`).
 - `assinatura` é renderizada como `<div class="signature-field" data-id="{{id}}">` para captura por JavaScript.
@@ -1116,45 +1159,45 @@ Elementos puramente decorativos (linhas, rectângulos, fundos SVG) devem ser mar
 
 ---
 
-## 9. Glossário
+## Anexo A (informativo) — Glossário
 
 | Termo | Significado |
 |---|---|
 | NDT | NORMORDIS Document Template — formato declarativo de layout (este documento) |
-| NDF | NORMORDIS Document Format — instância de dados materializados (spec NDF v1.0.0) |
-| Renderer | Executor puro que combina NDT + NDF → documento. Não aplica regras de negócio. |
+| NDF | NORMORDIS Document Format — instância de dados materializados (especificação NDF v1.0.0) |
+| Renderizador | Executor que combina NDT + NDF e produz uma representação. Verifica estrutura e referências, mas não aplica regras do domínio. |
 | `schema_id` | Identificador estável do tipo de documento; corresponde a `tipo_documento_ref` no NDF |
 | `versao_ndt` | Versão desta instância do template; parte de `ndt_version_ref` no NDF |
 | Hash do NDT | SHA-256 do ficheiro NDT registado no manifesto ou catálogo de custódia; não é campo do NDF-core |
-| `estilos` | Bloco de estilos globais do documento; fonte principal para renderers ODF/HTML |
+| `estilos` | Bloco de estilos globais do documento; fonte principal para renderizadores ODF/HTML |
 | `pagina_def` | Modelo de página instanciado por `sequencia[]` |
 | `grafico` | Elemento visual puro de uma `pagina_def`, a coordenadas absolutas |
 | `grelha_digitos` | Primitiva de caixas por carácter, ligada a um caminho NDF |
-| `assinatura` | Campo de assinatura electrónica/manuscrita; AcroForm PAdES em PDF; modos: `visual_apenas`, `hibrido` (default), `ndf_attachment` |
+| `assinatura` | Campo de assinatura eletrónica/manuscrita; AcroForm PAdES em PDF; modos: `visual_apenas`, `hibrido` (default), `ndf_attachment` |
 | CAdES | CMS Advanced Electronic Signatures (ETSI EN 319 122); algoritmo de assinatura usado pelo NDF (`CAdES-B-LTA`) |
 | PAdES | PDF Advanced Electronic Signatures (ETSI EN 319 142-1); assinatura opcional e independente da assinatura CAdES do NDF |
-| PDF/UA-2 | ISO 14289-2 — perfil de acessibilidade universal para PDF 2.0; formato alvo do renderer normordis-pdf |
-| PDF/A-3 | ISO 19005-3 — perfil de arquivo a longo prazo com suporte a attachments; compatível com PDF/UA-2 |
+| PDF/UA-2 | ISO 14289-2 — perfil de acessibilidade universal para PDF 2.0; formato alvo do renderizador normordis-pdf |
+| PDF/A-3 | ISO 19005-3 — perfil de arquivo a longo prazo com suporte a anexos; compatível com PDF/UA-2 |
 | `pdf_hash` | SHA-256 do PDF gerado, incluído no NDF antes de assinar; permite verificação determinística sem nova assinatura |
 | `alt` | Texto alternativo em elementos visuais (`imagem`, `svg`); obrigatório para conformidade PDF/UA-2 |
-| `rotulo_acessivel` | Tooltip acessível em campos interactivos (`campos[]`, `grelha_digitos`); emitido como `/TU` no AcroForm para PDF/UA-2 |
+| `rotulo_acessivel` | Tooltip acessível em campos interativos (`campos[]`, `grelha_digitos`); emitido como `/TU` no AcroForm para PDF/UA-2 |
 | `linha_lateral` | Elemento de `fluxo.elementos` que agrupa elementos lado a lado; resolve duplos blocos de assinatura e disposições colunares em documentos de fluxo |
 | `campo_ndf` | Tipo de elemento em `mobilia[]` — valor NDF escalar formatado no cabeçalho/rodapé de página |
 | `{ndf:caminho}` | Sintaxe de interpolação de dados NDF em `texto_fixo` de `mobilia[]`; distinto de `{{placeholder_ndt}}` e de `{n}/{total}` |
 | `quebra_pagina` | Elemento de `fluxo.elementos` que força início de nova página na `sequencia[]` |
 | `tabela` (bloco) | Array NDF renderizado como tabela de linhas e colunas com layout definido no NDT |
-| `min_linhas_visivel` | Número mínimo de linhas a renderizar; o renderer completa com linhas em branco |
+| `min_linhas_visivel` | Número mínimo de linhas a renderizar; o renderizador completa com linhas em branco |
 | `fluxo` | Região de layout vertical sequencial numa `pagina_def`; para documentos com corpo de extensão variável |
 | `corpo` | Bloco de texto NCRTF com fluxo, referenciado por caminho NDF |
 | `mobilia` | Elementos fixos de página: numeração, marca de água, texto de rodapé |
 | `sequencia` | Ordenação e modos de repetição das `paginas_def` no documento final |
-| `incluir_se` | Referência directa a booleano NDF; controla a inclusão condicional de elementos e secções |
+| `incluir_se` | Referência direta a booleano NDF; controla a inclusão condicional de elementos e secções |
 | `recurso` | Imagem ou fonte referenciada no layout: embebida no NDT ou por hash |
 | `composicao` | Mecanismo de entrega conjunta de documentos independentes num único ficheiro |
 | Caminho canónico | Referência a um dado NDF por percurso hierárquico de identificadores |
-| Formato de display | Hint de renderização visual (monetario, data, checkbox, etc.) sem semântica de validação |
-| Token de paginação | `{n}`, `{total}` — resolvidos pelo renderer; distintos de placeholders NDT e caminhos NDF |
+| Formato de apresentação | Hint de renderização visual (monetario, data, checkbox, etc.) sem semântica de validação |
+| Token de paginação | `{n}`, `{total}` — resolvidos pelo renderizador; distintos de placeholders NDT e caminhos NDF |
 | Placeholder NDT | `{{versao_ndt}}`, `{{schema_id}}` — metadados do próprio NDT, em `texto_fixo` |
-| Fidelidade normativa | Equivalência visual e semântica segundo um perfil de renderer; identidade binária exige perfil determinístico específico |
-| Fidelidade best-effort | Conteúdo fiel; layout adaptado às convenções do formato; aplica-se a ODF e HTML |
+| Fidelidade normativa | Equivalência visual e semântica segundo um perfil de renderizador; identidade binária exige perfil determinístico específico |
+| Fidelidade melhor esforço | Conteúdo fiel; layout adaptado às convenções do formato; aplica-se a ODF e HTML |
 | ODF | OpenDocument Format — ISO/IEC 26300; formato secundário para intercâmbio e edição |

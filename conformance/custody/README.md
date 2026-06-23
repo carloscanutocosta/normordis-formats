@@ -1,12 +1,11 @@
-# Custody-chain conformance
+# Conformidade da cadeia de custódia
 
-The JSON files are language-neutral fixtures. `valid-chain.json` must be
-accepted and `invalid-chain.json` rejected. Event hashes cover the RFC 8785
-bytes of each event after removing only `event_hash`.
-
-Reference commands:
+Os ficheiros JSON são vetores independentes da linguagem.
+`valid-chain.json` DEVE ser aceite e `invalid-chain.json` DEVE ser rejeitado.
+O hash de cada evento cobre os bytes RFC 8785 obtidos depois de remover apenas
+`event_hash`.
 
 ```bash
-node tools/check-custody.mjs conformance/custody/valid-chain.json
-! node tools/check-custody.mjs conformance/custody/invalid-chain.json
+python3 tools/check_custody.py conformance/custody/valid-chain.json
+! python3 tools/check_custody.py conformance/custody/invalid-chain.json
 ```
