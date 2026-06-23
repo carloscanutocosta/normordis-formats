@@ -1,5 +1,6 @@
-# NDF Changelog
+# Histórico NDF
 
-## [1.0.0] — Draft
+## [1.0.0] — Draft — Revisão pública
 
-- Initial specification: NDF-core structure, envelope (CAdES-B-LTA), archival evaluation (PCA/DF), finalisation pipeline, provenance chain, versioning policy.
+- Especificação inicial: estrutura NDF-core, envelope CAdES-B-LTA, avaliação
+  arquivística, pipeline de finalização, proveniência e versionamento.

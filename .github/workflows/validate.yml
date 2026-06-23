@@ -2,7 +2,7 @@ name: Conformance Suite
 
 on:
   push:
-    branches: ["master", "main"]
+    branches: ["devel", "master", "main"]
   pull_request:
 
 jobs:
@@ -25,6 +25,23 @@ jobs:
 
       - name: Package integrity (ndfpkg-example)
         run: python3 tools/validate.py --package specs/ndf/examples/ndfpkg-example
+
+      - name: Package negative vectors
+        run: python3 tools/check_package_vectors.py
+
+      - name: NDT semantic corpus
+        run: python3 tools/check_ndt_semantic_corpus.py
+
+      - name: Normative requirements and language audit
+        run: |
+          python3 tools/build_requirements_index.py
+          git diff --exit-code docs/normalization/REQUIREMENTS.md
+          python3 tools/audit_normative.py
+          git diff --exit-code docs/normalization/NORMATIVE-STATEMENTS.md
+          python3 tools/check_publication_profile.py
+
+      - name: Build public-review dossier
+        run: python3 tools/build_review_bundle.py
 
       - name: JCS vectors — Python
         run: python3 tools/check_jcs_vectors.py

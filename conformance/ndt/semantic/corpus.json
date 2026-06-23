@@ -1,0 +1,78 @@
+{
+  "corpus_version": "1.0.0",
+  "description": "Corpus independente do motor para cobertura estrutural e futura comparação semântica.",
+  "cases": [
+    {
+      "id": "NDT-SEM-001",
+      "input": "specs/ndt/examples/oficio-generico.ndt.json",
+      "expected_schema_id": "oficio-generico",
+      "expected_pages": 2,
+      "required_node_types": ["assinatura", "campo", "campo_ndf", "codigo_barras", "corpo", "imagem", "linha_lateral", "numero_pagina", "svg", "texto_fixo"],
+      "future_semantic_assertions": ["ordem de leitura", "corpo NCRTF", "assinatura", "texto alternativo"]
+    },
+    {
+      "id": "NDT-SEM-002",
+      "input": "specs/ndt/examples/modelo3-irs-rosto.ndt.json",
+      "expected_schema_id": "modelo3-irs-rosto",
+      "expected_pages": 2,
+      "required_node_types": ["codigo_barras", "grelha_digitos", "linha", "numero_pagina", "rectangulo", "tabela", "texto_fixo"],
+      "future_semantic_assertions": ["tabelas", "campos posicionados", "paginação"]
+    },
+    {
+      "id": "NDT-SEM-003",
+      "input": "specs/ndt/examples/modelo3-irs-anexoA.ndt.json",
+      "expected_schema_id": "modelo3-irs-anexoA",
+      "expected_pages": 2,
+      "required_node_types": ["grelha_digitos", "tabela", "texto_fixo"],
+      "future_semantic_assertions": ["tabela multipágina", "cabeçalhos repetidos"]
+    },
+    {
+      "id": "NDT-SEM-004",
+      "input": "specs/ndt/examples/modelo3-irs-anexoG.ndt.json",
+      "expected_schema_id": "modelo3-irs-anexoG",
+      "expected_pages": 2,
+      "required_node_types": ["grelha_digitos", "tabela", "texto_fixo"],
+      "future_semantic_assertions": ["tabela multipágina", "valores monetários"]
+    },
+    {
+      "id": "NDT-SEM-005",
+      "input": "conformance/ndt/valid/sequencia-overflow.json",
+      "expected_schema_id": "teste-overflow",
+      "expected_pages": 2,
+      "required_node_types": ["corpo"],
+      "future_semantic_assertions": ["extravasamento", "continuidade da ordem de leitura"]
+    },
+    {
+      "id": "NDT-SEM-006",
+      "input": "conformance/ndt/valid/blocos-tabela.json",
+      "expected_schema_id": "teste-bloco-tabela",
+      "expected_pages": 1,
+      "required_node_types": ["tabela", "texto_fixo"],
+      "future_semantic_assertions": ["estrutura de tabela", "mínimo de linhas visíveis"]
+    },
+    {
+      "id": "NDT-SEM-007",
+      "input": "conformance/ndt/valid/recurso-embebido.json",
+      "expected_schema_id": "teste-recurso-embebido",
+      "expected_pages": 1,
+      "required_node_types": ["imagem", "svg"],
+      "future_semantic_assertions": ["resolução de recurso embebido", "texto alternativo"]
+    },
+    {
+      "id": "NDT-SEM-008",
+      "input": "conformance/ndt/valid/recurso-referenciado-por-hash.json",
+      "expected_schema_id": "teste-recurso-hash",
+      "expected_pages": 1,
+      "required_node_types": ["imagem", "svg"],
+      "future_semantic_assertions": ["resolução por hash", "falha fechada"]
+    },
+    {
+      "id": "NDT-SEM-009",
+      "input": "conformance/ndt/valid/minimal.json",
+      "expected_schema_id": "teste-minimo",
+      "expected_pages": 1,
+      "required_node_types": [],
+      "future_semantic_assertions": ["documento vazio válido"]
+    }
+  ]
+}

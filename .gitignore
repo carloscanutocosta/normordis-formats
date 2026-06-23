@@ -5,3 +5,4 @@ Thumbs.db
 .claude/
 __pycache__/
 *.py[cod]
+build/

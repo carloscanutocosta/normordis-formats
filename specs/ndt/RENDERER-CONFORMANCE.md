@@ -1,54 +1,55 @@
-# NDT Renderer Conformance Profiles
+# Perfis de conformidade de renderizadores NDT
 
-This document defines observable, language-neutral renderer roles. It does not
-mandate a rendering engine.
+**Estado:** Draft — Revisão pública
 
-## Common profile
+Este documento define papéis observáveis e independentes da linguagem. Não
+impõe um motor de renderização.
 
-Every renderer MUST:
+## Perfil comum
 
-- validate the NDT version and semantic references before rendering;
-- resolve NDT paths relative to `NDF-core.documento`;
-- reject missing required resources or hash mismatches;
-- preserve NCRTF text, order, links, lists, tables and alternative text;
-- report unsupported output features instead of silently claiming full
-  conformance;
-- record renderer name/version and output profile in a rendering report.
+Todo o renderizador DEVE:
 
-## Semantic-output profile
+- **NDT-RENDER-001** — verificar versão NDT e referências semânticas antes de renderizar;
+- **NDT-RENDER-002** — resolver caminhos relativamente a `NDF-core.documento`;
+- **NDT-RENDER-003** — rejeitar recursos obrigatórios ausentes ou com hash incorreto;
+- **NDT-RENDER-004** — preservar texto, ordem, ligações, listas, tabelas e texto alternativo NCRTF;
+- **NDT-RENDER-005** — comunicar capacidades de saída não suportadas em vez de declarar
+  silenciosamente conformidade integral;
+- **NDT-RENDER-006** — registar nome e versão do renderizador e perfil de saída num relatório.
 
-HTML, ODF and future flow formats conform when their extracted semantic tree
-matches the expected language-neutral tree: headings, paragraphs, runs, marks,
-lists, tables, images, links and reading order. Pixel equality is not required.
+## Perfil de saída semântica
 
-## Fixed-layout PDF profile
+HTML, ODF e formatos de fluxo são conformes quando a árvore semântica extraída
+corresponde à árvore esperada: títulos, parágrafos, segmentos, marcas, listas,
+tabelas, imagens, ligações e ordem de leitura. Não se exige igualdade de pixéis.
 
-The PDF profile additionally fixes page geometry, coordinates, overflow rules,
-font selection/substitution, resource hashes, colour space, reading order and
-accessibility mappings. Golden tests MUST compare:
+## Perfil PDF de layout fixo
 
-1. page count and page boxes;
-2. normalized text and reading order;
-3. element bounding boxes with a declared tolerance;
-4. tagged-PDF structure and alternative text;
-5. embedded font/resource identities;
-6. PDF/A and PDF/UA validation reports for the declared subprofiles.
+Este perfil fixa adicionalmente geometria, coordenadas, overflow, fontes,
+substituições, hashes, espaço de cor, ordem de leitura e acessibilidade. Os
+testes golden DEVEM comparar:
 
-Binary equality is optional and may only be claimed by a deterministic profile
-that fixes the complete engine and serialization environment.
+1. número e caixas das páginas;
+2. texto normalizado e ordem de leitura;
+3. bounding boxes com tolerância declarada;
+4. estrutura tagged PDF e texto alternativo;
+5. identidades de fontes e recursos incorporados;
+6. relatórios PDF/A e PDF/UA dos subperfis declarados.
 
-## Required fixture corpus
+Igualdade binária é opcional e a sua declaração só é admissível quando o perfil fixa motor
+e ambiente completo de serialização.
 
-- every NDT primitive in isolation;
-- multi-page overflow with content before and after NCRTF;
-- nested lists, tables and images;
-- missing optional and required values;
-- conditional inclusion;
-- resource/hash failure;
-- accessibility and bidirectional/Unicode text;
-- at least two independently implemented renderers or extractors for semantic
-  comparison before a stable interoperability claim.
+## Corpus necessário
 
-The repository currently validates NDT structure and references but does not
-yet contain these golden rendering outputs; this remains an implementation
-gate, not an ambiguity in the conformance contract.
+- cada primitiva NDT isoladamente;
+- overflow multipágina com conteúdo antes e depois de NCRTF;
+- listas aninhadas, tabelas e imagens;
+- valores opcionais e obrigatórios ausentes;
+- inclusão condicional;
+- falha de recurso ou hash;
+- acessibilidade e texto bidirecional/Unicode;
+- pelo menos dois renderizadores ou extratores independentes antes de alegar
+  interoperabilidade estável.
+
+O repositório valida atualmente estrutura e referências NDT, mas ainda não
+contém todos os resultados golden. Este é um gate de implementação.

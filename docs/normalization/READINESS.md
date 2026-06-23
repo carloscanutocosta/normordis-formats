@@ -8,19 +8,21 @@ seja confundida com evidência de interoperabilidade.
 
 | Gate | Critério | Estado |
 |---|---|---|
-| Arquitectura comum | responsabilidades NDF/NDT/NCRTF sem contradição | concluído |
+| Arquitetura comum | responsabilidades NDF/NDT/NCRTF coerentes | revista; manter auditoria cruzada |
 | Schemas | todos válidos e versionados exactamente | concluído |
 | Pacote | exemplo autocontido com inventário e hashes verificáveis | concluído |
-| JCS | ferramenta + vectores independentes de linguagem, incluindo RFC 8785 Appendix B | concluído e cruzado em Python/JavaScript; outras stacks desejáveis |
-| Custódia | schema, cadeia de hashes, âncora e casos negativos | cadeia concluída; integração WORM/TSA externa pendente |
+| JCS | ferramenta + vetores independentes de linguagem, incluindo RFC 8785 Appendix B | concluído e cruzado em Python/JavaScript; outras stacks desejáveis |
+| Custódia | schema, cadeia de hashes, âncora e casos negativos | cadeia verificada; integração WORM/TSA externa pendente |
 | Portal | OpenAPI e semântica de autenticidade/privacidade | contrato concluído; implementação e revisão de segurança pendentes |
-| NDT | semântica, overflow, recursos, acessibilidade e golden outputs | parcial |
+| NDT | corpus semântico com 9 casos; extravasamento, recursos e acessibilidade | cobertura estrutural concluída; resultados extraídos de renderizadores independentes pendentes |
 | CAdES | fixtures B-LTA reais positivas e negativas | pendente externo |
 | Eficiência | corpus e medições reproduzíveis | metodologia e medição inicial concluídas; corpus institucional pendente |
+| Pacote | exemplo positivo e vetores negativos de inventário, caminhos, NDT e envelope | 1 positivo + 7 negativos concluídos |
+| Auditoria editorial | modalidade, IDs, estrutura de publicação e dossier com hashes | automatizada em CI |
 
 ## Gates externos
 
-Antes de declarar o conjunto estável:
+Antes de declarar qualquer especificação estável:
 
 1. revisão criptográfica independente do perfil CAdES e renovação;
 2. revisão arquivística por especialista competente;

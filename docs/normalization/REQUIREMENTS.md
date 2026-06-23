@@ -1,0 +1,55 @@
+# Índice de requisitos normativos
+
+Este ficheiro é gerado por `tools/build_requirements_index.py`. Não deve ser
+editado manualmente. A cláusula de origem permanece normativa; esta tabela é
+um índice de rastreabilidade.
+
+| ID | Origem | Resumo | Evidência atual |
+|---|---|---|---|
+| `NCRTF-PROD-001` | `specs/ncrtf/SPEC.md:679` | NCRTF-PROD-001 — DEVE gerar valores NCRTF que validam contra specs/ncrtf/schemas/ncrtf.schema.json. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-002` | `specs/ncrtf/SPEC.md:680` | NCRTF-PROD-002 — DEVE aplicar todas as regras de canonicalização R1–R6 (§8.2). | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-003` | `specs/ncrtf/SPEC.md:681` | NCRTF-PROD-003 — DEVE verificar que JCS(parse(serialize(ncrtf))) == serialize(ncrtf) antes de incorporar o valor num NDF-core. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-004` | `specs/ncrtf/SPEC.md:682` | NCRTF-PROD-004 — NÃO DEVE incluir nós image com ref que não existam no manifest.inventario do .ndfpkg. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-005` | `specs/ncrtf/SPEC.md:683` | NCRTF-PROD-005 — NÃO DEVE incluir src com data URL num NDF-core finalizado — apenas ref. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-006` | `specs/ncrtf/SPEC.md:684` | NCRTF-PROD-006 — DEVE ordenar marks conforme §6.2. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-007` | `specs/ncrtf/SPEC.md:685` | NCRTF-PROD-007 — DEVE fundir nós text contíguos com marcas e font_family idênticos (R2). | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-READ-001` | `specs/ncrtf/SPEC.md:691` | NCRTF-READ-001 — DEVE rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-002` | `specs/ncrtf/SPEC.md:692` | NCRTF-READ-002 — DEVE rejeitar documentos com marks fora da ordem canónica (R1). | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-003` | `specs/ncrtf/SPEC.md:693` | NCRTF-READ-003 — DEVE rejeitar nós de tipo desconhecido. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-004` | `specs/ncrtf/SPEC.md:694` | NCRTF-READ-004 — DEVE rejeitar versões NCRTF que não suporte explicitamente. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-005` | `specs/ncrtf/SPEC.md:695` | NCRTF-READ-005 — DEVE resolver referências image.ref dentro do .ndfpkg corrente. | vetores NCRTF válidos e inválidos |
+| `NDF-PKG-001` | `specs/ndf/SPEC.md:1020` | NDF-PKG-001 — DEVE ser um arquivo ZIP válido. | verificador de pacote + exemplo `.ndfpkg` |
+| `NDF-PKG-002` | `specs/ndf/SPEC.md:1021` | NDF-PKG-002 — DEVE conter manifest.json, ndf-core.json e envelope.json na raiz do arquivo. | verificador de pacote + exemplo `.ndfpkg` |
+| `NDF-PKG-003` | `specs/ndf/SPEC.md:1022` | NDF-PKG-003 — manifest.json DEVE incluir inventário com hash_sha256 de cada ficheiro e os campos obrigatórios definidos em §8.2. | verificador de pacote + exemplo `.ndfpkg` |
+| `NDF-PKG-004` | `specs/ndf/SPEC.md:1023` | NDF-PKG-004 — SHA-256(ndf-core.json) DEVE coincidir com manifest.inventario[ndf-core.json].hash_sha256. | verificador de pacote + exemplo `.ndfpkg` |
+| `NDF-PKG-005` | `specs/ndf/SPEC.md:1024` | NDF-PKG-005 — ndf-core.json DEVE ser um NDF-core conforme (§9.1). | verificador de pacote + exemplo `.ndfpkg` |
+| `NDF-PKG-006` | `specs/ndf/SPEC.md:1025` | NDF-PKG-006 — O NDT referenciado por ndt_version_ref DEVE estar presente em ndt/<schema_id>@<versao>.ndt.json. | verificador de pacote + exemplo `.ndfpkg` |
+| `NDF-PROD-001` | `specs/ndf/SPEC.md:987` | NDF-PROD-001 — DEVE gerar NDF-core JSON que valida contra o schema specs/ndf/schemas/ndf-core.schema.json (JSON Schema Draft 2020-12). | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-002` | `specs/ndf/SPEC.md:988` | NDF-PROD-002 — DEVE canonicalizar o NDF-core via JCS (RFC 8785) produzindo payload_bytes determinísticos — bytes idênticos para a mesma estrutura lógica independentemente da ordem de inserção de chaves ou formatação de origem. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-003` | `specs/ndf/SPEC.md:989` | NDF-PROD-003 — DEVE calcular payload_hash = SHA-256(payload_bytes) conforme NIST FIPS 180-4. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-004` | `specs/ndf/SPEC.md:990` | NDF-PROD-004 — DEVE calcular validation_code conforme o algoritmo definido em §4.6.2. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-005` | `specs/ndf/SPEC.md:991` | NDF-PROD-005 — DEVE executar os passos do pipeline de finalização conforme nivel_assinatura declarado (§5.2): | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-006` | `specs/ndf/SPEC.md:994` | NDF-PROD-006 — DEVE incluir todos os campos obrigatórios de metadados (§2.7.2), incluindo os condicionais RGPD quando contem_dados_pessoais: true. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-007` | `specs/ndf/SPEC.md:995` | NDF-PROD-007 — DEVE definir tipo_classificacao_ref no formato <instrumento>/<codigo> (§3.2.1). | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-008` | `specs/ndf/SPEC.md:996` | NDF-PROD-008 — DEVE gerar ndf_id como UUID v4 válido (RFC 9562), único no espaço de nomes do sistema produtor. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-009` | `specs/ndf/SPEC.md:997` | NDF-PROD-009 — DEVE definir estado: "ativo" no NDF-core de qualquer documento recém-finalizado. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-010` | `specs/ndf/SPEC.md:998` | NDF-PROD-010 — DEVE registar cada transição de estado em log de auditoria imutável (§2.4.2). | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-PROD-011` | `specs/ndf/SPEC.md:999` | NDF-PROD-011 — DEVE produzir saídas aceites pelo validador e pelas verificações semânticas oficiais; os casos válidos são referências de interoperabilidade, não entradas do produtor. todos os casos de conformance/ndf/valid/ sem erro. | schema NDF + `conformance/ndf/valid/` + verificações semânticas |
+| `NDF-READ-001` | `specs/ndf/SPEC.md:1005` | NDF-READ-001 — DEVE rejeitar qualquer NDF-core que não valide contra o schema desta versão. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-002` | `specs/ndf/SPEC.md:1006` | NDF-READ-002 — DEVE rejeitar versões NDF não suportadas explicitamente ou tratá-las como opacas, sem declarar interpretação completa. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-003` | `specs/ndf/SPEC.md:1007` | NDF-READ-003 — NÃO DEVE ignorar silenciosamente conteúdo assinado desconhecido. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-004` | `specs/ndf/SPEC.md:1008` | NDF-READ-004 — DEVE verificar SHA-256(payload_bytes) == payload_hash antes de aceitar um documento como íntegro. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-005` | `specs/ndf/SPEC.md:1009` | NDF-READ-005 — DEVE verificar validation_code recalculando o digest conforme §4.6.2. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-006` | `specs/ndf/SPEC.md:1010` | NDF-READ-006 — DEVE, quando nivel_assinatura ∈ {"avancada", "qualificada"}, validar a assinatura CAdES-B-LTA e os timestamps RFC 3161. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-007` | `specs/ndf/SPEC.md:1011` | NDF-READ-007 — NÃO DEVE aceitar um documento assinado com certificado incompatível com o nivel_assinatura declarado. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-008` | `specs/ndf/SPEC.md:1012` | NDF-READ-008 — DEVE considerar inválido um pacote onde assinatura original, timestamps ou material de validação obrigatórios estejam ausentes ou alterados. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-009` | `specs/ndf/SPEC.md:1013` | NDF-READ-009 — DEVE rejeitar todos os casos de conformance/ndf/invalid/. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDF-READ-010` | `specs/ndf/SPEC.md:1014` | NDF-READ-010 — DEVE aceitar todos os casos de conformance/ndf/valid/. | `conformance/ndf/valid/` e `conformance/ndf/invalid/` |
+| `NDT-RENDER-001` | `specs/ndt/RENDERER-CONFORMANCE.md:12` | - NDT-RENDER-001 — verificar versão NDT e referências semânticas antes de renderizar; | suite NDT; resultados de referência pendentes quando aplicável |
+| `NDT-RENDER-002` | `specs/ndt/RENDERER-CONFORMANCE.md:13` | - NDT-RENDER-002 — resolver caminhos relativamente a NDF-core.documento; | suite NDT; resultados de referência pendentes quando aplicável |
+| `NDT-RENDER-003` | `specs/ndt/RENDERER-CONFORMANCE.md:14` | - NDT-RENDER-003 — rejeitar recursos obrigatórios ausentes ou com hash incorreto; | suite NDT; resultados de referência pendentes quando aplicável |
+| `NDT-RENDER-004` | `specs/ndt/RENDERER-CONFORMANCE.md:15` | - NDT-RENDER-004 — preservar texto, ordem, ligações, listas, tabelas e texto alternativo NCRTF; | suite NDT; resultados de referência pendentes quando aplicável |
+| `NDT-RENDER-005` | `specs/ndt/RENDERER-CONFORMANCE.md:16` | - NDT-RENDER-005 — comunicar capacidades de saída não suportadas em vez de declarar | suite NDT; resultados de referência pendentes quando aplicável |
+| `NDT-RENDER-006` | `specs/ndt/RENDERER-CONFORMANCE.md:18` | - NDT-RENDER-006 — registar nome e versão do renderizador e perfil de saída num relatório. | suite NDT; resultados de referência pendentes quando aplicável |
+
+Total: **45 requisitos identificados**.

@@ -1,5 +1,5 @@
 {
-  "_comment": "INVÁLIDO: ndf_id não é UUID v4 válido (não segue o formato RFC 4122 v4). Violação: §2.3.",
+  "_comment": "INVÁLIDO: ndf_id não é UUID v4 válido (não segue o formato RFC 9562 UUIDv4). Violação: §2.3.",
   "_expected_error": "'not-a-uuid' não é um UUID v4 válido. O padrão exige: 8-4-4-4-12 hex com o terceiro grupo começando por '4' e o quarto por '8', '9', 'a' ou 'b'.",
   "ndf_version": "1.0.0",
   "ndf_id": "not-a-uuid",

@@ -1,4 +1,4 @@
-# Registry
+# Registo
 
 Catálogo oficial de identificadores canónicos (`schema_id`) para o ecossistema NORMORDIS.
 
@@ -6,7 +6,7 @@ Catálogo oficial de identificadores canónicos (`schema_id`) para o ecossistema
 
 - Evitar colisões entre identificadores de tipos de documento
 - Garantir estabilidade dos `schema_id` ao longo do tempo
-- Suportar versionamento de impressos (`versao_impresso`)
+- Suportar versionamento de templates (`versao_ndt`)
 
 ## Formato de entrada
 
@@ -17,7 +17,7 @@ Catálogo oficial de identificadores canónicos (`schema_id`) para o ecossistema
   "emissor": "AT",
   "perfil": "impresso_complexo",
   "versoes": [
-    { "versao_impresso": "2026.1", "referencia_legal": "Portaria n.º .../2026", "vigente": true }
+    { "versao_ndt": "2026.1", "referencia_legal": "Portaria n.º .../2026", "vigente": true }
   ]
 }
 ```

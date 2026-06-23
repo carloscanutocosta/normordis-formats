@@ -1,6 +1,6 @@
 # Eficiência de armazenamento
 
-O objectivo NDF é minimizar redundância sem sacrificar interpretação,
+O objetivo NDF é minimizar redundância sem sacrificar interpretação,
 integridade ou portabilidade. Não existe um limite universal em bytes: CAdES,
 certificados, NCRTF e recursos variam por documento.
 
@@ -16,7 +16,7 @@ Cada benchmark DEVE publicar, para o mesmo corpus:
 6. tamanho do PDF/ODF comparável, quando existir;
 7. tempo e memória de validação, canonicalização, embalagem e leitura.
 
-Resultados DEVEM separar conteúdo único de objectos deduplicáveis. Não é válido
+Resultados DEVEM separar conteúdo único de objetos deduplicáveis. Não é válido
 afirmar uma percentagem geral de poupança a partir de um único documento.
 
 ## Corpus mínimo
@@ -103,7 +103,7 @@ O envelope domina o custo de documentos curtos. Em documentos longos (Modelo 3
 complexo), o ndf-core torna-se o factor dominante, mas permanece estruturado e
 pesquisável — ao contrário de um PDF.
 
-#### Custo amortizado — objectos deduplicáveis (custo único por versão)
+#### Custo amortizado — objetos deduplicáveis (custo único por versão)
 
 | Objecto | Tamanho |
 |---|---:|
@@ -129,17 +129,17 @@ Mesmo ofício assinado, armazenado em BD (estimativas):
 | PDF/A com PAdES-B-LTA | ~78 KB |
 
 O NDF não armazena layout nem renderização — estes são responsabilidade do NDT,
-deduplicado, e do renderer, substituível. A separação entre dados (NDF-core) e
+deduplicado, e do renderizador, substituível. A separação entre dados (NDF-core) e
 apresentação (NDT) é a principal fonte de eficiência em arquivo.
 
-Numa projecção não vinculativa para 1 milhão de ofícios assinados:
+Numa projeção não vinculativa para 1 milhão de ofícios assinados:
 
 | Formato | Estimativa total |
 |---|---:|
 | NDF (assinatura qualificada) | **~21 GB** |
 | PDF/A + PAdES-B-LTA | ~78 GB |
 
-Esta projecção assume documentos homogéneos e envelope de tamanho fixo; na
+Esta projeção assume documentos homogéneos e envelope de tamanho fixo; na
 prática o ndf-core varia com o conteúdo. **Não deve ser usada como garantia
 contratual** até existirem medições sobre corpus institucional real.
 

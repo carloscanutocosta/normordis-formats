@@ -1,23 +1,29 @@
-# Normative traceability matrix
+# Matriz de rastreabilidade normativa
 
-This matrix is maintained as requirements are promoted from draft to stable.
-Every mandatory behavioural requirement must eventually map to a schema rule,
-positive vector, negative vector or an explicitly external assessment.
+Esta matriz é mantida à medida que requisitos passam de draft a candidatos.
+Cada requisito obrigatório deve receber um identificador estável e apontar para
+uma regra de schema, vetor positivo, vetor negativo ou avaliação externa.
+O índice requisito-a-requisito é gerado em `REQUIREMENTS.md` por
+`tools/build_requirements_index.py`.
+Todas as declarações com modalidade normativa, incluindo requisitos
+subordinados, são inventariadas em `NORMATIVE-STATEMENTS.md` por
+`tools/audit_normative.py`.
 
-| Requirement family | Machine rule / vector | Current evidence |
-|---|---|---|
-| NDF structure and exact version | `ndf-core.schema.json` | NDF valid/invalid suite |
-| Registry document shape | `registry/schemas/*.json` | registry applied by `validate.py` |
-| NCRTF structure and canonical rules | `ncrtf.schema.json` + semantic checks | NCRTF valid/invalid suite |
-| NDT structure and references | `ndt.schema.json` + semantic checks | NDT examples and negative suite |
-| JCS bytes and digest | RFC 8785 + `conformance/jcs/vectors.json` | basic vectors; IEEE-754 set pending |
-| Package paths and inventory | `manifest.schema.json` + package verifier | autocontained example |
-| Required signature presence | cross-document package checks | structural example only |
-| CAdES cryptographic validity | `conformance/cades` profile | real B-LTA fixtures pending externally |
-| Custody event shape and chain | `custody-event.schema.json` + custody vectors | positive/negative draft vectors |
-| Portal semantics | `specs/portal/openapi.yaml` | contract review pending |
-| Renderer semantics | `RENDERER-CONFORMANCE.md` | golden output corpus pending |
-| Storage efficiency | benchmark methodology | representative corpus pending |
+| Família / prefixo | Regra automática ou vetor | Evidência atual | Lacuna antes de candidata |
+|---|---|---|---|
+| `NDF-PROD-*`, `NDF-READ-*`, `NDF-PKG-*` | schemas NDF + verificações semânticas | suite NDF válida/inválida e pacote | casos criptográficos reais |
+| `REG-REQ-*` — tipos documentais | `registry/schemas/*.json` | aplicação pelo `validate.py` | vetores dedicados do registo |
+| `NCRTF-PROD-*`, `NCRTF-READ-*` | schema + verificações semânticas | suite NCRTF válida/inválida | mapear R1–R6 individualmente |
+| `NDT-RENDER-*` — estrutura e renderização | schema + verificações semânticas | 9 casos `NDT-SEM-*` + suite negativa | árvores extraídas e resultados de referência independentes |
+| `JCS-REQ-*` — bytes e digest | RFC 8785 + vetores JCS | vetores IEEE-754 incluídos | implementação independente adicional |
+| `PKG-REQ-*` — caminhos e inventário | schema do manifesto + verificador | pacote autocontido + 7 vetores negativos | ampliar cobertura de ZIP real |
+| `SIG-REQ-*` — assinaturas | verificações cruzadas | exemplo estrutural | fixtures CAdES-B-LTA reais |
+| `CUST-REQ-*` — cadeia de custódia | schema + verificador | vetores positivo/negativo | integração WORM/TSA |
+| `PORTAL-REQ-*` — portal | OpenAPI | contrato draft | revisão de segurança e privacidade |
+| `RENDER-REQ-*` — renderização | perfil do renderizador | texto draft | corpus golden e acessibilidade |
+| `BENCH-*` — eficiência | metodologia | medição inicial | corpus representativo |
 
-Release review MUST expand this matrix and MUST NOT mark a requirement covered
-merely because related prose exists.
+A revisão de uma versão candidata DEVE expandir esta matriz e NÃO DEVE marcar
+um requisito como coberto apenas porque existe prosa relacionada. Até o
+inventário requisito a requisito estar concluído, a matriz é uma visão por
+famílias e não demonstra cobertura integral.

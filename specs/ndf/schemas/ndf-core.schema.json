@@ -26,7 +26,7 @@
       "type": "string",
       "format": "uuid",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-      "description": "Permanent document identifier. UUID v4 (RFC 4122). Generated before canonicalisation, immutable after finalisation.",
+      "description": "Permanent document identifier. UUID v4 (RFC 9562). Generated before canonicalisation, immutable after finalisation.",
       "examples": ["a1b2c3d4-e5f6-4789-abcd-ef0123456789"]
     },
     "estado": {

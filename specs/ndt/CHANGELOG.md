@@ -4,13 +4,17 @@
 > mesmo CAdES foram substituídas pelo modelo normativo comum em
 > `docs/architecture/ARCHITECTURE.md`. Não constituem requisitos actuais.
 
-## [2.0.0] — Draft
+## [2.0.0] — Draft — Revisão pública
 
 ### Axioma e papel do NDT (revisão fundamental)
 
 Esta versão estabelece o axioma central do formato: **NDT + NDF = documento físico determinístico e rico**.
 
-O NDT é um formato declarativo de **layout puro**. Não contém regras de validação, fórmulas de cálculo, motor de expressões, nem lógica de negócio. Esses são responsabilidade exclusiva da app de domínio que produz o NDF. O renderer é um executor puro — não valida dados, não computa valores.
+O NDT é um formato declarativo de **layout puro**. Não contém regras de
+validação do domínio, fórmulas de cálculo, motor de expressões nem lógica de
+negócio. O renderizador verifica apenas versões, referências, integridade e
+estrutura necessárias à renderização; não decide regras jurídicas ou de
+negócio.
 
 Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 - Hierarquia lógica como schema (tipos de campo com validação, `campo_calculado`, `tabela_repetivel` com colunas tipadas, `grupo` com exclusividade)
@@ -37,7 +41,7 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 - `blocos[]`: `tabela` (array NDF → linhas), `corpo` (NCRTF com fluxo), `cabecalho`, `rodape`
 - **`min_linhas_visivel`** em `tabela`: o renderer completa com linhas em branco até ao mínimo — garante que impressos fiscais renderizam o frame mesmo sem dados
 - `sequencia[]`: `unica`, `por_linha`, `conforme_necessario`
-- **`incluir_se`** na sequência: referência directa a booleano NDF (não é expressão); controla inclusão de secções de página
+- **`incluir_se`** na sequência: referência direta a booleano NDF (não é expressão); controla inclusão de secções de página
 - Mobília: `numero_pagina` (`{n}`, `{total}`), `texto_fixo` (placeholders NDT), `marca_agua`
 - Recursos: `embebido` (base64 com prefixo `"base64:"`) ou `referenciado_por_hash` (com prefixo `"sha256:"`)
 
@@ -78,18 +82,18 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 ### Modelo de assinatura CAdES ↔ PDF [novo §8.1]
 - Workflow de fecho: `pdf_hash` adicionado ao NDF antes de assinar; CAdES-B-LTA cobre NDF + `pdf_hash`
 - Workflow de verificação determinística: regenerar PDF → confirmar `sha256(PDF) == NDF.outputs[].sha256`
-- Distinção CAdES/PAdES: mesmo algoritmo CMS; objectos assinados distintos (NDF JSON vs. PDF ByteRange); cross-referenciados via `pdf_hash` e `ndf_ref`
+- Distinção CAdES/PAdES: mesmo algoritmo CMS; objetos assinados distintos (NDF JSON vs. PDF ByteRange); cross-referenciados via `pdf_hash` e `ndf_ref`
 
 ### `incluir_se` ao nível de elemento [novo]
 - Anteriormente só disponível em `sequencia[]`; agora disponível em `campos[]`, `blocos[]` e `fluxo.elementos`
-- Referência directa a booleano NDF — não é uma expressão
+- Referência direta a booleano NDF — não é uma expressão
 
 ### Fidelidade por formato de saída [novo §1.3]
 - **PDF/A** — formato primário; fidelidade normativa (bit-idêntico para o mesmo NDT+NDF); arquivo, prova, entrega formal
 - **ODF** — formato secundário; fidelidade de conteúdo via `estilos` NDT; intercâmbio, edição, revisão. Escolha motivada por soberania digital: ISO/IEC 26300, sem dependência de licença proprietária, alinhado com o RNID. Implementações: LibreOffice, Collabora, OpenOffice, EuroOffice, OnlyOffice.
 - **HTML** — fidelidade de conteúdo; publicação e consulta; layout CSS flow
 - **Typst** — fidelidade alta; mm coords como dicas; composição tipográfica avançada
-- DOCX/Word excluído: apesar de normativo (ISO 29500), é controlado por fornecedor único — contradiz o princípio de soberania digital do projecto
+- DOCX/Word excluído: apesar de normativo (ISO 29500), é controlado por fornecedor único — contradiz o princípio de soberania digital do projeto
 
 ### Dados NDF em `mobilia[]` [novo]
 - `tipo: "texto_fixo"` em mobília aceita `{ndf:caminho.canonico}` para interpolação de valores NDF (referência, entidade, etc.)

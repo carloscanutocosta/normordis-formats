@@ -1,9 +1,13 @@
 # NCRTF — NORMORDIS Canonical Rich Text Format
 
 **Versão**: 2.0.0
-**Estado**: Estável
+**Estado**: Draft — Revisão pública
 **Licença**: CC0 1.0 Universal
 **Repositório**: normordis-spec
+
+**Convenções editoriais**: aplica-se
+[`docs/normalization/EDITORIAL-POLICY.md`](../../docs/normalization/EDITORIAL-POLICY.md).
+A língua normativa é o português europeu.
 
 ---
 
@@ -11,7 +15,7 @@
 
 | Secção | Conteúdo |
 |---|---|
-| §1 | Introdução e objectivos |
+| §1 | Introdução e objetivos |
 | §2 | Terminologia normativa |
 | §3 | Modelo de documento |
 | §4 | Nós bloco |
@@ -23,20 +27,26 @@
 | §10 | Integração com `.ndfpkg` |
 | §11 | Extensibilidade |
 | §12 | Conformidade |
-| §13 | Glossário |
+| Anexo A | Glossário informativo |
 
 ---
 
 ## 1. Introdução
 
-### 1.1 Objectivo
+### 1.1 Objetivo
 
-O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato de texto estruturado com os seguintes objectivos, por ordem de prioridade:
+O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato de texto estruturado com os seguintes objetivos, por ordem de prioridade:
 
 1. **Canónico**: a mesma estrutura lógica produz sempre os mesmos bytes JSON, tornando-se compatível com JCS/RFC 8785 e assinável como parte de um NDF-core.
-2. **Independente de implementação**: não pressupõe nem depende de nenhum editor ou biblioteca de rich text (Lexical, ProseMirror, Tiptap, Quill, etc.). Editores adaptam-se ao NCRTF através de conversores; a spec não refere nenhum.
-3. **Eficiente como campo NDT**: um valor NCRTF é um objecto JSON armazenado directamente num campo do bloco `documento` de um NDF-core, sem codificação adicional (sem base64, sem JSON dentro de string). Está sujeito a canonicalização JCS como qualquer outro campo.
-4. **Legível por máquina sem renderizador**: a estrutura de nós é interpretável directamente — sem dependência de CSS, fontes ou motores de layout.
+2. **Independente de implementação**: não pressupõe nem depende de nenhum editor ou biblioteca de rich text (Lexical, ProseMirror, Tiptap, Quill, etc.). Editores adaptam-se ao NCRTF através de conversores; a especificação não refere nenhum.
+3. **Eficiente como conteúdo NDF**: um valor NCRTF é um objeto JSON armazenado
+   diretamente num campo do bloco `documento` de um NDF-core, sem codificação
+   adicional. Está sujeito a canonicalização JCS como qualquer outro campo.
+4. **Legível por máquina sem renderizador**: a estrutura de nós é interpretável
+   diretamente, sem dependência de CSS, fontes ou motores de layout.
+5. **Interoperável**: produtores, editores, validadores e renderizadores
+   independentes trocam o mesmo conteúdo sem preservar o estado proprietário
+   do editor de origem.
 
 ### 1.2 O que o NCRTF representa
 
@@ -53,12 +63,12 @@ O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato
 
 | O quê | Onde fica |
 |---|---|
-| O acto jurídico completo | NDF-core (`documento`) |
-| Regras de validação e cálculo | App de domínio (fora do âmbito NORMORDIS-spec) |
+| O ato jurídico completo | NDF-core (`documento`) |
+| Regras de validação e cálculo | App de domínio (fora do âmbito NORMORDIS-especificação) |
 | Layout de página (margens, tipografia, logótipos) | Bloco `layout` do NDT |
 | Metadados do documento | NDF-core (`metadados`) |
 | Assinatura e envelope de custódia | Envelope NDF |
-| PDF/UA-2, ODF, HTML | Artefactos derivados — fora do scope |
+| PDF/UA-2, ODF, HTML | Artefactos derivados — fora do âmbito |
 | Estado interno de editor | Formato proprietário do editor (ex: Lexical JSON) |
 
 ### 1.4 Relação com outros componentes NORMORDIS
@@ -71,17 +81,19 @@ NDF-core.documento.campo_corpo  ←  valor NCRTF (este formato)
 Envelope NDF
 
 NDT: bloco tipo "corpo", referencia: "caminho.ndf"
-  │  o renderer lê o caminho NDF, obtém o valor NCRTF, renderiza
+  │  o renderizador lê o caminho NDF, obtém o valor NCRTF, renderiza
   ↓
 PDF/UA-2 + PDF/A-3  |  ODF  |  HTML  |  outros artefactos derivados
 ```
 
-**Leitura**: o NCRTF é um valor armazenado no **NDF** (como parte de `documento`). O **NDT** não contém NCRTF — declara apenas a posição e o caminho NDF onde o valor NCRTF reside. O renderer combina os dois para produzir o output.
+**Leitura**: o NCRTF é um valor armazenado no **NDF** (como parte de `documento`). O **NDT** não contém NCRTF — declara apenas a posição e o caminho NDF onde o valor NCRTF reside. O renderizador combina os dois para produzir o saída.
 
 ### 1.5 Referências normativas
 
 | Documento | Relevância |
 |---|---|
+| BCP 14 (RFC 2119 e RFC 8174) | Linguagem normativa |
+| RFC 8259 | Sintaxe e modelo JSON |
 | RFC 8785 (JCS) | Canonicalização JSON — base da assinabilidade NCRTF |
 | JSON Schema Draft 2020-12 | Schema de validação (§12) |
 | NORMORDIS NDF v1.x | Formato contentor que embebe valores NCRTF |
@@ -94,8 +106,8 @@ Esta é uma versão **MAJOR** — documentos v1.0.0 NÃO são válidos contra es
 | Área | Alteração |
 |---|---|
 | Listas | `ordered_list`/`unordered_list` unificados em `list` com campo `list_type`; `items` renomeado para `content`; `list_item` passa a ser um nó explícito com `type: "list_item"` e conteúdo inline (não blocos) |
-| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body`; células passam a ser strings simples (não objectos com `content`) |
-| Inline | Adicionados `link` e `hard_break`; `font_family` deixa de ser marca-objecto e passa a campo explícito nos nós `text` |
+| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body`; células passam a ser strings simples (não objetos com `content`) |
+| Inline | Adicionados `link` e `hard_break`; `font_family` deixa de ser marca-objeto e passa a campo explícito nos nós `text` |
 | Marcas | Adicionadas `"code"` e `"strikethrough"`; ordem canónica actualizada |
 | Bloco | Adicionado `blockquote`; campos `alignment`, `indent`, `font_family` em `paragraph` e `heading` |
 | Imagem | Adicionados `caption` e `width_percent`; removidos `width`/`height` em pixéis |
@@ -105,7 +117,9 @@ Esta é uma versão **MAJOR** — documentos v1.0.0 NÃO são válidos contra es
 
 ## 2. Terminologia normativa
 
-Os termos seguintes, quando em maiúsculas, têm o significado definido em RFC 2119 / BCP 14:
+Os termos seguintes, quando em maiúsculas, têm o significado definido no BCP
+14 (RFC 2119 e RFC 8174). Formas em minúsculas são narrativas e não criam
+requisitos:
 
 | Termo | Significado |
 |---|---|
@@ -115,13 +129,18 @@ Os termos seguintes, quando em maiúsculas, têm o significado definido em RFC 2
 | **PODE** / **PODEM** | Comportamento opcional |
 | **OPCIONAL** | O campo ou comportamento pode estar ausente |
 
+Aplicam-se igualmente os termos da
+[base terminológica comum](../../docs/normalization/TERMINOLOGY.md). Termos
+NCRTF específicos são definidos na cláusula em que são introduzidos. O Anexo A
+reúne um glossário informativo.
+
 ---
 
 ## 3. Modelo de documento
 
 ### 3.1 Estrutura raiz
 
-Um valor NCRTF é um objecto JSON com a seguinte estrutura:
+Um valor NCRTF é um objeto JSON com a seguinte estrutura:
 
 ```json
 {
@@ -132,7 +151,7 @@ Um valor NCRTF é um objecto JSON com a seguinte estrutura:
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `ncrtf_version` | string | Sim | Versão da spec NCRTF. DEVE ser `"2.0.0"` para documentos conformes a esta versão. |
+| `ncrtf_version` | string | Sim | Versão da especificação NCRTF. DEVE ser `"2.0.0"` para documentos conformes a esta versão. |
 | `content` | array de Bloco | Sim | Sequência de nós bloco. DEVE ter pelo menos 1 elemento. |
 
 Campos adicionais NÃO DEVEM estar presentes na raiz (`additionalProperties: false`).
@@ -397,7 +416,7 @@ Quebra de linha forçada dentro de um bloco. Diferente de um novo parágrafo.
 | `"bold"` | Negrito | |
 | `"code"` | Monospace inline | Para fragmentos de código ou identificadores técnicos. |
 | `"italic"` | Itálico | |
-| `"strikethrough"` | Riscado | Para correcções, actas, rectificações. |
+| `"strikethrough"` | Riscado | Para correções, actas, rectificações. |
 | `"subscript"` | Subscrito (ex: H₂O) | NÃO DEVE coexistir com `"superscript"` no mesmo nó. |
 | `"superscript"` | Sobrescrito (ex: m²) | NÃO DEVE coexistir com `"subscript"` no mesmo nó. |
 | `"underline"` | Sublinhado | |
@@ -438,7 +457,7 @@ A canonicalização NCRTF é pré-condição para a assinabilidade do campo quan
 
 Todo o valor NCRTF **DEVE** ser canonicalizado via JCS antes de ser incorporado no `payload_bytes` do NDF-core. JCS garante:
 
-- Chaves de objectos ordenadas lexicograficamente (Unicode code point)
+- Chaves de objetos ordenadas lexicograficamente (Unicode code point)
 - Sem whitespace extra
 - Números em formato canónico
 - Strings em UTF-8 com escapes mínimos
@@ -450,7 +469,7 @@ Todo o valor NCRTF **DEVE** ser canonicalizado via JCS antes de ser incorporado 
 | **R1** | `marks` DEVE estar em ordem canónica (§6.2). |
 | **R2** | Nós `text` contíguos com marcas idênticas E `font_family` idêntico DEVEM ser fundidos num único nó. |
 | **R3** | Campos com valor igual ao default NÃO DEVEM estar presentes: `alignment` quando `"left"`, `indent` quando `0`. |
-| **R4** | Arrays vazios NÃO DEVEM estar presentes — omitir o campo em vez de `[]`. Nota: `checked: false` em checklist é semanticamente relevante e NÃO deve ser omitido. |
+| **R4** | Arrays vazios NÃO DEVEM estar presentes — omitir o campo em vez de `[]`. Nota: `checked: false` em checklist é semanticamente relevante e NÃO DEVE ser omitido. |
 | **R5** | `text` NÃO DEVE ser string vazia. |
 | **R6** | `"subscript"` e `"superscript"` NÃO DEVEM coexistir no mesmo nó `text`. |
 
@@ -497,10 +516,10 @@ Ou, em layout de fluxo:
 ```
 
 O campo `referencia` é um caminho relativo a `NDF-core.documento` (ex.:
-`"corpo"`, `"parecer.texto"`). O renderer lê o valor NCRTF nesse caminho e
+`"corpo"`, `"parecer.texto"`). O renderizador lê o valor NCRTF nesse caminho e
 renderiza-o segundo as regras de layout do NDT.
 
-**Princípio**: o NCRTF vive no NDF. O NDT descreve onde e como renderizá-lo. O renderer é o único componente que conhece ambos.
+**Princípio**: o NCRTF vive no NDF. O NDT descreve onde e como renderizá-lo. O renderizador é o único componente que conhece ambos.
 
 ### 9.2 Exemplo completo — NDF-core com campo NCRTF
 
@@ -568,7 +587,7 @@ coberto pela assinatura ou selo do NDF. O caminho NDT é relativo a
 
 ### 9.3 Famílias tipográficas: NCRTF e NDT
 
-O NCRTF usa nomes canónicos de famílias tipográficas independentes de implementação (§7). O NDT usa nomes de fontes PDF para elementos de layout. A tabela de equivalência canónica está definida no NDT v2.0.0 §5.8. O renderer é responsável por aplicar o mapeamento ao combinar conteúdo NCRTF com estilos NDT.
+O NCRTF usa nomes canónicos de famílias tipográficas independentes de implementação (§7). O NDT usa nomes de fontes PDF para elementos de layout. A tabela de equivalência canónica está definida no NDT v2.0.0 §5.8. O renderizador é responsável por aplicar o mapeamento ao combinar conteúdo NCRTF com estilos NDT.
 
 ---
 
@@ -601,7 +620,7 @@ Fluxo recomendado para editores:
 | Formato | Extensão | Notas |
 |---|---|---|
 | PNG | `.png` | RECOMENDADO para gráficos e diagramas |
-| SVG | `.svg` | RECOMENDADO para vectorial; renderizadores devem sanitizar SVG |
+| SVG | `.svg` | RECOMENDADO para conteúdo vetorial; renderizadores DEVEM sanitizar SVG |
 | JPEG | `.jpg` / `.jpeg` | RECOMENDADO para fotografias |
 | PDF/A | `.pdf` | OPCIONAL — para sub-documentos em imagem |
 
@@ -635,7 +654,7 @@ oficio-OF-2026-00123.ndfpkg
 ### 11.2 Nós desconhecidos
 
 O schema NCRTF é fechado. Um leitor conforme DEVE rejeitar tipos de nó
-desconhecidos. Uma versão MINOR pode acrescentar um nó opcional, mas o documento
+desconhecidos. Uma versão MINOR **PODE** acrescentar um nó opcional, mas o documento
 que o utilize declara essa versão e requer um leitor/schema que a suporte. Um
 leitor nunca ignora silenciosamente conteúdo assinado que não compreende.
 
@@ -657,23 +676,23 @@ leitor nunca ignora silenciosamente conteúdo assinado que não compreende.
 
 Uma implementação é um **produtor NCRTF conforme** se:
 
-1. **DEVE** gerar valores NCRTF que validam contra `specs/ncrtf/schemas/ncrtf.schema.json`.
-2. **DEVE** aplicar todas as regras de canonicalização R1–R6 (§8.2).
-3. **DEVE** verificar que `JCS(parse(serialize(ncrtf))) == serialize(ncrtf)` antes de incorporar o valor num NDF-core.
-4. **NÃO DEVE** incluir nós `image` com `ref` que não existam no `manifest.inventario` do `.ndfpkg`.
-5. **NÃO DEVE** incluir `src` com data URL num NDF-core finalizado — apenas `ref`.
-6. **DEVE** ordenar `marks` conforme §6.2.
-7. **DEVE** fundir nós `text` contíguos com marcas e `font_family` idênticos (R2).
+1. **NCRTF-PROD-001 — DEVE** gerar valores NCRTF que validam contra `specs/ncrtf/schemas/ncrtf.schema.json`.
+2. **NCRTF-PROD-002 — DEVE** aplicar todas as regras de canonicalização R1–R6 (§8.2).
+3. **NCRTF-PROD-003 — DEVE** verificar que `JCS(parse(serialize(ncrtf))) == serialize(ncrtf)` antes de incorporar o valor num NDF-core.
+4. **NCRTF-PROD-004 — NÃO DEVE** incluir nós `image` com `ref` que não existam no `manifest.inventario` do `.ndfpkg`.
+5. **NCRTF-PROD-005 — NÃO DEVE** incluir `src` com data URL num NDF-core finalizado — apenas `ref`.
+6. **NCRTF-PROD-006 — DEVE** ordenar `marks` conforme §6.2.
+7. **NCRTF-PROD-007 — DEVE** fundir nós `text` contíguos com marcas e `font_family` idênticos (R2).
 
 ### 12.2 Leitor conforme
 
 Uma implementação é um **leitor NCRTF conforme** se:
 
-1. **DEVE** rejeitar qualquer valor NCRTF que não valide contra o schema desta versão.
-2. **DEVE** rejeitar documentos com `marks` fora da ordem canónica (R1).
-3. **DEVE** rejeitar nós de tipo desconhecido.
-4. **DEVE** rejeitar versões NCRTF que não suporte explicitamente.
-5. **DEVE** resolver referências `image.ref` dentro do `.ndfpkg` corrente.
+1. **NCRTF-READ-001 — DEVE** rejeitar qualquer valor NCRTF que não valide contra o schema desta versão.
+2. **NCRTF-READ-002 — DEVE** rejeitar documentos com `marks` fora da ordem canónica (R1).
+3. **NCRTF-READ-003 — DEVE** rejeitar nós de tipo desconhecido.
+4. **NCRTF-READ-004 — DEVE** rejeitar versões NCRTF que não suporte explicitamente.
+5. **NCRTF-READ-005 — DEVE** resolver referências `image.ref` dentro do `.ndfpkg` corrente.
 
 ### 12.3 Suite de conformidade
 
@@ -687,7 +706,7 @@ conformance/ncrtf/
 
 ---
 
-## 13. Glossário
+## Anexo A (informativo) — Glossário
 
 | Termo | Definição |
 |---|---|

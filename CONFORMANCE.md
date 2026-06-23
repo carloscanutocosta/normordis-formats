@@ -1,58 +1,56 @@
-# Conformance
+# Conformidade
 
-## Purpose
+## Finalidade
 
-This document defines what it means for an implementation to claim conformance with NORMORDIS specifications.
+Este documento define as condições gerais para uma implementação declarar
+conformidade com uma especificação NORMORDIS.
 
-## Principles
+## Princípios
 
-- Conformance is demonstrated through evidence.
-- Specifications are normative; implementations are not.
-- Passing a conformance suite does not transfer authority to an implementation.
-- Claims of conformance must be version-specific.
+- A conformidade é demonstrada por evidência verificável.
+- As especificações são normativas; implementações de referência não o são.
+- Passar uma suite não transfere autoridade normativa para a implementação.
+- Uma declaração é sempre específica de versão, papel e perfil.
+- A suite complementa, mas não substitui, requisitos normativos ainda não
+  traduzidos em testes.
 
-## Roles
+## Papéis
 
-An implementation may conform in one or more roles:
+Uma implementação pode declarar um ou mais papéis:
 
-- Producer
-- Reader
-- Renderer
-- Validator
+- produtor;
+- leitor;
+- renderizador;
+- verificador.
 
-Conformance to one role does not imply conformance to another.
+Conformidade num papel não implica conformidade noutro.
 
-## Conformance Requirements
+## Requisitos gerais
 
-A conformant implementation shall:
+Uma implementação conforme DEVE:
 
-- implement the normative behaviour of the specification;
-- correctly process official conformance vectors;
-- declare supported specification versions;
-- identify its supported role(s).
+- cumprir os requisitos normativos aplicáveis ao papel declarado;
+- processar corretamente os vetores oficiais abrangidos pelo perfil;
+- declarar as versões suportadas;
+- identificar papel, perfil, versão da suite e eventuais limitações;
+- disponibilizar resultados reproduzíveis suficientes para sustentar a
+  declaração.
 
-## Conformance Suites
+## Declaração de conformidade
 
-The project publishes official conformance suites containing:
+A declaração DEVE identificar:
 
-- valid examples;
-- invalid examples;
-- edge cases;
-- interoperability vectors;
-- regression vectors.
+- especificação e versão exata;
+- papel;
+- perfil;
+- versão ou hash da suite utilizada;
+- implementação, versão e ambiente de execução;
+- testes não executados, exceções e limitações conhecidas;
+- data da avaliação.
 
-## Conformance Declaration
+## Certificação
 
-A declaration should identify:
-
-- specification;
-- version;
-- role;
-- profile;
-- conformance-suite version.
-
-## Certification
-
-The project does not currently provide formal certification.
-
-Conformance claims remain the responsibility of the declaring party.
+O projeto não fornece certificação, acreditação nem aprovação jurídica. As
+declarações são da responsabilidade de quem as emite. Uma futura entidade de
+certificação fica sujeita às regras de avaliação da conformidade e acreditação
+aplicáveis.

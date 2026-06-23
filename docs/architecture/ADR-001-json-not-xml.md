@@ -8,7 +8,7 @@
 
 ## Contexto
 
-O NDF-core é o objecto canónico de armazenamento do documento institucional — é o que é canonicalizado, assinado e preservado. A escolha do formato de serialização afecta directamente:
+O NDF-core é o objeto canónico de armazenamento do documento institucional — é o que é canonicalizado, assinado e preservado. A escolha do formato de serialização afecta diretamente:
 
 - a canonicalização determinística (requisito de assinatura)
 - a eficiência de armazenamento em base de dados
@@ -39,7 +39,7 @@ Os candidatos avaliados foram: **JSON**, **XML**, **CBOR** e **Protocol Buffers*
 - XAdES (assinatura XML) é substancialmente mais complexo de implementar correctamente do que CAdES sobre JSON canonicalizado.
 - Armazenamento nativo em base de dados relacional: o tipo `xml` do PostgreSQL tem performance inferior ao `jsonb` para queries estruturadas. Não há equivalente ao `jsonb` para XML.
 - Verbosidade: os mesmos dados estruturados ocupam tipicamente 30–60% mais espaço em XML do que em JSON.
-- A interoperabilidade XML com sistemas externos (SAFT-PT, UBL, eIDAS de outros EM) é resolvida por **adapters de exportação** — o NDF-core não é o formato de troca directo. Esta separação é intencional.
+- A interoperabilidade XML com sistemas externos (SAFT-PT, UBL, eIDAS de outros EM) é resolvida por **adapters de exportação** — o NDF-core não é o formato de troca direto. Esta separação é intencional.
 
 ### CBOR (RFC 7049 / RFC 8949)
 
@@ -49,10 +49,10 @@ Os candidatos avaliados foram: **JSON**, **XML**, **CBOR** e **Protocol Buffers*
 - Desenhado para ambientes IoT/constrangidos
 
 **Contras**:
-- Não é human-readable — inspecção directa de um documento de arquivo requer ferramentas de decode
+- Não é human-readable — inspecção direta de um documento de arquivo requer ferramentas de decode
 - Ecossistema de tooling significativamente menor do que JSON
 - Não é adequado para `jsonb` em PostgreSQL
-- A adopção na Administração Pública e nos sistemas de arquivo europeus é negligenciável
+- A adoção na Administração Pública e nos sistemas de arquivo europeus é negligenciável
 
 ### Protocol Buffers (protobuf)
 
@@ -64,7 +64,7 @@ Os candidatos avaliados foram: **JSON**, **XML**, **CBOR** e **Protocol Buffers*
 - Formato proprietário (Google); não é um standard aberto
 - Não tem canonicalização determinística formal adequada para assinatura jurídica
 - Não é human-readable
-- Incompatível com os objectivos de formato aberto e independência de fornecedor do normordis-spec
+- Incompatível com os objetivos de formato aberto e independência de fornecedor do projeto NORMORDIS Formats
 
 ---
 
@@ -74,7 +74,7 @@ Os candidatos avaliados foram: **JSON**, **XML**, **CBOR** e **Protocol Buffers*
 
 O RFC 8785 (JSON Canonicalization Scheme) define uma canonicalização estrita de JSON que produz os mesmos bytes para a mesma estrutura lógica, independentemente da ordem de inserção de chaves, formatação, ou implementação. Esta propriedade é necessária para que a assinatura CAdES sobre `sha256(payload_bytes)` seja verificável por qualquer implementação conforme.
 
-Não existe equivalente XML com o mesmo nível de robustez e adopção. C14N (W3C XML Canonical) tem ambiguidades documentadas que produzem resultados diferentes em implementações distintas.
+Não existe equivalente XML com o mesmo nível de robustez e adoção. C14N (W3C XML Canonical) tem ambiguidades documentadas que produzem resultados diferentes em implementações distintas.
 
 ### 2. Armazenamento em base de dados relacional
 
@@ -83,17 +83,28 @@ O PostgreSQL oferece o tipo `jsonb` que permite:
 - queries estruturadas com operadores JSON nativos
 - geração de colunas computadas a partir do conteúdo JSON
 
-Não existe equivalente para XML com a mesma performance e expressividade de query. Isto é relevante para o modelo de armazenamento do NDF (§1.5 da spec NDF).
+Não existe equivalente para XML com a mesma performance e expressividade de
+consulta. O perfil físico encontra-se em
+`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`.
 
 ### 3. Simplicidade de implementação para terceiros
 
-O objectivo central do normordis-spec é que qualquer fornecedor possa implementar leitura e escrita de NDF sem dependência das bibliotecas de referência. JSON tem parsers disponíveis em todas as linguagens e plataformas sem dependências externas. XML requer parsers mais complexos e a validação XSD/RelaxNG exige bibliotecas adicionais.
+O objetivo central do projeto é que qualquer fornecedor possa implementar
+leitura e escrita de NDF sem dependência das bibliotecas de referência. JSON
+tem parsers disponíveis em todas as linguagens e plataformas sem dependências
+externas.
 
-### 4. Separação entre formato interno e formato de troca
+### 4. Dupla utilização: persistência e interoperabilidade
 
-O NDF-core é o formato de **armazenamento interno**. Interoperabilidade XML com sistemas externos (SAFT-PT, UBL, eIDAS de outros Estados-Membros, SIARQ, etc.) é resolvida por **adapters de exportação** fora do âmbito desta especificação. O NDF-core é a fonte de verdade a partir da qual essas exportações são derivadas.
+O NDF-core é simultaneamente o formato canónico de persistência e o núcleo do
+formato de interoperabilidade. Sistemas conformes podem trocar diretamente NDF
+ou `.ndfpkg`. Quando um contrato externo exigir XML, UBL ou outro formato, um
+adaptador explícito produz essa representação a partir da mesma fonte de
+verdade.
 
-Esta separação permite que o formato interno seja optimizado para arquivo, integridade e eficiência de DB, enquanto os formatos de troca são optimizados para os requisitos específicos de cada integração.
+O perfil de custódia otimiza arquivo, integridade, indexação e deduplicação. O
+perfil `.ndfpkg` otimiza portabilidade e autocontenção. Esta diferença física
+não cria dois modelos lógicos nem reduz o papel interoperável do NDF.
 
 ---
 
@@ -103,10 +114,10 @@ Esta separação permite que o formato interno seja optimizado para arquivo, int
 - Canonicalização robusta via RFC 8785 — base segura para assinatura CAdES
 - Armazenamento eficiente com `jsonb` no PostgreSQL
 - Implementação acessível a qualquer fornecedor sem tooling especializado
-- Human-readable — um documento NDF pode ser inspeccionado directamente num editor de texto
+- Human-readable — um documento NDF pode ser inspeccionado diretamente num editor de texto
 
 **Negativas / mitigações**:
-- Interoperabilidade XML com sistemas externos requer adapters de exportação → resolvido por `normordis-pdf` e futuros adaptadores (fora do âmbito desta spec)
+- Interoperabilidade XML com sistemas externos requer adapters de exportação → resolvido por `normordis-pdf` e futuros adaptadores (fora do âmbito desta especificação)
 - JSON não tem suporte nativo a tipos binários → resolvido por referência por hash para recursos externos; dados binários nunca são embebidos no NDF-core
 
 ---
