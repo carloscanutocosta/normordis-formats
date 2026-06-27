@@ -25,6 +25,15 @@ NDF, NDT e NCRTF encontram-se em **Draft — Revisão pública**. Este estado é
 interno ao projeto e não representa aprovação, homologação ou publicação pelo
 IPQ, CEN, ISO, IEC ou outra entidade normalizadora.
 
+Em termos práticos, o conjunto pode ser apresentado publicamente como uma
+proposta técnica madura para revisão externa: os formatos já possuem objetivos
+claros, separação de responsabilidades, esquema e suites de conformidade,
+matriz de rastreabilidade e gates explícitos para o que ainda depende de
+evidência externa.
+
+O que não deve ser comunicado é que exista já um estatuto formal de norma ou
+uma equivalência certificada com qualquer entidade normalizadora.
+
 | Especificação | Versão | Finalidade |
 |---|---:|---|
 | [NDF](specs/ndf/SPEC.md) | 1.0.0 | instância documental canónica e imutável |
@@ -69,6 +78,7 @@ NCRTF — conteúdo de texto estruturado
 - [Perfil editorial de publicação](docs/normalization/PUBLICATION-PROFILE.md)
 - [Declarações IPR](docs/normalization/IPR-DECLARATIONS.md)
 - [Gates de prontidão](docs/normalization/READINESS.md)
+- [Plano do gate CAdES](docs/normalization/CADES-GATE-PLAN.md)
 - [Percurso de normalização](NORMALIZATION.md)
 - [Contribuição](CONTRIBUTING.md)
 

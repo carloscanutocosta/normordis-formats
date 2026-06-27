@@ -1,0 +1,23 @@
+{
+  "case_id": "valid/advanced-real",
+  "decision": "accept",
+  "profile": "cades-b-lta",
+  "signature_kind": "sea",
+  "identity_state": "explicit",
+  "historical_validity": true,
+  "verification": {
+    "stack": "stack-1",
+    "mode": "offline",
+    "at": "2026-06-23T10:00:00Z"
+  },
+  "result": {
+    "integrity": "pass",
+    "authenticity": "pass",
+    "revocation": "pass",
+    "timestamps": "pass"
+  },
+  "notes": [
+    "Exemplo de expected.json para fixture positiva SEA.",
+    "Os valores servem apenas de referência."
+  ]
+}

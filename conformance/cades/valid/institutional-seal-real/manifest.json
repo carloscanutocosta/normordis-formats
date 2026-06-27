@@ -1,0 +1,59 @@
+{
+  "case_id": "valid/institutional-seal-real",
+  "case_kind": "positive",
+  "profile": "cades-b-lta",
+  "signature_kind": "institutional_seal",
+  "source": {
+    "issuer": "TO-DO",
+    "generated_at": "2026-01-01T00:00:00Z",
+    "environment": "laboratorio-controlado"
+  },
+  "trust": {
+    "anchor_set": "trust/anchor.pem",
+    "policy": "skeleton"
+  },
+  "artifacts": [
+    {
+      "path": "payload.jcs",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "payload.sha256",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "signature.p7s",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "certificates/",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "revocation/",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "timestamps/",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "expected.json",
+      "sha256": "sha256:..."
+    },
+    {
+      "path": "trust/",
+      "sha256": "sha256:..."
+    }
+  ],
+  "expected": {
+    "decision": "accept",
+    "identity_state": "explicit",
+    "historical_validity": true
+  },
+  "notes": [
+    "Preencher com a origem real da fixture.",
+    "Não incluir chaves privadas nem dados pessoais desnecessários."
+  ],
+  "fixture_state": "skeleton"
+}
