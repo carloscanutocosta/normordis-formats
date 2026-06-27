@@ -1,0 +1,29 @@
+{
+  "case_id": "valid/advanced-real",
+  "case_kind": "positive",
+  "profile": "cades-b-lta",
+  "signature_kind": "sea",
+  "source": {
+    "issuer": "Autoridade de teste",
+    "generated_at": "2026-06-23T10:00:00Z",
+    "environment": "laboratorio-controlado"
+  },
+  "trust": {
+    "anchor_set": "trust/anchor.pem",
+    "policy": "teste"
+  },
+  "artifacts": [
+    { "path": "payload.jcs", "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000" },
+    { "path": "payload.sha256", "sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111" },
+    { "path": "signature.p7s", "sha256": "sha256:2222222222222222222222222222222222222222222222222222222222222222" }
+  ],
+  "expected": {
+    "decision": "accept",
+    "identity_state": "explicit",
+    "historical_validity": true
+  },
+  "notes": [
+    "Exemplo de manifesto para fixture positiva SEA.",
+    "Os hashes acima são apenas ilustrativos."
+  ]
+}

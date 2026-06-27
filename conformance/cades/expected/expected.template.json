@@ -1,0 +1,23 @@
+{
+  "case_id": "cades-case-id",
+  "decision": "accept",
+  "profile": "cades-b-lta",
+  "signature_kind": "sea",
+  "identity_state": "explicit",
+  "historical_validity": true,
+  "verification": {
+    "stack": "stack-1",
+    "mode": "offline",
+    "at": "2026-01-01T00:00:00Z"
+  },
+  "result": {
+    "integrity": "pass",
+    "authenticity": "pass",
+    "revocation": "pass",
+    "timestamps": "pass"
+  },
+  "notes": [
+    "Preencher com a decisão real do caso.",
+    "Usar 'reject' nos casos negativos."
+  ]
+}

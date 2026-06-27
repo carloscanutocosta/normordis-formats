@@ -1,0 +1,24 @@
+{
+  "case_id": "valid/advanced-real",
+  "decision": "accept",
+  "profile": "cades-b-lta",
+  "signature_kind": "sea",
+  "identity_state": "explicit",
+  "historical_validity": true,
+  "verification": {
+    "stack": "stack-1",
+    "mode": "offline",
+    "at": "2026-01-01T00:00:00Z"
+  },
+  "result": {
+    "integrity": "pass",
+    "authenticity": "pass",
+    "revocation": "pass",
+    "timestamps": "pass"
+  },
+  "notes": [
+    "Esqueleto gerado automaticamente.",
+    "Substituir os placeholders por prova criptográfica real antes de publicar."
+  ],
+  "fixture_state": "skeleton"
+}
