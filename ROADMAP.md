@@ -20,6 +20,11 @@ Estado em: 2026-06-22
 | Portal de verificação | Contrato OpenAPI draft | 1.0.0 |
 | CI/GitHub Actions | Operacional (3 jobs) | — |
 
+**Roadmap operacional curto:** ver
+[`docs/roadmap/NGI-MVP-2026.md`](docs/roadmap/NGI-MVP-2026.md) para o plano
+de demonstração Modelo 3 XML -> NDF -> NDT -> PDF e preparação de candidatura
+até outubro de 2026.
+
 ---
 
 ## Fase 1 — Especificações tecnicamente completas
