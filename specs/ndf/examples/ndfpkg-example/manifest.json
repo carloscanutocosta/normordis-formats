@@ -27,7 +27,7 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:0c0ed2678c4f8448651d65c048cc8a7b3c501613f81efa31b43fad2e6a8721ea"
+      "hash_sha256": "sha256:4a915fe99161bebdea3ab6c8fa90d19e3418aa84b24dda73ca6f09ba8762c0ca"
     },
     {
       "ficheiro": "schemas/envelope.schema.json",

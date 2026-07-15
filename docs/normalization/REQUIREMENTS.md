@@ -6,18 +6,18 @@ um índice de rastreabilidade.
 
 | ID | Origem | Resumo | Evidência atual |
 |---|---|---|---|
-| `NCRTF-PROD-001` | `specs/ncrtf/SPEC.md:679` | NCRTF-PROD-001 — DEVE gerar valores NCRTF que validam contra specs/ncrtf/schemas/ncrtf.schema.json. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-002` | `specs/ncrtf/SPEC.md:680` | NCRTF-PROD-002 — DEVE aplicar todas as regras de canonicalização R1–R6 (§8.2). | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-003` | `specs/ncrtf/SPEC.md:681` | NCRTF-PROD-003 — DEVE verificar que JCS(parse(serialize(ncrtf))) == serialize(ncrtf) antes de incorporar o valor num NDF-core. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-004` | `specs/ncrtf/SPEC.md:682` | NCRTF-PROD-004 — NÃO DEVE incluir nós image com ref que não existam no manifest.inventario do .ndfpkg. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-005` | `specs/ncrtf/SPEC.md:683` | NCRTF-PROD-005 — NÃO DEVE incluir src com data URL num NDF-core finalizado — apenas ref. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-006` | `specs/ncrtf/SPEC.md:684` | NCRTF-PROD-006 — DEVE ordenar marks conforme §6.2. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-007` | `specs/ncrtf/SPEC.md:685` | NCRTF-PROD-007 — DEVE fundir nós text contíguos com marcas e font_family idênticos (R2). | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-READ-001` | `specs/ncrtf/SPEC.md:691` | NCRTF-READ-001 — DEVE rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-002` | `specs/ncrtf/SPEC.md:692` | NCRTF-READ-002 — DEVE rejeitar documentos com marks fora da ordem canónica (R1). | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-003` | `specs/ncrtf/SPEC.md:693` | NCRTF-READ-003 — DEVE rejeitar nós de tipo desconhecido. | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-004` | `specs/ncrtf/SPEC.md:694` | NCRTF-READ-004 — DEVE rejeitar versões NCRTF que não suporte explicitamente. | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-005` | `specs/ncrtf/SPEC.md:695` | NCRTF-READ-005 — DEVE resolver referências image.ref dentro do .ndfpkg corrente. | vetores NCRTF válidos e inválidos |
+| `NCRTF-PROD-001` | `specs/ncrtf/SPEC.md:677` | NCRTF-PROD-001 — DEVE gerar valores NCRTF que validam contra specs/ncrtf/schemas/ncrtf.schema.json. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-002` | `specs/ncrtf/SPEC.md:678` | NCRTF-PROD-002 — DEVE aplicar todas as regras de canonicalização R1–R6 (§8.2). | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-003` | `specs/ncrtf/SPEC.md:679` | NCRTF-PROD-003 — DEVE verificar que JCS(parse(serialize(ncrtf))) == serialize(ncrtf) antes de incorporar o valor num NDF-core. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-004` | `specs/ncrtf/SPEC.md:680` | NCRTF-PROD-004 — NÃO DEVE incluir nós image com ref que não existam no manifest.inventario do .ndfpkg. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-005` | `specs/ncrtf/SPEC.md:681` | NCRTF-PROD-005 — NÃO DEVE incluir src com data URL num NDF-core finalizado — apenas ref. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-006` | `specs/ncrtf/SPEC.md:682` | NCRTF-PROD-006 — DEVE ordenar marks conforme §6.2. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-007` | `specs/ncrtf/SPEC.md:683` | NCRTF-PROD-007 — DEVE fundir nós text contíguos com marcas e font_family idênticos (R2). | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-READ-001` | `specs/ncrtf/SPEC.md:689` | NCRTF-READ-001 — DEVE rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-002` | `specs/ncrtf/SPEC.md:690` | NCRTF-READ-002 — DEVE rejeitar documentos com marks fora da ordem canónica (R1). | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-003` | `specs/ncrtf/SPEC.md:691` | NCRTF-READ-003 — DEVE rejeitar nós de tipo desconhecido. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-004` | `specs/ncrtf/SPEC.md:692` | NCRTF-READ-004 — DEVE rejeitar versões NCRTF que não suporte explicitamente. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-005` | `specs/ncrtf/SPEC.md:693` | NCRTF-READ-005 — DEVE resolver referências image.ref dentro do .ndfpkg corrente. | vetores NCRTF válidos e inválidos |
 | `NDF-PKG-001` | `specs/ndf/SPEC.md:1020` | NDF-PKG-001 — DEVE ser um arquivo ZIP válido. | verificador de pacote + exemplo `.ndfpkg` |
 | `NDF-PKG-002` | `specs/ndf/SPEC.md:1021` | NDF-PKG-002 — DEVE conter manifest.json, ndf-core.json e envelope.json na raiz do arquivo. | verificador de pacote + exemplo `.ndfpkg` |
 | `NDF-PKG-003` | `specs/ndf/SPEC.md:1022` | NDF-PKG-003 — manifest.json DEVE incluir inventário com hash_sha256 de cada ficheiro e os campos obrigatórios definidos em §8.2. | verificador de pacote + exemplo `.ndfpkg` |

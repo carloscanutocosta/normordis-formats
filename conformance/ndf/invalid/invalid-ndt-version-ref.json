@@ -1,6 +1,6 @@
 {
-  "_comment": "INVÁLIDO: ndt_version_ref não segue o formato normativo '<schema_id>@<versao_impresso>'. Violação: §2.6.",
-  "_expected_error": "'oficio-generico-v1' não contém separador '@'. O formato exige '<schema_id>@<versao_impresso>' (ex.: 'oficio-generico@1.0.0').",
+  "_comment": "INVÁLIDO: ndt_version_ref não segue o formato normativo '<schema_id>@<versao_ndt>'. Violação: §2.6.",
+  "_expected_error": "'oficio-generico-v1' não contém separador '@'. O formato exige '<schema_id>@<versao_ndt>' (ex.: 'oficio-generico@1.0.0').",
   "ndf_version": "1.0.0",
   "ndf_id": "e5f6a7b8-c9d0-4123-efab-234567890123",
   "estado": "ativo",

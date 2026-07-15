@@ -1042,7 +1042,7 @@ Permite que um documento principal seja entregue com outros documentos independe
 
 - Cada documento mantém o seu NDT/NDF próprios.
 - No fecho do documento principal, o NDF de cada componente **tem de estar também fechado**.
-- O NDF principal regista `schema_id`, `ndf_id`, `ndf_hash` e `pdf_hash` de cada componente, para verificação de integridade componente a componente.
+- Quando o schema do tipo de documento principal suportar composição, o registo de `schema_id`, `ndf_id`, `ndf_hash` e `pdf_hash` de cada componente pertence ao respetivo bloco em `documento`. Estes valores não são campos universais implícitos do NDF-core.
 - A `mobilia` do documento principal não se propaga aos documentos compostos.
 
 ---
@@ -1178,7 +1178,7 @@ Elementos puramente decorativos (linhas, retângulos, fundos SVG) DEVEM ser marc
 | PAdES | PDF Advanced Electronic Signatures (ETSI EN 319 142-1); assinatura opcional e independente da assinatura CAdES do NDF |
 | PDF/UA-2 | ISO 14289-2 — perfil de acessibilidade universal para PDF 2.0; formato alvo do renderizador normordis-pdf |
 | PDF/A-3 | ISO 19005-3 — perfil de arquivo a longo prazo com suporte a anexos; compatível com PDF/UA-2 |
-| `pdf_hash` | SHA-256 do PDF gerado, incluído no NDF antes de assinar; permite verificação determinística sem nova assinatura |
+| `pdf_hash` | SHA-256 de uma representação PDF. Não é um campo implícito do NDF-core v1.0.0; só pertence a um schema de documento ou perfil de saída versionado que o declare. |
 | `alt` | Texto alternativo em elementos visuais (`imagem`, `svg`); obrigatório para conformidade PDF/UA-2 |
 | `rotulo_acessivel` | Tooltip acessível em campos interativos (`campos[]`, `grelha_digitos`); emitido como `/TU` no AcroForm para PDF/UA-2 |
 | `linha_lateral` | Elemento de `fluxo.elementos` que agrupa elementos lado a lado; resolve duplos blocos de assinatura e disposições colunares em documentos de fluxo |

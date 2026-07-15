@@ -197,7 +197,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `estado` | Sim | Estado de arquivo do documento. Enum fechado — ver §2.4. |
 | `payload_hash_alg` | Sim | Algoritmo usado para calcular `payload_hash`. Valor normativo desta versão: `"sha256"` (NIST FIPS 180-4). Ver §2.5. |
 | `nivel_assinatura` | Sim | Nível mínimo de assinatura eletrónica exigido pela natureza jurídica do ato. Enum fechado — ver §2.10. |
-| `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_impresso"`. Ver §2.6. |
+| `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_ndt"`. Ver §2.6. |
 | `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
 | `avaliacao` | Sim | Avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
