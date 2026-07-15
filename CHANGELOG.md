@@ -13,6 +13,8 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 - referências normativas controladas e migração de RFC 4122 para RFC 9562;
 - alegações jurídicas reformuladas como objetivos técnicos condicionados;
 - terminologia e ortografia portuguesa harmonizadas;
+- referências NDF/NDT harmonizadas em `versao_ndt`, `documento.corpo` e no
+  âmbito explícito de `pdf_hash`;
 - matriz de rastreabilidade expandida com prefixos estáveis de requisitos.
 - auditoria automática de 45 IDs e inventário de declarações subordinadas;
 - sete vetores negativos de pacote `.ndfpkg`;

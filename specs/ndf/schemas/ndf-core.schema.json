@@ -47,7 +47,7 @@
     "ndt_version_ref": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$",
-      "description": "NDT version reference. Format: '<schema_id>@<versao_impresso>'. Must be resolvable in the .ndfpkg or a compliant registry.",
+      "description": "NDT version reference. Format: '<schema_id>@<versao_ndt>'. Must be resolvable in the .ndfpkg or a compliant registry.",
       "examples": ["oficio-generico@1.0.0", "modelo3-irs@2026.1", "informacao-tecnica@2.3.1"]
     },
     "metadados": {

@@ -543,33 +543,31 @@ renderiza-o segundo as regras de layout do NDT.
     "numero": "OF/2026/00123",
     "data": "2026-06-18",
     "destinatario": { "nome": "Entidade Destinatária", "identificacao": "NIF 987654321" },
-    "conteudo": {
-      "corpo": {
-        "ncrtf_version": "2.0.0",
-        "content": [
-          {
-            "type": "paragraph",
-            "content": [
-              { "type": "text", "text": "Em resposta ao ofício n.º 45/2026, informamos que o prazo termina em " },
-              { "type": "text", "text": "30 de julho de 2026", "marks": ["bold"] },
-              { "type": "text", "text": "." }
-            ]
-          },
-          {
-            "type": "table",
-            "head": [ { "cells": ["Data", "Diligência", "Estado"] } ],
-            "body": [
-              { "cells": ["2026-06-01", "Notificação ao interessado", "Concluída"] }
-            ]
-          },
-          {
-            "type": "paragraph",
-            "content": [
-              { "type": "text", "text": "Aguardamos o vosso contacto." }
-            ]
-          }
-        ]
-      }
+    "corpo": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "Em resposta ao ofício n.º 45/2026, informamos que o prazo termina em " },
+            { "type": "text", "text": "30 de julho de 2026", "marks": ["bold"] },
+            { "type": "text", "text": "." }
+          ]
+        },
+        {
+          "type": "table",
+          "head": [ { "cells": ["Data", "Diligência", "Estado"] } ],
+          "body": [
+            { "cells": ["2026-06-01", "Notificação ao interessado", "Concluída"] }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "text": "Aguardamos o vosso contacto." }
+          ]
+        }
+      ]
     }
   },
   "avaliacao": {
@@ -716,7 +714,7 @@ conformance/ncrtf/
 | **Inline** | Nó filho de um bloco que contém texto ou ligação: `text`, `link`, `hard_break`. |
 | **JCS** | JSON Canonicalization Scheme, RFC 8785. Algoritmo de canonicalização JSON. |
 | **Marca** | Atributo de formatação aplicado a um nó `text`: `bold`, `code`, `italic`, `strikethrough`, `subscript`, `superscript`, `underline`. |
-| **NDT** | NORMORDIS Document Template — declara campos de tipo `ncrtf`. |
+| **NDT** | NORMORDIS Document Template — referencia por caminho valores NCRTF armazenados no NDF-core. |
 | **NDF-core** | NORMORDIS Document Format core — JSON assinável que contém valores NCRTF como campos. |
 | **`.ndfpkg`** | Arquivo ZIP que agrupa NDF-core, envelope, NDT e recursos (incluindo imagens referenciadas por NCRTF). |
 | **Produtor** | Sistema que gera valores NCRTF conformes e os incorpora em NDF-core. |

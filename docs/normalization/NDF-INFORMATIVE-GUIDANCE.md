@@ -90,7 +90,7 @@ Certas mudanças são absolvidas pelos campos `*_ref` existentes, sem alterar o 
 | Mudança | Campo absorvente | Acção |
 |---|---|---|
 | Nova versão da Lista Consolidada DGLAB | `avaliacao.instrumento_avaliacao_versao_ref` | Implementações atualizam o valor; especificação não muda |
-| Nova portaria de impressos fiscais | `impresso.versao_impresso` no NDT | NDT atualizado; NDF especificação não muda |
+| Nova portaria de impressos fiscais | `versao_ndt` no NDT | NDT atualizado; NDF especificação não muda |
 | Novo algoritmo de assinatura nos certificados qualificados | `envelope.assinaturas[].algoritmo` | Implementações suportam novo algoritmo; especificação não muda |
 
 **Tipo B — Nova versão MINOR (campos opcionais adicionados)**
@@ -191,4 +191,3 @@ Itens previstos para versões futuras desta especificação. Não são normativo
 | Extensões de namespace | 2.0.0 | Mecanismo formal de extensão do NDF-core por organismos externos (ex.: `ext.at.pt`, `ext.ss.pt`) sem necessidade de revisão desta especificação base. |
 
 ---
-
