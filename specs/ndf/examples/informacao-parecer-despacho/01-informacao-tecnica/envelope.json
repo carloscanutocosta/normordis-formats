@@ -1,0 +1,29 @@
+{
+  "estado": "ativo",
+  "payload_hash": "sha256:fa4b0a248cd1141488d37712610bb38daf25d6fea98f798e9bb13eda2a6bc8e8",
+  "validation_code": "NDF-C4GSOEZ5XV7YOHECDRYZ",
+  "assinaturas": [
+    {
+      "assinatura_id": "b64a1975-0010-4674-a894-0cc5afb025a1",
+      "nivel": "avancada",
+      "papel": "autor",
+      "signatario": {
+        "nome": "Marta Oliveira",
+        "certificado_serie": "1a2b3c4d5e6f7a8b",
+        "cargo": "Técnica Superior"
+      },
+      "cades_b_lta": "<BASE64_DER_CADES_B_LTA_PLACEHOLDER — exemplo ilustrativo, não é uma assinatura CAdES real>",
+      "assinado_em": "2026-06-10T15:00:00Z",
+      "timestamps": {
+        "assinatura": "<BASE64_RFC3161_TIMESTAMP_B_T_PLACEHOLDER>",
+        "arquivo": "<BASE64_RFC3161_TIMESTAMP_B_LTA_PLACEHOLDER>"
+      },
+      "validation_material": {
+        "cadeia_certificados": [
+          "<BASE64_DER_CERT_SIGNATARIO_PLACEHOLDER>",
+          "<BASE64_DER_CERT_RAIZ_PLACEHOLDER>"
+        ]
+      }
+    }
+  ]
+}

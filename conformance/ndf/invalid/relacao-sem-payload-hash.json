@@ -1,0 +1,37 @@
+{
+  "_comment": "INVÁLIDO: relacoes[0].alvo sem payload_hash. Violação: §2.11.1, §2.11.5 — o alvo DEVE ser identificado por ndf_id e payload_hash.",
+  "_expected_error": "relacoes[0].alvo deve incluir payload_hash — 'payload_hash' is a required property",
+  "ndf_version": "1.0.0",
+  "ndf_id": "8e234253-b404-4aeb-80f0-f456e6d17e88",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "avancada",
+  "ndt_version_ref": "parecer@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "parecer@1.0.0",
+    "entidade_produtora": { "designacao": "Direção-Geral de Exemplo" },
+    "contem_dados_pessoais": false,
+    "responsavel_tratamento": "Direção-Geral de Exemplo"
+  },
+  "documento": {
+    "numero": "PAR/2026/00012",
+    "data": "2026-06-14",
+    "autor": { "nome": "Rui Martins", "cargo": "Jurista" },
+    "sentido": "favoravel",
+    "corpo": "Texto do parecer."
+  },
+  "relacoes": [
+    {
+      "tipo": "emite_parecer_sobre",
+      "alvo": {
+        "ndf_id": "b55c4eaa-6fb0-4024-8317-3a4a5eedccbd"
+      }
+    }
+  ],
+  "avaliacao": {
+    "tipo_classificacao_ref": "lc/150.30.400",
+    "prazo_conservacao_administrativa": { "valor": 3, "unidade": "anos", "forma_contagem": "data_documento" },
+    "destino_final": "eliminacao",
+    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+  }
+}
