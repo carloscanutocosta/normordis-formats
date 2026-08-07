@@ -17,7 +17,7 @@ seja confundida com evidência de interoperabilidade.
 | NDT | corpus semântico com 9 casos; extravasamento, recursos e acessibilidade | cobertura estrutural concluída; resultados extraídos de renderizadores independentes pendentes |
 | CAdES | fixtures B-LTA reais positivas e negativas | plano operativo em `CADES-GATE-PLAN.md`; verificador em `tools/check_cades_gate.py`; evidência externa ainda pendente |
 | Eficiência | corpus e medições reproduzíveis | metodologia e medição inicial concluídas; corpus institucional pendente |
-| Pacote | exemplo positivo e vetores negativos de inventário, caminhos, NDT e envelope | 1 positivo + 7 negativos concluídos |
+| Pacote | exemplo positivo e vetores negativos de inventário, caminhos, NDT e envelope | 1 positivo + 8 negativos concluídos |
 | Auditoria editorial | modalidade, IDs, estrutura de publicação e dossier com hashes | automatizada em CI |
 
 ## Gates externos

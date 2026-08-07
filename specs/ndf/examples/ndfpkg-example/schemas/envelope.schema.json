@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://normordis.pt/specs/ndf/1.0.0/envelope.schema.json",
   "title": "NDF Envelope v1.0.0",
-  "description": "NDF envelope structure — produced after NDF-core finalisation. Not signed; contains signatures over NDF-core, timestamps, validation material, and operational fields.",
+  "description": "NDF envelope structure — produced after NDF-core finalisation. Not signed; contains signatures over NDF-core, timestamps, validation material, and operational fields. Each entry in 'assinaturas' is a self-contained unit of proof: timestamps and validation_material live per signature, not globally, so that N independent signatures (distinct certificates, chains, revocation data, signing instants) are never ambiguous about which proof belongs to which signature.",
   "type": "object",
   "required": ["validation_code", "payload_hash", "estado"],
   "additionalProperties": false,
@@ -20,8 +20,9 @@
     },
     "payload_hash": {
       "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$",
-      "description": "SHA-256 digest of payload_bytes (JCS-canonicalised NDF-core), hex-encoded. Format: 'sha256:<hex>'."
+      "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+      "description": "Digest of payload_bytes (JCS-canonicalised NDF-core), hex-encoded. Format: '<alg>:<hex>', algorithm-agnostic. Normative value for NDF v1.x is always 'sha256:' + 64 hex chars (payload_hash_alg, SPEC.md §2.5) — the pattern is intentionally broader than the current single algorithm so it does not need to change again when multi-algorithm support (roadmap 1.2.0) lands.",
+      "examples": ["sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"]
     },
     "assinaturas": {
       "type": "array",
@@ -30,9 +31,102 @@
         "$ref": "#/$defs/assinatura"
       }
     },
+    "versao_anterior": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "ndf_id of the immediately preceding NDF in the provenance chain. Present only when this NDF supersedes a previous one. See also NDF-core.relacoes (tipo 'substitui') for the signed, hash-bound equivalent — SPEC.md §2.11.3."
+    },
+    "hash_anterior": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+      "description": "payload_hash of the preceding NDF, for chain integrity verification. Required when versao_anterior is present."
+    }
+  },
+  "if": {
+    "required": ["versao_anterior"]
+  },
+  "then": {
+    "required": ["hash_anterior"]
+  },
+  "dependentRequired": {
+    "versao_anterior": ["hash_anterior"],
+    "hash_anterior": ["versao_anterior"]
+  },
+  "$defs": {
+    "assinatura": {
+      "type": "object",
+      "required": ["assinatura_id", "nivel", "cades_b_lta"],
+      "properties": {
+        "assinatura_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "description": "Stable identifier of this signature entry within the envelope. Enables unambiguous reference (e.g. from a future re-sealing/custody event) even when multiple signatures are present."
+        },
+        "nivel": {
+          "type": "string",
+          "enum": ["selo_institucional", "avancada", "qualificada"],
+          "description": "Tipo/nível da prova. Selo institucional não é assinatura pessoal."
+        },
+        "papel": {
+          "type": "string",
+          "enum": ["autor", "coautor", "validador", "aprovador", "decisor", "representante", "testemunha", "selante"],
+          "description": "Administrative role exercised by this signatory on this specific document — distinct from 'signatario.cargo' (organisational job title) and from NDF-core.participantes (SPEC.md §2.12), which records participation independent of signing."
+        },
+        "ordem": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optional sequence/ordering hint among co-signatures (e.g. co-authorship order). Descriptive only — this specification does not model signing workflow, quorum, or approval state machines."
+        },
+        "signatario": {
+          "type": "object",
+          "required": ["nome", "certificado_serie"],
+          "properties": {
+            "nome": {
+              "type": "string",
+              "description": "Common name from the signing certificate."
+            },
+            "certificado_serie": {
+              "type": "string",
+              "description": "Certificate serial number (hex)."
+            },
+            "cargo": {
+              "type": "string",
+              "description": "Organisational job title of the signatory (optional, from certificate or metadata). Not the same as 'papel' — a person's cargo may be 'Diretor de Serviços' while their papel on this document is 'decisor'."
+            }
+          },
+          "additionalProperties": false
+        },
+        "cades_b_lta": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "description": "DER-encoded detached CAdES-B-LTA signature (CMS/PKCS#7, ASN.1) over payload_bytes; its message digest matches payload_hash."
+        },
+        "assinado_em": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Signing timestamp (ISO 8601, UTC)."
+        },
+        "timestamps": {
+          "$ref": "#/$defs/timestamps",
+          "description": "RFC 3161 timestamps for this specific signature. Required when nivel ∈ {avancada, qualificada}."
+        },
+        "validation_material": {
+          "$ref": "#/$defs/validation_material",
+          "description": "Certificate chain and revocation data captured at signing time, for this specific signature. Required when nivel ∈ {avancada, qualificada}."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "nivel": { "enum": ["avancada", "qualificada"] } } },
+          "then": { "required": ["signatario"] }
+        }
+      ],
+      "additionalProperties": false
+    },
     "timestamps": {
       "type": "object",
-      "description": "RFC 3161 timestamps. Required when nivel_assinatura ∈ {avancada, qualificada}.",
       "properties": {
         "assinatura": {
           "type": "string",
@@ -50,7 +144,6 @@
     },
     "validation_material": {
       "type": "object",
-      "description": "Certificate chains and revocation data captured at signing time. Required when nivel_assinatura ∈ {avancada, qualificada}.",
       "properties": {
         "cadeia_certificados": {
           "type": "array",
@@ -75,76 +168,6 @@
         }
       },
       "required": ["cadeia_certificados"],
-      "additionalProperties": false
-    },
-    "versao_anterior": {
-      "type": "string",
-      "format": "uuid",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-      "description": "ndf_id of the immediately preceding NDF in the provenance chain. Present only when this NDF supersedes a previous one."
-    },
-    "hash_anterior": {
-      "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$",
-      "description": "payload_hash of the preceding NDF, for chain integrity verification. Required when versao_anterior is present."
-    }
-  },
-  "if": {
-    "required": ["versao_anterior"]
-  },
-  "then": {
-    "required": ["hash_anterior"]
-  },
-  "dependentRequired": {
-    "versao_anterior": ["hash_anterior"],
-    "hash_anterior": ["versao_anterior"]
-  },
-  "$defs": {
-    "assinatura": {
-      "type": "object",
-      "required": ["nivel", "cades_b_lta"],
-      "properties": {
-        "nivel": {
-          "type": "string",
-          "enum": ["selo_institucional", "avancada", "qualificada"],
-          "description": "Tipo/nível da prova. Selo institucional não é assinatura pessoal."
-        },
-        "signatario": {
-          "type": "object",
-          "required": ["nome", "certificado_serie"],
-          "properties": {
-            "nome": {
-              "type": "string",
-              "description": "Common name from the signing certificate."
-            },
-            "certificado_serie": {
-              "type": "string",
-              "description": "Certificate serial number (hex)."
-            },
-            "cargo": {
-              "type": "string",
-              "description": "Functional role of the signatory (optional, from certificate or metadata)."
-            }
-          },
-          "additionalProperties": false
-        },
-        "cades_b_lta": {
-          "type": "string",
-          "contentEncoding": "base64",
-          "description": "DER-encoded detached CAdES-B-LTA signature (CMS/PKCS#7, ASN.1) over payload_bytes; its message digest matches payload_hash."
-        },
-        "assinado_em": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Signing timestamp (ISO 8601, UTC)."
-        }
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "nivel": { "enum": ["avancada", "qualificada"] } } },
-          "then": { "required": ["signatario"] }
-        }
-      ],
       "additionalProperties": false
     }
   }

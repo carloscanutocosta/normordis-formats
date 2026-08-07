@@ -29,6 +29,11 @@
             "format": "uuid",
             "description": "ndf_id do documento sobre o qual recai o despacho."
           },
+          "payload_hash": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+            "description": "payload_hash do documento sujeito, para consistência com NDF-core.relacoes quando presente. Opcional aqui por compatibilidade com despachos de iniciativa própria ou sem relação estruturada; RECOMENDADO quando o mesmo alvo constar de NDF-core.relacoes."
+          },
           "descricao": {
             "type": "string",
             "description": "Descrição breve do documento sujeito (para legibilidade)."
@@ -36,7 +41,7 @@
         },
         "additionalProperties": false
       },
-      "description": "Documentos sobre os quais o despacho recai, identificados por ndf_id. Pode ser vazio para despachos de iniciativa própria."
+      "description": "Documentos sobre os quais o despacho recai, identificados por ndf_id. Pode ser vazio para despachos de iniciativa própria. Campo de conveniência de leitura específico deste tipo de documento; NDF-core.relacoes (SPEC.md §2.11) é o mecanismo genérico e a fonte de verdade criptograficamente verificável — quando ambos estiverem presentes, DEVEM referenciar o mesmo conjunto de ndf_id."
     },
     "texto": {
       "type": "string",

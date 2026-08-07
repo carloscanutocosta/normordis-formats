@@ -22,7 +22,7 @@
     },
     "nivel_assinatura": { "enum": ["nenhuma", "avancada", "qualificada"] },
     "finalizado_em": { "type": "string", "format": "date-time" },
-    "payload_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "payload_hash": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$", "description": "Format '<alg>:<hex>', algorithm-agnostic. Normative value for NDF v1.x is sha256:<64 hex chars>." },
     "validation_code": { "type": "string", "pattern": "^NDF-[A-Z2-7]{20}$" },
     "inventario": {
       "type": "array",
@@ -37,7 +37,7 @@
             "type": "string",
             "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._@/-]+$"
           },
-          "hash_sha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+          "hash_sha256": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$" }
         }
       }
     }

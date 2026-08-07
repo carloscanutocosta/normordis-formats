@@ -40,9 +40,9 @@
     "previous_event_hash": {
       "oneOf": [
         { "type": "null" },
-        { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$" }
       ]
     },
-    "event_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+    "event_hash": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$" }
   }
 }

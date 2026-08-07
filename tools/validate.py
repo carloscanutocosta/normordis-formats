@@ -486,12 +486,16 @@ def validate_package_dir(root: Path) -> bool:
     required_level = core.get("nivel_assinatura")
     signatures = envelope.get("assinaturas") or []
     if required_level in {"avancada", "qualificada"}:
-        if not any(s.get("nivel") == required_level for s in signatures):
+        matching = [s for s in signatures if s.get("nivel") == required_level]
+        if not matching:
             errors.append(f"envelope não contém assinatura pessoal {required_level} exigida")
-        if not envelope.get("timestamps"):
-            errors.append("envelope assinado sem timestamps B-LTA")
-        if not envelope.get("validation_material"):
-            errors.append("envelope assinado sem material de validação")
+        # timestamps e validation_material são por assinatura (unidade de prova
+        # autocontida — SPEC.md §4.4.1), não campos globais do envelope.
+        for s in matching:
+            if not s.get("timestamps"):
+                errors.append(f"assinatura {s.get('assinatura_id', '?')} sem timestamps B-LTA")
+            if not s.get("validation_material"):
+                errors.append(f"assinatura {s.get('assinatura_id', '?')} sem material de validação")
 
     items = manifest.get("inventario", [])
     inventory = {item["ficheiro"]: item["hash_sha256"] for item in items}
