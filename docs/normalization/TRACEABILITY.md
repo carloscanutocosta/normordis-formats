@@ -16,7 +16,7 @@ subordinados, são inventariadas em `NORMATIVE-STATEMENTS.md` por
 | `NCRTF-PROD-*`, `NCRTF-READ-*` | schema + verificações semânticas | suite NCRTF válida/inválida | mapear R1–R6 individualmente |
 | `NDT-RENDER-*` — estrutura e renderização | schema + verificações semânticas | 9 casos `NDT-SEM-*` + suite negativa | árvores extraídas e resultados de referência independentes |
 | `JCS-REQ-*` — bytes e digest | RFC 8785 + vetores JCS | vetores IEEE-754 incluídos | implementação independente adicional |
-| `PKG-REQ-*` — caminhos e inventário | schema do manifesto + verificador | pacote autocontido + 7 vetores negativos | ampliar cobertura de ZIP real |
+| `PKG-REQ-*` — caminhos e inventário | schema do manifesto + verificador | pacote autocontido + 8 vetores negativos | ampliar cobertura de ZIP real |
 | `SIG-REQ-*` — assinaturas | verificações cruzadas | exemplo estrutural | fixtures CAdES-B-LTA reais |
 | `CUST-REQ-*` — cadeia de custódia | schema + verificador | vetores positivo/negativo | integração WORM/TSA |
 | `PORTAL-REQ-*` — portal | OpenAPI | contrato draft | revisão de segurança e privacidade |

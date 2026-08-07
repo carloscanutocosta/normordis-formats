@@ -84,7 +84,7 @@
           },
           "hash_sha256": {
             "type": "string",
-            "pattern": "^sha256:[0-9a-f]{64}$",
+            "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
             "description": "SHA-256 digest do ficheiro de anexo (formato 'sha256:<hex>'). O ficheiro é externo ao NDF-core."
           },
           "nome_ficheiro": {

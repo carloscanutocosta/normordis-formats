@@ -70,6 +70,7 @@ NCRTF — conteúdo de texto estruturado
 - [Base terminológica](docs/normalization/TERMINOLOGY.md)
 - [Referências normativas](docs/normalization/NORMATIVE-REFERENCES.md)
 - [Orientações informativas NDF](docs/normalization/NDF-INFORMATIVE-GUIDANCE.md)
+- [Orientações de proveniência de IA](docs/normalization/AI-PROVENANCE-GUIDANCE.md)
 - [Matriz de rastreabilidade](docs/normalization/TRACEABILITY.md)
 - [Índice de requisitos](docs/normalization/REQUIREMENTS.md)
 - [Inventário de declarações normativas](docs/normalization/NORMATIVE-STATEMENTS.md)

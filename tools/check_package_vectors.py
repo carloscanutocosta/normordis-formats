@@ -44,6 +44,7 @@ def cases(root: Path):
     yield "PKG-NEG-005-ndt-ausente", lambda p: (p / "ndt/oficio-generico@2.0.0.ndt.json").unlink()
     yield "PKG-NEG-006-identidade-ndt-divergente", lambda p: _mismatch_ndt(p)
     yield "PKG-NEG-007-envelope-sem-timestamps", lambda p: _remove_timestamps(p)
+    yield "PKG-NEG-008-assinatura-sem-id", lambda p: _remove_assinatura_id(p)
 
 
 def _tamper_hash(root: Path) -> None:
@@ -77,10 +78,25 @@ def _mismatch_ndt(root: Path) -> None:
 
 
 def _remove_timestamps(root: Path) -> None:
+    # timestamps é por assinatura (unidade de prova autocontida — SPEC.md
+    # §4.4.1), não um campo global do envelope.
     relative = "envelope.json"
     path = root / relative
     envelope = load(path)
-    envelope.pop("timestamps", None)
+    for assinatura in envelope.get("assinaturas", []):
+        assinatura.pop("timestamps", None)
+    dump(path, envelope)
+    update_inventory_hash(root, relative)
+
+
+def _remove_assinatura_id(root: Path) -> None:
+    # Cada assinatura é uma unidade de prova autocontida (ADR-004) —
+    # assinatura_id é obrigatório para referenciação inequívoca.
+    relative = "envelope.json"
+    path = root / relative
+    envelope = load(path)
+    for assinatura in envelope.get("assinaturas", []):
+        assinatura.pop("assinatura_id", None)
     dump(path, envelope)
     update_inventory_hash(root, relative)
 
@@ -101,7 +117,8 @@ def main() -> int:
                 failed += 1
             else:
                 print(f"PASS {name}: rejeitado como esperado")
-    print(f"PASS package vectors: {7 - failed}/7" if not failed else f"FAIL package vectors: {failed}")
+    total = 8
+    print(f"PASS package vectors: {total - failed}/{total}" if not failed else f"FAIL package vectors: {failed}")
     return 1 if failed else 0
 
 

@@ -201,8 +201,11 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
 | `avaliacao` | Sim | Avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
+| `relacoes` | Não | Relações verificáveis com outros documentos NDF. Ver §2.11. |
+| `participantes` | Não | Autores, revisores e demais intervenientes, distintos de quem assina. Ver §2.12. |
+| `proveniencia_ia` | Não | Evidência de utilização de sistemas de IA na produção ou revisão do documento. Ver §2.13. |
 
-Nenhum destes campos PODE estar ausente — a finalização **DEVE falhar** se algum estiver em falta (ver §5).
+Nenhum dos campos obrigatórios PODE estar ausente — a finalização **DEVE falhar** se algum estiver em falta (ver §5). Os três campos opcionais, quando presentes, entram no NDF-core canonicalizado e assinado tal como os restantes.
 
 ### 2.3 `ndf_id`
 
@@ -553,6 +556,200 @@ Mesmo quando o ato não requer assinatura eletrónica para validade jurídica, h
 
 Quando CAdES-B-LTA é aplicado a um documento com `nivel_assinatura: "nenhuma"`, o envelope DEVE usar um **selo institucional** (não uma assinatura pessoal) — um certificado de autenticação da entidade produtora ou do sistema de gestão documental, não um certificado qualificado pessoal. O efeito jurídico é de integridade técnica, não de assinatura com efeito legal equivalente à manuscrita.
 
+### 2.11 Relações documentais (`relacoes`)
+
+#### 2.11.1 Objetivo e princípio
+
+Um procedimento administrativo é tipicamente composto por vários documentos
+autónomos e relacionados — uma informação técnica, um ou mais pareceres, um
+despacho — cada um com o seu próprio `ndf_id`, hash e assinaturas (§2.9,
+Anexo A). O campo opcional `relacoes` regista essas relações **dentro do
+NDF-core**, e não no envelope, precisamente para que a relação fique coberta
+pela mesma assinatura e canonicalização que protege o conteúdo do documento.
+
+Cada relação DEVE identificar o documento alvo por `ndf_id` **e**
+`payload_hash` — nunca apenas por `ndf_id`. O `payload_hash` liga a relação
+aos bytes canónicos exatos que existiam no momento em que a relação foi
+estabelecida, não a uma identidade lógica que poderá entretanto ter sido
+substituída por uma nova versão do mesmo documento.
+
+```json
+{
+  "relacoes": [
+    {
+      "tipo": "emite_parecer_sobre",
+      "alvo": {
+        "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+        "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
+        "descricao": "Informação técnica IT/2026/00045"
+      },
+      "papel": "informacao_base"
+    }
+  ]
+}
+```
+
+#### 2.11.2 Vocabulário de relações (enum fechado)
+
+| Valor | Significado |
+|---|---|
+| `substitui` | O documento alvo é substituído por este (cadeia de proveniência de versões, §6). |
+| `corrige` | Este documento corrige informação do alvo, sem o substituir formalmente. |
+| `complementa` | Este documento acrescenta informação ao alvo, sem o substituir nem corrigir. |
+| `anula` | Este documento anula os efeitos do alvo. |
+| `responde_a` | Este documento é uma resposta ao alvo (ex.: resposta a requerimento). |
+| `emite_parecer_sobre` | Este documento é um parecer emitido sobre o alvo. |
+| `decide_sobre` | Este documento é uma decisão (despacho) sobre o alvo. |
+| `executa` | Este documento executa o que o alvo determina. |
+| `anexa` | O alvo é anexado a este documento. |
+| `deriva_de` | Este documento deriva do alvo, sem ser uma nova versão formal. |
+| `referencia` | Ligação informativa, sem implicação jurídico-documental direta. |
+
+Este vocabulário é fechado nesta versão. Extensão requer uma nova versão
+minor desta especificação — o mesmo princípio já aplicado a
+`classificacao_seguranca` (§2.7.4) e `destino_final` (§3.4).
+
+**Correspondência informativa com PROV-O** (W3C) — não normativa, apenas para
+interoperabilidade semântica fora do ecossistema NORMORDIS — consta de
+[`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`](../../docs/normalization/NDF-INFORMATIVE-GUIDANCE.md).
+
+#### 2.11.3 Relação com `versao_anterior`/`hash_anterior` (§6.2)
+
+`relacoes` e `versao_anterior`/`hash_anterior` (envelope) cobrem propósitos
+sobrepostos mas não idênticos: `versao_anterior`/`hash_anterior` é um atalho
+operacional de cadeia linear, fora do core; uma relação `"tipo": "substitui"`
+em `relacoes` é o mesmo facto, mas coberto pela assinatura. Um sistema
+produtor que crie um NDF substituto de outro **RECOMENDA-SE** que preencha
+ambos, mantendo-os coerentes. Não é uma obrigação — sistemas que só precisem
+de versionamento linear simples **PODEM** continuar a usar apenas o
+mecanismo do envelope.
+
+#### 2.11.4 Relação com campos de tipo de documento (ex.: `despacho.sobre`)
+
+Alguns tipos de documento do registo (ex.: `despacho@1.0.0`, ver
+`specs/registry/SPEC.md`) já têm campos próprios de referência a outros
+documentos por `ndf_id`, para legibilidade humana e indexação específica do
+tipo. `relacoes` é o mecanismo genérico e a fonte de verdade
+criptograficamente verificável para qualquer produtor conforme; quando um
+tipo de documento tiver o seu próprio campo de referência, um produtor
+conforme DEVE manter os dois coerentes (mesmo conjunto de `ndf_id`
+referenciados).
+
+Os requisitos normativos de produtor e leitor para `relacoes` estão
+enumerados em §9.1 e §9.2.
+
+#### 2.11.6 Exemplo
+
+`specs/ndf/examples/informacao-parecer-despacho/` contém um exemplo completo
+de três NDF autónomos (informação técnica, parecer, despacho) ligados por
+`relacoes[]`, com hashes reais recalculáveis e diagrama do grafo.
+
+### 2.12 Participantes (`participantes`)
+
+#### 2.12.1 Objetivo
+
+Distingue **autoria e participação** de **assinatura eletrónica** (Anexo A;
+ver também §4 — Envelope). Um autor poderá não assinar; um signatário
+poderá assinar num papel de aprovador ou representante sem ser autor
+material. O
+bloco `participantes`, opcional, regista essa informação de forma estrutural
+e independente do texto de exibição que já existe nalguns schemas de tipo de
+documento (ex.: `informacao-tecnica.autor`, `despacho.decisor`) — esses
+campos continuam a servir a apresentação do documento (via NDT); `participantes`
+serve a consulta, auditoria e o grafo documental.
+
+```json
+{
+  "participantes": [
+    { "participante_ref": "user:123", "tipo": "pessoa", "papel": "autor" },
+    { "participante_ref": "user:456", "tipo": "pessoa", "papel": "revisor_humano" }
+  ]
+}
+```
+
+#### 2.12.2 Campos
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `participante_ref` | Sim | Identificador institucional estável — não um nome de exibição. |
+| `tipo` | Não | `pessoa` \| `sistema` \| `entidade`. Assume-se `pessoa` quando omitido. |
+| `papel` | Sim | `autor`, `coautor`, `revisor_humano`, `validador`, `aprovador`, `decisor`, `representante`, `entidade_produtora`, `sistema_tecnico`. |
+
+Um sistema de IA interveniente PODE ser registado com `tipo: "sistema"` e
+`papel: "sistema_tecnico"` — nunca com um papel que implique autoria,
+aprovação ou decisão (ver §2.13.4).
+
+### 2.13 Proveniência de IA (`proveniencia_ia`)
+
+#### 2.13.1 Objetivo e âmbito
+
+Bloco opcional, só relevante quando um sistema de IA influenciou
+materialmente a criação, transformação, classificação, fundamentação ou
+revisão do conteúdo de `documento`. O NDF não impõe nem garante conformidade
+com o AI Act ou qualquer outro regime jurídico — fornece mecanismos técnicos
+que poderão apoiar rastreabilidade, transparência, supervisão humana e
+conservação de evidências relativas ao uso de sistemas de IA. A conformidade
+jurídica depende do sistema, finalidade, classificação de risco, operadores,
+contexto jurídico e medidas técnicas e organizativas aplicáveis — não é
+garantida pelo formato isoladamente (mesmo princípio de §1.1 e §1.4 aplicado
+a IA). Orientação informativa adicional consta de
+[`docs/normalization/AI-PROVENANCE-GUIDANCE.md`](../../docs/normalization/AI-PROVENANCE-GUIDANCE.md).
+
+#### 2.13.2 Dois níveis de evidência
+
+1. **Proveniência essencial** — no NDF-core, coberta pela assinatura:
+   finalidade, sistema/fornecedor/modelo/versão, data, resultado incorporado,
+   segmentos afetados, estado da revisão humana.
+2. **Logs detalhados** — fora do NDF (prompts integrais, respostas
+   completas), sob política própria de acesso e retenção, ligados por
+   `evidencia_ref` (identificador + hash). NÃO DEVEM ser embutidos
+   obrigatoriamente no NDF-core: poderão conter dados pessoais, informação
+   confidencial ou material desproporcionado para conservação permanente.
+
+```json
+{
+  "proveniencia_ia": {
+    "utilizada": true,
+    "intervencoes": [
+      {
+        "intervencao_id": "b2c3d4e5-f6a7-4890-bcde-f01234567890",
+        "finalidade": "apoio_redacao",
+        "sistema": { "nome": "string", "fornecedor": "string", "modelo": "string", "versao": "string" },
+        "executada_em": "2026-06-18T10:30:00Z",
+        "resultado_incorporado": "parcialmente",
+        "segmentos_afetados": ["documento.fundamentacao"],
+        "revisao_humana": {
+          "estado": "revisto_e_aprovado",
+          "revisor_ref": "user:456",
+          "revisto_em": "2026-06-18T11:00:00Z"
+        },
+        "evidencia_ref": { "tipo": "registo_externo", "identificador": "string", "hash": "sha256:..." }
+      }
+    ]
+  }
+}
+```
+
+#### 2.13.3 Estado de revisão humana
+
+`revisao_humana.estado` é obrigatório em cada intervenção — incluindo o
+valor `"pendente"`, para que a ausência de revisão seja **representável e
+visível**, não apenas omitida. Quando o estado for `revisto_e_aprovado`,
+`revisto_com_alteracoes` ou `rejeitado`, `revisor_ref` e `revisto_em` DEVEM
+estar presentes.
+
+#### 2.13.4 IA não é signatária nem decisora
+
+Um sistema de IA NÃO DEVE ser registado como `signatario` de uma assinatura
+(§4), nem como `participante` com papel de autor, aprovador ou decisor
+(§2.12.2). A IA **PODE** ser registada em `proveniencia_ia.intervencoes[].sistema`
+como sistema técnico interveniente, e opcionalmente em `participantes` com
+`papel: "sistema_tecnico"`. O ato administrativo depende sempre de
+intervenção humana identificável.
+
+Os requisitos normativos de produtor e leitor para `proveniencia_ia` estão
+enumerados em §9.1 e §9.2.
+
 ---
 
 ## 3. Avaliação arquivística (PCA/DF — MEG/DGLAB)
@@ -667,10 +864,13 @@ A partir de `avaliacao.prazo_conservacao_administrativa` e da data de finalizaç
 
 | Componente | Conteúdo | Norma | Condicional |
 |---|---|---|---|
-| `assinaturas` | Assinaturas pessoais ou selos institucionais CAdES sobre os `payload_bytes` canónicos, mais metadados de identidade e certificado | CAdES (ETSI EN 319 122), nível B-LTA | Assinatura pessoal obrigatória se `nivel_assinatura ∈ {"avancada", "qualificada"}`; selo institucional opcional se `"nenhuma"` |
-| `timestamps` | Timestamps RFC 3161 — de assinatura (B-T) e de arquivo (B-LTA) | RFC 3161 | Obrigatório se `nivel_assinatura ∈ {"avancada", "qualificada"}`; opcional se `"nenhuma"` |
-| `validation_material` | Cadeia de certificados (signatário → raiz) + respostas de revogação (OCSP/CRL) capturadas no momento da assinatura | LT/LTA (ETSI EN 319 122) | Obrigatório se `nivel_assinatura ∈ {"avancada", "qualificada"}`; ausente se `"nenhuma"` |
+| `assinaturas[]` | Assinaturas pessoais ou selos institucionais CAdES sobre os `payload_bytes` canónicos — cada entrada é uma unidade de prova autocontida (identidade, certificado, timestamps RFC 3161 e material de validação próprios). Ver §4.4. | CAdES (ETSI EN 319 122), nível B-LTA | Assinatura pessoal obrigatória se `nivel_assinatura ∈ {"avancada", "qualificada"}`; selo institucional opcional se `"nenhuma"` |
 | `validation_code` | Código de verificação canónico — derivado de `ndf_id` + `payload_hash`. Ver §4.6. | Esta especificação | **Sempre presente** — independente de `nivel_assinatura` |
+
+`timestamps` e `validation_material` **não são componentes de topo do
+envelope** — vivem dentro de cada entrada de `assinaturas[]` (§4.4.2), para
+que a associação entre prova, certificado, cadeia e timestamp nunca seja
+ambígua quando existir mais do que uma assinatura independente.
 
 ### 4.2 Nível alvo quando CAdES é usado: CAdES-B-LTA
 
@@ -707,11 +907,39 @@ A mitigação completa deste risco faz parte do **roadmap desta especificação*
 ### 4.4 Múltiplas assinaturas
 
 `assinaturas` é um array — um NDF aceita mais do que uma assinatura (ex.:
-assinatura de autor + selo institucional/visto). Cada entrada é independente e
-assina os mesmos `payload_bytes` canónicos em modo detached. O digest usado
-internamente pelo contentor CAdES DEVE coincidir com `payload_hash`.
+assinatura de autor + selo institucional/visto, ou coautoria). Cada entrada é
+independente e assina os mesmos `payload_bytes` canónicos em modo detached. O
+digest usado internamente pelo contentor CAdES DEVE coincidir com
+`payload_hash`.
 
-### 4.4.1 Preservação da assinatura original
+Múltiplas assinaturas do mesmo NDF destinam-se a coautoria, aprovação
+conjunta ou selo institucional sobre o mesmo conteúdo — não a encadear
+documentos distintos. Um parecer sobre uma informação, ou um despacho sobre
+um parecer, NÃO DEVEM ser representados como uma segunda assinatura do
+documento original: são NDF autónomos, ligados por `relacoes` (§2.11).
+
+#### 4.4.1 Unidade de prova autocontida
+
+Cada entrada de `assinaturas[]` é autossuficiente: inclui identidade,
+certificado, `timestamps` e `validation_material` próprios, além de:
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `assinatura_id` | Sim | Identificador estável desta entrada de assinatura — permite referenciá-la sem ambiguidade (ex.: de um evento de custódia de renovação). |
+| `nivel` | Sim | `selo_institucional` \| `avancada` \| `qualificada`. |
+| `papel` | Não | Papel administrativo exercido **neste documento**: `autor`, `coautor`, `validador`, `aprovador`, `decisor`, `representante`, `testemunha`, `selante`. Distinto de `signatario.cargo` (cargo organizacional) — uma pessoa poderá ter o cargo "Diretor de Serviços" e assinar no papel de `decisor`. |
+| `ordem` | Não | Indicação descritiva de ordem entre coassinaturas. Não é um motor de workflow: quórum, sequência obrigatória e estado de aprovação pertencem ao sistema de gestão documental, não a esta especificação. |
+| `signatario` | Condicional | Identidade do signatário — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. |
+| `cades_b_lta` | Sim | Assinatura CAdES-B-LTA detached (DER). |
+| `timestamps` | Condicional | RFC 3161 B-T + B-LTA desta assinatura — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. |
+| `validation_material` | Condicional | Cadeia de certificados + revogação desta assinatura — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. |
+
+Não existe um modelo dual (campos globais + campos por assinatura): manter
+os dois caminhos de leitura válidos para o mesmo dado obrigaria qualquer
+verificador a saber qual usar, sem benefício de compatibilidade — não há
+implementação nem adoção externa do formato de envelope anterior a proteger.
+
+#### 4.4.2 Preservação da assinatura original
 
 Quando `nivel_assinatura ∈ {"avancada", "qualificada"}`, a assinatura CAdES é
 parte integrante e obrigatória do documento arquivado. Durante todo o prazo de
@@ -997,6 +1225,9 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 9. **NDF-PROD-009 — DEVE** definir `estado: "ativo"` no NDF-core de qualquer documento recém-finalizado.
 10. **NDF-PROD-010 — DEVE** registar cada transição de estado em log de auditoria imutável (§2.4.2).
 11. **NDF-PROD-011 — DEVE** produzir saídas aceites pelo validador e pelas verificações semânticas oficiais; os casos válidos são referências de interoperabilidade, não entradas do produtor. todos os casos de `conformance/ndf/valid/` sem erro.
+12. **NDF-PROD-012 — DEVE**, quando `relacoes` estiver presente, incluir em cada elemento `tipo`, `alvo.ndf_id` e `alvo.payload_hash` (§2.11).
+13. **NDF-PROD-013 — DEVE** incluir `intervencoes` com pelo menos um elemento quando `proveniencia_ia.utilizada` for `true`, e omitir ou esvaziar `intervencoes` quando for `false` (§2.13).
+14. **NDF-PROD-014 — DEVE** incluir `revisao_humana.estado` em cada elemento de `proveniencia_ia.intervencoes`, e `revisor_ref`+`revisto_em` quando o estado for terminal (§2.13.3).
 
 ### 9.2 Leitor conforme
 
@@ -1012,6 +1243,9 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 8. **NDF-READ-008 — DEVE** considerar inválido um pacote onde assinatura original, timestamps ou material de validação obrigatórios estejam ausentes ou alterados.
 9. **NDF-READ-009 — DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`.
 10. **NDF-READ-010 — DEVE** aceitar todos os casos de `conformance/ndf/valid/`.
+11. **NDF-READ-011 — DEVE** rejeitar uma relação em `relacoes` sem `alvo.payload_hash`, ou com `alvo.payload_hash` em formato inválido, ou com `tipo` fora do enum fechado de §2.11.2.
+12. **NDF-READ-012 — DEVE** rejeitar `proveniencia_ia` com `utilizada: false` e `intervencoes` não vazio.
+13. **NDF-READ-013 — DEVE** rejeitar uma intervenção de `proveniencia_ia` com estado de revisão terminal (`revisto_e_aprovado`, `revisto_com_alteracoes` ou `rejeitado`) sem `revisor_ref` ou sem `revisto_em`.
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 

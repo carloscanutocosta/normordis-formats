@@ -51,6 +51,29 @@ Projecção a 10 anos para um município médio: ~75 GB (PDF/A) vs. ~4 GB (NDF) 
 
 > **Validação empírica pendente**: os valores acima serão substituídos por medições reais quando estiverem disponíveis amostras representativas de documentos produzidos pelo core-documental NORMORDIS. A metodologia de medição (corpus, tipos de documento, densidade de preenchimento) será publicada em `docs/benchmarks/` desta especificação.
 
+## Vocabulário de relações (`relacoes`) — correspondência com PROV-O (informativo)
+
+O vocabulário fechado de `relacoes[].tipo` (SPEC.md §2.11.2) é uma extensão
+NORMORDIS específica do domínio administrativo português. A tabela seguinte
+regista a correspondência informativa com as primitivas de proveniência do
+[PROV-O](https://www.w3.org/TR/prov-o/) (W3C), para quem precise de
+interoperar semanticamente fora do ecossistema NORMORDIS. Não é normativa —
+o NDF não serializa em PROV-O nem depende dele para validação.
+
+| `relacoes[].tipo` | Primitiva PROV-O mais próxima | Nota |
+|---|---|---|
+| `substitui` | `prov:wasRevisionOf` | Nova versão do mesmo documento lógico |
+| `corrige` | `prov:wasRevisionOf` | Variante de revisão — corrige sem substituir formalmente |
+| `deriva_de` | `prov:wasDerivedFrom` | Derivação genérica sem ser nova versão formal |
+| `complementa` | `prov:wasDerivedFrom` | Variante de derivação genérica |
+| `anexa` | `prov:wasDerivedFrom` | Variante de derivação genérica |
+| `referencia` | `prov:wasDerivedFrom` | Variante mais fraca — ligação informativa |
+| `emite_parecer_sobre` | `prov:wasInformedBy` | O parecer foi informado pelo documento base |
+| `decide_sobre` | `prov:wasInformedBy` | O despacho foi informado pelo(s) documento(s) base |
+| `anula` | sem equivalente direto | Extensão NORMORDIS — efeito jurídico sem primitiva PROV-O correspondente |
+| `responde_a` | sem equivalente direto | Extensão NORMORDIS |
+| `executa` | sem equivalente direto | Extensão NORMORDIS |
+
 ## Mapeamento jurídico e normativo (informativo)
 
 ### Matriz de apoio à conformidade

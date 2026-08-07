@@ -4,31 +4,33 @@
   "validation_code": "NDF-COXWCCZKZUUKRS76N7OJ",
   "assinaturas": [
     {
+      "assinatura_id": "79f85831-5fa1-4ee8-bc16-8bcd468f9a4c",
       "nivel": "qualificada",
+      "papel": "decisor",
       "signatario": {
         "nome": "João Costa",
         "certificado_serie": "0a1b2c3d4e5f6a7b",
         "cargo": "Director-Geral"
       },
       "cades_b_lta": "<BASE64_DER_CADES_B_LTA_PLACEHOLDER — bytes DER da assinatura CAdES-B-LTA sobre sha256(payload_bytes)>",
-      "assinado_em": "2026-06-18T10:30:00Z"
-    }
-  ],
-  "timestamps": {
-    "assinatura": "<BASE64_RFC3161_TIMESTAMP_B_T_PLACEHOLDER — timestamp de assinatura (CAdES-B-T)>",
-    "arquivo": "<BASE64_RFC3161_TIMESTAMP_B_LTA_PLACEHOLDER — timestamp de arquivo (CAdES-B-LTA) sobre assinatura + validation_material>"
-  },
-  "validation_material": {
-    "cadeia_certificados": [
-      "<BASE64_DER_CERT_SIGNATARIO_PLACEHOLDER — certificado qualificado do signatário>",
-      "<BASE64_DER_CERT_INTERMEDIO_PLACEHOLDER — certificado da CA intermédia>",
-      "<BASE64_DER_CERT_RAIZ_PLACEHOLDER — certificado da CA raiz>"
-    ],
-    "revogacao": [
-      {
-        "tipo": "ocsp",
-        "dados": "<BASE64_OCSP_RESPONSE_PLACEHOLDER — resposta OCSP capturada no momento da assinatura>"
+      "assinado_em": "2026-06-18T10:30:00Z",
+      "timestamps": {
+        "assinatura": "<BASE64_RFC3161_TIMESTAMP_B_T_PLACEHOLDER — timestamp de assinatura (CAdES-B-T)>",
+        "arquivo": "<BASE64_RFC3161_TIMESTAMP_B_LTA_PLACEHOLDER — timestamp de arquivo (CAdES-B-LTA) sobre assinatura + validation_material>"
+      },
+      "validation_material": {
+        "cadeia_certificados": [
+          "<BASE64_DER_CERT_SIGNATARIO_PLACEHOLDER — certificado qualificado do signatário>",
+          "<BASE64_DER_CERT_INTERMEDIO_PLACEHOLDER — certificado da CA intermédia>",
+          "<BASE64_DER_CERT_RAIZ_PLACEHOLDER — certificado da CA raiz>"
+        ],
+        "revogacao": [
+          {
+            "tipo": "ocsp",
+            "dados": "<BASE64_OCSP_RESPONSE_PLACEHOLDER — resposta OCSP capturada no momento da assinatura>"
+          }
+        ]
       }
-    ]
-  }
+    }
+  ]
 }

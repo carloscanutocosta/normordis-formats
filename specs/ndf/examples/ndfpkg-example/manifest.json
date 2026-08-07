@@ -15,7 +15,7 @@
     },
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:75e87fffddb53a784b00a47c3396546d7f21db2c3ca25d167de06591453d493c"
+      "hash_sha256": "sha256:03d4d3e84051cb3fa55c0d3e7c8f52642442859acaf170072a072a707b0ceea8"
     },
     {
       "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
@@ -27,15 +27,15 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:4a915fe99161bebdea3ab6c8fa90d19e3418aa84b24dda73ca6f09ba8762c0ca"
+      "hash_sha256": "sha256:329d1e3eff666838ba1ba6cb0377858b0ab76d9c464ac1d716a74b1f17af7f02"
     },
     {
       "ficheiro": "schemas/envelope.schema.json",
-      "hash_sha256": "sha256:e8156cc62df32f4fa7ca5c0292515e0b9f7428c8aff2ebc22be7769d29612244"
+      "hash_sha256": "sha256:f5ffcf27e754f50f4ad751a243acf65180865b5cf99b4a2275aae1991a78264a"
     },
     {
       "ficheiro": "schemas/manifest.schema.json",
-      "hash_sha256": "sha256:00952847af735496bbad543cca842c1b0194fde8e289635f582997e4dc6265c7"
+      "hash_sha256": "sha256:2aca2688e2be95c254024b1832e1f01045c82c95da9ced39a54a32d734dc2c69"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",
@@ -47,11 +47,11 @@
     },
     {
       "ficheiro": "schemas/oficio.schema.json",
-      "hash_sha256": "sha256:feb7ec1d3206c0696453fb7f8b25ad5e443949b8d3a9971a9b8d7647e0233ead"
+      "hash_sha256": "sha256:abb8617143a186679072ee7ba87233ce365ac0a43e0badfa21c11cde79ed0d9b"
     },
     {
       "ficheiro": "schemas/custody-event.schema.json",
-      "hash_sha256": "sha256:2350b86c87d04d523cd86a66b09fdfd0062200e0d9799621d0ab97d81d3b5382"
+      "hash_sha256": "sha256:816a7656c545b3be04d28fdb0c724db840e871dd4e3c4c99341584a886d10861"
     }
   ]
 }
