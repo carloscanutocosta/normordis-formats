@@ -73,6 +73,68 @@ NDT v2.0.0 está tecnicamente especificado e permanece em revisão pública. Ver
 
 ---
 
+## Fase 1B — Robustez normativa e de segurança (`LACUNAS.md`)
+
+Origem: revisão adversarial pós-estabilização (2026-08-07), registada em
+[`LACUNAS.md`](LACUNAS.md), já recalibrada pelo princípio de âmbito do NDF —
+*"formato eficiente para guardar documentos reconstituíveis, não substituto
+de workflows específicos de procedimento"*. A maioria dos itens desta fase é
+**normativa (texto), não estrutural (schema)** — precisamente porque, após
+recalibração, a maior parte do que faltava era dizer com clareza o que o
+NDF *não* garante, não acrescentar mais schema.
+
+### Lista de alterações
+
+| # | Origem | Alteração | Tipo | Esforço |
+|---|---|---|---|---|
+| A1 | L1 | Nota normativa em §2.11: relação é afirmação unilateral e assinada, não implica reconhecimento/consentimento do alvo — inaugura a nova secção "Segurança e Privacidade" | Texto (SPEC.md, nova secção) | Baixo |
+| A3 | L3 | Nota de implementação: deteção de ciclos é responsabilidade do verificador/renderizador de grafo, o schema não pode impor acircularidade entre documentos independentes | Texto (SPEC.md, secção Segurança e Privacidade) | Baixo |
+| A4 | L7 | Nota normativa em §4.4.1: correspondência `papel`↔exigência legal de quem assina é responsabilidade da entidade produtora, não garantida pelo formato (mesmo padrão de §2.10.2) | Texto (SPEC.md) | Baixo |
+| A5 | L9 | Nota normativa em §2.12: `participante_ref` é referência externa não resolvida pelo NDF, por desenho — paralelo explícito a `tipo_classificacao_ref` | Texto (SPEC.md) | Baixo |
+| A6 | L10 | Nota em §2.12.2: `validador`/`aprovador` descrevem estado de workflow, não conteúdo intrínseco — uso desencorajado fora de sistemas que já os tratem como tal; **não remover do enum** (seria alteração incompatível sem necessidade demonstrada) | Texto (SPEC.md) | Baixo |
+| A7 | L5 | Verificação semântica: `despacho.sobre[]` e `NDF-core.relacoes` com conjuntos divergentes de `ndf_id` produz aviso (não erro) | Código (`tools/validate.py`, `check_ndf_semantic`) | Médio |
+| A8 | L8 | Estender `decisor.delegacao_ref` (ou equivalente) a `parecer` e `informacao-tecnica` no registo, onde relevante | Schema aditivo (`specs/registry/schemas/`), versão de registo própria | Médio |
+| A9 | L4 | Mecanismo de extensão qualificada do vocabulário de `relacoes[].tipo` (namespace, ex.: `ext.<entidade>.<tipo>`) além do enum fechado atual | Schema + ADR novo | Alto — candidato a v1.1.0 |
+| A10 | L6 | Espaço de nomes por entidade produtora em `ndf_id` | Schema (mudança de padrão) + ADR novo | Alto — juntar a "Extensões de namespace" já prevista em v2.0.0 |
+
+**A2 retirado.** A mitigação de fuga de metadados por `relacoes[]` em
+documentos classificados é resolvida ao nível do core-documental (pacote
+NDF protegido como artefacto opaco — cifra em repouso e em trânsito,
+controlo de acesso do sistema custodiante), não por nenhum mecanismo do
+NDF. Ver `LACUNAS.md` L2 e
+`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`.
+
+### Roadmap de implementação
+
+**Sprint imediato — ainda `1.0.0`, preparação de PR-001, só texto (A1, A3–A6)**
+
+Zero risco de compatibilidade — nenhum schema é tocado. Fecha também a
+secção de Segurança e Privacidade que ficou por escrever na ronda anterior
+(mission §13, nunca cumprida).
+
+**Curto prazo — ainda `1.0.0`, aditivo de baixo risco (A7–A8)**
+
+A7 é código de validador, não schema — pode ser feito sem tocar em nenhum
+artefacto publicado. A8 é aditivo ao registo (campo opcional novo por
+tipo), cada tipo com a sua própria versão de registo independente da
+versão NDF.
+
+**Médio prazo — candidato a `NDF v1.1.0`, requer proposta e ADR próprios (A9)**
+
+Não deve ser feito ad-hoc: extensão de vocabulário fechado é uma decisão de
+arquitetura com precedente para todo o resto do formato (seria o primeiro
+mecanismo de extensão por namespace do NDF-core). Fazer depois de PR-001,
+com proposta dedicada.
+
+**Longo prazo — `NDF v2.0.0`, junto com trabalho já previsto (A10)**
+
+`ndf_id` com espaço de nomes por entidade tem melhor custo-benefício se
+resolvido em conjunto com "Extensões de namespace (`ext.<entidade>`)", já
+prevista na Fase 5 deste roadmap — evita duas rondas de alteração
+incompatível separadas.
+
+---
+
 ## Fase 2 — Ferramentas de referência (`normordis-tools`)
 
 Ferramentas CLI independentes que demonstram que a especificação é implementável e reduzem o custo de adoção para terceiros. Repositório: `normordis-tools` (separado desta especificação).
@@ -174,6 +236,7 @@ Interface pública de verificação de `validation_code`. Um cidadão, auditor, 
 | Categorias especiais de dados (RGPD Art.º 9.º) | Dados de saúde, biométricos — schema mais granular em `metadados` |
 | Registo remoto `registry.normordis.pt` | Resolução de `tipo_documento_ref` sem acesso ao `.ndfpkg` |
 | Suporte a QSCD (eIDAS 2.0 / European Digital Identity Wallet) | Regulamento (UE) 2024/1183 em transposição |
+| Extensão qualificada do vocabulário de `relacoes[].tipo` (A9, `LACUNAS.md` L4) | Vocabulário fechado hoje sem via de extensão institucional, inconsistente com o registo de tipos de documento |
 
 ---
 
@@ -224,6 +287,7 @@ normordis-migrate --batch *.ndfpkg --out-dir migrado/
 | Item | Motivação |
 |---|---|
 | Extensões de namespace (`ext.<entidade>`) | Permite que AT, SS, Municípios estendam o NDF-core com campos próprios sem alterar esta especificação base |
+| Espaço de nomes por entidade produtora em `ndf_id` (A10, `LACUNAS.md` L6) | Resolvido em conjunto com extensões de namespace, acima — evita duas rondas de alteração incompatível separadas |
 | Revisão de `tipo_documento_ref` para URI formal | Alinhamento com Linked Data / European Interoperability Framework |
 
 ### NCRTF v2.0.0 ✅

@@ -74,6 +74,88 @@ o NDF não serializa em PROV-O nem depende dele para validação.
 | `responde_a` | sem equivalente direto | Extensão NORMORDIS |
 | `executa` | sem equivalente direto | Extensão NORMORDIS |
 
+## Confidencialidade e controlo de acesso (fora de âmbito do NDF)
+
+**Decisão registada, com raciocínio, para não se perder em revisões
+futuras.** Ver `LACUNAS.md` L2 para o historial completo da análise.
+
+O NDF não define nenhum mecanismo de cifra, controlo de acesso ou gestão de
+credenciação. `metadados.classificacao_seguranca` (§2.7.4) é o único sinal
+que o NDF transporta — o que fazer com esse sinal (quem pode aceder, como
+proteger o artefacto) é inteiramente responsabilidade do core-documental.
+
+### Porque é uma decisão de fundo, não só simplicidade
+
+Uma assinatura eletrónica precisa de ser verificável por qualquer terceiro,
+para sempre, sem depender de infraestrutura viva — por isso faz sentido
+estar definida no formato (CAdES, §4). Confidencialidade é o oposto: só
+tem sentido decifrar dentro do próprio sistema custodiante, para os seus
+utilizadores credenciados nesse momento — e a lista de credenciados muda ao
+longo do tempo. É um **estado vivo de sistema**, não uma prova estática que
+viaja com o documento. Por isso pertence ao core-documental, pela mesma
+lógica já aplicada a outras questões de workflow/competência processual
+(delegação, papel de quem assina, notificação — ver `LACUNAS.md`).
+
+Consequência prática: proteger o `.ndfpkg`/pacote NDF como artefacto opaco
+(cifra em repouso e em trânsito) também resolve, sem qualquer mecanismo no
+NDF, a preocupação de que `relacoes[]` revele a existência ou o alvo de uma
+ação sobre um documento classificado — se o sistema nunca entrega os bytes
+a quem não está autorizado, o conteúdo relacional nunca chega a ser lido
+por quem não deve.
+
+### Cifra em repouso/trânsito não é, por si só, controlo de acesso
+
+Nota importante para quem for desenhar o core-documental: cifra em repouso
+e em trânsito protege contra um conjunto específico de ameaças — furto do
+suporte de armazenamento, interceção de rede. **Não** garante, por si só,
+que "só decifra a informação a que se tem direito legal" — isso é uma
+propriedade de **autorização** (autenticação + verificação de credenciação
+face a `classificacao_seguranca` + registo de auditoria), uma camada
+distinta que tem de estar corretamente implementada por cima da cifra:
+
+- A cifra em repouso tipicamente decifra de forma transparente para
+  qualquer ligação autenticada ao sistema de armazenamento — um erro na
+  lógica de autorização da aplicação expõe o conteúdo na mesma, sem que a
+  cifra em repouso o impeça (o bug está numa camada diferente).
+- Um administrador de sistema ou de base de dados com acesso às chaves de
+  cifra tipicamente consegue decifrar tudo — proteger contra esse cenário
+  exige medidas adicionais (isolamento de chaves em HSM, cifra ao nível da
+  aplicação com chaves que o DBA não detém), um patamar bem acima de "cifra
+  em repouso e em trânsito" genérica.
+- Para documentos com `destino_final: conservacao_permanente`, a gestão de
+  chaves ao longo de décadas é ela própria um risco a desenhar
+  explicitamente — uma chave perdida não pode significar perda de acesso a
+  um documento de conservação permanente; uma chave mal gerida ao longo de
+  reorganizações institucionais pode alargar, sem se dar conta, quem
+  consegue decifrar.
+
+Ou seja: "o pacote está cifrado em repouso e em trânsito" é condição
+necessária mas não suficiente. A garantia de que "só decifra a informação a
+que se tem direito legal" vem da autorização correta, não da cifra —
+ambas têm de estar corretamente desenhadas no core-documental; o NDF não
+pode certificar nenhuma das duas.
+
+### Pontos a considerar na implementação do core-documental (não normativo)
+
+Categorias que um core-documental deve decidir explicitamente para cada
+nível de `classificacao_seguranca` — não são soluções prescritas pelo NDF,
+são os pontos de decisão que a ausência de mecanismo no formato deixa em
+aberto:
+
+| Categoria | Pergunta a responder |
+|---|---|
+| Autenticação | Como se confirma a identidade de quem pede acesso a um NDF? |
+| Autorização | Como se verifica que essa identidade tem credenciação compatível com `classificacao_seguranca` deste documento em concreto? |
+| Auditoria | Cada leitura/decifra fica registada, com identidade, momento e resultado? |
+| Isolamento de chaves | Quem gere as chaves de cifra tem, por esse facto, acesso ao conteúdo? Se sim, é aceitável para este nível de classificação? |
+| Gestão de chaves a longo prazo | Existe processo formal de rotação, escrow e recuperação que sobreviva a mudanças de pessoal e de sistema, sem nunca perder acesso a um documento de `conservacao_permanente`? |
+| Separação de responsabilidades | Quem decide o nível de classificação de um documento é diferente de quem gere o acesso técnico a ele? |
+
+Referências de enquadramento (informativas, não normativas): ISO/IEC 27001
+(gestão de segurança da informação), família de controlos de acesso do
+NIST SP 800-53, e DL n.º 11/2023 (Segurança de Informação do Estado) para
+`"secreto"`/`"muito_secreto"`.
+
 ## Mapeamento jurídico e normativo (informativo)
 
 ### Matriz de apoio à conformidade

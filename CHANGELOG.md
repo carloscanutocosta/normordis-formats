@@ -41,6 +41,23 @@ mantido em `1.0.0` — ver ADR-007. Detalhe completo em
   novo vetor negativo de pacote (`PKG-NEG-008-assinatura-sem-id`);
 - adicionado: ADR-002 a ADR-007.
 
+### Revisão adversarial pós-estabilização — `LACUNAS.md`
+
+Ver `LACUNAS.md` para a análise completa e `docs/reports/CURRENT-STATE-ASSESSMENT.md`
+para o histórico de decisões.
+
+- adicionado: SPEC.md §1.5 "Confidencialidade e controlo de acesso" — limite
+  normativo explícito: o NDF não define nem garante cifra, controlo de
+  acesso ou gestão de credenciação; `classificacao_seguranca` é sinal
+  descritivo, a proteção é responsabilidade do sistema de custódia;
+- adicionado: `docs/normalization/NDF-INFORMATIVE-GUIDANCE.md` — secção
+  "Confidencialidade e controlo de acesso", incluindo pontos a considerar
+  na implementação do core-documental (não normativo);
+- decisão registada: mitigação de fuga de metadados por `relacoes[]` em
+  documentos classificados fica fora de âmbito do NDF — resolvida por
+  proteção do artefacto ao nível do core-documental, não por mecanismo do
+  formato (`LACUNAS.md` L2).
+
 ### Harmonização editorial e de normalização
 
 - estado comum `Draft — Revisão pública` para NDF, NDT e NCRTF;

@@ -160,6 +160,33 @@ O bloco `metadados` DEVE incluir:
 | `base_legal_conservacao` | Condicional | Obrigatório se `contem_dados_pessoais: true`. `obrigacao_legal` \| `interesse_publico` \| `consentimento` \| `contrato`. |
 | `responsavel_tratamento` | Sim | Identificador da entidade responsável pelo tratamento. |
 
+### 1.5 Confidencialidade e controlo de acesso
+
+O NDF admite documentos com diferentes níveis de sensibilidade, declarados
+em `metadados.classificacao_seguranca` (§2.7.4) — de `"publico"` a
+`"muito_secreto"`. Este campo é descritivo: sinaliza o nível de
+sensibilidade do conteúdo. O NDF NÃO DEVE ser apresentado, nem
+interpretado, como garantindo confidencialidade, cifra ou controlo de
+acesso por si só.
+
+A proteção de um NDF classificado — decidir quem poderá aceder aos seus
+bytes, cifra em repouso e em trânsito, gestão de chaves ao longo do prazo
+de conservação, auditoria de acessos — é inteiramente responsabilidade do
+sistema de custódia que o produz, armazena e disponibiliza. Este princípio
+segue a mesma lógica já aplicada à conformidade de RGPD (§1.4) e do AI Act
+(§2.13.1): o NDF fornece o sinal estrutural necessário para que o sistema
+aplique a proteção adequada; não a substitui nem a garante.
+
+Em particular: cifra em repouso e em trânsito não é, isoladamente, controlo
+de acesso — protege contra furto de suporte e interceção de rede, mas não
+garante que só quem tem direito legal ao conteúdo consegue decifrá-lo. Essa
+garantia depende de autenticação, autorização face a
+`classificacao_seguranca`, e auditoria, corretamente implementadas no
+sistema de custódia.
+
+Orientações práticas de implementação (não normativas) constam de
+[`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`](../../docs/normalization/NDF-INFORMATIVE-GUIDANCE.md).
+
 ---
 
 ## 2. NDF-core
