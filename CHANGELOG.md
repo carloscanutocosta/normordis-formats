@@ -56,7 +56,22 @@ para o histórico de decisões.
 - decisão registada: mitigação de fuga de metadados por `relacoes[]` em
   documentos classificados fica fora de âmbito do NDF — resolvida por
   proteção do artefacto ao nível do core-documental, não por mecanismo do
-  formato (`LACUNAS.md` L2).
+  formato (`LACUNAS.md` L2);
+- adicionado: SPEC.md §2.11.5 "Segurança e privacidade do grafo de
+  relações" — relação é afirmação unilateral, não implica reconhecimento
+  do alvo (A1/L1); deteção de ciclos é responsabilidade do verificador,
+  não do schema (A3/L3);
+- adicionado: nota em SPEC.md §4.4.1 — correspondência `papel`↔exigência
+  legal de quem assina não é garantida pelo formato (A4/L7);
+- adicionado: SPEC.md §2.12.3 — `participante_ref` é referência externa
+  não resolvida pelo NDF, por desenho (A5/L9);
+- adicionado: SPEC.md §2.12.4 — `validador`/`aprovador` descrevem estado
+  de workflow; uso desencorajado fora de sistemas que já os tratem como
+  tal, mantidos no enum sem alteração incompatível (A6/L10);
+- adicionado: `tools/validate.py` `check_ndf_advisories` — aviso (não
+  erro) quando `documento.sobre[]` e `NDF-core.relacoes` divergem (A7/L5);
+- adicionado: `delegacao_ref` opcional em `parecer.autor` e
+  `informacao-tecnica.autor`, mesmo padrão de `despacho.decisor` (A8/L8).
 
 ### Harmonização editorial e de normalização
 

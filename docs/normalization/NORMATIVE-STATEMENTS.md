@@ -38,73 +38,75 @@ permanecem definidos no texto normativo.
 | NDF | 2.11.3 | `specs/ndf/SPEC.md:649` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | produtor que crie um NDF substituto de outro **RECOMENDA-SE** que preencha |
 | NDF | 2.11.3 | `specs/ndf/SPEC.md:651` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | de versionamento linear simples **PODEM** continuar a usar apenas o |
 | NDF | 2.11.4 | `specs/ndf/SPEC.md:662` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | conforme DEVE manter os dois coerentes (mesmo conjunto de `ndf_id` |
-| NDF | 2.12.2 | `specs/ndf/SPEC.md:705` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | Um sistema de IA interveniente PODE ser registado com `tipo: "sistema"` e |
-| NDF | 2.13.2 | `specs/ndf/SPEC.md:732` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | `evidencia_ref` (identificador + hash). NÃO DEVEM ser embutidos |
-| NDF | 2.13.3 | `specs/ndf/SPEC.md:765` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | `revisto_com_alteracoes` ou `rejeitado`, `revisor_ref` e `revisto_em` DEVEM |
-| NDF | 2.13.4 | `specs/ndf/SPEC.md:770` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | Um sistema de IA NÃO DEVE ser registado como `signatario` de uma assinatura |
-| NDF | 2.13.4 | `specs/ndf/SPEC.md:772` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | (§2.12.2). A IA **PODE** ser registada em `proveniencia_ia.intervencoes[].sistema` |
-| NDF | 3.1 | `specs/ndf/SPEC.md:786` | subordinado | `NDF-PROD-006,007` | Conforme o MEG e os instrumentos da DGLAB (Lista Consolidada e Tabelas de Seleção), todo o documento de arquivo DEVE ter associada uma decisão de avaliação que determina: |
-| NDF | 3.2.2 | `specs/ndf/SPEC.md:847` | subordinado | `NDF-PROD-006,007` | \| `versao` \| Identificador da versão ou edição consultada — suficiente para localizar o instrumento exato. Não há formato imposto; RECOMENDA-SE incluir ano e número de revisão. \| |
-| NDF | 3.2.2 | `specs/ndf/SPEC.md:857` | subordinado | `NDF-PROD-006,007` | `tipo_classificacao_ref` e `instrumento_avaliacao_versao_ref` DEVEM referenciar o mesmo instrumento: o prefixo de `tipo_classificacao_ref` DEVE corresponder ao `instrumento` de `instrumento_avaliacao_versao_ref`. Exemplo: `"lc/450.10.001"` exige `"lc/..."` em `instrumento_avaliacao_versao_ref`. |
-| NDF | 3.5 | `specs/ndf/SPEC.md:877` | subordinado | `NDF-PROD-006,007` | `prazo_conservacao_administrativa` e `destino_final` DEVEM ser **resolvidos automaticamente** a partir de `tipo_classificacao_ref`, consultando o instrumento de avaliação carregado no sistema no momento da finalização — NÃO DEVEM ser introduzidos manualmente por documento. `instrumento_avaliacao_versao_ref` regista qual o instrumento e versão consultados, preservando a regra aplicável mesmo que o instrumento seja atualizado posteriormente. |
-| NDF | 4.2.1 | `specs/ndf/SPEC.md:913` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | O timestamp RFC 3161 (B-T e B-LTA) DEVE ser emitido por uma TSA que cumpra os seguintes requisitos: |
-| NDF | 4.2.1 | `specs/ndf/SPEC.md:917` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | \| Qualificação \| A TSA DEVE constar da lista de confiança de um Estado-Membro UE (EU Trusted List, conforme ETSI TS 119 612). \| |
-| NDF | 4.2.1 | `specs/ndf/SPEC.md:919` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | \| Precisão \| O timestamp DEVE ter precisão de 1 segundo ou melhor. \| |
-| NDF | 4.2.1 | `specs/ndf/SPEC.md:921` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | \| Disponibilidade de resposta \| A TSA DEVE suportar o protocolo TSP (Time-Stamp Protocol) via HTTP ou HTTPS. \| |
-| NDF | 4.2.1 | `specs/ndf/SPEC.md:923` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | Quando a implementação opera em ambientes sem acesso à internet (ex.: redes de classificação), o timestamp PODE ser obtido de uma TSA local acreditada, desde que a cadeia de confiança seja incluída no `validation_material` do envelope. |
-| NDF | 4.4 | `specs/ndf/SPEC.md:939` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | digest usado internamente pelo contentor CAdES DEVE coincidir com |
-| NDF | 4.4 | `specs/ndf/SPEC.md:945` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | um parecer, NÃO DEVEM ser representados como uma segunda assinatura do |
-| NDF | 4.4.2 | `specs/ndf/SPEC.md:973` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | conservação, e enquanto o NDF-core for preservado, o sistema de custódia DEVE: |
-| NDF | 4.4.2 | `specs/ndf/SPEC.md:981` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | Uma re-selagem, renovação de timestamp ou migração de algoritmo NÃO DEVE |
-| NDF | 4.5 | `specs/ndf/SPEC.md:990` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | é exigido ou aplicado, o resultado DEVE ser uma assinatura detached |
-| NDF | 4.6.4 | `specs/ndf/SPEC.md:1042` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | âncora pública de custódia. Uma resposta positiva DEVE resultar da comparação |
-| NDF | 4.6.4 | `specs/ndf/SPEC.md:1044` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | do estado corrente. Quando exista CAdES, o portal DEVE também validar a |
-| NDF | 5.1 | `specs/ndf/SPEC.md:1085` | subordinado | `NDF-PROD-005` | A finalização **DEVE falhar** se: |
-| NDF | 5.2 | `specs/ndf/SPEC.md:1108` | subordinado | `NDF-PROD-005` | **PODEM** estar ausentes; um selo institucional continua permitido. |
-| NDF | 5.3 | `specs/ndf/SPEC.md:1112` | subordinado | `NDF-PROD-005` | - `payload_bytes` DEVE ser tratado como imutável para sempre. |
-| NDF | 5.3 | `specs/ndf/SPEC.md:1113` | subordinado | `NDF-PROD-005` | - Assinaturas CAdES originais, timestamps e material de validação DEVEM ser |
-| NDF | 5.3 | `specs/ndf/SPEC.md:1115` | subordinado | `NDF-PROD-005` | - Entradas existentes do envelope NÃO DEVEM ser alteradas. Provas de |
-| NDF | 5.3 | `specs/ndf/SPEC.md:1116` | subordinado | `NDF-PROD-005` | re-selagem **PODEM** ser acrescentadas de forma append-only e auditada. |
-| NDF | 5.3 | `specs/ndf/SPEC.md:1117` | subordinado | `NDF-PROD-005` | - Qualquer necessidade de alteração ao conteúdo lógico DEVE originar um **novo NDF** (ver §6) — NÃO DEVE alterar o NDF finalizado. |
-| NDF | 6.2 | `specs/ndf/SPEC.md:1145` | subordinado | `NDF-PROD-010` | ****Quando presentes**: DEVEM estar presentes quando o NDF é uma nova versão de um documento anterior (`estado` do anterior transita para `"substituido"`). DEVEM estar ausentes em documentos sem versão prévia. |
-| NDF | 7.1 | `specs/ndf/SPEC.md:1168` | subordinado | `NDF-READ-002,003` | \| `MINOR` \| Adição compatível de campos ou blocos opcionais \| Requer schema da nova versão; leitores antigos **PODEM** preservar o documento como opaco, mas não ignoram conteúdo assinado desconhecido \| |
-| NDF | 7.2 | `specs/ndf/SPEC.md:1173` | subordinado | `NDF-READ-002,003` | Um leitor NDF DEVE declarar explicitamente as versões que suporta. O schema de |
-| NDF | 7.2 | `specs/ndf/SPEC.md:1174` | subordinado | `NDF-READ-002,003` | cada release valida apenas a sua versão exata. Um leitor DEVE rejeitar uma |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1242` | principal | `NDF-PROD-001` | 1. **NDF-PROD-001 — DEVE** gerar NDF-core JSON que valida contra o schema `specs/ndf/schemas/ndf-core.schema.json` (JSON Schema Draft 2020-12). |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1243` | principal | `NDF-PROD-002` | 2. **NDF-PROD-002 — DEVE** canonicalizar o NDF-core via JCS (RFC 8785) produzindo `payload_bytes` determinísticos — bytes idênticos para a mesma estrutura lógica independentemente da ordem de inserção de chaves ou formatação de origem. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1244` | principal | `NDF-PROD-003` | 3. **NDF-PROD-003 — DEVE** calcular `payload_hash = SHA-256(payload_bytes)` conforme NIST FIPS 180-4. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1245` | principal | `NDF-PROD-004` | 4. **NDF-PROD-004 — DEVE** calcular `validation_code` conforme o algoritmo definido em §4.6.2. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1246` | principal | `NDF-PROD-005` | 5. **NDF-PROD-005 — DEVE** executar os passos do pipeline de finalização conforme `nivel_assinatura` declarado (§5.2): |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1249` | principal | `NDF-PROD-006` | 6. **NDF-PROD-006 — DEVE** incluir todos os campos obrigatórios de `metadados` (§2.7.2), incluindo os condicionais RGPD quando `contem_dados_pessoais: true`. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1250` | principal | `NDF-PROD-007` | 7. **NDF-PROD-007 — DEVE** definir `tipo_classificacao_ref` no formato `<instrumento>/<codigo>` (§3.2.1). |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1251` | principal | `NDF-PROD-008` | 8. **NDF-PROD-008 — DEVE** gerar `ndf_id` como UUID v4 válido (RFC 9562), único no espaço de nomes do sistema produtor. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1252` | principal | `NDF-PROD-009` | 9. **NDF-PROD-009 — DEVE** definir `estado: "ativo"` no NDF-core de qualquer documento recém-finalizado. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1253` | principal | `NDF-PROD-010` | 10. **NDF-PROD-010 — DEVE** registar cada transição de estado em log de auditoria imutável (§2.4.2). |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1254` | principal | `NDF-PROD-011` | 11. **NDF-PROD-011 — DEVE** produzir saídas aceites pelo validador e pelas verificações semânticas oficiais; os casos válidos são referências de interoperabilidade, não entradas do produtor. todos os casos de `conformance/ndf/valid/` sem erro. |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1255` | principal | `NDF-PROD-012` | 12. **NDF-PROD-012 — DEVE**, quando `relacoes` estiver presente, incluir em cada elemento `tipo`, `alvo.ndf_id` e `alvo.payload_hash` (§2.11). |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1256` | principal | `NDF-PROD-013` | 13. **NDF-PROD-013 — DEVE** incluir `intervencoes` com pelo menos um elemento quando `proveniencia_ia.utilizada` for `true`, e omitir ou esvaziar `intervencoes` quando for `false` (§2.13). |
-| NDF | 9.1 | `specs/ndf/SPEC.md:1257` | principal | `NDF-PROD-014` | 14. **NDF-PROD-014 — DEVE** incluir `revisao_humana.estado` em cada elemento de `proveniencia_ia.intervencoes`, e `revisor_ref`+`revisto_em` quando o estado for terminal (§2.13.3). |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1263` | principal | `NDF-READ-001` | 1. **NDF-READ-001 — DEVE** rejeitar qualquer NDF-core que não valide contra o schema desta versão. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1264` | principal | `NDF-READ-002` | 2. **NDF-READ-002 — DEVE** rejeitar versões NDF não suportadas explicitamente ou tratá-las como opacas, sem declarar interpretação completa. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1265` | principal | `NDF-READ-003` | 3. **NDF-READ-003 — NÃO DEVE** ignorar silenciosamente conteúdo assinado desconhecido. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1266` | principal | `NDF-READ-004` | 4. **NDF-READ-004 — DEVE** verificar `SHA-256(payload_bytes) == payload_hash` antes de aceitar um documento como íntegro. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1267` | principal | `NDF-READ-005` | 5. **NDF-READ-005 — DEVE** verificar `validation_code` recalculando o digest conforme §4.6.2. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1268` | principal | `NDF-READ-006` | 6. **NDF-READ-006 — DEVE**, quando `nivel_assinatura ∈ {"avancada", "qualificada"}`, validar a assinatura CAdES-B-LTA e os timestamps RFC 3161. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1269` | principal | `NDF-READ-007` | 7. **NDF-READ-007 — NÃO DEVE** aceitar um documento assinado com certificado incompatível com o `nivel_assinatura` declarado. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1270` | principal | `NDF-READ-008` | 8. **NDF-READ-008 — DEVE** considerar inválido um pacote onde assinatura original, timestamps ou material de validação obrigatórios estejam ausentes ou alterados. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1271` | principal | `NDF-READ-009` | 9. **NDF-READ-009 — DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1272` | principal | `NDF-READ-010` | 10. **NDF-READ-010 — DEVE** aceitar todos os casos de `conformance/ndf/valid/`. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1273` | principal | `NDF-READ-011` | 11. **NDF-READ-011 — DEVE** rejeitar uma relação em `relacoes` sem `alvo.payload_hash`, ou com `alvo.payload_hash` em formato inválido, ou com `tipo` fora do enum fechado de §2.11.2. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1274` | principal | `NDF-READ-012` | 12. **NDF-READ-012 — DEVE** rejeitar `proveniencia_ia` com `utilizada: false` e `intervencoes` não vazio. |
-| NDF | 9.2 | `specs/ndf/SPEC.md:1275` | principal | `NDF-READ-013` | 13. **NDF-READ-013 — DEVE** rejeitar uma intervenção de `proveniencia_ia` com estado de revisão terminal (`revisto_e_aprovado`, `revisto_com_alteracoes` ou `rejeitado`) sem `revisor_ref` ou sem `revisto_em`. |
-| NDF | 9.3 | `specs/ndf/SPEC.md:1281` | principal | `NDF-PKG-001` | 1. **NDF-PKG-001 — DEVE** ser um arquivo ZIP válido. |
-| NDF | 9.3 | `specs/ndf/SPEC.md:1282` | principal | `NDF-PKG-002` | 2. **NDF-PKG-002 — DEVE** conter `manifest.json`, `ndf-core.json` e `envelope.json` na raiz do arquivo. |
-| NDF | 9.3 | `specs/ndf/SPEC.md:1283` | principal | `NDF-PKG-003` | 3. **NDF-PKG-003** — `manifest.json` **DEVE** incluir inventário com `hash_sha256` de cada ficheiro e os campos obrigatórios definidos em §8.2. |
-| NDF | 9.3 | `specs/ndf/SPEC.md:1284` | principal | `NDF-PKG-004` | 4. **NDF-PKG-004** — `SHA-256(ndf-core.json)` **DEVE** coincidir com `manifest.inventario[ndf-core.json].hash_sha256`. |
-| NDF | 9.3 | `specs/ndf/SPEC.md:1285` | principal | `NDF-PKG-005` | 5. **NDF-PKG-005** — `ndf-core.json` **DEVE** ser um NDF-core conforme (§9.1). |
-| NDF | 9.3 | `specs/ndf/SPEC.md:1286` | principal | `NDF-PKG-006` | 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`. |
-| NDF | 9.4 | `specs/ndf/SPEC.md:1310` | subordinado | `requisito identificado na própria cláusula` | Uma implementação conforme **DEVE** passar todos os casos de `conformance/ndf/valid/` e **DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`. |
-| NDF | 9.4 | `specs/ndf/SPEC.md:1312` | subordinado | `requisito identificado na própria cláusula` | **Nota**: os ficheiros de conformidade contêm campos `_comment` e `_expected_error` prefixados com `_` para documentação interna. Estes campos **NÃO DEVEM** constar do NDF-core produzido por uma implementação — o test runner remove-os automaticamente antes de validar. |
+| NDF | 2.11.5 | `specs/ndf/SPEC.md:670` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | Uma relação DEVE ser interpretada como uma afirmação unilateral e assinada |
+| NDF | 2.11.5 | `specs/ndf/SPEC.md:680` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | renderizador que percorra o grafo DEVE implementar deteção de ciclos — o |
+| NDF | 2.12.2 | `specs/ndf/SPEC.md:721` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | Um sistema de IA interveniente PODE ser registado com `tipo: "sistema"` e |
+| NDF | 2.13.2 | `specs/ndf/SPEC.md:768` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | `evidencia_ref` (identificador + hash). NÃO DEVEM ser embutidos |
+| NDF | 2.13.3 | `specs/ndf/SPEC.md:801` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | `revisto_com_alteracoes` ou `rejeitado`, `revisor_ref` e `revisto_em` DEVEM |
+| NDF | 2.13.4 | `specs/ndf/SPEC.md:806` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | Um sistema de IA NÃO DEVE ser registado como `signatario` de uma assinatura |
+| NDF | 2.13.4 | `specs/ndf/SPEC.md:808` | subordinado | `NDF-PROD-001,006,008,009; NDF-READ-001..005` | (§2.12.2). A IA **PODE** ser registada em `proveniencia_ia.intervencoes[].sistema` |
+| NDF | 3.1 | `specs/ndf/SPEC.md:822` | subordinado | `NDF-PROD-006,007` | Conforme o MEG e os instrumentos da DGLAB (Lista Consolidada e Tabelas de Seleção), todo o documento de arquivo DEVE ter associada uma decisão de avaliação que determina: |
+| NDF | 3.2.2 | `specs/ndf/SPEC.md:883` | subordinado | `NDF-PROD-006,007` | \| `versao` \| Identificador da versão ou edição consultada — suficiente para localizar o instrumento exato. Não há formato imposto; RECOMENDA-SE incluir ano e número de revisão. \| |
+| NDF | 3.2.2 | `specs/ndf/SPEC.md:893` | subordinado | `NDF-PROD-006,007` | `tipo_classificacao_ref` e `instrumento_avaliacao_versao_ref` DEVEM referenciar o mesmo instrumento: o prefixo de `tipo_classificacao_ref` DEVE corresponder ao `instrumento` de `instrumento_avaliacao_versao_ref`. Exemplo: `"lc/450.10.001"` exige `"lc/..."` em `instrumento_avaliacao_versao_ref`. |
+| NDF | 3.5 | `specs/ndf/SPEC.md:913` | subordinado | `NDF-PROD-006,007` | `prazo_conservacao_administrativa` e `destino_final` DEVEM ser **resolvidos automaticamente** a partir de `tipo_classificacao_ref`, consultando o instrumento de avaliação carregado no sistema no momento da finalização — NÃO DEVEM ser introduzidos manualmente por documento. `instrumento_avaliacao_versao_ref` regista qual o instrumento e versão consultados, preservando a regra aplicável mesmo que o instrumento seja atualizado posteriormente. |
+| NDF | 4.2.1 | `specs/ndf/SPEC.md:949` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | O timestamp RFC 3161 (B-T e B-LTA) DEVE ser emitido por uma TSA que cumpra os seguintes requisitos: |
+| NDF | 4.2.1 | `specs/ndf/SPEC.md:953` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | \| Qualificação \| A TSA DEVE constar da lista de confiança de um Estado-Membro UE (EU Trusted List, conforme ETSI TS 119 612). \| |
+| NDF | 4.2.1 | `specs/ndf/SPEC.md:955` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | \| Precisão \| O timestamp DEVE ter precisão de 1 segundo ou melhor. \| |
+| NDF | 4.2.1 | `specs/ndf/SPEC.md:957` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | \| Disponibilidade de resposta \| A TSA DEVE suportar o protocolo TSP (Time-Stamp Protocol) via HTTP ou HTTPS. \| |
+| NDF | 4.2.1 | `specs/ndf/SPEC.md:959` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | Quando a implementação opera em ambientes sem acesso à internet (ex.: redes de classificação), o timestamp PODE ser obtido de uma TSA local acreditada, desde que a cadeia de confiança seja incluída no `validation_material` do envelope. |
+| NDF | 4.4 | `specs/ndf/SPEC.md:975` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | digest usado internamente pelo contentor CAdES DEVE coincidir com |
+| NDF | 4.4 | `specs/ndf/SPEC.md:981` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | um parecer, NÃO DEVEM ser representados como uma segunda assinatura do |
+| NDF | 4.4.2 | `specs/ndf/SPEC.md:1017` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | conservação, e enquanto o NDF-core for preservado, o sistema de custódia DEVE: |
+| NDF | 4.4.2 | `specs/ndf/SPEC.md:1025` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | Uma re-selagem, renovação de timestamp ou migração de algoritmo NÃO DEVE |
+| NDF | 4.5 | `specs/ndf/SPEC.md:1034` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | é exigido ou aplicado, o resultado DEVE ser uma assinatura detached |
+| NDF | 4.6.4 | `specs/ndf/SPEC.md:1086` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | âncora pública de custódia. Uma resposta positiva DEVE resultar da comparação |
+| NDF | 4.6.4 | `specs/ndf/SPEC.md:1088` | subordinado | `NDF-PROD-005; NDF-READ-006..008` | do estado corrente. Quando exista CAdES, o portal DEVE também validar a |
+| NDF | 5.1 | `specs/ndf/SPEC.md:1129` | subordinado | `NDF-PROD-005` | A finalização **DEVE falhar** se: |
+| NDF | 5.2 | `specs/ndf/SPEC.md:1152` | subordinado | `NDF-PROD-005` | **PODEM** estar ausentes; um selo institucional continua permitido. |
+| NDF | 5.3 | `specs/ndf/SPEC.md:1156` | subordinado | `NDF-PROD-005` | - `payload_bytes` DEVE ser tratado como imutável para sempre. |
+| NDF | 5.3 | `specs/ndf/SPEC.md:1157` | subordinado | `NDF-PROD-005` | - Assinaturas CAdES originais, timestamps e material de validação DEVEM ser |
+| NDF | 5.3 | `specs/ndf/SPEC.md:1159` | subordinado | `NDF-PROD-005` | - Entradas existentes do envelope NÃO DEVEM ser alteradas. Provas de |
+| NDF | 5.3 | `specs/ndf/SPEC.md:1160` | subordinado | `NDF-PROD-005` | re-selagem **PODEM** ser acrescentadas de forma append-only e auditada. |
+| NDF | 5.3 | `specs/ndf/SPEC.md:1161` | subordinado | `NDF-PROD-005` | - Qualquer necessidade de alteração ao conteúdo lógico DEVE originar um **novo NDF** (ver §6) — NÃO DEVE alterar o NDF finalizado. |
+| NDF | 6.2 | `specs/ndf/SPEC.md:1189` | subordinado | `NDF-PROD-010` | ****Quando presentes**: DEVEM estar presentes quando o NDF é uma nova versão de um documento anterior (`estado` do anterior transita para `"substituido"`). DEVEM estar ausentes em documentos sem versão prévia. |
+| NDF | 7.1 | `specs/ndf/SPEC.md:1212` | subordinado | `NDF-READ-002,003` | \| `MINOR` \| Adição compatível de campos ou blocos opcionais \| Requer schema da nova versão; leitores antigos **PODEM** preservar o documento como opaco, mas não ignoram conteúdo assinado desconhecido \| |
+| NDF | 7.2 | `specs/ndf/SPEC.md:1217` | subordinado | `NDF-READ-002,003` | Um leitor NDF DEVE declarar explicitamente as versões que suporta. O schema de |
+| NDF | 7.2 | `specs/ndf/SPEC.md:1218` | subordinado | `NDF-READ-002,003` | cada release valida apenas a sua versão exata. Um leitor DEVE rejeitar uma |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1286` | principal | `NDF-PROD-001` | 1. **NDF-PROD-001 — DEVE** gerar NDF-core JSON que valida contra o schema `specs/ndf/schemas/ndf-core.schema.json` (JSON Schema Draft 2020-12). |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1287` | principal | `NDF-PROD-002` | 2. **NDF-PROD-002 — DEVE** canonicalizar o NDF-core via JCS (RFC 8785) produzindo `payload_bytes` determinísticos — bytes idênticos para a mesma estrutura lógica independentemente da ordem de inserção de chaves ou formatação de origem. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1288` | principal | `NDF-PROD-003` | 3. **NDF-PROD-003 — DEVE** calcular `payload_hash = SHA-256(payload_bytes)` conforme NIST FIPS 180-4. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1289` | principal | `NDF-PROD-004` | 4. **NDF-PROD-004 — DEVE** calcular `validation_code` conforme o algoritmo definido em §4.6.2. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1290` | principal | `NDF-PROD-005` | 5. **NDF-PROD-005 — DEVE** executar os passos do pipeline de finalização conforme `nivel_assinatura` declarado (§5.2): |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1293` | principal | `NDF-PROD-006` | 6. **NDF-PROD-006 — DEVE** incluir todos os campos obrigatórios de `metadados` (§2.7.2), incluindo os condicionais RGPD quando `contem_dados_pessoais: true`. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1294` | principal | `NDF-PROD-007` | 7. **NDF-PROD-007 — DEVE** definir `tipo_classificacao_ref` no formato `<instrumento>/<codigo>` (§3.2.1). |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1295` | principal | `NDF-PROD-008` | 8. **NDF-PROD-008 — DEVE** gerar `ndf_id` como UUID v4 válido (RFC 9562), único no espaço de nomes do sistema produtor. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1296` | principal | `NDF-PROD-009` | 9. **NDF-PROD-009 — DEVE** definir `estado: "ativo"` no NDF-core de qualquer documento recém-finalizado. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1297` | principal | `NDF-PROD-010` | 10. **NDF-PROD-010 — DEVE** registar cada transição de estado em log de auditoria imutável (§2.4.2). |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1298` | principal | `NDF-PROD-011` | 11. **NDF-PROD-011 — DEVE** produzir saídas aceites pelo validador e pelas verificações semânticas oficiais; os casos válidos são referências de interoperabilidade, não entradas do produtor. todos os casos de `conformance/ndf/valid/` sem erro. |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1299` | principal | `NDF-PROD-012` | 12. **NDF-PROD-012 — DEVE**, quando `relacoes` estiver presente, incluir em cada elemento `tipo`, `alvo.ndf_id` e `alvo.payload_hash` (§2.11). |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1300` | principal | `NDF-PROD-013` | 13. **NDF-PROD-013 — DEVE** incluir `intervencoes` com pelo menos um elemento quando `proveniencia_ia.utilizada` for `true`, e omitir ou esvaziar `intervencoes` quando for `false` (§2.13). |
+| NDF | 9.1 | `specs/ndf/SPEC.md:1301` | principal | `NDF-PROD-014` | 14. **NDF-PROD-014 — DEVE** incluir `revisao_humana.estado` em cada elemento de `proveniencia_ia.intervencoes`, e `revisor_ref`+`revisto_em` quando o estado for terminal (§2.13.3). |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1307` | principal | `NDF-READ-001` | 1. **NDF-READ-001 — DEVE** rejeitar qualquer NDF-core que não valide contra o schema desta versão. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1308` | principal | `NDF-READ-002` | 2. **NDF-READ-002 — DEVE** rejeitar versões NDF não suportadas explicitamente ou tratá-las como opacas, sem declarar interpretação completa. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1309` | principal | `NDF-READ-003` | 3. **NDF-READ-003 — NÃO DEVE** ignorar silenciosamente conteúdo assinado desconhecido. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1310` | principal | `NDF-READ-004` | 4. **NDF-READ-004 — DEVE** verificar `SHA-256(payload_bytes) == payload_hash` antes de aceitar um documento como íntegro. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1311` | principal | `NDF-READ-005` | 5. **NDF-READ-005 — DEVE** verificar `validation_code` recalculando o digest conforme §4.6.2. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1312` | principal | `NDF-READ-006` | 6. **NDF-READ-006 — DEVE**, quando `nivel_assinatura ∈ {"avancada", "qualificada"}`, validar a assinatura CAdES-B-LTA e os timestamps RFC 3161. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1313` | principal | `NDF-READ-007` | 7. **NDF-READ-007 — NÃO DEVE** aceitar um documento assinado com certificado incompatível com o `nivel_assinatura` declarado. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1314` | principal | `NDF-READ-008` | 8. **NDF-READ-008 — DEVE** considerar inválido um pacote onde assinatura original, timestamps ou material de validação obrigatórios estejam ausentes ou alterados. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1315` | principal | `NDF-READ-009` | 9. **NDF-READ-009 — DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1316` | principal | `NDF-READ-010` | 10. **NDF-READ-010 — DEVE** aceitar todos os casos de `conformance/ndf/valid/`. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1317` | principal | `NDF-READ-011` | 11. **NDF-READ-011 — DEVE** rejeitar uma relação em `relacoes` sem `alvo.payload_hash`, ou com `alvo.payload_hash` em formato inválido, ou com `tipo` fora do enum fechado de §2.11.2. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1318` | principal | `NDF-READ-012` | 12. **NDF-READ-012 — DEVE** rejeitar `proveniencia_ia` com `utilizada: false` e `intervencoes` não vazio. |
+| NDF | 9.2 | `specs/ndf/SPEC.md:1319` | principal | `NDF-READ-013` | 13. **NDF-READ-013 — DEVE** rejeitar uma intervenção de `proveniencia_ia` com estado de revisão terminal (`revisto_e_aprovado`, `revisto_com_alteracoes` ou `rejeitado`) sem `revisor_ref` ou sem `revisto_em`. |
+| NDF | 9.3 | `specs/ndf/SPEC.md:1325` | principal | `NDF-PKG-001` | 1. **NDF-PKG-001 — DEVE** ser um arquivo ZIP válido. |
+| NDF | 9.3 | `specs/ndf/SPEC.md:1326` | principal | `NDF-PKG-002` | 2. **NDF-PKG-002 — DEVE** conter `manifest.json`, `ndf-core.json` e `envelope.json` na raiz do arquivo. |
+| NDF | 9.3 | `specs/ndf/SPEC.md:1327` | principal | `NDF-PKG-003` | 3. **NDF-PKG-003** — `manifest.json` **DEVE** incluir inventário com `hash_sha256` de cada ficheiro e os campos obrigatórios definidos em §8.2. |
+| NDF | 9.3 | `specs/ndf/SPEC.md:1328` | principal | `NDF-PKG-004` | 4. **NDF-PKG-004** — `SHA-256(ndf-core.json)` **DEVE** coincidir com `manifest.inventario[ndf-core.json].hash_sha256`. |
+| NDF | 9.3 | `specs/ndf/SPEC.md:1329` | principal | `NDF-PKG-005` | 5. **NDF-PKG-005** — `ndf-core.json` **DEVE** ser um NDF-core conforme (§9.1). |
+| NDF | 9.3 | `specs/ndf/SPEC.md:1330` | principal | `NDF-PKG-006` | 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`. |
+| NDF | 9.4 | `specs/ndf/SPEC.md:1354` | subordinado | `requisito identificado na própria cláusula` | Uma implementação conforme **DEVE** passar todos os casos de `conformance/ndf/valid/` e **DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`. |
+| NDF | 9.4 | `specs/ndf/SPEC.md:1356` | subordinado | `requisito identificado na própria cláusula` | **Nota**: os ficheiros de conformidade contêm campos `_comment` e `_expected_error` prefixados com `_` para documentação interna. Estes campos **NÃO DEVEM** constar do NDF-core produzido por uma implementação — o test runner remove-os automaticamente antes de validar. |
 | NCRTF | 2 | `specs/ncrtf/SPEC.md:126` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **DEVE** / **DEVEM** \| Requisito obrigatório \| |
 | NCRTF | 2 | `specs/ncrtf/SPEC.md:127` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **NÃO DEVE** / **NÃO DEVEM** \| Proibição \| |
 | NCRTF | 2 | `specs/ncrtf/SPEC.md:128` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **RECOMENDA-SE** \| Prática aconselhada; desvios aceitáveis com justificação \| |
@@ -175,4 +177,4 @@ permanecem definidos no texto normativo.
 | NDT-RENDER | preâmbulo | `specs/ndt/RENDERER-CONFORMANCE.md:10` | subordinado | `NDT-RENDER-001..006` | Todo o renderizador DEVE: |
 | NDT-RENDER | preâmbulo | `specs/ndt/RENDERER-CONFORMANCE.md:30` | subordinado | `NDT-RENDER-001..006` | testes golden DEVEM comparar: |
 
-Total: **168 declarações com modalidade normativa**.
+Total: **170 declarações com modalidade normativa**.

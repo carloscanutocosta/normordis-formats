@@ -54,6 +54,7 @@ CANONICAL_MARKS_ORDER = ["bold", "code", "italic", "strikethrough", "subscript",
 
 GREEN  = "\033[32m"
 RED    = "\033[31m"
+YELLOW = "\033[33m"
 RESET  = "\033[0m"
 BOLD   = "\033[1m"
 SEP    = "=" * 60
@@ -236,6 +237,37 @@ def check_ndf_semantic(doc: dict) -> list[str]:
     return errors
 
 
+def check_ndf_advisories(doc: dict) -> list[str]:
+    """Verificações não-bloqueantes — produzem aviso, não erro (ex.: A7,
+    coerência entre documento.sobre[] e relacoes[], SPEC.md §2.11.4)."""
+    advisories = []
+
+    documento = doc.get("documento", {})
+    sobre = documento.get("sobre") if isinstance(documento, dict) else None
+    relacoes = doc.get("relacoes")
+    if isinstance(sobre, list) and isinstance(relacoes, list):
+        sobre_ids = {item.get("ndf_id") for item in sobre if isinstance(item, dict)}
+        relacoes_ids = {
+            rel.get("alvo", {}).get("ndf_id")
+            for rel in relacoes if isinstance(rel, dict)
+        }
+        if sobre_ids and relacoes_ids and sobre_ids != relacoes_ids:
+            so_em_sobre = sobre_ids - relacoes_ids
+            so_em_relacoes = relacoes_ids - sobre_ids
+            detalhe = []
+            if so_em_sobre:
+                detalhe.append(f"apenas em documento.sobre[]: {sorted(so_em_sobre)}")
+            if so_em_relacoes:
+                detalhe.append(f"apenas em relacoes[]: {sorted(so_em_relacoes)}")
+            advisories.append(
+                "documento.sobre[] e relacoes[] referenciam conjuntos "
+                "diferentes de ndf_id — RECOMENDA-SE coerência (§2.11.4): "
+                + "; ".join(detalhe)
+            )
+
+    return advisories
+
+
 # ── shared helpers ────────────────────────────────────────────────────────────
 
 def strip_meta(obj):
@@ -287,6 +319,11 @@ def validate_ndf_file(path: Path, schema: dict, expect_valid: bool) -> bool:
     is_valid = not all_errors
 
     _print_result(path.name, is_valid, expect_valid, all_errors, expected_error)
+
+    if is_valid:
+        for advisory in check_ndf_advisories(doc):
+            print(f"  {YELLOW}AVISO{RESET}  {path.name}: {advisory}")
+
     return is_valid == expect_valid
 
 
@@ -556,6 +593,8 @@ def validate_package_dir(root: Path) -> bool:
             print(f"      → {e}")
         return False
     print(f"{GREEN}PASS{RESET}  pacote {root}")
+    for advisory in check_ndf_advisories(core):
+        print(f"      {YELLOW}AVISO{RESET} {advisory}")
     return True
 
 
