@@ -85,17 +85,17 @@ NDF *não* garante, não acrescentar mais schema.
 
 ### Lista de alterações
 
-| # | Origem | Alteração | Tipo | Esforço |
-|---|---|---|---|---|
-| A1 | L1 | Nota normativa em §2.11: relação é afirmação unilateral e assinada, não implica reconhecimento/consentimento do alvo — inaugura a nova secção "Segurança e Privacidade" | Texto (SPEC.md, nova secção) | Baixo |
-| A3 | L3 | Nota de implementação: deteção de ciclos é responsabilidade do verificador/renderizador de grafo, o schema não pode impor acircularidade entre documentos independentes | Texto (SPEC.md, secção Segurança e Privacidade) | Baixo |
-| A4 | L7 | Nota normativa em §4.4.1: correspondência `papel`↔exigência legal de quem assina é responsabilidade da entidade produtora, não garantida pelo formato (mesmo padrão de §2.10.2) | Texto (SPEC.md) | Baixo |
-| A5 | L9 | Nota normativa em §2.12: `participante_ref` é referência externa não resolvida pelo NDF, por desenho — paralelo explícito a `tipo_classificacao_ref` | Texto (SPEC.md) | Baixo |
-| A6 | L10 | Nota em §2.12.2: `validador`/`aprovador` descrevem estado de workflow, não conteúdo intrínseco — uso desencorajado fora de sistemas que já os tratem como tal; **não remover do enum** (seria alteração incompatível sem necessidade demonstrada) | Texto (SPEC.md) | Baixo |
-| A7 | L5 | Verificação semântica: `despacho.sobre[]` e `NDF-core.relacoes` com conjuntos divergentes de `ndf_id` produz aviso (não erro) | Código (`tools/validate.py`, `check_ndf_semantic`) | Médio |
-| A8 | L8 | Estender `decisor.delegacao_ref` (ou equivalente) a `parecer` e `informacao-tecnica` no registo, onde relevante | Schema aditivo (`specs/registry/schemas/`), versão de registo própria | Médio |
-| A9 | L4 | Mecanismo de extensão qualificada do vocabulário de `relacoes[].tipo` (namespace, ex.: `ext.<entidade>.<tipo>`) além do enum fechado atual | Schema + ADR novo | Alto — candidato a v1.1.0 |
-| A10 | L6 | Espaço de nomes por entidade produtora em `ndf_id` | Schema (mudança de padrão) + ADR novo | Alto — juntar a "Extensões de namespace" já prevista em v2.0.0 |
+| # | Origem | Alteração | Tipo | Esforço | Estado |
+|---|---|---|---|---|---|
+| A1 | L1 | Nota normativa em §2.11.5: relação é afirmação unilateral e assinada, não implica reconhecimento/consentimento do alvo | Texto (SPEC.md) | Baixo | ✅ Feito |
+| A3 | L3 | Nota de implementação em §2.11.5: deteção de ciclos é responsabilidade do verificador/renderizador de grafo, o schema não impõe acircularidade entre documentos independentes | Texto (SPEC.md) | Baixo | ✅ Feito |
+| A4 | L7 | Nota normativa em §4.4.1: correspondência `papel`↔exigência legal de quem assina é responsabilidade da entidade produtora, não garantida pelo formato (mesmo padrão de §2.10.2) | Texto (SPEC.md) | Baixo | ✅ Feito |
+| A5 | L9 | Nota normativa em §2.12.3: `participante_ref` é referência externa não resolvida pelo NDF, por desenho — paralelo explícito a `tipo_classificacao_ref` | Texto (SPEC.md) | Baixo | ✅ Feito |
+| A6 | L10 | Nota em §2.12.4: `validador`/`aprovador` descrevem estado de workflow, não conteúdo intrínseco — uso desencorajado fora de sistemas que já os tratem como tal; **não removido do enum** (seria alteração incompatível sem necessidade demonstrada) | Texto (SPEC.md) | Baixo | ✅ Feito |
+| A7 | L5 | Verificação semântica: `despacho.sobre[]` e `NDF-core.relacoes` com conjuntos divergentes de `ndf_id` produz aviso (não erro) | Código (`tools/validate.py`, `check_ndf_advisories`) | Médio | ✅ Feito |
+| A8 | L8 | Estendido `delegacao_ref` (mesmo padrão de `despacho.decisor`) a `parecer.autor` e `informacao-tecnica.autor` | Schema aditivo (`specs/registry/schemas/`), editado em `1.0.0` — mesma lógica do ADR-007, sem consumidores externos a proteger | Médio | ✅ Feito |
+| A9 | L4 | Mecanismo de extensão qualificada do vocabulário de `relacoes[].tipo` (namespace, ex.: `ext.<entidade>.<tipo>`) além do enum fechado atual | Schema + ADR novo | Alto — candidato a v1.1.0 | Pendente |
+| A10 | L6 | Espaço de nomes por entidade produtora em `ndf_id` | Schema (mudança de padrão) + ADR novo | Alto — juntar a "Extensões de namespace" já prevista em v2.0.0 | Pendente |
 
 **A2 retirado.** A mitigação de fuga de metadados por `relacoes[]` em
 documentos classificados é resolvida ao nível do core-documental (pacote
@@ -106,18 +106,18 @@ NDF. Ver `LACUNAS.md` L2 e
 
 ### Roadmap de implementação
 
-**Sprint imediato — ainda `1.0.0`, preparação de PR-001, só texto (A1, A3–A6)**
+**A1, A3–A8 — concluídos.** Todos os itens de baixo/médio esforço da lista
+de alterações estão implementados, verificados (`tools/validate.py`
+56/56, `check_package_vectors.py` 8/8, `audit_normative.py` e
+`build_requirements_index.py` regenerados) e prontos a rever. §1.5
+("Confidencialidade e controlo de acesso") também ficou concluída no
+mesmo lote, embora não fizesse parte da lista original A1–A10 — emergiu
+da mesma revisão adversarial. Fecha, com isto, a secção de Segurança e
+Privacidade que tinha ficado por escrever na ronda de estabilização
+anterior (mission §13, nunca cumprida até agora).
 
-Zero risco de compatibilidade — nenhum schema é tocado. Fecha também a
-secção de Segurança e Privacidade que ficou por escrever na ronda anterior
-(mission §13, nunca cumprida).
-
-**Curto prazo — ainda `1.0.0`, aditivo de baixo risco (A7–A8)**
-
-A7 é código de validador, não schema — pode ser feito sem tocar em nenhum
-artefacto publicado. A8 é aditivo ao registo (campo opcional novo por
-tipo), cada tipo com a sua própria versão de registo independente da
-versão NDF.
+**Ainda por fazer (A9, A10)** — candidatos a `NDF v1.1.0`/`v2.0.0`, ver
+tabela acima. Requerem proposta e ADR próprios, não são de baixo esforço.
 
 **Médio prazo — candidato a `NDF v1.1.0`, requer proposta e ADR próprios (A9)**
 

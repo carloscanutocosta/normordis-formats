@@ -665,6 +665,22 @@ referenciados).
 Os requisitos normativos de produtor e leitor para `relacoes` estão
 enumerados em §9.1 e §9.2.
 
+#### 2.11.5 Segurança e privacidade do grafo de relações
+
+Uma relação DEVE ser interpretada como uma afirmação unilateral e assinada
+da entidade produtora do documento de origem — não implica reconhecimento,
+consentimento, nem validação de competência por parte da entidade
+produtora do documento alvo. A validação de autoridade para estabelecer
+uma relação (quem tem competência para decidir sobre, anular, ou responder
+a outro documento) é responsabilidade do sistema de gestão processual,
+fora do âmbito desta especificação.
+
+O vocabulário fechado de §2.11.2 não impede ciclos entre documentos
+independentes (ex.: A `substitui` B e B `substitui` A). Um verificador ou
+renderizador que percorra o grafo DEVE implementar deteção de ciclos — o
+schema, por si só, não impõe acircularidade entre documentos assinados de
+forma independente.
+
 #### 2.11.6 Exemplo
 
 `specs/ndf/examples/informacao-parecer-despacho/` contém um exemplo completo
@@ -705,6 +721,26 @@ serve a consulta, auditoria e o grafo documental.
 Um sistema de IA interveniente PODE ser registado com `tipo: "sistema"` e
 `papel: "sistema_tecnico"` — nunca com um papel que implique autoria,
 aprovação ou decisão (ver §2.13.4).
+
+#### 2.12.3 `participante_ref` como referência externa
+
+`participante_ref` é uma referência externa, não resolvida pelo NDF —
+paralelo direto a `avaliacao.tipo_classificacao_ref` (§3.2.1), que também
+referencia um instrumento externo sem o incorporar. O NDF não define nem
+embute um esquema de identidade verificável: a resolução de
+`participante_ref` para uma identidade concreta (nome, função,
+credenciais) é responsabilidade do sistema produtor, que mantém o registo
+correspondente na sua própria base de dados.
+
+#### 2.12.4 `validador` e `aprovador` — estado de workflow, não de conteúdo
+
+Os papéis `validador` e `aprovador` descrevem estado de um fluxo de
+aprovação, tipicamente já gerido pelo sistema de workflow do produtor
+(GED/GCA) — o seu uso em `participantes` é desaconselhado fora de sistemas
+que já tratem esse estado como parte constitutiva do conteúdo do documento.
+Não foram removidos do enum de §2.12.2: retirá-los seria uma alteração
+incompatível sem necessidade demonstrada. A decisão de os usar, ou de
+manter esse estado apenas no sistema de workflow, cabe ao sistema produtor.
 
 ### 2.13 Proveniência de IA (`proveniencia_ia`)
 
@@ -965,6 +1001,14 @@ Não existe um modelo dual (campos globais + campos por assinatura): manter
 os dois caminhos de leitura válidos para o mesmo dado obrigaria qualquer
 verificador a saber qual usar, sem benefício de compatibilidade — não há
 implementação nem adoção externa do formato de envelope anterior a proteger.
+
+O NDF não garante, nem verifica, que exista uma assinatura com `papel`
+correspondente à exigência legal de quem tem de assinar um determinado ato
+(ex.: que um `decisor` tenha efetivamente assinado, e não apenas uma
+`testemunha`). Essa correspondência é responsabilidade da entidade
+produtora, decidida segundo o CPA, estatutos setoriais e normas internas de
+delegação — o mesmo princípio já aplicado à classificação de
+`nivel_assinatura` (§2.10.2).
 
 #### 4.4.2 Preservação da assinatura original
 

@@ -54,7 +54,11 @@
       "properties": {
         "nome": { "type": "string" },
         "cargo": { "type": "string" },
-        "unidade_organica": { "type": "string" }
+        "unidade_organica": { "type": "string" },
+        "delegacao_ref": {
+          "type": "string",
+          "description": "Referência ao despacho de delegação que habilita o autor, quando emite a informação técnica por delegação de competência."
+        }
       },
       "additionalProperties": false,
       "description": "Autor da informação técnica."

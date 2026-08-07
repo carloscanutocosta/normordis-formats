@@ -24,7 +24,11 @@
       "properties": {
         "nome": { "type": "string" },
         "cargo": { "type": "string" },
-        "unidade_organica": { "type": "string" }
+        "unidade_organica": { "type": "string" },
+        "delegacao_ref": {
+          "type": "string",
+          "description": "Referência ao despacho de delegação que habilita o autor, quando emite o parecer por delegação de competência."
+        }
       },
       "additionalProperties": false,
       "description": "Autor do parecer. Consistente com informacao-tecnica.autor e despacho.decisor."

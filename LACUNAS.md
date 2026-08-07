@@ -239,19 +239,25 @@ por inteiro, não só reformulo.
 
 ## Priorização revista
 
-**Dentro de âmbito, a considerar em próxima ronda**: L1 (nota normativa,
-sem novo código), L5 (validação de coerência sobre/relacoes),
-L9 (documentar `participante_ref` como referência externa não resolvida).
+**Implementadas** (ver `ROADMAP.md` Fase 1B, itens A1, A3–A8, e
+`CHANGELOG.md`): L1 (SPEC.md §2.11.5), L3 (SPEC.md §2.11.5), L5 (aviso de
+coerência `sobre[]`/`relacoes[]` em `tools/validate.py`), L7 (SPEC.md
+§4.4.1), L8 (`delegacao_ref` estendido a `parecer`/`informacao-tecnica`),
+L9 (SPEC.md §2.12.3), L10 (SPEC.md §2.12.4). Confirmado com suite completa
+verde (`tools/validate.py` 56/56, `check_package_vectors.py` 8/8,
+`audit_normative.py`, `build_requirements_index.py`).
 
-**Dentro de âmbito, sem urgência**: L3, L4, L6, L10.
+**Pendentes, candidatas a versão futura**: L4 (A9 — extensão qualificada
+do vocabulário de relações, `v1.1.0`), L6 (A10 — espaço de nomes em
+`ndf_id`, `v2.0.0`, junto com extensões de namespace já previstas).
 
-**Fora de âmbito do NDF, por desenho**: L2 (pertence ao core-documental —
-cifra em repouso/trânsito e controlo de acesso ao artefacto), L7, L8 (fica
-ao nível do registo, não da especificação base), L11 (pertence ao sistema
-de custódia/workflow, não ao NDF).
+**Fora de âmbito do NDF, por desenho, sem alteração ao formato**: L2
+(pertence ao core-documental — cifra em repouso/trânsito e controlo de
+acesso ao artefacto; ver SPEC.md §1.5), L11 (pertence ao sistema de
+custódia/workflow, não ao NDF).
 
-Note-se que a maioria das ações que sobrevivem são **normativas/documentais**
-(clarificar o que o formato não garante), não schema novo — o que é
-coerente com a própria nota de âmbito: o NDF já tem os blocos certos: o que
-faltava, em grande parte, era dizer com mais clareza o que esses blocos
-*não* fazem.
+Note-se que a maioria das ações implementadas foram
+**normativas/documentais** (clarificar o que o formato não garante), não
+schema novo — o que é coerente com a própria nota de âmbito: o NDF já tinha
+os blocos certos; o que faltava, em grande parte, era dizer com mais
+clareza o que esses blocos *não* fazem.
