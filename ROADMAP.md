@@ -130,19 +130,17 @@ Verificado: `tools/validate.py` 58/58 (56 + 2 novos casos de conformidade
 para A9), `check_package_vectors.py` 8/8, `audit_normative.py` e
 `build_requirements_index.py` regenerados sem erros.
 
-**Médio prazo — candidato a `NDF v1.1.0`, requer proposta e ADR próprios (A9)**
-
-Não deve ser feito ad-hoc: extensão de vocabulário fechado é uma decisão de
-arquitetura com precedente para todo o resto do formato (seria o primeiro
-mecanismo de extensão por namespace do NDF-core). Fazer depois de PR-001,
-com proposta dedicada.
-
-**Longo prazo — `NDF v2.0.0`, junto com trabalho já previsto (A10)**
-
-`ndf_id` com espaço de nomes por entidade tem melhor custo-benefício se
-resolvido em conjunto com "Extensões de namespace (`ext.<entidade>`)", já
-prevista na Fase 5 deste roadmap — evita duas rondas de alteração
-incompatível separadas.
+**Separação NDF/Perfil de Ciclo de Vida NORMORDIS — concluída
+(2026-08-08).** Revisão externa ao commit `40ef47a` identificou acoplagem
+indevida entre conformidade de formato e requisitos operacionais de
+custódia (`NDF-PROD-010`, §5.2 passo 8, `ARCHITECTURE.md` §2.1/§3).
+Resolvido com ADR-010: nova família `CUST-REQ-*` (3 IDs, SPEC.md §9.5),
+`NDF-PROD-010` reclassificado para persistência atómica (mesma ID,
+conteúdo diferente), e clarificação de que `nivel_assinatura` é uma
+declaração do produtor (não uma decisão jurídica do NDF) e que
+`validation_code` é intrínseco ao formato, independente de qualquer
+serviço específico. `tools/build_requirements_index.py` e
+`audit_normative.py` passam a reconhecer `CUST-REQ-*` (54 IDs, antes 51).
 
 ---
 

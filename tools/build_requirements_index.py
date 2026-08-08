@@ -15,7 +15,7 @@ SOURCES = (
     ROOT / "specs/ndt/RENDERER-CONFORMANCE.md",
 )
 ID_RE = re.compile(
-    r"\*\*((?:NDF-(?:PROD|READ|PKG)|NCRTF-(?:PROD|READ)|NDT-RENDER)-\d{3})"
+    r"\*\*((?:NDF-(?:PROD|READ|PKG)|NCRTF-(?:PROD|READ)|NDT-RENDER|CUST-REQ)-\d{3})"
 )
 
 
@@ -30,6 +30,8 @@ def evidence(requirement_id: str) -> str:
         return "schema NCRTF + vetores válidos + regras R1–R6"
     if requirement_id.startswith("NCRTF-READ"):
         return "vetores NCRTF válidos e inválidos"
+    if requirement_id.startswith("CUST-REQ"):
+        return "schema custody-event + `tools/check_custody.py` + `conformance/custody/` — Perfil de Ciclo de Vida NORMORDIS, opcional (não requisito de conformidade NDF)"
     return "suite NDT; resultados de referência pendentes quando aplicável"
 
 

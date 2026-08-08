@@ -16,7 +16,7 @@ SOURCES = {
     ROOT / "specs/ndt/RENDERER-CONFORMANCE.md": "NDT-RENDER",
 }
 MODAL = re.compile(r"\b(NÃO DEVEM|NÃO DEVE|DEVEM|DEVE|PODEM|PODE|RECOMENDA-SE|NÃO RECOMENDADO|RECOMENDADO)\b")
-ID_RE = re.compile(r"\b((?:NDF-(?:PROD|READ|PKG)|NCRTF-(?:PROD|READ)|NDT-RENDER)-\d{3})\b")
+ID_RE = re.compile(r"\b((?:NDF-(?:PROD|READ|PKG)|NCRTF-(?:PROD|READ)|NDT-RENDER|CUST-REQ)-\d{3})\b")
 ENGLISH_MODAL = re.compile(r"\b(MUST|SHALL|SHOULD|MAY)(?: NOT)?\b")
 LOWER_MODAL = re.compile(r"\b(não devem|não deve|devem|deve|podem|pode|recomenda-se)\b", re.I)
 LOWER_ALLOWED = (

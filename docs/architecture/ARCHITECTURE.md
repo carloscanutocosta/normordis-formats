@@ -36,17 +36,24 @@ metadados e conteúdo lógico que permitem compreender o documento, bem como os
 elementos necessários para verificar a sua integridade e, quando aplicável, a
 sua autenticidade.
 
-O NDF divide-se em:
+O formato NDF, no sentido de conformidade (specs/ndf/SPEC.md §9.1–§9.3),
+divide-se em:
 
 - **NDF-core**: JSON canónico e imutável, incluindo dados, metadados, avaliação
   arquivística, conteúdo NCRTF e a referência exata ao NDT;
 - **envelope**: hash do NDF-core, código de verificação, assinaturas ou selos
   opcionais, timestamps e material de validação;
-- **registo de custódia**: eventos append-only relativos a ingestão, acesso,
-  transições de estado, re-selagem e eliminação;
 - **`.ndfpkg`**: representação portátil e autocontida, contendo NDF-core,
   envelope, NDT, schemas e recursos necessários para interpretar, verificar e
   renderizar o documento.
+
+Adicionalmente, e como perfil operacional **opcional** — o **Perfil de
+Ciclo de Vida NORMORDIS** (SPEC.md §2.4, §9.5) — um sistema custodiante
+PODE manter um **registo de custódia**: eventos append-only relativos a
+ingestão, acesso, transições de estado, re-selagem e eliminação. Não é
+requisito de conformidade NDF; um sistema pode adotar o seu próprio modelo
+de gestão de ciclo de vida sem deixar de ser um produtor ou leitor NDF
+conforme.
 
 ### 2.2 NDT
 
@@ -77,8 +84,12 @@ Estes conceitos não são sinónimos:
 - **assinatura qualificada**: nível jurídico específico, exigido apenas quando
   a natureza do ato ou a lei aplicável o determinar.
 
-Todo o NDF finalizado DEVE ter NDF-core canonicalizado por JCS, `payload_hash`
-SHA-256 e armazenamento append-only ou WORM com log de auditoria. Um hash sem
+Todo o NDF finalizado DEVE ter NDF-core canonicalizado por JCS e
+`payload_hash` SHA-256 (requisito de formato — SPEC.md §9.1). Armazenamento
+append-only ou WORM com log de auditoria pertence ao Perfil de Ciclo de
+Vida NORMORDIS, opcional (SPEC.md §2.4, §9.5) — reforça a garantia de
+imutabilidade de custódia descrita acima, mas não é condição de
+conformidade NDF. Um hash sem
 uma âncora de custódia permite detectar alterações face a uma cópia conhecida,
 mas não impede que um atacante substitua simultaneamente conteúdo e hash.
 
@@ -87,10 +98,16 @@ perfis:
 
 | Perfil | Requisito | Uso típico |
 |---|---|---|
-| `integridade` | JCS + hash + custódia append-only/WORM + auditoria | registos internos sem ato assinável |
+| `integridade` | JCS + hash (formato) + custódia append-only/WORM + auditoria (Perfil de Ciclo de Vida NORMORDIS, opcional) | registos internos sem ato assinável |
 | `selo_institucional` | perfil `integridade` + selo eletrónico CAdES da entidade | prova portátil de origem e integridade institucional |
 | `assinatura_avancada` | perfil `integridade` + assinatura CAdES avançada | atos que exigem identificação do signatário |
 | `assinatura_qualificada` | perfil `integridade` + assinatura CAdES qualificada | atos para os quais a lei ou política exige assinatura qualificada |
+
+A componente "custódia append-only/WORM + auditoria" destes perfis é o
+Perfil de Ciclo de Vida NORMORDIS (SPEC.md §2.4, §9.5) — reforça a garantia
+de imutabilidade, mas um sistema pode implementar JCS + hash e adotar o seu
+próprio modelo de custódia sem deixar de ser um produtor ou leitor NDF
+conforme.
 
 O campo `nivel_assinatura` do NDF-core declara o requisito jurídico de
 assinatura pessoal (`nenhuma`, `avancada` ou `qualificada`). Um documento com
