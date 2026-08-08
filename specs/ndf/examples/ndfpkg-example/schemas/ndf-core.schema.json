@@ -247,12 +247,19 @@
       "properties": {
         "tipo": {
           "type": "string",
-          "enum": [
-            "substitui", "corrige", "complementa", "anula", "responde_a",
-            "emite_parecer_sobre", "decide_sobre", "executa", "anexa",
-            "deriva_de", "referencia"
+          "oneOf": [
+            {
+              "enum": [
+                "substitui", "corrige", "complementa", "anula", "responde_a",
+                "emite_parecer_sobre", "decide_sobre", "executa", "anexa",
+                "deriva_de", "referencia"
+              ]
+            },
+            {
+              "pattern": "^ext\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9_-]*$"
+            }
           ],
-          "description": "Closed relation vocabulary. Extension requires a new minor specification version, consistent with other controlled vocabularies in this schema (e.g. destino_final, classificacao_seguranca). See SPEC.md §2.11.1 for the informative mapping to PROV-O primitives."
+          "description": "Base relation vocabulary (closed enum) or a qualified extension in the form 'ext.<entidade>.<tipo>' (e.g. 'ext.at.retificacao-oficiosa'), for domain-specific relation types not covered by the base vocabulary. Extending the base vocabulary itself still requires a new minor specification version. See SPEC.md §2.11.2 and §2.11.7."
         },
         "alvo": {
           "type": "object",

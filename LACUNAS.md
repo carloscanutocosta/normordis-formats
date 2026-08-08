@@ -70,16 +70,17 @@ que percorram o grafo (deteção de ciclos obrigatória), já que o schema por
 si só não pode impor acircularidade num grafo distribuído entre documentos
 independentes.
 
-### L4 — Vocabulário de `relacoes[]` sem via de extensão institucional
+### L4 — Vocabulário de `relacoes[]` sem via de extensão institucional — RESOLVIDO
 
 Ao contrário de `tipo_documento_ref` (registo extensível por entidade),
-`relacoes[].tipo` só se estende por nova versão minor da especificação
-base. Isto é uma inconsistência de arquitetura do formato, não uma questão
-de workflow — dentro de âmbito.
+`relacoes[].tipo` só se estendia por nova versão minor da especificação
+base. Isto era uma inconsistência de arquitetura do formato, não uma
+questão de workflow — dentro de âmbito.
 
-**Recomendação**: equacionar, numa versão futura, um mecanismo de extensão
-qualificada (namespace) para tipos de relação específicos de domínio,
-espelhando o modelo já usado para tipos de documento.
+**Resolvido (A9, 2026-08-08)**: `relacoes[].tipo` aceita agora, além do
+enum fechado, uma extensão qualificada `ext.<entidade>.<tipo>` — alteração
+aditiva ao schema, documentada em SPEC.md §2.11.7, justificada em
+`docs/architecture/ADR-008-extensao-qualificada-relacoes.md`.
 
 ### L5 — `despacho.sobre[]` vs `relacoes[]`: coerência só recomendada, nunca imposta
 
@@ -91,15 +92,22 @@ presentes. É uma questão de integridade interna do documento — dentro de
 (fora do JSON Schema, que não pode comparar dois campos de proveniências
 distintas facilmente) que sinalize divergência como aviso, se não erro.
 
-### L6 — `ndf_id` sem espaço de nomes por entidade produtora
+### L6 — `ndf_id` sem espaço de nomes por entidade produtora — RESOLVIDO
 
 UUIDs v4 puros não distinguem visualmente a entidade produtora, e nada
 impede — ainda que improvável — colisão deliberada por um sistema produtor
-comprometido. É uma questão de desenho do identificador do próprio formato —
-dentro de âmbito.
+comprometido. Era uma questão de desenho do identificador do próprio
+formato — dentro de âmbito.
 
-**Recomendação**: equacionar prefixo estruturado (código DGLAB/NIF da
-entidade) em versão futura, sem quebrar compatibilidade do `ndf_id` atual.
+**Resolvido (A10, 2026-08-08), por decisão de não alterar o schema**: a
+análise em `docs/architecture/ADR-009-ndf-id-sem-namespace.md` concluiu que
+`ndf_id` deve continuar opaco — misturar identidade organizacional no
+identificador acopla-o a uma entidade que pode ser reorganizada, fundida
+ou extinta, e a informação que se procurava (a entidade produtora) já
+existe, estruturada e assinada, em `metadados.entidade_produtora` (§2.7.3).
+Fechar uma lacuna decidindo conscientemente não alterar o schema é um
+resultado tão válido como fechá-la com uma alteração — evita um blast
+radius de seis ficheiros para resolver algo já resolvido de outra forma.
 
 ---
 
@@ -237,27 +245,37 @@ por inteiro, não só reformulo.
 
 ---
 
-## Priorização revista
+## Priorização revista — estado final (2026-08-08)
 
-**Implementadas** (ver `ROADMAP.md` Fase 1B, itens A1, A3–A8, e
-`CHANGELOG.md`): L1 (SPEC.md §2.11.5), L3 (SPEC.md §2.11.5), L5 (aviso de
-coerência `sobre[]`/`relacoes[]` em `tools/validate.py`), L7 (SPEC.md
-§4.4.1), L8 (`delegacao_ref` estendido a `parecer`/`informacao-tecnica`),
-L9 (SPEC.md §2.12.3), L10 (SPEC.md §2.12.4). Confirmado com suite completa
-verde (`tools/validate.py` 56/56, `check_package_vectors.py` 8/8,
-`audit_normative.py`, `build_requirements_index.py`).
+Os dez pontos identificados nesta revisão adversarial estão todos com
+destino definido e concluído. Nenhum fica em aberto.
 
-**Pendentes, candidatas a versão futura**: L4 (A9 — extensão qualificada
-do vocabulário de relações, `v1.1.0`), L6 (A10 — espaço de nomes em
-`ndf_id`, `v2.0.0`, junto com extensões de namespace já previstas).
+**Implementadas, normativas/documentais** (ver `ROADMAP.md` Fase 1B, itens
+A1, A3–A6, e `CHANGELOG.md`): L1 (SPEC.md §2.11.5), L3 (SPEC.md §2.11.5),
+L7 (SPEC.md §4.4.1), L9 (SPEC.md §2.12.3), L10 (SPEC.md §2.12.4).
+
+**Implementadas, código/schema aditivo** (A7, A8, A9): L5 (aviso de
+coerência `sobre[]`/`relacoes[]` em `tools/validate.py`), L8
+(`delegacao_ref` estendido a `parecer`/`informacao-tecnica`), L4 (extensão
+qualificada `ext.<entidade>.<tipo>` para `relacoes[].tipo`, ADR-008).
+
+**Fechada por decisão de não alterar o schema** (A10): L6 — `ndf_id`
+mantém-se opaco; a necessidade estava já resolvida por
+`metadados.entidade_produtora` (ADR-009).
 
 **Fora de âmbito do NDF, por desenho, sem alteração ao formato**: L2
 (pertence ao core-documental — cifra em repouso/trânsito e controlo de
 acesso ao artefacto; ver SPEC.md §1.5), L11 (pertence ao sistema de
 custódia/workflow, não ao NDF).
 
+Confirmado com suite completa verde: `tools/validate.py` 58/58,
+`check_package_vectors.py` 8/8, `audit_normative.py` e
+`build_requirements_index.py` regenerados sem erros.
+
 Note-se que a maioria das ações implementadas foram
-**normativas/documentais** (clarificar o que o formato não garante), não
-schema novo — o que é coerente com a própria nota de âmbito: o NDF já tinha
-os blocos certos; o que faltava, em grande parte, era dizer com mais
-clareza o que esses blocos *não* fazem.
+**normativas/documentais** (clarificar o que o formato não garante e, em
+L6, decidir conscientemente não alterar nada), não schema novo — o que é
+coerente com a própria nota de âmbito: o NDF já tinha os blocos certos; o
+que faltava, em grande parte, era dizer com mais clareza o que esses
+blocos *não* fazem — e, nalguns casos, confirmar que não precisavam de
+fazer mais.

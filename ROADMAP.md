@@ -94,8 +94,8 @@ NDF *não* garante, não acrescentar mais schema.
 | A6 | L10 | Nota em §2.12.4: `validador`/`aprovador` descrevem estado de workflow, não conteúdo intrínseco — uso desencorajado fora de sistemas que já os tratem como tal; **não removido do enum** (seria alteração incompatível sem necessidade demonstrada) | Texto (SPEC.md) | Baixo | ✅ Feito |
 | A7 | L5 | Verificação semântica: `despacho.sobre[]` e `NDF-core.relacoes` com conjuntos divergentes de `ndf_id` produz aviso (não erro) | Código (`tools/validate.py`, `check_ndf_advisories`) | Médio | ✅ Feito |
 | A8 | L8 | Estendido `delegacao_ref` (mesmo padrão de `despacho.decisor`) a `parecer.autor` e `informacao-tecnica.autor` | Schema aditivo (`specs/registry/schemas/`), editado em `1.0.0` — mesma lógica do ADR-007, sem consumidores externos a proteger | Médio | ✅ Feito |
-| A9 | L4 | Mecanismo de extensão qualificada do vocabulário de `relacoes[].tipo` (namespace, ex.: `ext.<entidade>.<tipo>`) além do enum fechado atual | Schema + ADR novo | Alto — candidato a v1.1.0 | Pendente |
-| A10 | L6 | Espaço de nomes por entidade produtora em `ndf_id` | Schema (mudança de padrão) + ADR novo | Alto — juntar a "Extensões de namespace" já prevista em v2.0.0 | Pendente |
+| A9 | L4 | Mecanismo de extensão qualificada `relacoes[].tipo` = `ext.<entidade>.<tipo>`, além do enum fechado (`oneOf`, aditivo) | Schema (`ndf-core.schema.json`) + SPEC.md §2.11.7 + ADR-008 | Alto | ✅ Feito |
+| A10 | L6 | Analisado e decidido **não alterar** o formato de `ndf_id` — identificador opaco por desenho; entidade produtora já resolvida por `metadados.entidade_produtora` | ADR-009 + clarificação normativa em SPEC.md §2.3 | Alto | ✅ Feito (fechado por decisão, não por schema) |
 
 **A2 retirado.** A mitigação de fuga de metadados por `relacoes[]` em
 documentos classificados é resolvida ao nível do core-documental (pacote
@@ -116,8 +116,19 @@ da mesma revisão adversarial. Fecha, com isto, a secção de Segurança e
 Privacidade que tinha ficado por escrever na ronda de estabilização
 anterior (mission §13, nunca cumprida até agora).
 
-**Ainda por fazer (A9, A10)** — candidatos a `NDF v1.1.0`/`v2.0.0`, ver
-tabela acima. Requerem proposta e ADR próprios, não são de baixo esforço.
+**A9, A10 — concluídos (2026-08-08).** A9 implementado como alteração
+aditiva ao schema (todos os 11 valores base continuam válidos), com
+mecanismo de extensão qualificada documentado em SPEC.md §2.11.7 e ADR-008.
+A10 fechado por decisão registada em ADR-009: `ndf_id` mantém-se opaco,
+sem alteração de schema — a necessidade original (identificar a entidade
+produtora) já estava resolvida por `metadados.entidade_produtora`. Com
+isto, `LACUNAS.md` fica com os dez pontos totalmente resolvidos: sete
+implementados por texto/código, um fechado por decisão de não-alteração
+(A10), dois retirados por estarem fora de âmbito (L2, L11).
+
+Verificado: `tools/validate.py` 58/58 (56 + 2 novos casos de conformidade
+para A9), `check_package_vectors.py` 8/8, `audit_normative.py` e
+`build_requirements_index.py` regenerados sem erros.
 
 **Médio prazo — candidato a `NDF v1.1.0`, requer proposta e ADR próprios (A9)**
 
