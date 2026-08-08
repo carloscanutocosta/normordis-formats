@@ -117,6 +117,32 @@ para sistemas com o seu próprio modelo de custódia.
 - atualizado: `docs/normalization/TRACEABILITY.md` — família `CUST-REQ-*`
   com evidência real, já não placeholder.
 
+### Resíduos de fronteira NDF/Perfil de Ciclo de Vida (revisão de consistência)
+
+Revisão externa ao ADR-010 encontrou três resíduos onde a separação
+formato/perfil não tinha sido aplicada até ao fim:
+
+- corrigido: SPEC.md §2.10.4 — a linha de `conservacao_permanente` dizia
+  "custódia append-only/WORM e auditoria continuam obrigatórias", em
+  tensão direta com §9.5 (perfil opcional). Reescrita para tornar a
+  dependência do perfil explícita;
+- corrigido: SPEC.md §4.4.2 — separado o requisito de formato/pacote
+  (preservar byte a byte a assinatura original, timestamps e material de
+  validação) do requisito específico do Perfil de Ciclo de Vida NORMORDIS
+  (registar renovação criptográfica como evento append-only no log de
+  custódia);
+- suavizado: SPEC.md §3.2.1 e §3.5 — "`tipo_classificacao_ref` é resolvido
+  automaticamente... nunca introduzido manualmente" e equivalente para
+  `prazo_conservacao_administrativa`/`destino_final` eram regras de
+  implementação do sistema produtor apresentadas como requisito do
+  formato; passam a **RECOMENDA-SE**, mantendo como requisito apenas que o
+  valor final seja válido, coerente e imutável;
+- registada em `ROADMAP.md` (v2.0.0): nota sobre generalização futura do
+  bloco `avaliacao` — hoje semanticamente acoplado ao modelo arquivístico
+  português (PCA/DF/DGLAB), relevante para adoção por outras
+  administrações europeias. Sem ação prevista para 1.0, apenas registo da
+  questão.
+
 ### Harmonização editorial e de normalização
 
 - estado comum `Draft — Revisão pública` para NDF, NDT e NCRTF;
