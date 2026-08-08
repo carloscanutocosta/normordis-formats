@@ -49,26 +49,20 @@ A validação estrutural usa `specs/ndf/schemas/ndf-core.schema.json` (JSON Sche
 
 ## Casos de teste
 
-### Válidos
+O inventário completo e atualizado de todos os casos — desta e das restantes
+suites — está em [`conformance/INDEX.md`](../INDEX.md), **gerado
+automaticamente** por `tools/build_conformance_index.py` a partir dos
+ficheiros reais e dos respetivos campos `_comment`/`_expected_error`.
 
-| Ficheiro | O que valida |
-|---|---|
-| `valid/oficio-qualificado.json` | Caso base — ofício com assinatura qualificada, dados pessoais presentes, todos os campos obrigatórios |
-| `valid/despacho-avancado.json` | Despacho com assinatura avançada, sem dados pessoais |
-| `valid/registo-interno-sem-assinatura.json` | Documento interno com `nivel_assinatura: "nenhuma"`, conservação permanente |
-| `valid/versao-substituicao.json` | NDF que substitui um anterior (campos `versao_anterior`/`hash_anterior` no envelope) |
+Não existe aqui uma tabela manual por decisão deliberada: a versão anterior
+deste README documentava 14 de 28 casos, por não acompanhar as adições à
+suite (achado F15 da revisão pré-RC). A CI verifica que o índice gerado está
+sincronizado com os ficheiros.
 
-### Inválidos
+```bash
+python3 tools/build_conformance_index.py   # regenera conformance/INDEX.md
+```
 
-| Ficheiro | Regra violada | Secção |
-|---|---|---|
-| `invalid/missing-nivel-assinatura.json` | Campo obrigatório `nivel_assinatura` ausente | §2.2, §5.1 |
-| `invalid/invalid-nivel-assinatura.json` | `nivel_assinatura` com valor fora do enum | §2.10.1 |
-| `invalid/missing-ndf-id.json` | Campo obrigatório `ndf_id` ausente | §2.3 |
-| `invalid/invalid-uuid.json` | `ndf_id` não é UUID v4 válido | §2.3 |
-| `invalid/invalid-estado.json` | `estado` com valor fora do enum | §2.4 |
-| `invalid/missing-tipo-documento-ref.json` | `metadados.tipo_documento_ref` ausente | §2.7.2 |
-| `invalid/dados-pessoais-sem-base-legal.json` | `contem_dados_pessoais: true` sem `base_legal_conservacao` | §2.7.2, §1.4 |
-| `invalid/invalid-tipo-classificacao-ref.json` | `tipo_classificacao_ref` não segue formato `<instrumento>/<codigo>` | §3.2.1 |
-| `invalid/invalid-ndt-version-ref.json` | `ndt_version_ref` não segue formato `<id>@<versao>` | §2.6 |
-| `invalid/missing-avaliacao.json` | Bloco `avaliacao` ausente | §3.2, §5.1 |
+Ao acrescentar um caso novo, preencher `_comment` (casos válidos) ou
+`_expected_error` (casos inválidos) — é essa a descrição que aparece no
+índice.

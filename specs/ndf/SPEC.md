@@ -242,7 +242,7 @@ Identificador permanente do documento no ecossistema NORMORDIS.
 - **Geração**: pelo sistema produtor imediatamente antes da canonicalização, nunca depois.
 - **Imutabilidade**: faz parte do NDF-core canonicalizado e assinado — NÃO DEVE ser alterado após finalização.
 - **Unicidade**: o sistema produtor DEVE garantir que não existem dois NDF com o mesmo `ndf_id`.
-- **Uso**: referência primária em `versao_anterior`, no manifest do `.ndfpkg`, e como chave primária no armazenamento físico.
+- **Uso**: referência primária em `relacoes[].alvo.ndf_id` (§2.11), no `manifest.json` do `.ndfpkg` (§8.2), e como chave primária no armazenamento físico.
 
 `ndf_id` é, por desenho, um identificador **opaco** — não incorpora
 código de entidade, tipo de documento, nem qualquer outro componente
@@ -288,7 +288,7 @@ em_conservacao → eliminado                    (DF: eliminação — destruiç�
 | `"substituido"` | Documento supersedido por nova versão na cadeia de proveniência (§6). Imutável no arquivo; não é o documento corrente. |
 | `"em_conservacao"` | PCA decorrido; aguarda aplicação do destino final — transferência para arquivo definitivo ou eliminação. |
 | `"conservado_permanentemente"` | DF aplicado: conservação permanente. Documento transferido para arquivo definitivo (ex.: DGLAB). |
-| `"eliminado"` | DF aplicado: eliminação. `payload_bytes` e envelope destruídos; subsiste um registo tombstone (ver §2.4.3). |
+| `"eliminado"` | DF aplicado: eliminação. `payload_bytes` e envelope destruídos; subsiste um evento terminal no log de custódia (ver §2.4.3). |
 
 #### 2.4.2 Mecanismo de transição de estado
 
@@ -303,52 +303,93 @@ cadeia. A cabeça da cadeia DEVE ser periodicamente ancorada em armazenamento
 WORM, selo institucional ou serviço temporal; uma cadeia de hashes sem âncora
 externa não impede reescrita integral por um custodiante comprometido.
 
-**Estrutura mínima de cada entrada do log de auditoria**:
+**Estrutura de cada entrada do log de auditoria** (conforme
+`custody-event.schema.json` — este exemplo valida contra o schema):
 
 ```json
 {
-  "ndf_id": "uuid-v4",
-  "estado_anterior": "ativo",
-  "estado_novo": "em_conservacao",
-  "timestamp": "2031-06-18T10:30:00Z",
-  "motivo": "PCA de 5 anos decorrido desde 2026-06-18",
-  "actualizador": "sistema-gca-v2.1 / utilizador-id-456",
-  "instrumento_legal": "lista-consolidada-dglab-2023-v3/lc/450.10.001"
+  "custody_event_version": "1.0.0",
+  "event_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "sequence": 3,
+  "event_type": "estado_alterado",
+  "occurred_at": "2031-06-18T10:30:00Z",
+  "actor": {
+    "type": "sistema",
+    "id": "sistema-gca-v2.1",
+    "display_name": "Sistema de Gestão de Custódia"
+  },
+  "details": {
+    "estado_anterior": "ativo",
+    "estado_novo": "em_conservacao",
+    "motivo": "PCA de 5 anos decorrido desde 2026-06-18",
+    "instrumento_legal": "lc/lista-consolidada-dglab-2023-v3"
+  },
+  "previous_event_hash": "sha256:9f2c1a7b3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4",
+  "event_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
 }
 ```
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `ndf_id` | Sim | Identificador do NDF cujo estado transita. |
-| `estado_anterior` | Sim | Estado antes da transição. |
-| `estado_novo` | Sim | Estado após a transição. |
-| `timestamp` | Sim | Data/hora da transição (ISO 8601, UTC). |
-| `motivo` | Sim | Justificação textual — rastreável para auditoria. |
-| `actualizador` | Sim | Identidade do sistema e/ou utilizador que efectuou a transição. |
-| `instrumento_legal` | Recomendado | Referência ao instrumento (Lista Consolidada, despacho, portaria) que autoriza a transição. |
+| `custody_event_version` | Sim | Versão do schema de evento. Valor normativo: `"1.0.0"`. |
+| `event_id` | Sim | Identificador único do evento (UUID v4). |
+| `ndf_id` | Sim | Identificador do NDF a que o evento respeita. |
+| `sequence` | Sim | Posição na cadeia; `0` no primeiro evento, incrementa exatamente uma unidade. |
+| `event_type` | Sim | Enum fechado: `finalizado`, `verificado`, `exportado`, `estado_alterado`, `assinatura_renovada`, `selo_acrescentado`, `transferido`, `eliminado`. |
+| `occurred_at` | Sim | Data/hora do evento (ISO 8601, UTC). |
+| `actor` | Sim | Quem originou o evento: `type` (`sistema` \| `utilizador` \| `entidade`), `id`, e `display_name` opcional. |
+| `details` | Não | Objeto livre para a semântica específica do tipo de evento. Para `estado_alterado`, RECOMENDA-SE `estado_anterior`, `estado_novo`, `motivo` e `instrumento_legal`. |
+| `previous_event_hash` | Sim | `event_hash` do evento anterior; `null` no primeiro. |
+| `event_hash` | Sim | `SHA-256(JCS(evento sem a propriedade event_hash))`. |
 
-**Autorização**: a transição `em_conservacao → eliminado` DEVE ser autorizada formalmente pelo `responsavel_tratamento` (§2.7.2) e DEVE referenciar explicitamente o instrumento de avaliação que suporta a decisão de eliminação.
+**Autorização**: um sistema que implemente este perfil DEVE registar, no
+evento de eliminação, a identidade de quem autorizou formalmente a operação
+e o instrumento de avaliação que a suporta (ver §2.4.3). Quem tem
+competência para conceder essa autorização é matéria de política
+arquivística e organizacional da entidade, fora do âmbito desta
+especificação.
 
-#### 2.4.3 Tombstone de eliminação
+#### 2.4.3 Evento terminal de eliminação
 
-Quando `estado` transita para `"eliminado"`, o sistema de custódia DEVE:
+Quando `estado` transita para `"eliminado"`, um sistema que implemente este
+perfil DEVE:
 
 1. Destruir `payload_bytes` e todos os campos do envelope excepto `validation_code` e `payload_hash`.
-2. Criar um registo tombstone imutável com os seguintes campos mínimos:
+2. Registar um **evento terminal** no log de custódia (§2.4.2), com
+   `event_type: "eliminado"`, conservando em `details` a evidência mínima
+   necessária para rastreabilidade posterior.
+
+Não existe um artefacto normativo separado para este efeito: o evento de
+custódia já definido em `custody-event.schema.json` é a estrutura usada,
+evitando um segundo schema a versionar, testar e manter sincronizado.
 
 ```json
 {
-  "ndf_id": "uuid-v4",
-  "payload_hash": "sha256:<hex>",
-  "validation_code": "NDF-XXXXX-XXXXX-XXXXX-XXXXX",
-  "data_eliminacao": "2031-06-18T10:30:00Z",
-  "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
-  "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3",
-  "tipo_classificacao_ref": "lc/450.10.001"
+  "custody_event_version": "1.0.0",
+  "event_id": "0b5ed7e9-1c2d-4e3f-a4b5-c6d7e8f90a1b",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "sequence": 7,
+  "event_type": "eliminado",
+  "occurred_at": "2031-06-18T10:30:00Z",
+  "actor": { "type": "utilizador", "id": "user:456" },
+  "details": {
+    "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
+    "validation_code": "NDF-A3F7K2MXPQR9ZTNW8VJ",
+    "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
+    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3",
+    "tipo_classificacao_ref": "lc/450.10.001",
+    "autorizado_por": "user:123"
+  },
+  "previous_event_hash": "sha256:9f2c1a7b3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4",
+  "event_hash": "sha256:5c1e2f3a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a"
 }
 ```
 
-O tombstone garante rastreabilidade sem preservar os dados eliminados: `validation_code` e `payload_hash` permitem confirmar que o documento existiu e foi destruído de forma autorizada.
+O evento garante rastreabilidade sem preservar os dados eliminados:
+`validation_code` e `payload_hash` conservados em `details` permitem
+confirmar que o documento existiu e foi destruído de forma autorizada, sem
+reconstituir o seu conteúdo.
 
 ### 2.5 Algoritmo de hash (`payload_hash_alg`)
 
@@ -591,9 +632,13 @@ A classificação correcta de um ato num destes três níveis é **responsabilid
 
 #### 2.10.3 Implicações para o envelope
 
-| `nivel_assinatura` | `assinaturas[]` | `timestamps` | `validation_material` | `validation_code` |
+`timestamps` e `validation_material` são campos **de cada entrada** de
+`assinaturas[]`, não do envelope (§4.4.1) — as colunas abaixo referem-se ao
+conteúdo de cada assinatura presente.
+
+| `nivel_assinatura` | `assinaturas[]` | `timestamps` (por assinatura) | `validation_material` (por assinatura) | `validation_code` |
 |---|---|---|---|---|
-| `"nenhuma"` | Ausente ou `[]` | Ausente (opcional por razões de arquivo) | Ausente | **Sempre presente** |
+| `"nenhuma"` | Ausente ou `[]`; selo institucional opcional | Presente no selo, quando exista | Presente no selo, quando exista | **Sempre presente** |
 | `"avancada"` | CAdES-B-LTA com certificado SEA | Presente (B-T + B-LTA) | Presente | **Sempre presente** |
 | `"qualificada"` | CAdES-B-LTA com certificado SEQ qualificado PSSC | Presente (B-T + B-LTA) | Presente | **Sempre presente** |
 
@@ -670,16 +715,12 @@ versão da especificação, ver o mecanismo de extensão qualificada em
 interoperabilidade semântica fora do ecossistema NORMORDIS — consta de
 [`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`](../../docs/normalization/NDF-INFORMATIVE-GUIDANCE.md).
 
-#### 2.11.3 Relação com `versao_anterior`/`hash_anterior` (§6.2)
+#### 2.11.3 Sucessão documental (`substitui`)
 
-`relacoes` e `versao_anterior`/`hash_anterior` (envelope) cobrem propósitos
-sobrepostos mas não idênticos: `versao_anterior`/`hash_anterior` é um atalho
-operacional de cadeia linear, fora do core; uma relação `"tipo": "substitui"`
-em `relacoes` é o mesmo facto, mas coberto pela assinatura. Um sistema
-produtor que crie um NDF substituto de outro **RECOMENDA-SE** que preencha
-ambos, mantendo-os coerentes. Não é uma obrigação — sistemas que só precisem
-de versionamento linear simples **PODEM** continuar a usar apenas o
-mecanismo do envelope.
+A relação `substitui` é a **única** representação normativa de sucessão entre
+documentos (§6). Um NDF que suceda a outro DEVE incluí-la. Não existe
+mecanismo paralelo no envelope nem no manifesto — a sucessão fica coberta
+pela assinatura do NDF-core, como qualquer outra relação. Ver ADR-011.
 
 #### 2.11.4 Relação com campos de tipo de documento (ex.: `despacho.sobre`)
 
@@ -786,7 +827,31 @@ Um sistema de IA interveniente PODE ser registado com `tipo: "sistema"` e
 `papel: "sistema_tecnico"` — nunca com um papel que implique autoria,
 aprovação ou decisão (ver §2.13.4).
 
-#### 2.12.3 `participante_ref` como referência externa
+#### 2.12.3 Autoria — três noções distintas, não equivalentes
+
+Três mecanismos são capazes de afirmar autoria num NDF. São **semanticamente
+distintos** e NÃO DEVEM ser interpretados como equivalentes nem como uma
+hierarquia de precedência:
+
+| Mecanismo | O que significa |
+|---|---|
+| `documento.autor` (schema do tipo, §2.9) | Autoria **representada no conteúdo documental** — o que o renderizador apresenta no documento reproduzido (ex.: "Autor: Maria Silva"). |
+| `participantes[].papel = "autor"` (§2.12) | Autoria **estrutural declarada**, para indexação, auditoria e interoperabilidade — por identificador institucional, não por nome de exibição. |
+| `assinaturas[].papel = "autor"` (envelope, §4.4.1) | A qualidade em que uma assinatura foi aposta: esta pessoa assinou **na qualidade declarada de autor**. |
+
+Quando coexistam, o produtor DEVE assegurar coerência entre a autoria
+estrutural declarada em `participantes` e a autoria representada no conteúdo
+documental, salvo quando o tipo documental justificar explicitamente a
+diferença. `assinaturas[].papel` descreve apenas a qualidade em que a
+assinatura foi aposta e **não redefine** a autoria documental — nem prova,
+isoladamente, que o signatário seja o único autor.
+
+Divergir entre os três é legítimo em casos concretos (ex.: um documento
+assinado por um representante em nome do autor material). Por isso esta
+especificação não impõe validação automática de igualdade — impõe que a
+diferença, quando exista, seja intencional e não acidental.
+
+#### 2.12.4 `participante_ref` como referência externa
 
 `participante_ref` é uma referência externa, não resolvida pelo NDF —
 paralelo direto a `avaliacao.tipo_classificacao_ref` (§3.2.1), que também
@@ -796,7 +861,7 @@ embute um esquema de identidade verificável: a resolução de
 credenciais) é responsabilidade do sistema produtor, que mantém o registo
 correspondente na sua própria base de dados.
 
-#### 2.12.4 `validador` e `aprovador` — estado de workflow, não de conteúdo
+#### 2.12.5 `validador` e `aprovador` — estado de workflow, não de conteúdo
 
 Os papéis `validador` e `aprovador` descrevem estado de um fluxo de
 aprovação, tipicamente já gerido pelo sistema de workflow do produtor
@@ -864,6 +929,12 @@ valor `"pendente"`, para que a ausência de revisão seja **representável e
 visível**, não apenas omitida. Quando o estado for `revisto_e_aprovado`,
 `revisto_com_alteracoes` ou `rejeitado`, `revisor_ref` e `revisto_em` DEVEM
 estar presentes.
+
+`finalidade` é um enum fechado (`apoio_redacao`, `resumo`, `classificacao`,
+`pesquisa`, `traducao`, `deteccao_erros`, `outro`). Quando o valor for
+`"outro"`, RECOMENDA-SE preencher `finalidade_detalhe` com uma descrição
+textual — o mesmo padrão já usado em
+`avaliacao.prazo_conservacao_administrativa.forma_contagem_detalhe` (§3.3).
 
 #### 2.13.4 IA não é signatária nem decisora
 
@@ -1010,7 +1081,7 @@ A partir de `avaliacao.prazo_conservacao_administrativa` e da data de finalizaç
 | `validation_code` | Código de verificação canónico — derivado de `ndf_id` + `payload_hash`. Ver §4.6. | Esta especificação | **Sempre presente** — independente de `nivel_assinatura` |
 
 `timestamps` e `validation_material` **não são componentes de topo do
-envelope** — vivem dentro de cada entrada de `assinaturas[]` (§4.4.2), para
+envelope** — vivem dentro de cada entrada de `assinaturas[]` (§4.4.1), para
 que a associação entre prova, certificado, cadeia e timestamp nunca seja
 ambígua quando existir mais do que uma assinatura independente.
 
@@ -1071,10 +1142,11 @@ certificado, `timestamps` e `validation_material` próprios, além de:
 | `nivel` | Sim | `selo_institucional` \| `avancada` \| `qualificada`. |
 | `papel` | Não | Papel administrativo exercido **neste documento**: `autor`, `coautor`, `validador`, `aprovador`, `decisor`, `representante`, `testemunha`, `selante`. Distinto de `signatario.cargo` (cargo organizacional) — uma pessoa poderá ter o cargo "Diretor de Serviços" e assinar no papel de `decisor`. |
 | `ordem` | Não | Indicação descritiva de ordem entre coassinaturas. Não é um motor de workflow: quórum, sequência obrigatória e estado de aprovação pertencem ao sistema de gestão documental, não a esta especificação. |
-| `signatario` | Condicional | Identidade do signatário — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. |
+| `signatario` | Condicional | Identidade do signatário — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. Contém `nome` (common name do certificado), `certificado_serie` (número de série, hex) e `cargo` opcional. |
+| `assinado_em` | Não | Instante da assinatura (ISO 8601, UTC), declarado pelo produtor. Não substitui o timestamp RFC 3161 de `timestamps.assinatura`, que é a prova temporal oponível. |
 | `cades_b_lta` | Sim | Assinatura CAdES-B-LTA detached (DER). |
-| `timestamps` | Condicional | RFC 3161 B-T + B-LTA desta assinatura — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. |
-| `validation_material` | Condicional | Cadeia de certificados + revogação desta assinatura — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. |
+| `timestamps` | Condicional | Timestamps RFC 3161 desta assinatura — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. Contém `assinatura` (timestamp B-T sobre o valor da assinatura) e `arquivo` (timestamp B-LTA sobre assinatura + material de validação), ambos DER base64. |
+| `validation_material` | Condicional | Material de validação desta assinatura — obrigatório quando `nivel ∈ {"avancada", "qualificada"}`. Contém `cadeia_certificados` (array DER base64, signatário → raiz) e `revogacao` opcional — cada entrada com `tipo` (`ocsp` ou `crl`) e `dados` (resposta DER base64 capturada no momento da assinatura). |
 
 Não existe um modelo dual (campos globais + campos por assinatura): manter
 os dois caminhos de leitura válidos para o mesmo dado obrigaria qualquer
@@ -1257,31 +1329,58 @@ inicial no log de custódia — não é requisito de conformidade NDF de base.
 
 ---
 
-## 6. Versionamento de documentos (cadeia de proveniência)
+## 6. Sucessão documental
 
 ### 6.1 Princípio
 
-Um NDF finalizado nunca é editado. Uma "nova versão" de um documento é um **NDF novo e distinto**, com o seu próprio NDF-core, envelope, e ciclo de finalização completo (§5).
+Um NDF finalizado nunca é editado. Uma "nova versão" de um documento é um
+**NDF novo e distinto**, com o seu próprio NDF-core, envelope, e ciclo de
+finalização completo (§5).
 
-### 6.2 Referência ao documento anterior
+Sucessão **não é versionamento interno de um documento** — é uma **relação
+entre dois documentos NDF autónomos e imutáveis**:
 
-O novo NDF regista a proveniência no **envelope** (fora do NDF-core), nos seguintes campos de topo:
+```text
+A continua a existir, imutável
+B substitui A
+```
+
+e não `A passou a ser B`. O documento substituído não é alterado nem
+destruído pela existência do sucessor; apenas deixa de ser o documento
+corrente, o que é uma propriedade operacional gerida fora do NDF-core
+(§2.4.1).
+
+### 6.2 Representação normativa
+
+A sucessão é registada no **NDF-core**, como relação `substitui` (§2.11):
 
 ```json
 {
-  "versao_anterior": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
-  "hash_anterior": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
+  "relacoes": [
+    {
+      "tipo": "substitui",
+      "alvo": {
+        "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+        "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
+      }
+    }
+  ]
 }
 ```
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `versao_anterior` | string (UUID v4) | `ndf_id` do NDF imediatamente anterior na cadeia de proveniência. |
-| `hash_anterior` | string (`"sha256:<hex>"`) | `payload_hash` do NDF anterior — permite verificar que o documento anterior não foi adulterado. |
+Um NDF que suceda a outro **DEVE** incluir esta relação. `alvo.payload_hash`
+liga a sucessão aos bytes canónicos exatos do documento substituído,
+permitindo confirmar que não foi adulterado.
 
-**Localização normativa**: estes campos ficam no envelope, ao mesmo nível de `assinaturas`, `timestamps` e `validation_code`. Não entram no NDF-core canonicalizado — são metadados relacionais sobre a ligação entre documentos, não conteúdo do documento em si.
+Esta é a **única** representação normativa de sucessão. Não existe mecanismo
+paralelo no envelope nem no manifesto: a relação fica coberta pela assinatura
+do NDF-core, ao contrário de qualquer campo de envelope. Ver ADR-011 para a
+justificação, e ADR-002 para o modelo geral de relações.
 
-****Quando presentes**: DEVEM estar presentes quando o NDF é uma nova versão de um documento anterior (`estado` do anterior transita para `"substituido"`). DEVEM estar ausentes em documentos sem versão prévia.
+`substitui` não tem estatuto especial face aos restantes tipos de relação
+(§2.11.2) — um documento é livre de suceder a mais do que um antecedente
+(`relacoes` é um array), e de combinar `substitui` com outras relações no
+mesmo NDF.
 
 ### 6.3 Pacote de exportação (`.ndfpkg`)
 
@@ -1289,7 +1388,10 @@ O formato `.ndfpkg` é o **pacote de exportação autocontido** de um NDF
 finalizado. É definido nesta especificação (§8) e reúne os objetos necessários
 para verificação, renderização e preservação sem dependências externas.
 
-A cadeia de proveniência de um processo documental é uma coleção de pacotes `.ndfpkg` independentes, ligados por referências leves (`versao_anterior`/`hash_anterior`), nunca por conteúdo embutido.
+A cadeia de sucessão de um processo documental é uma coleção de pacotes
+`.ndfpkg` independentes, reconstruível a partir das `relacoes` no
+`ndf-core.json` de cada pacote — isto é, a partir dos bytes assinados, nunca
+por conteúdo embutido nem por metadados de empacotamento.
 
 ---
 
@@ -1347,18 +1449,25 @@ documento.ndfpkg (ZIP)
 
 ### 8.2 `manifest.json`
 
+O manifesto é **inventário físico do pacote** — não duplica informação
+documental do NDF-core. Todos os campos abaixo são obrigatórios (este
+exemplo valida contra `manifest.schema.json`):
+
 ```json
 {
   "ndfpkg_version": "1.0.0",
-  "ndf_id": "uuid",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
   "ndf_version": "1.0.0",
   "schema_id": "oficio-generico",
+  "estado": "ativo",
+  "nivel_assinatura": "qualificada",
   "finalizado_em": "2026-06-18T10:30:00Z",
-  "payload_hash": "sha256:abc123...",
+  "payload_hash": "sha256:7196abc4d62371c2fea9da9d409d72d8d128244f4447b0cf8121b5d0fcbfce5f",
+  "validation_code": "NDF-COXWCCZKZUUKRS76N7OJ",
   "inventario": [
-    { "ficheiro": "ndf-core.json", "hash_sha256": "..." },
-    { "ficheiro": "envelope.json", "hash_sha256": "..." },
-    { "ficheiro": "ndt/oficio-generico@1.0.0.ndt.json", "hash_sha256": "..." }
+    { "ficheiro": "ndf-core.json", "hash_sha256": "sha256:7196abc4d62371c2fea9da9d409d72d8d128244f4447b0cf8121b5d0fcbfce5f" },
+    { "ficheiro": "envelope.json", "hash_sha256": "sha256:f37a43b32b61ecccf22d8408b4fb1fa0ee2be3e7ed3c5181d3a75878a6272410" },
+    { "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json", "hash_sha256": "sha256:f036d126366753ae21c47881c03f05ecf5a9d15359a597c339f88d8e2195f575" }
   ]
 }
 ```
@@ -1368,7 +1477,7 @@ documento.ndfpkg (ZIP)
 - **Auto-suficiência**: contém tudo o que é necessário para verificar a assinatura, reproduzir visualmente o documento e confirmar a avaliação arquivística — sem dependência de infraestrutura online.
 - **NDT embebido**: o NDT referenciado por `ndt_version_ref` é incluído no pacote, garantindo reprodutibilidade visual mesmo que o NDT evolua ou o repositório original deixe de existir.
 - **Verificabilidade**: o pacote permite a qualquer implementação conforme verificar `sha256(ndf-core.json) == payload_hash` e validar a assinatura CAdES-B-LTA sem acesso ao core-documental original.
-- **Cadeia de proveniência**: o `manifest.json` regista `versao_anterior` e `hash_anterior` quando aplicável, permitindo reconstruir a cadeia de versões com múltiplos `.ndfpkg`.
+- **Cadeia de sucessão**: reconstruível a partir das `relacoes` no `ndf-core.json` de cada pacote (§6.3) — os bytes assinados. O `manifest.json` é inventário físico do pacote e NÃO DEVE duplicar informação documental do NDF-core.
 
 ---
 
@@ -1460,7 +1569,7 @@ vida — ver ADR-010.
 
 1. **CUST-REQ-001 — DEVE** registar cada transição de estado (§2.4.1) num log de auditoria imutável, validando cada entrada contra `custody-event.schema.json` e mantendo a cadeia de hash encadeado (§2.4.2).
 2. **CUST-REQ-002 — DEVE** usar armazenamento append-only ou WORM para `payload_bytes`, envelope e log de custódia.
-3. **CUST-REQ-003 — DEVE** aplicar o mecanismo de tombstone (§2.4.3) antes de destruir `payload_bytes` de um documento elegível para eliminação, preservando `validation_code` e `payload_hash`.
+3. **CUST-REQ-003 — DEVE** registar o evento terminal de eliminação (§2.4.3) antes de destruir `payload_bytes` de um documento elegível para eliminação, conservando `validation_code` e `payload_hash` em `details`.
 
 Ferramenta de referência: `tools/check_custody.py`; vetores em
 `conformance/custody/`.

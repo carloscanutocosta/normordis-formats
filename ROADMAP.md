@@ -144,6 +144,41 @@ serviço específico. `tools/build_requirements_index.py` e
 
 ---
 
+## Fase 1C — Revisão adversarial pré-RC (concluída, 2026-08-08)
+
+Revisão dirigida a **contradições, redundâncias e requisitos impossíveis de
+implementar**, em vez de novas funcionalidades. Relatório completo, com os
+16 achados e a resolução de cada um, em
+[`docs/reports/NDF-PRE-RC-REVIEW.md`](docs/reports/NDF-PRE-RC-REVIEW.md).
+
+Resultado: todos resolvidos. A decisão de fundo foi a **ADR-011** —
+`versao_anterior`/`hash_anterior` removidos do envelope, ficando
+`relacoes[{tipo:"substitui"}]` como única representação normativa de
+sucessão documental, coberta pela assinatura.
+
+**Lição registada para o processo, não só para o formato:** uma suite de
+conformidade verde não demonstra coerência da especificação. Os 58 casos
+passavam enquanto três blocos JSON da própria SPEC eram inválidos contra os
+schemas que a SPEC torna obrigatórios. A validação passa a ter três camadas
+distintas:
+
+```text
+correção dos schemas
+        ↓
+corpus de conformidade
+        ↓
+coerência SPEC ↔ schemas ↔ exemplos   ← acrescentada nesta fase
+```
+
+Guardrails introduzidos, ligados à CI:
+
+| Ferramenta | O que impede |
+|---|---|
+| `tools/check_spec_coherence.py` | blocos JSON da SPEC inválidos; campos de schema não documentados; referências `§X.Y` quebradas; deriva entre enums duplicados; reaparecimento de propriedades removidas por ADR |
+| `tools/build_conformance_index.py` | índice de conformidade desatualizado face aos ficheiros reais |
+
+---
+
 ## Fase 2 — Ferramentas de referência (`normordis-tools`)
 
 Ferramentas CLI independentes que demonstram que a especificação é implementável e reduzem o custo de adoção para terceiros. Repositório: `normordis-tools` (separado desta especificação).

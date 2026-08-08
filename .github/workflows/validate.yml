@@ -40,6 +40,14 @@ jobs:
           git diff --exit-code docs/normalization/NORMATIVE-STATEMENTS.md
           python3 tools/check_publication_profile.py
 
+      - name: SPEC/schema coherence guardrails
+        run: python3 tools/check_spec_coherence.py
+
+      - name: Conformance index up to date
+        run: |
+          python3 tools/build_conformance_index.py
+          git diff --exit-code conformance/INDEX.md
+
       - name: Build public-review dossier
         run: python3 tools/build_review_bundle.py
 

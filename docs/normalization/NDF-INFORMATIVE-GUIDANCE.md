@@ -175,7 +175,7 @@ aplicabilidade deve ser validada por especialistas competentes.
 | Prazo de conservação administrativa (PCA) | MEG/DGLAB, Lista Consolidada | Bloco `avaliacao.prazo_conservacao_administrativa` com `instrumento_avaliacao_versao_ref` | §3 |
 | Destino final (conservação / eliminação) | MEG/DGLAB, Tabelas de Seleção | `avaliacao.destino_final`; eliminação no termo do PCA | §3.4 |
 | Classificação documental (MEF/MIP) | MEG/DGLAB, Macroestrutura Funcional | `metadados.tipo_classificacao_ref` | §2.7 |
-| Cadeia de custódia / proveniência | ISO 15489:2016, §5.3; MoReq2017, R6 | `versao_anterior` + `hash_anterior`; cadeia de NDF imutáveis | §6 |
+| Cadeia de custódia / proveniência | ISO 15489:2016, §5.3; MoReq2017, R6 | `relacoes[{tipo:"substitui"}]` no NDF-core assinado; cadeia de NDF imutáveis | §6 |
 | Limitação da conservação de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. e) | PCA + `destino_final: eliminacao` aplicado no termo do prazo | §3, §1.4 |
 | Minimização de dados pessoais | RGPD, Art.º 5.º, n.º 1, al. c) | NDF armazena apenas campos preenchidos; sem layout nem páginas vazias | §2.8 |
 | Direito ao apagamento | RGPD, Art.º 17.º | Eliminação integral no termo do PCA; base legal de conservação prevalente documentada | §1.4 |
