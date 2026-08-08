@@ -90,6 +90,33 @@ para o histórico de decisões.
 - `LACUNAS.md` fecha com os dez pontos resolvidos: sete implementados,
   um fechado por decisão de não-alteração, dois fora de âmbito.
 
+### Separação entre conformidade NDF e Perfil de Ciclo de Vida NORMORDIS (ADR-010)
+
+Revisão externa ao estado do repositório identificou que `SPEC.md`
+misturava requisitos de formato com requisitos operacionais de gestão de
+ciclo de vida documental, criando uma barreira de adoção desnecessária
+para sistemas com o seu próprio modelo de custódia.
+
+- adicionado: `docs/architecture/ADR-010-separacao-conformidade-perfil-ciclo-vida.md`;
+- adicionado: nova secção "Perfil de Ciclo de Vida NORMORDIS (opcional)"
+  em SPEC.md §9.5, com requisitos próprios `CUST-REQ-001..003` — reclassifica
+  o requisito de log de auditoria que estava indevidamente em `NDF-PROD-010`;
+- alterado: `NDF-PROD-010` deixa de exigir log de custódia; passa a exigir
+  persistência atómica de `payload_bytes` e envelope (mantém a mesma ID,
+  conteúdo diferente — sem renumeração);
+- alterado: SPEC.md §2.4 (nova nota de âmbito), §5.2 passo 8 (dividido em
+  requisito de formato + requisito de perfil), §2.10, §4.6.1, §4.6.4 e
+  glossário — linguagem sobre `nivel_assinatura` e `validation_code`
+  ajustada para não sugerir que o NDF decide juridicamente o nível de
+  assinatura exigido, nem que depende de um serviço específico;
+- alterado: `docs/architecture/ARCHITECTURE.md` §2.1, §3 — "registo de
+  custódia" deixa de ser apresentado como parte constitutiva do NDF;
+  passa a Perfil de Ciclo de Vida NORMORDIS opcional;
+- alterado: `tools/build_requirements_index.py`, `tools/audit_normative.py`
+  — reconhecem a família `CUST-REQ-*` (54 IDs únicos, antes 51);
+- atualizado: `docs/normalization/TRACEABILITY.md` — família `CUST-REQ-*`
+  com evidência real, já não placeholder.
+
 ### Harmonização editorial e de normalização
 
 - estado comum `Draft — Revisão pública` para NDF, NDT e NCRTF;

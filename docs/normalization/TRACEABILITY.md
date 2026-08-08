@@ -18,7 +18,7 @@ subordinados, são inventariadas em `NORMATIVE-STATEMENTS.md` por
 | `JCS-REQ-*` — bytes e digest | RFC 8785 + vetores JCS | vetores IEEE-754 incluídos | implementação independente adicional |
 | `PKG-REQ-*` — caminhos e inventário | schema do manifesto + verificador | pacote autocontido + 8 vetores negativos | ampliar cobertura de ZIP real |
 | `SIG-REQ-*` — assinaturas | verificações cruzadas | exemplo estrutural | fixtures CAdES-B-LTA reais |
-| `CUST-REQ-*` — cadeia de custódia | schema + verificador | vetores positivo/negativo | integração WORM/TSA |
+| `CUST-REQ-*` — Perfil de Ciclo de Vida NORMORDIS, opcional (não requisito de conformidade NDF — ver ADR-010) | schema custody-event + verificador | 3 IDs (§9.5), vetores positivo/negativo em `conformance/custody/` | integração WORM/TSA |
 | `PORTAL-REQ-*` — portal | OpenAPI | contrato draft | revisão de segurança e privacidade |
 | `RENDER-REQ-*` — renderização | perfil do renderizador | texto draft | corpus golden e acessibilidade |
 | `BENCH-*` — eficiência | metodologia | medição inicial | corpus representativo |

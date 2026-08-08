@@ -108,7 +108,7 @@ A separação evita circularidade: o envelope fica fora dos bytes sobre os quais
 | JSON Schema (NDF-core) | `specs/ndf/schemas/ndf-core.schema.json` | Schema legível por máquina do NDF-core completo |
 | JSON Schema (Envelope) | `specs/ndf/schemas/envelope.schema.json` | Schema legível por máquina do envelope |
 | JSON Schema (Manifest) | `specs/ndf/schemas/manifest.schema.json` | Schema legível por máquina do manifesto `.ndfpkg` |
-| JSON Schema (Custódia) | `specs/ndf/schemas/custody-event.schema.json` | Evento encadeado do log de custódia |
+| JSON Schema (Custódia) | `specs/ndf/schemas/custody-event.schema.json` | Evento encadeado do log de custódia — Perfil de Ciclo de Vida NORMORDIS (§2.4, §9.5), opcional, não requisito de conformidade NDF |
 | Registo de tipos de documento | `specs/registry/` | Schemas dos tipos canónicos (`oficio`, `informacao-tecnica`, `despacho`) |
 | Suite de conformidade | `conformance/ndf/` | Casos de teste válidos e inválidos para implementações |
 
@@ -223,7 +223,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `ndf_id` | Sim | Identificador único do documento. UUID v4, gerado pelo sistema produtor antes da canonicalização. Imutável após finalização. Ver §2.3. |
 | `estado` | Sim | Estado de arquivo do documento. Enum fechado — ver §2.4. |
 | `payload_hash_alg` | Sim | Algoritmo usado para calcular `payload_hash`. Valor normativo desta versão: `"sha256"` (NIST FIPS 180-4). Ver §2.5. |
-| `nivel_assinatura` | Sim | Nível mínimo de assinatura eletrónica exigido pela natureza jurídica do ato. Enum fechado — ver §2.10. |
+| `nivel_assinatura` | Sim | Nível de assinatura eletrónica declarado pelo sistema produtor para este documento, segundo a política e o enquadramento jurídico que aplica. Enum fechado — ver §2.10. |
 | `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_ndt"`. Ver §2.6. |
 | `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
@@ -260,6 +260,16 @@ O campo `estado` no NDF-core declara o estado do documento **no momento da final
 O estado arquivístico corrente ao longo do ciclo de vida do documento é uma propriedade operacional gerida fora do NDF-core: na base de dados e no campo `estado` do manifesto `.ndfpkg` (§8.2). O valor no NDF-core não reflecte transições posteriores à finalização.
 
 **Valor normativo**: `"ativo"` — único valor válido no NDF-core no momento da finalização.
+
+> **Âmbito de §2.4.1–§2.4.3.** As subsecções seguintes descrevem o **Perfil
+> de Ciclo de Vida NORMORDIS** — um modelo de referência para sistemas que
+> gerem NDF depois da finalização (transições de estado, log de auditoria,
+> WORM, tombstones). Não é requisito de conformidade NDF (§9.1–§9.3); é um
+> perfil operacional opcional, com os seus próprios requisitos rastreados
+> em §9.5. Um produtor ou leitor NDF conforme não tem de implementar este
+> perfil — podendo adotar o seu próprio modelo de gestão de ciclo de vida,
+> desde que preserve a imutabilidade de `payload_bytes` (§2.1, §5.3). Ver
+> ADR-010 para a justificação desta separação.
 
 #### 2.4.1 Ciclo de vida arquivístico (camada operacional)
 
@@ -549,12 +559,20 @@ Estrutura profundamente aninhada, com arrays de elementos repetíveis (anexos, s
 
 ### 2.10 Nível de assinatura eletrónica (`nivel_assinatura`)
 
-Declara o nível mínimo de assinatura eletrónica exigido pela natureza jurídica do ato representado pelo documento. Determina quais os passos do pipeline de finalização (§5.2) que são obrigatórios e que tipo de certificado é requerido.
+Declara o nível de assinatura eletrónica que o sistema produtor determinou
+ser adequado a este documento, segundo a natureza jurídica do ato e a
+política aplicável (ver §2.10.2 — a decisão em si é sempre da entidade
+produtora, nunca do NDF). Determina quais os passos do pipeline de
+finalização (§5.2) que são obrigatórios e que tipo de certificado é
+requerido.
 
-**Distinção importante**: `nivel_assinatura` refere-se ao requisito jurídico de
-assinatura pessoal. É independente da integridade e da imutabilidade de
-custódia. Todo o NDF tem JCS, hash e custódia append-only/WORM auditável; CAdES
-é obrigatório apenas para `"avancada"` e `"qualificada"`. Um documento com
+**Distinção importante**: `nivel_assinatura` refere-se ao requisito de
+assinatura pessoal declarado pelo produtor. É independente da integridade
+e da imutabilidade de custódia. Todo o NDF tem JCS e hash; CAdES é
+obrigatório apenas para `"avancada"` e `"qualificada"`. Armazenamento
+append-only/WORM e auditoria pertencem ao Perfil de Ciclo de Vida
+NORMORDIS (§2.4, §9.5), opcional — não são garantidos pelo `nivel_assinatura`
+nem por nenhum outro campo do NDF-core. Um documento com
 `"nenhuma"` **PODE** receber um selo institucional opcional, sem que isso constitua
 uma assinatura pessoal. Ver a arquitetura normativa comum em
 `docs/architecture/ARCHITECTURE.md`.
@@ -1085,12 +1103,17 @@ de Cidadão, HSM institucional, selo eletrónico e Chave Móvel Digital.
 
 #### 4.6.1 Propósito
 
-O `validation_code` é um identificador curto aposto à representação visual do
-documento. Permite ao público consultar o portal oficial, que resolve o código
-para o registo sob custódia e confirma a autenticidade institucional, entidade
-produtora, hash e estado corrente. O código também permite confirmar a
-correspondência com `ndf_id` e `payload_hash`; isoladamente e fora de um
-custodiante confiável, não prova autoria ou origem institucional.
+O `validation_code` é um identificador curto aposto à representação visual
+do documento. É intrinsecamente do formato: derivado deterministicamente de
+`ndf_id` e `payload_hash` (§4.6.2), verificável por qualquer implementação
+sem depender de nenhum serviço externo (§4.6.4). O seu uso típico é permitir
+ao público consultar um serviço de verificação — por exemplo, mas não
+exclusivamente, o portal público de uma entidade custodiante — que resolve
+o código para o registo sob custódia e confirma autenticidade
+institucional, entidade produtora, hash e estado corrente. O código também
+permite confirmar a correspondência com `ndf_id` e `payload_hash`;
+isoladamente e fora de um custodiante confiável, não prova autoria ou
+origem institucional.
 
 #### 4.6.2 Algoritmo de derivação
 
@@ -1128,13 +1151,17 @@ O `validation_code` é **self-verifiable quanto à correspondência**: qualquer
 implementação consegue confirmar que o código corresponde ao `ndf_id` e
 `payload_hash` apresentados. Esta verificação não autentica o emissor.
 
-O portal de verificação (`https://validar.normordis.pt/<validation_code>`) é a
-âncora pública de custódia. Uma resposta positiva DEVE resultar da comparação
-do código com o NDF preservado, da verificação do `payload_hash` e da consulta
-do estado corrente. Quando exista CAdES, o portal DEVE também validar a
-assinatura ou selo e indicar o resultado. A verificação offline continua
-possível, mas só confirma autenticidade quando exista uma âncora de confiança
-local, assinatura ou selo verificável.
+Um serviço de verificação pública (ex.: o portal de referência NORMORDIS,
+`https://validar.normordis.pt/<validation_code>`) serve tipicamente de
+âncora pública de custódia — não é requisito de conformidade NDF, é uma
+funcionalidade de serviço que qualquer entidade custodiante está livre de
+disponibilizar sobre o seu próprio acervo. Quando um serviço deste tipo
+existir, uma resposta positiva DEVE resultar da comparação do código com o
+NDF preservado, da verificação do `payload_hash` e da consulta do estado
+corrente; quando exista CAdES, DEVE também validar a assinatura ou selo e
+indicar o resultado. A verificação offline continua possível, mas só
+confirma autenticidade quando exista uma âncora de confiança local,
+assinatura ou selo verificável.
 
 #### 4.6.5 Representações
 
@@ -1192,10 +1219,13 @@ Os passos 1–3 e 8 são **sempre obrigatórios**. Os passos 4–7 são **condic
 5. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Obter timestamp de assinatura (CAdES-B-T).
 6. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Recolher material de validação — cadeia de certificados + revogação (CAdES-B-LT).
 7. **[Se `nivel_assinatura ∈ {"avancada", "qualificada"}`]** Obter timestamp de arquivo selando assinatura + material de validação (CAdES-B-LTA).
-8. Persistir atomicamente `payload_bytes` e envelope em armazenamento
-append-only/WORM, criando o evento inicial no log de custódia. Para
+8. Persistir `payload_bytes` e envelope de forma atómica — nenhuma escrita
+parcial ou inconsistente entre os dois DEVE ficar visível a um leitor. Para
 `nivel_assinatura: "nenhuma"`, assinatura, timestamps e material de validação
-**PODEM** estar ausentes; um selo institucional continua permitido.
+**PODEM** estar ausentes; um selo institucional continua permitido. Um
+sistema que implemente o Perfil de Ciclo de Vida NORMORDIS (§2.4, §9.5)
+DEVE, adicionalmente, usar armazenamento append-only/WORM e criar o evento
+inicial no log de custódia — não é requisito de conformidade NDF de base.
 
 ### 5.3 Pós-condições
 
@@ -1340,7 +1370,7 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 7. **NDF-PROD-007 — DEVE** definir `tipo_classificacao_ref` no formato `<instrumento>/<codigo>` (§3.2.1).
 8. **NDF-PROD-008 — DEVE** gerar `ndf_id` como UUID v4 válido (RFC 9562), único no espaço de nomes do sistema produtor.
 9. **NDF-PROD-009 — DEVE** definir `estado: "ativo"` no NDF-core de qualquer documento recém-finalizado.
-10. **NDF-PROD-010 — DEVE** registar cada transição de estado em log de auditoria imutável (§2.4.2).
+10. **NDF-PROD-010 — DEVE** persistir `payload_bytes` e o envelope de forma atómica — nenhuma escrita parcial ou inconsistente entre os dois deve ficar visível a um leitor (§5.2, passo 8). Não inclui o Perfil de Ciclo de Vida NORMORDIS — ver §9.5.
 11. **NDF-PROD-011 — DEVE** produzir saídas aceites pelo validador e pelas verificações semânticas oficiais; os casos válidos são referências de interoperabilidade, não entradas do produtor. todos os casos de `conformance/ndf/valid/` sem erro.
 12. **NDF-PROD-012 — DEVE**, quando `relacoes` estiver presente, incluir em cada elemento `tipo`, `alvo.ndf_id` e `alvo.payload_hash` (§2.11).
 13. **NDF-PROD-013 — DEVE** incluir `intervencoes` com pelo menos um elemento quando `proveniencia_ia.utilizada` for `true`, e omitir ou esvaziar `intervencoes` quando for `false` (§2.13).
@@ -1401,6 +1431,21 @@ Uma implementação conforme **DEVE** passar todos os casos de `conformance/ndf/
 
 **Nota**: os ficheiros de conformidade contêm campos `_comment` e `_expected_error` prefixados com `_` para documentação interna. Estes campos **NÃO DEVEM** constar do NDF-core produzido por uma implementação — o test runner remove-os automaticamente antes de validar.
 
+### 9.5 Perfil de Ciclo de Vida NORMORDIS (opcional)
+
+Este perfil **NÃO É** requisito de conformidade NDF (§9.1–§9.3). Cobre o
+modelo de referência descrito em §2.4.1–§2.4.3 para sistemas que gerem NDF
+depois da finalização. Um produtor ou leitor NDF conforme PODE optar por
+não o implementar, adotando o seu próprio modelo de gestão de ciclo de
+vida — ver ADR-010.
+
+1. **CUST-REQ-001 — DEVE** registar cada transição de estado (§2.4.1) num log de auditoria imutável, validando cada entrada contra `custody-event.schema.json` e mantendo a cadeia de hash encadeado (§2.4.2).
+2. **CUST-REQ-002 — DEVE** usar armazenamento append-only ou WORM para `payload_bytes`, envelope e log de custódia.
+3. **CUST-REQ-003 — DEVE** aplicar o mecanismo de tombstone (§2.4.3) antes de destruir `payload_bytes` de um documento elegível para eliminação, preservando `validation_code` e `payload_hash`.
+
+Ferramenta de referência: `tools/check_custody.py`; vetores em
+`conformance/custody/`.
+
 ---
 
 ## Anexo A (informativo) — Glossário
@@ -1420,6 +1465,6 @@ Uma implementação conforme **DEVE** passar todos os casos de `conformance/ndf/
 | SEA / AES | Assinatura Eletrónica Avançada — eIDAS Art.º 26.º; identificação única do signatário sem obrigatoriedade de certificado qualificado |
 | SEQ / QES | Assinatura Eletrónica Qualificada — eIDAS Art.º 25.º; certificado qualificado PSSC; equivalente legal à assinatura manuscrita |
 | PSSC | Prestador de Serviços de Confiança Qualificado — entidade inscrita na lista de confiança eIDAS |
-| `nivel_assinatura` | Nível mínimo de assinatura eletrónica exigido pela natureza jurídica do ato: `"nenhuma"`, `"avancada"` ou `"qualificada"` (ver §2.10) |
+| `nivel_assinatura` | Nível de assinatura eletrónica declarado pelo sistema produtor: `"nenhuma"`, `"avancada"` ou `"qualificada"` (ver §2.10) |
 | CAdES-B-LTA | Nível de assinatura eletrónica avançada com timestamp de arquivo (ETSI EN 319 122) |
 | `tipo_documento_ref` | Referência ao schema versionado que define a estrutura interna de `documento` (ex.: `oficio@1.0.0`, `modelo3-irs@2025.1`) — ver §2.9.2 |
