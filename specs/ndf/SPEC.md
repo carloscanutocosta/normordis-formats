@@ -606,7 +606,7 @@ Mesmo quando o ato não requer assinatura eletrónica para validade jurídica, h
 | `destino_final: "eliminacao"` E PCA ≤ 5 anos | Envelope mínimo (apenas `validation_code` + `payload_hash`). CAdES-B-LTA **não obrigatório**. |
 | `destino_final: "eliminacao"` E PCA > 5 anos | Selo institucional CAdES-B-LTA RECOMENDADO para portabilidade da prova de origem. |
 | `destino_final: "conservacao_parcial_por_amostragem"` | Selo institucional CAdES-B-LTA RECOMENDADO para os documentos seleccionados. |
-| `destino_final: "conservacao_permanente"` | Selo institucional CAdES-B-LTA RECOMENDADO; custódia append-only/WORM e auditoria continuam obrigatórias. |
+| `destino_final: "conservacao_permanente"` | Selo institucional CAdES-B-LTA RECOMENDADO. Requisitos adicionais de custódia (armazenamento append-only/WORM, auditoria) dependem de o sistema custodiante adotar o Perfil de Ciclo de Vida NORMORDIS (§9.5) ou um modelo próprio equivalente — não são exigidos pela conformidade NDF de base. |
 
 Quando CAdES-B-LTA é aplicado a um documento com `nivel_assinatura: "nenhuma"`, o envelope DEVE usar um **selo institucional** (não uma assinatura pessoal) — um certificado de autenticação da entidade produtora ou do sistema de gestão documental, não um certificado qualificado pessoal. O efeito jurídico é de integridade técnica, não de assinatura com efeito legal equivalente à manuscrita.
 
@@ -935,7 +935,13 @@ A string segue o formato `"<instrumento>/<codigo_classe>"`:
 
 O instrumento e a versão consultados são registados em `instrumento_avaliacao_versao_ref`, permitindo que a regra aplicável seja rastreável mesmo após atualização do instrumento.
 
-`tipo_classificacao_ref` é **resolvido automaticamente** pelo sistema produtor a partir do tipo de documento — nunca introduzido manualmente por documento.
+**RECOMENDA-SE** que o sistema produtor resolva `tipo_classificacao_ref`
+automaticamente a partir do tipo de documento, para reduzir erro humano e
+garantir consistência entre documentos do mesmo tipo. O NDF não exige um
+processo específico de resolução — manual, automático, ou por outra regra
+é responsabilidade da aplicação produtora — apenas que o valor final seja
+válido, coerente com o instrumento referenciado, e imutável após a
+finalização (§2.1).
 
 ### 3.2.2 Formato normativo de `instrumento_avaliacao_versao_ref`
 
@@ -972,9 +978,18 @@ Conjunto fechado, alinhado com as formas de contagem de prazo previstas pela Lis
 - `eliminacao` — o documento, decorrido o PCA, é elegível para eliminação.
 - `conservacao_parcial_por_amostragem` — apenas uma amostra (conforme critério de amostragem definido na Lista Consolidada/Tabela de Seleção) é conservada permanentemente; o remanescente é eliminado.
 
-### 3.5 Resolução automática
+### 3.5 Resolução de `prazo_conservacao_administrativa` e `destino_final`
 
-`prazo_conservacao_administrativa` e `destino_final` DEVEM ser **resolvidos automaticamente** a partir de `tipo_classificacao_ref`, consultando o instrumento de avaliação carregado no sistema no momento da finalização — NÃO DEVEM ser introduzidos manualmente por documento. `instrumento_avaliacao_versao_ref` regista qual o instrumento e versão consultados, preservando a regra aplicável mesmo que o instrumento seja atualizado posteriormente.
+`prazo_conservacao_administrativa` e `destino_final` DEVEM ser coerentes
+com `tipo_classificacao_ref` e com o instrumento de avaliação identificado
+em `instrumento_avaliacao_versao_ref` no momento da finalização — este
+último regista qual o instrumento e versão consultados, preservando a
+regra aplicável mesmo que o instrumento seja atualizado posteriormente. O
+NDF não impõe o processo pelo qual esses valores são determinados;
+**RECOMENDA-SE** resolvê-los automaticamente a partir do instrumento de
+avaliação carregado no sistema, para reduzir erro humano — mas essa é uma
+decisão de implementação da aplicação produtora, não um requisito do
+formato.
 
 ### 3.6 Dados derivados (fora do NDF-core)
 
@@ -1077,20 +1092,24 @@ delegação — o mesmo princípio já aplicado à classificação de
 #### 4.4.2 Preservação da assinatura original
 
 Quando `nivel_assinatura ∈ {"avancada", "qualificada"}`, a assinatura CAdES é
-parte integrante e obrigatória do documento arquivado. Durante todo o prazo de
-conservação, e enquanto o NDF-core for preservado, o sistema de custódia DEVE:
+parte integrante e obrigatória do documento arquivado. Este é um requisito
+de formato/pacote — aplica-se a qualquer implementação que preserve o
+NDF-core, independentemente de adotar ou não o Perfil de Ciclo de Vida
+NORMORDIS (§9.5). Enquanto o NDF-core for preservado, a implementação DEVE:
 
 1. preservar byte a byte o contentor CAdES original;
 2. preservar os timestamps RFC 3161 e o material de validação associados;
 3. impedir alteração, substituição ou remoção isolada destes objetos;
-4. incluir estes objetos nos hashes do inventário do `.ndfpkg`;
-5. registar qualquer renovação criptográfica como nova prova append-only.
+4. incluir estes objetos nos hashes do inventário do `.ndfpkg`, quando exportado nesse formato.
 
 Uma re-selagem, renovação de timestamp ou migração de algoritmo NÃO DEVE
 substituir a assinatura original. A nova prova protege a cadeia anterior e é
-acrescentada ao envelope ou ao registo de custódia. A eliminação destes
-objetos só é permitida juntamente com a eliminação arquivística formalmente
-autorizada do próprio documento (§2.4.3).
+acrescentada ao envelope. Sistemas que implementem o Perfil de Ciclo de
+Vida NORMORDIS DEVEM, adicionalmente, registar cada renovação criptográfica
+como novo evento append-only no log de custódia (§2.4.2, §9.5) — este passo
+adicional não é requisito de conformidade NDF de base. A eliminação dos
+objetos de assinatura só é permitida juntamente com a eliminação
+arquivística formalmente autorizada do próprio documento (§2.4.3).
 
 ### 4.5 Mecanismos de assinatura suportados
 

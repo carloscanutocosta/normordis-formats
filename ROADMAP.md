@@ -298,6 +298,25 @@ normordis-migrate --batch *.ndfpkg --out-dir migrado/
 | Extensões de namespace (`ext.<entidade>`) | Permite que AT, SS, Municípios estendam o NDF-core com campos próprios sem alterar esta especificação base |
 | Espaço de nomes por entidade produtora em `ndf_id` (A10, `LACUNAS.md` L6) | Resolvido em conjunto com extensões de namespace, acima — evita duas rondas de alteração incompatível separadas |
 | Revisão de `tipo_documento_ref` para URI formal | Alinhamento com Linked Data / European Interoperability Framework |
+| Generalização do bloco `avaliacao` (conceito abstrato + perfil PT/DGLAB) | Ver nota "Generalização arquivística europeia" abaixo |
+
+#### Generalização arquivística europeia (nota, sem ação prevista para 1.0)
+
+Identificado em revisão externa (2026-08-08): a ADR-010 desacoplou o NDF do
+modelo operacional NORMORDIS (custódia, lifecycle), mas o bloco `avaliacao`
+continua semanticamente acoplado ao modelo arquivístico português (PCA,
+DF, Lista Consolidada, DGLAB, PGD, Tabela de Seleção — SPEC.md §3). Isto é
+aceitável para uma versão 1.0 focada na AP portuguesa, mas é a próxima
+questão de generalização a considerar caso o objetivo seja adoção por
+outras administrações públicas europeias (relevante para uma eventual
+candidatura NGI com âmbito além de Portugal).
+
+Direção a explorar, sem comprometer agora: separar um conceito abstrato de
+avaliação arquivística (`retention_classification`, `retention_period`,
+`disposition`, `governing_instrument` — nomes ilustrativos) de um perfil
+`PT-DGLAB` que o instancia com os termos portugueses atuais
+(`tipo_classificacao_ref`, PCA, DF). Não decidido nem desenhado — registo
+da questão para não se perder, não uma proposta.
 
 ### NCRTF v2.0.0 ✅
 
