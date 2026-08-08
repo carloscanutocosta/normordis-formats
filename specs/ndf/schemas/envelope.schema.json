@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://normordis.pt/specs/ndf/1.0.0/envelope.schema.json",
   "title": "NDF Envelope v1.0.0",
-  "description": "NDF envelope structure — produced after NDF-core finalisation. Not signed; contains signatures over NDF-core, timestamps, validation material, and operational fields. Each entry in 'assinaturas' is a self-contained unit of proof: timestamps and validation_material live per signature, not globally, so that N independent signatures (distinct certificates, chains, revocation data, signing instants) are never ambiguous about which proof belongs to which signature.",
+  "description": "NDF envelope structure — produced after NDF-core finalisation. Not signed; contains signatures over NDF-core, timestamps, validation material, and operational fields. Each entry in 'assinaturas' is a self-contained unit of proof: timestamps and validation_material live per signature, not globally, so that N independent signatures (distinct certificates, chains, revocation data, signing instants) are never ambiguous about which proof belongs to which signature. Document succession is NOT represented here — it is a signed relation in NDF-core.relacoes (tipo 'substitui'), see SPEC.md §6 and ADR-011.",
   "type": "object",
   "required": ["validation_code", "payload_hash", "estado"],
   "additionalProperties": false,
@@ -30,28 +30,7 @@
       "items": {
         "$ref": "#/$defs/assinatura"
       }
-    },
-    "versao_anterior": {
-      "type": "string",
-      "format": "uuid",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-      "description": "ndf_id of the immediately preceding NDF in the provenance chain. Present only when this NDF supersedes a previous one. See also NDF-core.relacoes (tipo 'substitui') for the signed, hash-bound equivalent — SPEC.md §2.11.3."
-    },
-    "hash_anterior": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
-      "description": "payload_hash of the preceding NDF, for chain integrity verification. Required when versao_anterior is present."
     }
-  },
-  "if": {
-    "required": ["versao_anterior"]
-  },
-  "then": {
-    "required": ["hash_anterior"]
-  },
-  "dependentRequired": {
-    "versao_anterior": ["hash_anterior"],
-    "hash_anterior": ["versao_anterior"]
   },
   "$defs": {
     "assinatura": {

@@ -62,7 +62,7 @@ operacional).
 
 - Transições de estado arquivístico e o log de auditoria imutável (§2.4.2).
 - Armazenamento append-only/WORM.
-- Mecanismo de tombstone (§2.4.3).
+- Evento terminal de eliminação (§2.4.3).
 - Validação da cadeia de eventos (`custody-event.schema.json`,
   `tools/check_custody.py`).
 

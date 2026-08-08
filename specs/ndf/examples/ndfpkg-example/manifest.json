@@ -31,7 +31,7 @@
     },
     {
       "ficheiro": "schemas/envelope.schema.json",
-      "hash_sha256": "sha256:f5ffcf27e754f50f4ad751a243acf65180865b5cf99b4a2275aae1991a78264a"
+      "hash_sha256": "sha256:d55c2dc452f6e0979a39cbf463715a4ce9ac6837e3b684d6c0f0606fb2dc82c9"
     },
     {
       "ficheiro": "schemas/manifest.schema.json",

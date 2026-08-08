@@ -117,6 +117,66 @@ para sistemas com o seu próprio modelo de custódia.
 - atualizado: `docs/normalization/TRACEABILITY.md` — família `CUST-REQ-*`
   com evidência real, já não placeholder.
 
+### Revisão adversarial pré-RC — 16 achados resolvidos (`NDF-PRE-RC-REVIEW.md`)
+
+Revisão dirigida a contradições, redundâncias e requisitos impossíveis de
+implementar, em vez de novas funcionalidades. Relatório completo em
+`docs/reports/NDF-PRE-RC-REVIEW.md`.
+
+**Alteração arquitetural (ADR-011):**
+
+- removido: `versao_anterior` e `hash_anterior` do envelope. A sucessão
+  documental passa a ser representada exclusivamente por
+  `relacoes[{tipo: "substitui"}]` no NDF-core assinado — um facto, um sítio,
+  coberto pela assinatura. Resolve em cascata a contradição do manifesto
+  (F3), a hierarquia normativa invertida (F6) e a ausência total de
+  cobertura de teste do mecanismo removido (F8);
+- alterado: SPEC.md §6 reescrita — sucessão é uma relação entre documentos
+  autónomos e imutáveis (`A continua a existir; B substitui A`), não
+  versionamento interno.
+
+**Contradições SPEC↔schema corrigidas:**
+
+- corrigido: SPEC.md §2.4.2 — o exemplo e a tabela do log de custódia
+  descreviam um modelo de dados que falhava 9 validações contra o
+  `custody-event.schema.json` que a própria cláusula torna obrigatório
+  (só `ndf_id` coincidia). Alinhados ao schema, com a semântica antiga
+  (`motivo`, `instrumento_legal`) mapeada para `details` (F1);
+- corrigido: SPEC.md §8.2 — o exemplo do `manifest.json` omitia três campos
+  obrigatórios (`estado`, `nivel_assinatura`, `validation_code`) (F2);
+- corrigido: SPEC.md §2.10.3 — a tabela ainda tratava `timestamps` e
+  `validation_material` como campos de topo do envelope, contra a ADR-004
+  (F4); mesma correção em §6.2 (F5) e na referência de §4.1, que apontava
+  para §4.4.2 em vez de §4.4.1 (F12).
+
+**Simplificações e clarificações:**
+
+- alterado: o tombstone de eliminação (§2.4.3) deixa de ser um artefacto
+  normativo próprio sem schema; passa a **evento terminal** no log de
+  custódia (`event_type: "eliminado"`, evidência em `details`), reutilizando
+  a estrutura já existente (F7);
+- adicionado: SPEC.md §2.12.3 — as três noções de autoria
+  (`documento.autor`, `participantes[].papel`, `assinaturas[].papel`) são
+  declaradas semanticamente distintas, com regra de coerência, sem impor
+  uma hierarquia de precedência artificial (F10);
+- documentados: campos de schema que existiam sem prosa normativa —
+  `assinado_em`, subcampos de `timestamps`, `validation_material` e
+  `revogacao`, e `finalidade_detalhe` (F11).
+
+**Guardrails de CI (novo — impede a reincidência do padrão):**
+
+- adicionado: `tools/check_spec_coherence.py` — valida os blocos JSON
+  normativos da SPEC contra os schemas, verifica que todo o campo de schema
+  está documentado, que as referências `§X.Y` resolvem, que enums
+  deliberadamente duplicados não derivam (F16), e que propriedades removidas
+  por ADR não reaparecem;
+- adicionado: `tools/build_conformance_index.py` — gera `conformance/INDEX.md`
+  a partir dos ficheiros reais. O README de conformidade documentava 14 de
+  28 casos por ser mantido à mão (F15); o índice passa a ser gerado e
+  verificado em CI;
+- alterado: `.github/workflows/validate.yml` — ambas as ferramentas ligadas
+  ao pipeline.
+
 ### Resíduos de fronteira NDF/Perfil de Ciclo de Vida (revisão de consistência)
 
 Revisão externa ao ADR-010 encontrou três resíduos onde a separação

@@ -1,5 +1,5 @@
 {
-  "_comment": "Caso de teste: NDF-core de um documento que SUBSTITUI um anterior. O NDF-core em si tem estado='ativo' (imutável, como sempre). O envelope deste NDF conteria versao_anterior + hash_anterior apontando para o documento supersedido. O documento supersedido teria o seu estado operacional (DB/envelope) actualizado para 'substituido' pelo sistema de custódia.",
+  "_comment": "Caso de teste: NDF-core de um documento que SUBSTITUI um anterior, via relacoes[{tipo:'substitui'}] no core assinado (§6, ADR-011). O NDF-core em si tem estado='ativo' (imutável, como sempre). O documento substituído continua a existir, imutável; o seu estado operacional (DB/envelope) é actualizado para 'substituido' por um sistema que implemente o Perfil de Ciclo de Vida NORMORDIS.",
   "ndf_version": "1.0.0",
   "ndf_id": "f6a7b8c9-d0e1-4234-aabc-345678901234",
   "estado": "ativo",
@@ -46,6 +46,16 @@
       "cargo": "Director-Geral"
     }
   },
+  "relacoes": [
+    {
+      "tipo": "substitui",
+      "alvo": {
+        "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+        "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
+        "descricao": "Ofício n.º OF/2026/00123, de 18 de junho de 2026"
+      }
+    }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "lc/450.10.001",
     "prazo_conservacao_administrativa": {
