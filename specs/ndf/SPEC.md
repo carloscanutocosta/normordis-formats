@@ -244,6 +244,15 @@ Identificador permanente do documento no ecossistema NORMORDIS.
 - **Unicidade**: o sistema produtor DEVE garantir que não existem dois NDF com o mesmo `ndf_id`.
 - **Uso**: referência primária em `versao_anterior`, no manifest do `.ndfpkg`, e como chave primária no armazenamento físico.
 
+`ndf_id` é, por desenho, um identificador **opaco** — não incorpora
+código de entidade, tipo de documento, nem qualquer outro componente
+estrutural. A atribuição a uma entidade produtora fica em
+`metadados.entidade_produtora` (§2.7.3), estruturada e coberta pela mesma
+assinatura, não no próprio identificador — evita acoplar a identidade
+permanente do documento à identidade organizacional da entidade, que muda
+ao longo do tempo (reorganizações, fusões, extinções). Ver ADR-009 para a
+análise completa desta decisão.
+
 ### 2.4 Estado de arquivo (`estado`)
 
 O campo `estado` no NDF-core declara o estado do documento **no momento da finalização** — é sempre `"ativo"`. É canonicalizado e assinado como parte do NDF-core e é **imutável** tal como todos os outros campos.
@@ -632,9 +641,12 @@ substituída por uma nova versão do mesmo documento.
 | `deriva_de` | Este documento deriva do alvo, sem ser uma nova versão formal. |
 | `referencia` | Ligação informativa, sem implicação jurídico-documental direta. |
 
-Este vocabulário é fechado nesta versão. Extensão requer uma nova versão
-minor desta especificação — o mesmo princípio já aplicado a
-`classificacao_seguranca` (§2.7.4) e `destino_final` (§3.4).
+Este vocabulário base é fechado nesta versão. Estendê-lo requer uma nova
+versão minor desta especificação — o mesmo princípio já aplicado a
+`classificacao_seguranca` (§2.7.4) e `destino_final` (§3.4). Para tipos de
+relação específicos de um domínio ou entidade, sem esperar por uma nova
+versão da especificação, ver o mecanismo de extensão qualificada em
+§2.11.7.
 
 **Correspondência informativa com PROV-O** (W3C) — não normativa, apenas para
 interoperabilidade semântica fora do ecossistema NORMORDIS — consta de
@@ -686,6 +698,40 @@ forma independente.
 `specs/ndf/examples/informacao-parecer-despacho/` contém um exemplo completo
 de três NDF autónomos (informação técnica, parecer, despacho) ligados por
 `relacoes[]`, com hashes reais recalculáveis e diagrama do grafo.
+
+#### 2.11.7 Extensão qualificada de `relacoes[].tipo`
+
+Além do vocabulário base fechado (§2.11.2), `relacoes[].tipo` aceita um
+valor de **extensão qualificada**, no formato:
+
+```
+ext.<entidade>.<tipo>
+```
+
+| Componente | Regras | Exemplo |
+|---|---|---|
+| `entidade` | lowercase, `[a-z][a-z0-9-]*` | `at`, `municipio-lisboa` |
+| `tipo` | lowercase, `[a-z][a-z0-9_-]*` | `retificacao-oficiosa` |
+
+**Exemplo válido**: `"ext.at.retificacao-oficiosa"`.
+
+Este mecanismo permite a uma entidade produtora declarar tipos de relação
+específicos do seu domínio administrativo sem esperar por uma nova versão
+minor desta especificação — o mesmo espírito do registo de tipos de
+documento (`specs/registry/`), aplicado ao vocabulário de relações. Não há
+um registo central de extensões: o namespace `<entidade>` é autodeclarado,
+com o mesmo risco de colisão semântica que qualquer namespace autodeclarado
+(ex.: pacotes Java, namespaces XML) — mitigado, na prática, por
+`<entidade>` corresponder tipicamente a um identificador organizacional já
+reconhecido (código DGLAB, sigla institucional).
+
+Uma extensão qualificada NÃO DEVE ser interpretada como parte do
+vocabulário normativo desta especificação — a sua semântica é definida e da
+responsabilidade exclusiva da entidade que a declara. Um leitor conforme
+que não reconheça uma extensão qualificada DEVE tratá-la como relação de
+tipo desconhecido para efeitos de interpretação semântica, mas NÃO DEVE
+rejeitar o documento só por esse motivo — a relação continua
+estruturalmente válida (formato correto, `alvo` verificável por hash).
 
 ### 2.12 Participantes (`participantes`)
 
@@ -1314,7 +1360,7 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 8. **NDF-READ-008 — DEVE** considerar inválido um pacote onde assinatura original, timestamps ou material de validação obrigatórios estejam ausentes ou alterados.
 9. **NDF-READ-009 — DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`.
 10. **NDF-READ-010 — DEVE** aceitar todos os casos de `conformance/ndf/valid/`.
-11. **NDF-READ-011 — DEVE** rejeitar uma relação em `relacoes` sem `alvo.payload_hash`, ou com `alvo.payload_hash` em formato inválido, ou com `tipo` fora do enum fechado de §2.11.2.
+11. **NDF-READ-011 — DEVE** rejeitar uma relação em `relacoes` sem `alvo.payload_hash`, ou com `alvo.payload_hash` em formato inválido, ou com `tipo` fora do vocabulário base fechado de §2.11.2 e fora do formato de extensão qualificada de §2.11.7.
 12. **NDF-READ-012 — DEVE** rejeitar `proveniencia_ia` com `utilizada: false` e `intervencoes` não vazio.
 13. **NDF-READ-013 — DEVE** rejeitar uma intervenção de `proveniencia_ia` com estado de revisão terminal (`revisto_e_aprovado`, `revisto_com_alteracoes` ou `rejeitado`) sem `revisor_ref` ou sem `revisto_em`.
 

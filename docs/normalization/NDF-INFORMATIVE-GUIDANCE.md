@@ -73,6 +73,7 @@ o NDF não serializa em PROV-O nem depende dele para validação.
 | `anula` | sem equivalente direto | Extensão NORMORDIS — efeito jurídico sem primitiva PROV-O correspondente |
 | `responde_a` | sem equivalente direto | Extensão NORMORDIS |
 | `executa` | sem equivalente direto | Extensão NORMORDIS |
+| `ext.<entidade>.<tipo>` | avaliar caso a caso | Extensão qualificada de domínio (SPEC.md §2.11.7) — sem primitiva PROV-O fixa; a entidade que a declara decide a correspondência mais próxima, se relevante |
 
 ## Confidencialidade e controlo de acesso (fora de âmbito do NDF)
 

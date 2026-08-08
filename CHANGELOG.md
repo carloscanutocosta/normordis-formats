@@ -73,6 +73,23 @@ para o histórico de decisões.
 - adicionado: `delegacao_ref` opcional em `parecer.autor` e
   `informacao-tecnica.autor`, mesmo padrão de `despacho.decisor` (A8/L8).
 
+### Extensibilidade e fecho de `LACUNAS.md` (A9, A10)
+
+- adicionado: extensão qualificada `ext.<entidade>.<tipo>` para
+  `relacoes[].tipo`, além do vocabulário base fechado — alteração aditiva
+  (`oneOf` no schema), sem quebra de compatibilidade; SPEC.md §2.11.7;
+  ADR-008 (A9/L4);
+- adicionado: 2 novos casos de conformidade NDF (1 válido com extensão
+  qualificada, 1 inválido com extensão malformada) — suite passa a 58/58;
+- decidido, e registado em ADR-009: `ndf_id` mantém-se UUID v4 opaco, sem
+  espaço de nomes por entidade produtora — a necessidade já estava
+  resolvida por `metadados.entidade_produtora`; alterar o identificador
+  acoplaria-o a uma identidade organizacional mutável, para um ganho sem
+  benefício real (A10/L6). Clarificação normativa acrescentada a SPEC.md
+  §2.3, sem alteração de schema;
+- `LACUNAS.md` fecha com os dez pontos resolvidos: sete implementados,
+  um fechado por decisão de não-alteração, dois fora de âmbito.
+
 ### Harmonização editorial e de normalização
 
 - estado comum `Draft — Revisão pública` para NDF, NDT e NCRTF;
