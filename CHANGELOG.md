@@ -117,6 +117,17 @@ para sistemas com o seu próprio modelo de custódia.
 - atualizado: `docs/normalization/TRACEABILITY.md` — família `CUST-REQ-*`
   com evidência real, já não placeholder.
 
+### Correções de seguimento pós-revisão
+
+- alterado: SPEC.md §2.12.1 e §2.12.3 — `participantes` deixa de ser descrito
+  como servindo "auditoria", termo que após a ADR-010 podia ser lido como
+  *audit trail* operacional (Perfil de Ciclo de Vida). Passa a "consulta,
+  proveniência e interoperabilidade documental";
+- alterado: `.github/workflows/validate.yml` — `actions/checkout`,
+  `actions/setup-python` e `actions/setup-node` atualizadas para v7, e o
+  runtime Node dos verificadores JS de 20 para 24. Resolve os avisos de
+  depreciação de Node.js 20 emitidos pelo GitHub Actions.
+
 ### Revisão adversarial pré-RC — 16 achados resolvidos (`NDF-PRE-RC-REVIEW.md`)
 
 Revisão dirigida a contradições, redundâncias e requisitos impossíveis de

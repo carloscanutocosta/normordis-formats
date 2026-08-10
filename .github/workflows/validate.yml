@@ -10,9 +10,9 @@ jobs:
     name: Python conformance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -64,11 +64,11 @@ jobs:
     name: JavaScript conformance (cross-language)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: JCS vectors — Node.js
         run: node tools/check-jcs-vectors.mjs
@@ -83,7 +83,7 @@ jobs:
     name: JSON well-formedness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate all JSON files parse correctly
         run: |

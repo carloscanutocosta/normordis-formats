@@ -804,7 +804,7 @@ bloco `participantes`, opcional, regista essa informação de forma estrutural
 e independente do texto de exibição que já existe nalguns schemas de tipo de
 documento (ex.: `informacao-tecnica.autor`, `despacho.decisor`) — esses
 campos continuam a servir a apresentação do documento (via NDT); `participantes`
-serve a consulta, auditoria e o grafo documental.
+serve a consulta, a proveniência e a interoperabilidade documental.
 
 ```json
 {
@@ -836,7 +836,7 @@ hierarquia de precedência:
 | Mecanismo | O que significa |
 |---|---|
 | `documento.autor` (schema do tipo, §2.9) | Autoria **representada no conteúdo documental** — o que o renderizador apresenta no documento reproduzido (ex.: "Autor: Maria Silva"). |
-| `participantes[].papel = "autor"` (§2.12) | Autoria **estrutural declarada**, para indexação, auditoria e interoperabilidade — por identificador institucional, não por nome de exibição. |
+| `participantes[].papel = "autor"` (§2.12) | Autoria **estrutural declarada**, para indexação, proveniência e interoperabilidade documental — por identificador institucional, não por nome de exibição. |
 | `assinaturas[].papel = "autor"` (envelope, §4.4.1) | A qualidade em que uma assinatura foi aposta: esta pessoa assinou **na qualidade declarada de autor**. |
 
 Quando coexistam, o produtor DEVE assegurar coerência entre a autoria
