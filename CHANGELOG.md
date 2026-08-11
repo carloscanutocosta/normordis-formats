@@ -231,6 +231,38 @@ formato/perfil não tinha sido aplicada até ao fim:
 - dossier de revisão pública autocontido e verificado por hashes;
 - gates editoriais e normativos integrados na CI.
 
+### Correção do estado editorial e adiamento de PR-001 (2026-08-11)
+
+Origem: avaliação de prontidão para debate público e candidatura NGI, em
+`docs/reports/READINESS-ASSESSMENT.md` (achado `R1`, decisão D1). O estado
+declarado descrevia uma revisão pública que nunca chegou a ser aberta.
+
+- alterado: estado editorial de `Draft — Revisão pública` (nível 2 de
+  `NORMALIZATION.md`) para `Draft — revisão pública por abrir` (nível 1) em
+  `specs/ndf/SPEC.md`, `specs/ndt/SPEC.md`, `specs/ncrtf/SPEC.md`,
+  `specs/registry/SPEC.md`, `specs/portal/SPEC.md` e
+  `specs/ndt/RENDERER-CONFORMANCE.md`;
+- alterado: PR-001 passa a estado `adiado` em
+  `docs/normalization/REVIEW-LOG.md`; a janela proposta 2026-07-01 → 2026-08-15
+  é dada por caduca sem comentários recebidos e sem commit fixado; o critério
+  de abertura passa de temporal a **condição de evidência** — `normordis-pdf`
+  a produzir um documento a partir de NDF + NDT, reproduzível por terceiros;
+- alterado: secção "Estado" do `README.md` declara explicitamente que nenhum
+  período de revisão está aberto e que nenhum dos oito gates externos de
+  `READINESS.md` está cumprido;
+- alterado: `tools/check_publication_profile.py` valida contra um conjunto
+  `ALLOWED_STATES` em vez de exigir literalmente `Draft — Revisão pública` —
+  a ferramenta tornava obrigatório por CI o estado incorreto; mantém-se como
+  gate real, falhando se nenhum estado admissível for declarado;
+- adicionado: `docs/reports/READINESS-ASSESSMENT.md` — documento vivo com as
+  decisões de sequenciamento D1–D7, comparação NDF vs. abordagem tradicional
+  (12 vantagens, 10 desafios) e achados `R1`–`R13` de estado rastreável;
+- adicionado: secção de decisões de sequenciamento e Fase 1D (evidência de
+  assinatura CAdES) em `ROADMAP.md`;
+- alterado: `docs/roadmap/NGI-MVP-2026.md` marcado como parcialmente superado,
+  distinguindo o que caducou (datas dos marcos, centralidade do XML) do que se
+  mantém válido.
+
 ## [2026-06-20] — NDT v2.0.0 e harmonização NDF/NCRTF
 
 ### NDT

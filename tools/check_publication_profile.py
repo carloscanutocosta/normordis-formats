@@ -11,6 +11,13 @@ SPECS = {
     "NDT": ROOT / "specs/ndt/SPEC.md",
     "NCRTF": ROOT / "specs/ncrtf/SPEC.md",
 }
+# Estados editoriais admissíveis, alinhados com os níveis de NORMALIZATION.md.
+# "Revisão pública" (nível 2) só é declarável enquanto existir um período de
+# revisão efetivamente aberto em docs/normalization/REVIEW-LOG.md.
+ALLOWED_STATES = (
+    "Draft — revisão pública por abrir",
+    "Draft — Revisão pública",
+)
 REQUIRED = (
     r"Objetivo",
     r"Referências normativas",
@@ -28,8 +35,9 @@ def main() -> int:
     failures = []
     for name, path in SPECS.items():
         text = path.read_text(encoding="utf-8")
-        if "Draft — Revisão pública" not in text:
-            failures.append(f"{name}: estado editorial ausente")
+        if not any(state in text for state in ALLOWED_STATES):
+            allowed = " | ".join(ALLOWED_STATES)
+            failures.append(f"{name}: estado editorial ausente ou não admissível ({allowed})")
         for pattern in REQUIRED:
             if not re.search(pattern, text, re.I):
                 failures.append(f"{name}: elemento ausente /{pattern}/")

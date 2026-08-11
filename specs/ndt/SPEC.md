@@ -2,7 +2,7 @@
 
 **NORMORDIS Document Template — Especificação Formal**
 
-Estado: Draft — Revisão pública
+Estado: Draft — revisão pública por abrir
 Âmbito: formato declarativo de layout para descrever a composição visual de qualquer documento institucional — desde impressos fiscais complexos (ex.: Modelo 3 IRS) a documentos administrativos correntes (ofícios, informações, despachos).
 
 Objetivo de interoperabilidade: permitir que renderizadores independentes

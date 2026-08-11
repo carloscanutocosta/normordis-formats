@@ -1,6 +1,6 @@
 # NORMORDIS Roadmap
 
-Estado em: 2026-06-22
+Estado em: 2026-08-11
 
 ---
 
@@ -20,10 +20,83 @@ Estado em: 2026-06-22
 | Portal de verificação | Contrato OpenAPI draft | 1.0.0 |
 | CI/GitHub Actions | Operacional (3 jobs) | — |
 
-**Roadmap operacional curto:** ver
-[`docs/roadmap/NGI-MVP-2026.md`](docs/roadmap/NGI-MVP-2026.md) para o plano
-de demonstração Modelo 3 XML -> NDF -> NDT -> PDF e preparação de candidatura
-até outubro de 2026.
+**Roadmap operacional curto:**
+[`docs/roadmap/NGI-MVP-2026.md`](docs/roadmap/NGI-MVP-2026.md) — **parcialmente
+superado** pelas decisões de sequenciamento de 2026-08-11 abaixo. A etapa XML
+saiu do caminho crítico e os marcos M2–M5 deixaram de ter datas.
+
+---
+
+## Decisões de sequenciamento (2026-08-11)
+
+Origem: avaliação de prontidão para debate público e candidatura NGI, em
+[`docs/reports/READINESS-ASSESSMENT.md`](docs/reports/READINESS-ASSESSMENT.md),
+que mantém os achados abertos com ID estável (`R*`) e é o documento vivo onde
+este trabalho se afina.
+
+Constatação de fundo: **a especificação está sobredesenvolvida face à
+demonstração**. O que falta não é âmbito normativo — é evidência executável e
+validação independente. As decisões abaixo reordenam o trabalho em função
+disso.
+
+| # | Decisão | Efeito no roadmap |
+|---|---|---|
+| D1 | Debate público deixa de ter janela temporal e passa a ter **condição de evidência**: abre quando `normordis-pdf` estiver funcional. `normordis-odf` é evidência de segunda implementação, posterior, e **não bloqueia** a abertura | PR-001 adiado; datas substituídas por condição — ver `R1` |
+| D2 | **Adapters XML despriorizados.** Reproduziriam apenas o payload de dados, e o NDF não substitui os dados estruturados dos sistemas aplicacionais. Coerente com o princípio de âmbito de `LACUNAS.md`. **Reforçado em 2026-08-11**: o NDF é formato de *documento*, não de *dados* — um adapter XML↔NDF conflacia camadas e não deve ser reposto. A interoperabilidade a explorar é ao nível do **pacote documental** (depósito OAIS/METS/PREMIS), não dos dados | `normordis-xml-adapters` sai do caminho crítico e não regressa; ver `R13` e secção 5.2 do relatório |
+| D3 | **Versão inglesa necessária** | Novo item de Fase 6 (gaps editoriais) — ver `R3` |
+| D4 | **Fixtures CAdES reais entram no roadmap**, deixando de ser apenas gate externo pendente | Trabalho atribuível sobre `CADES-GATE-PLAN.md` — ver `R2` |
+| D5 | **NDF-core congelado em âmbito.** O formato prevê já o que foi idealizado: guarda de documentos, metadados de segurança, auditoria, relações entre documentos, intervenientes | Cessa o alargamento normativo do NDF-core; esforço desloca-se para NDT, NCRTF, `normordis-pdf` e `normordis-odf` |
+| D6 | **Procura de necessidade institucional em linha paralela**, sem depender de marcos de engenharia | Gate externo 7 passa a trabalho ativo — ver `R5` |
+| D7 | **Três eixos de posicionamento**: soberania documental, eficiência e capacidade, implementabilidade livre por terceiros | Exige corpus comparativo de medição antes de qualquer afirmação quantitativa — ver `R6` |
+
+### Alcance de D5
+
+Congelar o âmbito **não** congela o texto. Continuam admissíveis: correções de
+defeito, clarificações resultantes de revisão externa, e o trabalho editorial
+de normalização já previsto na Fase 6 (linguagem normativa, termos e
+definições, referências normativas, anexos). Os itens de NDF v1.1.0, v1.2.0 e
+v2.0.0 mais abaixo mantêm-se — são evolução planeada, não lacunas do âmbito
+atual.
+
+**Risco registado:** D1 e D5 combinadas congelam o âmbito *antes* de qualquer
+contacto externo. Se a revisão pública revelar lacunas de âmbito — e não apenas
+defeitos —, o congelamento reabre. Isso deve ser lido como resultado esperado
+do processo de revisão, não como falha de planeamento.
+
+### Sequência de trabalho resultante
+
+**Caminho crítico até à abertura do debate**
+
+1. ~~corrigir o estado comunicado de PR-001 e do `README.md`~~ — ✅ concluído
+   em 2026-08-11: PR-001 passa a `adiado` com condição de abertura em vez de
+   datas; estado editorial corrigido para «Draft — revisão pública por abrir»
+   (nível 1) nas seis SPECs e no `README.md` (`R1`);
+2. `normordis-pdf` até ao caso Modelo 3 fim-a-fim, reproduzível por terceiros
+   a partir do README (`R8`) — **reestimado em 2026-08-11**: o renderizador de
+   layout posicionado NDT 2.0.0 é hoje um stub que devolve erro, e a ligação
+   `Campo.referencia` → `NDF-core.documento` não está implementada (`R15`).
+   A colisão de nomes com o NDF-core (`R14`) foi **resolvida em 2026-08-11**
+   por renomeação para `RenderArchive` no crate, que passa a v4.0.0. O crate
+   fica organizado em camadas — motor autónomo PDF/UA na base, conformidade
+   NDF/NDT por cima, atrás de *feature* Cargo. Detalhe nas secções 5.1 e 5.3
+   do relatório;
+3. par mínimo de fixtures CAdES — uma positiva com certificado de teste próprio
+   e uma `payload-tampered` (`R2`);
+4. versão inglesa, começando por `README.en.md` e abstract/âmbito das três
+   SPECs (`R3`).
+
+**Linhas paralelas**
+
+5. procura de necessidade institucional (`R5`);
+6. corpus comparativo de eficiência e capacidade — NDF+NDT contra PDF/A e ODT,
+   a 1 e a N documentos, com unidade de comparação declarada (`R6`).
+
+**Posterior**
+
+7. `normordis-odf`, com perfil mínimo definido à partida (`R9`);
+8. portal de verificação mínimo (`R7`);
+9. decisão sobre o enquadramento da tese face à ausência de demonstração de
+   ingestão (`R13`).
 
 ---
 
@@ -176,6 +249,29 @@ Guardrails introduzidos, ligados à CI:
 |---|---|
 | `tools/check_spec_coherence.py` | blocos JSON da SPEC inválidos; campos de schema não documentados; referências `§X.Y` quebradas; deriva entre enums duplicados; reaparecimento de propriedades removidas por ADR |
 | `tools/build_conformance_index.py` | índice de conformidade desatualizado face aos ficheiros reais |
+
+---
+
+## Fase 1D — Evidência de assinatura CAdES (D4, `R2`)
+
+O gate CAdES deixa de ser apenas "gate externo pendente" e passa a trabalho
+atribuível. Estado atual: `tools/check_cades_gate.py` reporta **12/12 fixtures
+em `skeleton`** — 5 positivas (`advanced-real`, `qualified-real`,
+`institutional-seal-real`, `expired-certificate-historical`, `offline-tsa-real`)
+e 7 negativas. A alegação de valor probatório de longo prazo, que é o argumento
+mais forte do formato, não tem hoje qualquer suporte executável.
+
+Plano operativo em
+[`docs/normalization/CADES-GATE-PLAN.md`](docs/normalization/CADES-GATE-PLAN.md);
+verificador já existente em [`tools/check_cades_gate.py`](tools/check_cades_gate.py).
+
+| Passo | Entregável | Nota |
+|---|---|---|
+| 1 | Par mínimo: uma fixture positiva com certificado de teste próprio e a negativa `payload-tampered` | Converte o gate de "pendente" em "iniciado com evidência" — suficiente para responder em debate |
+| 2 | Restantes negativas (`signature-tampered`, `timestamp-missing`, `timestamp-altered`, `chain-untrusted`, `payload-hash-mismatch`, `revocation-before-signing`) | Não dependem de certificado qualificado |
+| 3 | Positivas com material real (`qualified-real`, `institutional-seal-real`, `offline-tsa-real`) | Dependem de certificado/TSA reais ou parceria — **permanecem gate externo** |
+
+O passo 1 é caminho crítico até à abertura do debate; os passos 2 e 3 não são.
 
 ---
 
@@ -404,6 +500,7 @@ correções técnicas.
 | **Suite de conformidade executável** | Runner automatizado existente; expandir até cobrir cada requisito individualmente |
 | **Implementações e adoção independente** | Produzir evidência de implementabilidade e necessidade de mercado; múltiplas implementações são desejáveis, mas não constituem requisito ISO universal |
 | **Estrutura de anexos** | Distinguir Annex A normativo de Annex B informativo; mover exemplos para anexo informativo |
+| **Versão inglesa** (D3, `R3`) | Não existe hoje um único ficheiro `.en.md`. Âmbito mínimo: `README.en.md` e abstract/âmbito das três SPECs; tradução integral depois, apoiada na base terminológica bilingue. Bloqueante para avaliação externa e para qualquer via CEN/ISO |
 
 ### Pré-requisitos antes de submeter a NP
 
