@@ -1,6 +1,6 @@
 # Perfis de conformidade de renderizadores NDT
 
-**Estado:** Draft — Revisão pública
+**Estado:** Draft — revisão pública por abrir
 
 Este documento define papéis observáveis e independentes da linguagem. Não
 impõe um motor de renderização.

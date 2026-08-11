@@ -1,8 +1,29 @@
 # Roadmap NGI MVP 2026
 
-**Estado:** orientação de trabalho  
-**Data:** 2026-06-27  
-**Horizonte:** demonstração operacional até 2026-09-30; candidatura/apresentação em outubro de 2026  
+> **⚠️ Parcialmente superado (2026-08-11).** As decisões de sequenciamento
+> registadas em [`../../ROADMAP.md`](../../ROADMAP.md) e fundamentadas em
+> [`../reports/READINESS-ASSESSMENT.md`](../reports/READINESS-ASSESSMENT.md)
+> alteram este plano em três pontos:
+>
+> - **D1** — a abertura do debate/revisão pública deixa de ter data e passa a
+>   ter condição de evidência: `normordis-pdf` funcional. Os prazos dos marcos
+>   M2–M5 abaixo **deixam de vigorar**.
+> - **D2** — a etapa XML (M3, `normordis-xml-adapters`) **sai do caminho
+>   crítico**. O fluxo de demonstração passa de
+>   `XML → NDF → NDT → PDF` para `NDF → NDT → PDF`, com ODF depois. A tese de
+>   interoperabilidade das secções 2 e 11 precisa de ser reenquadrada — ver
+>   achado `R13`.
+> - **D5** — o âmbito do NDF-core está congelado; o esforço desloca-se para
+>   NDT, NCRTF, `normordis-pdf` e `normordis-odf`.
+>
+> O que se mantém válido: a tese de financiamento (secção 2), o caso
+> transversal Modelo 3 IRS (secção 4), as decisões de arquitetura (secção 5),
+> a matriz de riscos (secção 9) e o orçamento indicativo (secção 10). O que
+> caducou: as datas dos marcos e a centralidade do XML.
+
+**Estado:** orientação de trabalho, parcialmente superada — ver aviso acima  
+**Data:** 2026-06-27 (aviso de superação: 2026-08-11)  
+**Horizonte original:** demonstração operacional até 2026-09-30; candidatura/apresentação em outubro de 2026  
 
 Este documento fixa a memória de orientação para preparar uma candidatura NGI
 ou equivalente sem dispersar a arquitetura NORMORDIS. O objetivo é transformar

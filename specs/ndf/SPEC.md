@@ -2,7 +2,7 @@
 
 **NORMORDIS Document Format — Especificação Formal**
 
-Estado: Draft — Revisão pública
+Estado: Draft — revisão pública por abrir
 Âmbito: representação canónica, empacotamento, integridade e verificação de
 documentos institucionais estruturados. A ingestão e preservação bit a bit de
 documentos preexistentes ficam fora do âmbito.

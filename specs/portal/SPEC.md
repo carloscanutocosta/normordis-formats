@@ -1,7 +1,7 @@
 # Portal público de verificação NORMORDIS
 
 **Versão:** 1.0.0
-**Estado:** Draft — Revisão pública
+**Estado:** Draft — revisão pública por abrir
 
 ## 1. Objetivo e âmbito
 

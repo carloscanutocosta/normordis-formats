@@ -21,18 +21,29 @@ O conjunto NORMORDIS Formats tem dois objetivos complementares:
 
 ## Estado
 
-NDF, NDT e NCRTF encontram-se em **Draft — Revisão pública**. Este estado é
-interno ao projeto e não representa aprovação, homologação ou publicação pelo
-IPQ, CEN, ISO, IEC ou outra entidade normalizadora.
+NDF, NDT e NCRTF encontram-se em **Draft — revisão pública por abrir**
+(nível 1 de [NORMALIZATION.md](NORMALIZATION.md)). Este estado é interno ao
+projeto e não representa aprovação, homologação ou publicação pelo IPQ, CEN,
+ISO, IEC ou outra entidade normalizadora.
+
+**Nenhum período de revisão pública está aberto.** O período PR-001 foi
+adiado: por decisão de 2026-08-11, a abertura deixou de ter data e passou a
+ter condição de evidência — abre quando `normordis-pdf` produzir, de forma
+reproduzível por terceiros, um documento a partir de NDF + NDT. Condição,
+fundamentação e o que fica por fixar na abertura estão em
+[REVIEW-LOG.md](docs/normalization/REVIEW-LOG.md).
 
 Em termos práticos, o conjunto pode ser apresentado publicamente como uma
 proposta técnica madura para revisão externa: os formatos já possuem objetivos
 claros, separação de responsabilidades, esquema e suites de conformidade,
 matriz de rastreabilidade e gates explícitos para o que ainda depende de
-evidência externa.
+evidência externa. Nenhum dos oito gates externos de
+[READINESS.md](docs/normalization/READINESS.md) está cumprido, e nenhum deles
+pode ser cumprido por revisão interna.
 
-O que não deve ser comunicado é que exista já um estatuto formal de norma ou
-uma equivalência certificada com qualquer entidade normalizadora.
+O que não deve ser comunicado é que exista já um estatuto formal de norma, uma
+equivalência certificada com qualquer entidade normalizadora, ou uma revisão
+pública em curso.
 
 | Especificação | Versão | Finalidade |
 |---|---:|---|
@@ -71,6 +82,7 @@ NCRTF — conteúdo de texto estruturado
 - [Referências normativas](docs/normalization/NORMATIVE-REFERENCES.md)
 - [Orientações informativas NDF](docs/normalization/NDF-INFORMATIVE-GUIDANCE.md)
 - [Orientações de proveniência de IA](docs/normalization/AI-PROVENANCE-GUIDANCE.md)
+- [Camadas de interoperabilidade](docs/interoperability/INTEROPERABILITY-LAYERS.md)
 - [Matriz de rastreabilidade](docs/normalization/TRACEABILITY.md)
 - [Índice de requisitos](docs/normalization/REQUIREMENTS.md)
 - [Inventário de declarações normativas](docs/normalization/NORMATIVE-STATEMENTS.md)

@@ -1,7 +1,7 @@
 # NCRTF — NORMORDIS Canonical Rich Text Format
 
 **Versão**: 2.0.0
-**Estado**: Draft — Revisão pública
+**Estado**: Draft — revisão pública por abrir
 **Licença**: CC0 1.0 Universal
 **Repositório**: normordis-spec
 

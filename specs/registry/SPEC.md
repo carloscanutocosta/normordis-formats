@@ -1,7 +1,7 @@
 # Registo NORMORDIS — Tipos de documento
 
 **Versão**: 1.0.0  
-**Estado**: Draft — Revisão pública
+**Estado**: Draft — revisão pública por abrir
 
 ---
 
