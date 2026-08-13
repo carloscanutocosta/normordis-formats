@@ -265,16 +265,31 @@ Novo campo opcional em `ndf-core.schema.json`:
     "additionalProperties": false,
     "properties": {
       "participante_ref": { "type": "string", "minLength": 1 },
-      "tipo": { "type": "string", "enum": ["pessoa", "sistema", "entidade"] },
       "papel": {
         "type": "string",
-        "enum": ["autor","coautor","revisor_humano","validador","aprovador",
-                 "decisor","representante","entidade_produtora","sistema_tecnico"]
+        "enum": ["autor","coautor","revisor_humano",
+                 "decisor","representante","responsavel_tecnico"]
+      },
+      "qualificacao": {
+        "type": "object",
+        "required": ["tipo", "identificador"],
+        "properties": {
+          "tipo": { "type": "string", "minLength": 1 },
+          "identificador": { "type": "string", "minLength": 1 }
+        }
       }
     }
   }
 }
 ```
+
+> **Nota de superveniência (2026-08-13)**: o bloco acima reflete já a
+> revisão de ADR-013 — `participantes` passou a índice exclusivamente de
+> pessoas singulares. Foram removidos o campo `tipo` e os papéis
+> `sistema_tecnico`, `entidade_produtora`, `validador` e `aprovador`; foram
+> acrescentados `responsavel_tecnico` e `qualificacao`. Sistemas ficam em
+> `proveniencia_sistema` (§2.14) e a responsabilidade jurídica em `imputacao`
+> (§2.15).
 
 ### 5.2 Convivência com `informacao-tecnica.autor` e `despacho.decisor`
 

@@ -195,6 +195,36 @@ apenas ao sistema de workflow — sem urgência, não é um erro que quebre
 nada, mas vale a pena decidir conscientemente em vez de ter ficado por
 omissão do desenho original.
 
+**Resolução (2026-08-13)**: `validador` e `aprovador` foram removidos do
+enum, na mesma ronda que redefiniu `participantes` como índice exclusivamente
+de pessoas singulares (ADR-013, SPEC.md §2.12.7). Estado processual fica no
+sistema de workflow do produtor. **RESOLVIDO.**
+
+---
+
+### L12 — Duplicação estrutural entre `referencia_externa` e `evidencia_ref`
+
+**Origem**: ronda de 2026-08-13 (ADR-013).
+
+`proveniencia_sistema[].regra_ref`, `.build_ref` e `.configuracao_ref` usam o
+`$def` `referencia_externa` — `{ tipo, identificador, hash }`. O bloco
+`proveniencia_ia.intervencoes[].evidencia_ref` (§2.13.2) define inline uma
+estrutura **estruturalmente idêntica**, com a única diferença de não impor
+`minLength: 1` a `tipo` e `identificador`.
+
+A duplicação foi deixada **deliberadamente** nessa ronda: fundir os dois
+obrigaria a alterar o bloco de proveniência de IA, que estava fora do âmbito
+declarado, e uma alteração fora de âmbito num bloco já estabilizado tem custo
+de revisão desproporcionado ao ganho.
+
+**Recomendação**: eliminar a duplicação apontando `evidencia_ref` para
+`#/$defs/referencia_externa`. A alteração é compatível em ambos os sentidos
+para qualquer documento real (nenhum produtor emite `tipo` ou `identificador`
+como string vazia), mas torna o schema marginalmente mais estrito, pelo que
+deve ser feita numa ronda em que o bloco de IA seja revisto de propósito e
+não como efeito colateral. Sem urgência — é higiene de schema, não defeito
+funcional.
+
 ---
 
 ## Lacunas retiradas (fora de âmbito do NDF, por decisão)

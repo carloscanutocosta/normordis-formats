@@ -5,6 +5,68 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Proveniência de sistema produtor e imputação jurídica (2026-08-13)
+
+Motivada por uma categoria não coberta: documentos gerados por sistemas
+determinísticos, sem autor humano material — liquidações de impostos,
+notificações, certidões automáticas. O NDF não sabia registar que sistema os
+produziu, nem quem responde juridicamente por eles, sendo esta última uma
+menção obrigatória (CPA art. 151.º/1/a; CPPT art. 36.º/2) e condição do
+exercício dos meios de defesa (CPPT art. 66.º/2). `ndf_version` mantido em
+`1.0.0` — ver ADR-007. Detalhe em ADR-012, ADR-013 e ADR-014.
+
+- adicionado: campo de topo `proveniencia_sistema` (array) — sistema ou cadeia
+  de sistemas determinísticos que produziu o conteúdo, com `sistema`
+  (nome/identificador/versão), `componente`, `gerado_em` e referências
+  externas opcionais de regra, *build* e configuração; **ordem cronológica
+  normativa**, por JCS preservar a ordem dos arrays e esta entrar no
+  `payload_hash` (ADR-013);
+- adicionado: campo de topo `imputacao` (array) — quem responde juridicamente
+  pelo documento e a que título, num vocabulário que cobre o regime do ato
+  administrativo (`competencia_propria`, `delegacao`, `subdelegacao`) e o
+  regime declarativo (`declaracao_propria`, `aceitacao_expressa`,
+  `efeito_legal`), com condicionais por título; mais do que uma entrada
+  significa co-titularidade — ato conjunto ou declaração conjunta — nunca
+  cadeia de delegação (ADR-012);
+- adicionado: bloco opcional `imputacao[].autenticacao` (`meio`,
+  `nivel_garantia` em terminologia eIDAS) — regista o facto que fundamenta a
+  imputação numa submissão por canal autenticado ou por atendimento
+  presencial. Por entrada e não por documento, porque a lei exige autenticação
+  de ambos os sujeitos passivos numa declaração em tributação conjunta;
+- adicionado: **invariante de origem** (§2.2.1) — todo o NDF DEVE declarar
+  pelo menos uma origem identificável do conteúdo (humana, de sistema ou de
+  IA). Expresso por `anyOf` no JSON Schema, portanto aplicado por qualquer
+  validador Draft 2020-12 sem código adicional;
+- alterado: `participantes` passa a índice **exclusivamente de pessoas
+  singulares** — removido o campo `tipo` e os papéis `sistema_tecnico`
+  (um sistema não participa, produz), `entidade_produtora` (redundante),
+  `validador` e `aprovador` (estado de workflow — encerra `LACUNAS.md` L10);
+  acrescentados o papel `responsavel_tecnico` e o bloco `qualificacao`
+  (`{ tipo, identificador }`), para quem responde tecnicamente em nome próprio
+  com qualidade profissional que é condição de validade do documento
+  (contabilista certificado, ROC, advogado, autor de termo de
+  responsabilidade);
+- alterado: `metadados.tipo_documento_ref` aceita a extensão qualificada
+  `ext.<entidade>.<tipo>@<versao>`, com o schema do tipo a viajar no `.ndfpkg`
+  em `schemas/` — mantém o registo canónico reservado a formas documentais
+  transversais, sem perder validação estrutural (ADR-014);
+- corrigido: a resolução do schema do tipo passa a preferir o pacote ao
+  registo, tornando o `.ndfpkg` genuinamente autovalidável; e um
+  `tipo_documento_ref` não resolúvel passa a ser **erro** — antes era saltado
+  em silêncio, deixando `documento` sem validação nenhuma;
+- adicionado: fronteira normativa entre `proveniencia_sistema` e
+  `proveniencia_ia` — qualquer componente não determinístico pertence a
+  `proveniencia_ia`, sem exceção, para que a escolha de campo não permita
+  contornar o `revisao_humana.estado` obrigatório;
+- adicionado: 12 requisitos normativos (`NDF-PROD-015` a `019`,
+  `NDF-READ-014` a `020`, `NDF-PKG-007`);
+- adicionado: 4 casos de conformidade válidos e 9 inválidos; exemplo de pacote
+  `specs/ndf/examples/liquidacao-irs-automatica/`;
+- adicionado: ADR-012, ADR-013 e ADR-014; notas de superveniência em ADR-005 e
+  ADR-006;
+- adicionado: `LACUNAS.md` L12 — duplicação entre `referencia_externa` e
+  `evidencia_ref`, deixada deliberada e agendada para v1.1.0.
+
 ### Estabilização NDF — relações, assinaturas, participantes e proveniência de IA
 
 Preparação de PR-001 (ver `docs/normalization/REVIEW-LOG.md`). `ndf_version`

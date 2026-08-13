@@ -31,9 +31,9 @@ assinatura, não a portabilidade completa (para isso, ver
 
 | # | Documento | `tipo_documento_ref` | `ndf_id` | `payload_hash` |
 |---|---|---|---|---|
-| 01 | Informação Técnica IT/2026/00045 | `informacao-tecnica@1.0.0` | `b55c4eaa-6fb0-4024-8317-3a4a5eedccbd` | `sha256:fa4b0a248cd1141488d37712610bb38daf25d6fea98f798e9bb13eda2a6bc8e8` |
-| 02 | Parecer PAR/2026/00012 | `parecer@1.0.0` | `8e234253-b404-4aeb-80f0-f456e6d17e88` | `sha256:4e8c3e0faea8f0324f794e50bd9b714b35da6a7ae5b0ede6dcf535578a3a8d1f` |
-| 03 | Despacho DESP/2026/00089 | `despacho@1.0.0` | `b82c82a4-d1ac-490a-8103-a47580ee651c` | `sha256:08cca747bc47d2181b85e8d99475cd6dd3f16f8d6ff49e84ab0502260523856e` |
+| 01 | Informação Técnica IT/2026/00045 | `informacao-tecnica@1.0.0` | `b55c4eaa-6fb0-4024-8317-3a4a5eedccbd` | `sha256:ec9f5c3e7a14c62b5e97c3a72107cdef5c117bf60b118b0aba0a51220cffcd21` |
+| 02 | Parecer PAR/2026/00012 | `parecer@1.0.0` | `8e234253-b404-4aeb-80f0-f456e6d17e88` | `sha256:3b84ef0c3afdffa437aa57f4f137a6fcf9b72c8eeb13bea64c36b95122180124` |
+| 03 | Despacho DESP/2026/00089 | `despacho@1.0.0` | `b82c82a4-d1ac-490a-8103-a47580ee651c` | `sha256:cff11c3bb6b8c8b2976accc0a8f10b72b1af2b3ca183c30446fca8614b180ba1` |
 
 Os `payload_hash` acima foram calculados a partir dos bytes reais de cada
 `ndf-core.json` (canonicalização RFC 8785 via `rfc8785`, a mesma biblioteca

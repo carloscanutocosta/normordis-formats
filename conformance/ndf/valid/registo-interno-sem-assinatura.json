@@ -25,6 +25,9 @@
     "assunto": "Deliberação da reunião de Conselho de Direcção de 2026-06-18",
     "corpo": "Deliberações aprovadas na reunião de Conselho de Direcção realizada em 18 de junho de 2026..."
   },
+  "participantes": [
+    { "participante_ref": "user:201", "papel": "autor" }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "lc/010.10.001",
     "prazo_conservacao_administrativa": {

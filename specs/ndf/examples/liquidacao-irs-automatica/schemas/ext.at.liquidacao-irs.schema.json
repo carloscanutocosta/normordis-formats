@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://at.gov.pt/ndf/ext.at.liquidacao-irs/2026.1/schema.json",
+  "title": "Liquidação de IRS 2026.1 (ext.at)",
+  "description": "Tipo documental de domínio, definido e mantido pela entidade produtora. Fora do registo canónico NORMORDIS — ver SPEC.md §2.9.5 e ADR-014.",
+  "type": "object",
+  "required": [
+    "numero_liquidacao",
+    "ano_fiscal",
+    "nif_sujeito_passivo",
+    "apuramento"
+  ],
+  "properties": {
+    "numero_liquidacao": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ano_fiscal": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "nif_sujeito_passivo": {
+      "type": "string",
+      "pattern": "^[0-9]{9}$"
+    },
+    "data_liquidacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "apuramento": {
+      "type": "object",
+      "required": [
+        "rendimento_global",
+        "coleta_total",
+        "valor_a_pagar"
+      ],
+      "properties": {
+        "rendimento_global": {
+          "type": "number"
+        },
+        "deducoes_coleta": {
+          "type": "number"
+        },
+        "coleta_total": {
+          "type": "number"
+        },
+        "retencoes_na_fonte": {
+          "type": "number"
+        },
+        "valor_a_pagar": {
+          "type": "number"
+        },
+        "valor_a_reembolsar": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "prazo_pagamento": {
+      "type": "string",
+      "format": "date"
+    },
+    "meios_reacao": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

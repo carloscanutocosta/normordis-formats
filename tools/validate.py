@@ -22,6 +22,7 @@ import argparse
 import base64
 import hashlib
 import re
+from datetime import datetime
 from pathlib import Path
 
 try:
@@ -173,7 +174,42 @@ def _check_ncrtf_text(node: dict, path: str) -> list[str]:
 
 # ── NDF semantic checks ───────────────────────────────────────────────────────
 
-def check_ndf_semantic(doc: dict) -> list[str]:
+def fmt_schema_error(e) -> str:
+    """Mensagem legível para um erro de schema.
+
+    O invariante de origem (§2.2.1) é expresso por `anyOf` na raiz — portável
+    para qualquer validador Draft 2020-12, mas a mensagem nativa despeja o
+    documento inteiro. Como é o erro de autoria mais provável, traduz-se.
+    """
+    if e.validator == "anyOf" and not list(e.absolute_path):
+        return (
+            "NDF-core não declara nenhuma origem do conteúdo: é necessário "
+            "participantes[] com papel 'autor', 'coautor' ou 'decisor', ou "
+            "proveniencia_sistema não vazio, ou proveniencia_ia.utilizada true "
+            "(§2.2.1)"
+        )
+    field = "/".join(str(p) for p in e.absolute_path)
+    return e.message + (f" (campo: {field})" if field else "")
+
+
+def _resolve_tipo_schema(tipo_id: str, pkg_root: Path | None):
+    """Resolve o schema do tipo documental, preferindo o que viaja no pacote.
+
+    SPEC.md §2.9.5 e §9.3 (NDF-PKG-007): um .ndfpkg é autonomamente validável,
+    logo o schema que vem em schemas/ tem precedência sobre o registo canónico.
+    Devolve (schema, origem) com origem em {"pacote", "registo", None}.
+    """
+    if pkg_root is not None:
+        in_pkg = pkg_root / "schemas" / f"{tipo_id}.schema.json"
+        if in_pkg.is_file():
+            return _load_schema(in_pkg), "pacote"
+    in_registry = REGISTRY_SCHEMA_DIR / f"{tipo_id}.schema.json"
+    if in_registry.is_file():
+        return _load_schema(in_registry), "registo"
+    return None, None
+
+
+def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
     errors = []
 
     meta = doc.get("metadados", {})
@@ -220,14 +256,60 @@ def check_ndf_semantic(doc: dict) -> list[str]:
     documento = doc.get("documento", {})
     tipo_ref = meta.get("tipo_documento_ref", "")
     tipo_id = tipo_ref.rsplit("@", 1)[0] if "@" in tipo_ref else ""
-    registry_schema = _load_schema(REGISTRY_SCHEMA_DIR / f"{tipo_id}.schema.json") if tipo_id else None
-    if registry_schema is not None:
-        for e in Draft202012Validator(registry_schema, format_checker=FormatChecker()).iter_errors(documento):
+    tipo_schema, origem = _resolve_tipo_schema(tipo_id, pkg_root) if tipo_id else (None, None)
+    if tipo_schema is not None:
+        for e in Draft202012Validator(tipo_schema, format_checker=FormatChecker()).iter_errors(documento):
             field = "/".join(str(p) for p in e.absolute_path)
             errors.append(
-                f"documento não valida contra {tipo_ref}: {e.message}" +
+                f"documento não valida contra {tipo_ref} (schema do {origem}): {e.message}" +
                 (f" (campo: {field})" if field else "")
             )
+    elif tipo_id:
+        # §2.9.5: este runner é estrito porque DETÉM o registo canónico — aqui,
+        # um tipo canónico não resolúvel significa que não existe, não que o
+        # leitor não lhe tem acesso. NDF-READ-018 admite, para leitores em
+        # geral, tratar `documento` como opaco em vez de rejeitar; o que nunca
+        # é admissível é declará-lo validado sem o ter sido, que era o
+        # comportamento anterior (o caso passava em silêncio).
+        # Tipo de extensão: erro dentro de um pacote (tem de lá vir), aviso num
+        # ficheiro solto, onde não existe onde o resolver.
+        if not tipo_id.startswith("ext."):
+            errors.append(
+                f"metadados.tipo_documento_ref '{tipo_ref}' não resolve em "
+                f"specs/registry/schemas/{tipo_id}.schema.json (§2.9.2)"
+            )
+        elif pkg_root is not None:
+            errors.append(
+                f"metadados.tipo_documento_ref '{tipo_ref}' é uma extensão qualificada "
+                f"e o pacote não contém schemas/{tipo_id}.schema.json (§2.9.5, NDF-PKG-007)"
+            )
+
+    prov_sistema = doc.get("proveniencia_sistema")
+    if isinstance(prov_sistema, list):
+        # §2.14.3: JCS preserva a ordem dos arrays, logo a ordem entra no
+        # payload_hash. Sem ordem normativa, os mesmos factos produziriam
+        # hashes diferentes. Não é exprimível em JSON Schema — nenhum
+        # vocabulário Draft 2020-12 compara elementos de um array entre si.
+        instantes = []
+        for e in prov_sistema:
+            bruto = e.get("gerado_em") if isinstance(e, dict) else None
+            if not isinstance(bruto, str):
+                break
+            try:
+                # comparar instantes, não strings: '...Z' e '...+01:00' são
+                # ordenáveis entre si como datas mas não lexicograficamente
+                instantes.append((datetime.fromisoformat(bruto), bruto))
+            except ValueError:
+                break
+        if len(instantes) == len(prov_sistema):
+            for i in range(1, len(instantes)):
+                if instantes[i][0] < instantes[i - 1][0]:
+                    errors.append(
+                        f"proveniencia_sistema[{i}].gerado_em ({instantes[i][1]}) é anterior "
+                        f"a proveniencia_sistema[{i - 1}].gerado_em ({instantes[i - 1][1]}) — "
+                        "as entradas devem estar ordenadas cronologicamente (§2.14.3)"
+                    )
+                    break
 
     if isinstance(documento, dict):
         for field_name, field_value in documento.items():
@@ -237,10 +319,24 @@ def check_ndf_semantic(doc: dict) -> list[str]:
     return errors
 
 
-def check_ndf_advisories(doc: dict) -> list[str]:
+def check_ndf_advisories(doc: dict, pkg_root: Path | None = None) -> list[str]:
     """Verificações não-bloqueantes — produzem aviso, não erro (ex.: A7,
     coerência entre documento.sobre[] e relacoes[], SPEC.md §2.11.4)."""
     advisories = []
+
+    # §2.9.5: num ficheiro solto não existe onde resolver um tipo de extensão —
+    # o aviso regista que `documento` não foi validado contra schema nenhum.
+    # Dentro de um pacote a mesma situação é erro (NDF-PKG-007).
+    if pkg_root is None:
+        tipo_ref = doc.get("metadados", {}).get("tipo_documento_ref", "")
+        tipo_id = tipo_ref.rsplit("@", 1)[0] if "@" in tipo_ref else ""
+        if tipo_id.startswith("ext."):
+            schema, _ = _resolve_tipo_schema(tipo_id, None)
+            if schema is None:
+                advisories.append(
+                    f"tipo de extensão '{tipo_ref}' não resolúvel fora de um pacote — "
+                    "documento não foi validado contra nenhum schema de tipo (§2.9.5)"
+                )
 
     documento = doc.get("documento", {})
     sobre = documento.get("sobre") if isinstance(documento, dict) else None
@@ -263,6 +359,31 @@ def check_ndf_advisories(doc: dict) -> list[str]:
                 "documento.sobre[] e relacoes[] referenciam conjuntos "
                 "diferentes de ndf_id — RECOMENDA-SE coerência (§2.11.4): "
                 + "; ".join(detalhe)
+            )
+
+    # §2.14.4 — a fronteira entre proveniencia_sistema (determinístico) e
+    # proveniencia_ia não é mecanicamente decidível: nenhum campo declara se um
+    # componente é determinístico. Só é detectável o indício de um mesmo
+    # sistema aparecer nos dois blocos, que é sinal de possível contorno do
+    # revisao_humana obrigatório. O requisito completo é normativo, não
+    # testável — ver SPEC.md §2.14.4 e §9.1.
+    prov_sistema = doc.get("proveniencia_sistema")
+    prov_ia = doc.get("proveniencia_ia")
+    if isinstance(prov_sistema, list) and isinstance(prov_ia, dict):
+        nomes_sistema = {
+            (e.get("sistema") or {}).get("nome")
+            for e in prov_sistema if isinstance(e, dict)
+        }
+        nomes_ia = {
+            (i.get("sistema") or {}).get("nome")
+            for i in prov_ia.get("intervencoes") or [] if isinstance(i, dict)
+        }
+        comuns = sorted(n for n in nomes_sistema & nomes_ia if n)
+        if comuns:
+            advisories.append(
+                "o mesmo sistema consta de proveniencia_sistema e de "
+                f"proveniencia_ia ({', '.join(comuns)}) — um componente não "
+                "determinístico pertence exclusivamente a proveniencia_ia (§2.14.4)"
             )
 
     return advisories
@@ -315,7 +436,7 @@ def validate_ndf_file(path: Path, schema: dict, expect_valid: bool) -> bool:
         return False
 
     semantic = check_ndf_semantic(doc) if not schema_errors else []
-    all_errors = [e.message for e in schema_errors] + semantic
+    all_errors = [fmt_schema_error(e) for e in schema_errors] + semantic
     is_valid = not all_errors
 
     _print_result(path.name, is_valid, expect_valid, all_errors, expected_error)
@@ -516,9 +637,12 @@ def validate_package_dir(root: Path) -> bool:
     ):
         schema = _load_schema(schema_path)
         for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(value):
-            errors.append(f"{name}: {e.message}")
+            errors.append(f"{name}: {fmt_schema_error(e)}")
 
-    errors.extend(check_ndf_semantic(core))
+    # §9.3 (NDF-PKG-007): dentro de um pacote, o schema do tipo resolve-se
+    # primeiro a partir de schemas/ — é isso que torna o .ndfpkg autonomamente
+    # validável por um terceiro sem acesso ao registo canónico.
+    errors.extend(check_ndf_semantic(core, pkg_root=root))
 
     required_level = core.get("nivel_assinatura")
     signatures = envelope.get("assinaturas") or []
@@ -593,7 +717,7 @@ def validate_package_dir(root: Path) -> bool:
             print(f"      → {e}")
         return False
     print(f"{GREEN}PASS{RESET}  pacote {root}")
-    for advisory in check_ndf_advisories(core):
+    for advisory in check_ndf_advisories(core, pkg_root=root):
         print(f"      {YELLOW}AVISO{RESET} {advisory}")
     return True
 

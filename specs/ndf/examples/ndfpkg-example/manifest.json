@@ -6,16 +6,16 @@
   "estado": "ativo",
   "nivel_assinatura": "qualificada",
   "finalizado_em": "2026-06-18T10:30:00Z",
-  "payload_hash": "sha256:7196abc4d62371c2fea9da9d409d72d8d128244f4447b0cf8121b5d0fcbfce5f",
-  "validation_code": "NDF-COXWCCZKZUUKRS76N7OJ",
+  "payload_hash": "sha256:357f6a8084375e9f29bcfd41bb44fe79d2ea48bf369d5faa4fe8bf16ef2c70be",
+  "validation_code": "NDF-LIMWMV3HOXQV32VDQLPG",
   "inventario": [
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:7196abc4d62371c2fea9da9d409d72d8d128244f4447b0cf8121b5d0fcbfce5f"
+      "hash_sha256": "sha256:357f6a8084375e9f29bcfd41bb44fe79d2ea48bf369d5faa4fe8bf16ef2c70be"
     },
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:03d4d3e84051cb3fa55c0d3e7c8f52642442859acaf170072a072a707b0ceea8"
+      "hash_sha256": "sha256:6026c03f041ecf68784419445473af6c8e1df180c02e71308dc5f18a4739b482"
     },
     {
       "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
@@ -27,7 +27,7 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:0e5d9e56a9254a1d70bae4f1d2f6a8ee6b464c66ea5b54a2069b688834ced677"
+      "hash_sha256": "sha256:681e8093b716347d302948fc5723b2da23287dfe249eee72fb1000b00c5fc4e3"
     },
     {
       "ficheiro": "schemas/envelope.schema.json",

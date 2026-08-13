@@ -63,6 +63,23 @@ contacto externo. Se a revisão pública revelar lacunas de âmbito — e não a
 defeitos —, o congelamento reabre. Isso deve ser lido como resultado esperado
 do processo de revisão, não como falha de planeamento.
 
+**Reabertura de D5 (2026-08-13).** O risco acima concretizou-se, por revisão
+interna e não externa. D5 registava que «o formato prevê já o que foi
+idealizado: guarda de documentos, metadados de segurança, auditoria, relações
+entre documentos, intervenientes». Faltava uma categoria inteira: **documentos
+gerados por sistemas determinísticos**, sem autor humano material —
+liquidações de impostos, notificações, certidões automáticas —, que é
+provavelmente a mais numerosa da Administração Pública moderna. O NDF não
+sabia registar que sistema os produziu (`proveniencia_sistema`, ADR-013) nem
+quem responde juridicamente por eles (`imputacao`, ADR-012), sendo esta última
+uma menção legalmente obrigatória e condição do exercício dos meios de defesa.
+
+Isto é lacuna de âmbito, não defeito de texto, pelo que **excede o alcance
+admitido por D5** e é registado como tal. O congelamento mantém-se quanto ao
+resto: esta reabertura é pontual, fundamentada nos três ADR, e não constitui
+autorização genérica para alargar o NDF-core. `ndf_version` mantém-se em
+`1.0.0` (ADR-007).
+
 ### Sequência de trabalho resultante
 
 **Caminho crítico até à abertura do debate**
@@ -122,7 +139,13 @@ Objetivo: especificação autocontido e implementável por terceiros sem acesso 
 - [x] Exemplo `.ndfpkg` autocontido e verificável por hash
 - [x] Exemplo render-ready NDF Modelo 3 IRS — `specs/ndf/examples/modelo3-irs-2025.json`
 - [x] Conformance test runner NDF + NDT + NCRTF + verificação de pacote (`tools/validate.py`)
-- [x] CI/GitHub Actions — pipeline verde em cada push (`50/50` testes)
+- [x] CI/GitHub Actions — pipeline verde em cada push
+- [x] `proveniencia_sistema` — documentos gerados por sistemas determinísticos (§2.14, ADR-013)
+- [x] `imputacao` — responsabilidade jurídica e título, com autenticação por entrada (§2.15, ADR-012)
+- [x] Invariante de origem — todo o NDF declara origem humana, de sistema ou de IA (§2.2.1)
+- [x] `participantes` como índice exclusivamente de pessoas singulares, com `qualificacao` (§2.12)
+- [x] Tipos documentais por namespace de entidade `ext.<entidade>.*`, com schema no pacote (§2.9.5, ADR-014)
+- [x] Exemplo de pacote de liquidação automática — `specs/ndf/examples/liquidacao-irs-automatica/`
 
 ### NDT
 
@@ -377,6 +400,7 @@ Interface pública de verificação de `validation_code`. Um cidadão, auditor, 
 | Registo remoto `registry.normordis.pt` | Resolução de `tipo_documento_ref` sem acesso ao `.ndfpkg` |
 | Suporte a QSCD (eIDAS 2.0 / European Digital Identity Wallet) | Regulamento (UE) 2024/1183 em transposição |
 | Extensão qualificada do vocabulário de `relacoes[].tipo` (A9, `LACUNAS.md` L4) | Vocabulário fechado hoje sem via de extensão institucional, inconsistente com o registo de tipos de documento |
+| Eliminar a duplicação entre `referencia_externa` e `evidencia_ref` (`LACUNAS.md` L12) | Estruturas idênticas definidas em dois sítios desde a ronda de 2026-08-13; a fusão exige rever o bloco de proveniência de IA de propósito, não como efeito colateral |
 
 ---
 

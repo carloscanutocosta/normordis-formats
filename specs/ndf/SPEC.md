@@ -229,10 +229,39 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
 | `avaliacao` | Sim | Avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
 | `relacoes` | Não | Relações verificáveis com outros documentos NDF. Ver §2.11. |
-| `participantes` | Não | Autores, revisores e demais intervenientes, distintos de quem assina. Ver §2.12. |
+| `participantes` | Não | Pessoas singulares que intervieram na produção, distintas de quem assina. Ver §2.12. |
 | `proveniencia_ia` | Não | Evidência de utilização de sistemas de IA na produção ou revisão do documento. Ver §2.13. |
+| `proveniencia_sistema` | Não | Sistema ou cadeia de sistemas determinísticos que produziu o conteúdo. Ver §2.14. |
+| `imputacao` | Não | Quem responde juridicamente pelo documento, e a que título. Ver §2.15. |
 
-Nenhum dos campos obrigatórios PODE estar ausente — a finalização **DEVE falhar** se algum estiver em falta (ver §5). Os três campos opcionais, quando presentes, entram no NDF-core canonicalizado e assinado tal como os restantes.
+Nenhum dos campos obrigatórios PODE estar ausente — a finalização **DEVE falhar** se algum estiver em falta (ver §5). Os cinco campos opcionais, quando presentes, entram no NDF-core canonicalizado e assinado tal como os restantes.
+
+#### 2.2.1 Invariante de origem
+
+Os campos opcionais são individualmente opcionais, mas não o são em conjunto.
+Todo o NDF **DEVE** declarar pelo menos uma **origem identificável do
+conteúdo**, de um dos três modos seguintes:
+
+| Modo | Como se declara |
+|---|---|
+| Humana | `participantes` contém pelo menos uma entrada com `papel` em `autor`, `coautor` ou `decisor` |
+| De sistema | `proveniencia_sistema` presente e não vazio |
+| De IA | `proveniencia_ia.utilizada` é `true` |
+
+Um NDF que não declare nenhuma destas origens **DEVE** ser rejeitado
+(ver §9.1 e §9.2). A regra é verificável apenas por estrutura,
+sem inferência sobre o conteúdo: é expressa no JSON Schema por `anyOf`, pelo
+que qualquer validador Draft 2020-12 a aplica sem código adicional.
+
+Papéis como `revisor_humano` ou `responsavel_tecnico` **não** satisfazem o
+invariante: rever ou responder tecnicamente por um conteúdo não é o mesmo que
+produzi-lo. Um documento revisto por uma pessoa continua a ter de declarar
+quem — ou o quê — o produziu.
+
+O invariante não obriga a inventar informação. Um documento produzido por um
+sistema sem qualquer intervenção humana declara `proveniencia_sistema` e
+nada mais; nenhum autor humano tem de ser fabricado para satisfazer a regra
+(ver §2.15.5, caso da declaração automática convertida).
 
 ### 2.3 `ndf_id`
 
@@ -471,7 +500,7 @@ O bloco `metadados` contém os campos descritivos transversais a qualquer tipo d
 
 | Campo | Obrigatório | Tipo | Descrição |
 |---|---|---|---|
-| `tipo_documento_ref` | Sim | string | Referência versionada ao schema do tipo de documento. Formato: `"<id>@<versao>"`. Define a estrutura de `documento`. Ver §2.9.2 e `specs/registry/`. |
+| `tipo_documento_ref` | Sim | string | Referência versionada ao schema do tipo de documento. Formato canónico `"<id>@<versao>"` ou extensão qualificada `"ext.<entidade>.<tipo>@<versao>"`. Define a estrutura de `documento`. Ver §2.9.2, §2.9.5 e `specs/registry/`. |
 | `entidade_produtora` | Sim | objeto | Entidade responsável pela produção do documento. Ver §2.7.3. |
 | `assunto` | Recomendado | string | Título ou descrição breve do documento — indexável para pesquisa e arquivo. |
 | `numero_referencia` | Recomendado | string | Número de referência documental (ex.: `"OF/2026/00123"`). |
@@ -490,6 +519,16 @@ O bloco `metadados` contém os campos descritivos transversais a qualquer tipo d
 | `designacao` | Sim | Designação oficial da entidade (ex.: `"Autoridade Tributária e Aduaneira"`). |
 | `nif` | Recomendado | NIF institucional — 9 dígitos sem espaços ou pontuação. |
 | `codigo_dglab` | Opcional | Código de entidade DGLAB para identificação no contexto arquivístico (MEG). |
+
+`entidade_produtora` identifica a **pessoa coletiva** para efeitos
+arquivísticos — o organismo cuja produção documental é objeto de avaliação e
+conservação (§3). NÃO DEVE ser confundida com `imputacao` (§2.15), que
+identifica o **órgão ou a pessoa que responde juridicamente** pelo documento,
+nem com `proveniencia_sistema` (§2.14), que identifica o sistema que produziu
+o conteúdo. Os três coexistem e são independentes: uma liquidação automática
+tem `entidade_produtora` "Autoridade Tributária e Aduaneira",
+`imputacao[].imputado` o órgão concreto com competência para o ato, e
+`proveniencia_sistema[].sistema` o motor de liquidação.
 
 #### 2.7.4 `classificacao_seguranca` (enum fechado)
 
@@ -535,9 +574,12 @@ Adicionar a `metadados` (não a `documento`) uma referência ao schema que defin
 }
 ```
 
-- **Tipo**: string no formato normativo `<id>@<versao>` definido pelo registo
-  (ex. `oficio@1.0.0`, `modelo3-irs@2025.1`). Formas URI/URN exigem uma futura
-  revisão da especificação; não são escolhas locais de implementação.
+- **Tipo**: string em uma de duas formas normativas — canónica `<id>@<versao>`
+  (ex. `oficio@1.0.0`, `modelo3-irs@2025.1`), definida pelo registo, ou
+  extensão qualificada `ext.<entidade>.<tipo>@<versao>` (ex.
+  `ext.at.liquidacao-irs@2026.1`), definida pela entidade produtora. Ver
+  §2.9.5. Formas URI/URN exigem uma futura revisão da especificação; não são
+  escolhas locais de implementação.
 - **Obrigatoriedade**: `tipo_documento_ref` é **obrigatório** em `metadados` (entra portanto no NDF-core, canonicalizado/assinado) — sem ele, não é possível interpretar `documento` de forma fiável a longo prazo.
 - **Resolução**: o schema referenciado por `tipo_documento_ref` define a estrutura de `documento` (e tipicamente também orienta o NDT correspondente via `ndt_version_ref`, mas os dois são referências independentes — um mesmo `tipo_documento` pode ter múltiplas versões de NDT ao longo do tempo).
 - **Versionamento de schemas de tipo de documento**: segue o mesmo princípio de §7 (compatibilidade major/minor) — um leitor recusa processar `documento` cujo `tipo_documento_ref` tenha versão major não suportada; versões minor adicionam campos opcionais sem quebrar leitores antigos.
@@ -597,6 +639,161 @@ Estrutura profundamente aninhada, com arrays de elementos repetíveis (anexos, s
 - **Profundidade de aninhamento e tamanho**: o JCS (RFC 8785) e o JSON em geral não impõem limites teóricos de profundidade/tamanho, mas implementações concretas (parsers, validadores de schema) podem ter limites práticos. Para tipos de documento muito complexos (Modelo 3 IRS pode ter milhares de campos preenchidos com múltiplos anexos), a implementação DEVE validar que: (a) a canonicalização JCS é determinística e performante mesmo para `documento` de grande dimensão; (b) os validadores JSON Schema dos `tipo_documento_ref` mais complexos não excedem limites de profundidade/recursão dos validadores escolhidos (ver prompt de implementação do schema/validador).
 - **Eficiência de armazenamento permanece válida**: mesmo um Modelo 3 IRS complexo, em JSON estruturado, é tipicamente muito mais compacto do que o PDF oficial equivalente (que inclui layout completo de todos os anexos, mesmo os não preenchidos). O argumento de economia de espaço (ver discussão de vantagens do NDF) mantém-se, possivelmente de forma ainda mais pronunciada para formulários longos com muitas secções não aplicáveis/vazias no PDF mas ausentes no NDF.
 - **Anexos binários dentro de formulários complexos**: se um `tipo_documento` exigir anexos binários (ex. comprovativos digitalizados anexos a uma declaração), estes seguem o regime de documentos importados/preservação bit-a-bit (fora de âmbito desta especificação) — `documento` referencia-os por identificador/hash, nunca os embute.
+
+#### 2.9.5 Extensão qualificada por entidade
+
+O registo canónico (`specs/registry/`) destina-se a **formas documentais
+transversais** — as que atravessam organismos e cuja estrutura é matéria de
+normalização (ofício, despacho, informação, parecer). Não se destina a
+acomodar a tipologia documental própria de cada entidade: mantê-la
+centralmente produziria um número indeterminado de tipos que esta
+especificação não tem capacidade nem legitimidade para manter, e um registo
+não mantido deixa de ser fonte de verdade.
+
+Para esses casos, `tipo_documento_ref` aceita uma **extensão qualificada**:
+
+```
+ext.<entidade>.<tipo>@<versao>
+```
+
+| Componente | Regras | Exemplo |
+|---|---|---|
+| `entidade` | lowercase, `[a-z][a-z0-9-]*` | `at`, `municipio-lisboa` |
+| `tipo` | lowercase, `[a-z][a-z0-9-]*` | `liquidacao-irs` |
+| `versao` | começa por dígito | `2026.1` |
+
+**Exemplo válido**: `"ext.at.liquidacao-irs@2026.1"`.
+
+Mesmo mecanismo, mesmo regime de responsabilidade e mesma justificação de
+§2.11.7 (extensão qualificada de `relacoes[].tipo`): não há registo central, o
+namespace `<entidade>` é autodeclarado, e a semântica do tipo é definida e da
+responsabilidade exclusiva da entidade que o declara.
+
+**Resolução do schema.** O schema de um tipo de extensão **DEVE** viajar
+dentro do `.ndfpkg`, em `schemas/<tipo_id>.schema.json` (§8.1) — por exemplo
+`schemas/ext.at.liquidacao-irs.schema.json`. Um verificador independente
+valida `documento` contra o schema que veio no pacote, sem acesso a registo
+nenhum, o que preserva a garantia de autocontenção de §8.3.
+
+Um leitor **DEVE** resolver o schema do tipo preferencialmente a partir do
+pacote, recorrendo ao registo canónico apenas quando o pacote o não contiver.
+
+**O schema do tipo é artefacto de validação, não de reconstrução.** Esta
+distinção determina o que sucede quando ele não resolve. Os dados do documento
+estão em `documento`, no NDF-core assinado; o layout está no NDT. Um documento
+cujo schema de tipo não resolva continua integralmente **reconstituível** e
+**verificável quanto à integridade**: o `payload_hash` confere, a assinatura
+valida, e `proveniencia_sistema`, `imputacao`, `participantes` e `relacoes`
+continuam garantidos pelo schema do NDF-core, que é independente. O que se
+perde é apenas a garantia sobre a estrutura **interna** de `documento`.
+
+Por isso, um leitor que não consiga resolver o schema do tipo **DEVE**
+rejeitar o documento **ou** tratar `documento` como opaco, sem declarar
+interpretação completa — mesma disciplina já aplicada a versões NDF não
+suportadas (ver §9.2). O que um leitor **NÃO DEVE** fazer é
+declarar `documento` validado quando o não validou: o problema a evitar não é
+a interpretação incompleta, é a **incompletude silenciosa**.
+
+Três contextos, portanto:
+
+| Contexto | Tipo não resolúvel |
+|---|---|
+| Dentro de um `.ndfpkg` | Pacote **não conforme** (ver §9.3) — falhou a promessa de autocontenção de §8.3. É afirmação sobre o pacote, não sobre o documento |
+| Leitor com acesso ao registo | Erro — o tipo canónico não existe onde deveria |
+| Leitor sem registo, ficheiro avulso | `documento` opaco, declarado como tal |
+
+O test runner de referência (`tools/validate.py`, §9.4) trata o caso como erro
+porque **detém o registo canónico**: nele, um tipo canónico não resolúvel
+significa que não existe, não que o leitor não lhe tem acesso. Essa
+severidade decorre da posição do runner, não é uma norma que os leitores
+tenham de replicar.
+
+Esta é uma diferença deliberada face a §2.11.7. Uma relação de tipo
+desconhecido **não** conduz à rejeição do documento, porque continua
+verificável por hash e só a interpretação semântica fica limitada. Um
+`documento` cujo schema não é resolúvel **é** motivo de rejeição em contexto
+de pacote, porque sem schema não há garantia estrutural nenhuma sobre o
+conteúdo. Tolerância semântica num caso, exigência estrutural no outro.
+
+#### 2.9.6 Porque o schema do tipo não é substituível pelo NDT
+
+§2.6.1 estabelece que `tipo_documento_ref` e `ndt_version_ref` são referências
+independentes. Fica por responder uma pergunta que decorre naturalmente dela:
+se a reconstrução de um documento depende de NDF **e** NDT, e se o NDT já
+declara que campos de `documento` são apresentados, para que serve um schema
+de tipo à parte?
+
+**Reconstruir não é interpretar.** O NDT declara **onde imprimir** um valor; o
+schema do tipo declara **o que o valor é**. Um sistema de arquivo que indexe,
+pesquise ou migre formatos daqui a décadas não passa pelo renderizador: para
+esse sistema, sem schema de tipo, um campo de `documento` é uma chave JSON com
+um número, sem que se saiba se admite valores negativos, se é obrigatório, ou
+que forma tem. O princípio de âmbito desta especificação abrange
+explicitamente interpretar corretamente o conteúdo imutável, e não apenas
+reconstituí-lo.
+
+**A independência é simétrica.** Sem schema de tipo, o documento ainda se
+renderiza mas não se valida; sem NDT, ainda se valida mas não se renderiza. Se
+um substituísse o outro, uma das metades desta frase seria falsa.
+
+**Fundir os dois acoplaria dados a apresentação.** Se o NDT fosse também o
+contrato de dados, alterar o grafismo de um impresso passaria a ser uma
+alteração ao modelo de dados, e um mesmo tipo documental deixaria de admitir
+vários NDTs — versão simplificada e completa, formatos de página distintos —
+sem duplicar a definição dos dados. É precisamente o acoplamento que §2.6.1
+evita.
+
+**Critério operacional.** Uma restrição pertence ao NDT quando a sua violação
+significa «não cabe **neste** layout», e ao schema do tipo quando significa «o
+dado está mal formado». Um limite de dimensão de texto é exemplo do primeiro
+caso: o mesmo conteúdo poderá ser válido noutro NDT. Um NIF com número errado
+de dígitos é exemplo do segundo: é inválido independentemente de como venha a
+ser apresentado.
+
+**Limite normativo — estrutura, não regras de negócio.** Um schema de tipo
+**DEVE** restringir-se à forma dos dados: campos presentes, tipos, formatos,
+cardinalidades. **NÃO DEVE** codificar regras materiais de negócio — se um
+montante foi corretamente apurado, se uma dedução é elegível, se um prazo está
+cumprido. Essas regras pertencem ao sistema produtor, que o NDF não substitui,
+e a sua inclusão faria dos schemas de tipo réplicas desatualizadas da lógica
+aplicacional, com custo de manutenção crescente e sem garantia real acrescida.
+
+#### 2.9.7 Estabilidade por separação de ritmos de alteração
+
+A razão de fundo para os limites de §2.9.6 é a estabilidade do formato a longo
+prazo. Cada camada altera-se por motivos próprios e a ritmos muito diferentes,
+e o desenho existe para que a camada mais estável não fique refém da mais
+volátil:
+
+| Camada | Altera-se quando | Ritmo típico |
+|---|---|---|
+| Regras materiais — **fora do NDF** | a lei altera taxas, deduções, prazos, condições | frequente, por vezes intra-anual |
+| Schema do tipo (registo) | a **estrutura** do documento muda: campo novo no impresso | ocasional |
+| NDT | o grafismo ou o layout muda | ocasional, e independente do anterior |
+| NDF | o **formato de documento** muda | raro — escala de décadas |
+
+Uma alteração legislativa atinge, na esmagadora maioria dos casos, apenas a
+primeira linha: é absorvida pelo sistema produtor, sem qualquer efeito sobre o
+NDF, o NDT ou o registo. Quando cria um campo novo no impresso, atinge também
+a segunda — produzindo uma versão nova do tipo no registo, por exemplo
+`modelo3-irs@2027` —, ainda assim **sem** implicar versão nova de NDF ou de
+NDT (ver `VERSIONING.md`). Uma alteração de grafismo atinge apenas o NDT, e
+não invalida nem obriga a alterar o NDF.
+
+**Onde a dimensão legislativa entra no NDF.** Entra como **proveniência, não
+como validação**: `proveniencia_sistema[].regra_ref` (§2.14.2) referencia o
+conjunto de regras, tabela ou base de cálculo aplicada, por identificador e
+hash. É uma referência ao que vigorava no momento da produção — não uma cópia
+das regras, nem uma restrição que o validador aplique.
+
+**Consequência para o arquivo.** Um documento finalizado em 2026 tem de
+continuar validável em 2046. Se o schema do seu tipo codificasse regras
+materiais de 2026, validá-lo décadas depois exigiria reconstituir o direito
+vigente à data — confundindo **conformidade estrutural** com **legalidade
+material**, que são juízos distintos e de naturezas distintas. A conformidade
+estrutural é permanente e verificável por máquina; a legalidade material é
+histórica e da competência de quem a aprecia. O NDF garante a primeira e
+regista os elementos que permitem apreciar a segunda, sem a substituir.
 
 ### 2.10 Nível de assinatura eletrónica (`nivel_assinatura`)
 
@@ -798,7 +995,7 @@ estruturalmente válida (formato correto, `alvo` verificável por hash).
 
 Distingue **autoria e participação** de **assinatura eletrónica** (Anexo A;
 ver também §4 — Envelope). Um autor poderá não assinar; um signatário
-poderá assinar num papel de aprovador ou representante sem ser autor
+poderá assinar num papel de representante sem ser autor
 material. O
 bloco `participantes`, opcional, regista essa informação de forma estrutural
 e independente do texto de exibição que já existe nalguns schemas de tipo de
@@ -806,11 +1003,17 @@ documento (ex.: `informacao-tecnica.autor`, `despacho.decisor`) — esses
 campos continuam a servir a apresentação do documento (via NDT); `participantes`
 serve a consulta, a proveniência e a interoperabilidade documental.
 
+`participantes` é um índice **exclusivamente de pessoas singulares**. Os
+sistemas determinísticos ficam em `proveniencia_sistema` (§2.14), os sistemas
+de IA em `proveniencia_ia` (§2.13), a responsabilidade jurídica em `imputacao`
+(§2.15) e a entidade produtora em `metadados.entidade_produtora` (§2.7.3). Um
+sistema não *participa* na produção de um documento — **produz** o documento.
+
 ```json
 {
   "participantes": [
-    { "participante_ref": "user:123", "tipo": "pessoa", "papel": "autor" },
-    { "participante_ref": "user:456", "tipo": "pessoa", "papel": "revisor_humano" }
+    { "participante_ref": "user:123", "papel": "autor" },
+    { "participante_ref": "user:456", "papel": "revisor_humano" }
   ]
 }
 ```
@@ -819,13 +1022,28 @@ serve a consulta, a proveniência e a interoperabilidade documental.
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `participante_ref` | Sim | Identificador institucional estável — não um nome de exibição. |
-| `tipo` | Não | `pessoa` \| `sistema` \| `entidade`. Assume-se `pessoa` quando omitido. |
-| `papel` | Sim | `autor`, `coautor`, `revisor_humano`, `validador`, `aprovador`, `decisor`, `representante`, `entidade_produtora`, `sistema_tecnico`. |
+| `participante_ref` | Sim | Identificador institucional estável da pessoa singular — não um nome de exibição. |
+| `papel` | Sim | `autor`, `coautor`, `revisor_humano`, `decisor`, `representante`, `responsavel_tecnico`. |
+| `qualificacao` | Não | Qualidade profissional, quando é condição de validade do documento. Ver §2.12.6. |
 
-Um sistema de IA interveniente PODE ser registado com `tipo: "sistema"` e
-`papel: "sistema_tecnico"` — nunca com um papel que implique autoria,
-aprovação ou decisão (ver §2.13.4).
+| Papel | Significado |
+|---|---|
+| `autor` | Produziu materialmente o conteúdo canonicalizado. |
+| `coautor` | Produziu materialmente parte do conteúdo, em conjunto com o autor. |
+| `revisor_humano` | Reviu conteúdo produzido por outrem — pessoa, sistema ou IA. |
+| `decisor` | Praticou a decisão que constitui o conteúdo do documento (ex.: despacho). |
+| `representante` | Atuou por conta de outrem, ao abrigo de mandato ou representação. |
+| `responsavel_tecnico` | Responde tecnicamente em nome próprio, sem representar (ex.: contabilista certificado, ROC, autor de termo de responsabilidade). |
+
+`autor`, `coautor` e `decisor` são os papéis que satisfazem o invariante de
+origem de §2.2.1. `revisor_humano`, `representante` e `responsavel_tecnico`
+não o satisfazem: rever, representar ou responder tecnicamente por um conteúdo
+não é o mesmo que produzi-lo.
+
+Um sistema — determinístico ou de IA — **NÃO DEVE** ser registado em
+`participantes` sob nenhum papel. O papel `sistema_tecnico` e o campo `tipo`
+existiram em versões anteriores desta preparação e foram removidos; ver
+§2.12.7 (nota de migração).
 
 #### 2.12.3 Autoria — três noções distintas, não equivalentes
 
@@ -861,15 +1079,86 @@ embute um esquema de identidade verificável: a resolução de
 credenciais) é responsabilidade do sistema produtor, que mantém o registo
 correspondente na sua própria base de dados.
 
-#### 2.12.5 `validador` e `aprovador` — estado de workflow, não de conteúdo
+#### 2.12.5 A ausência de um participante não é prova de ausência de intervenção
 
-Os papéis `validador` e `aprovador` descrevem estado de um fluxo de
-aprovação, tipicamente já gerido pelo sistema de workflow do produtor
-(GED/GCA) — o seu uso em `participantes` é desaconselhado fora de sistemas
-que já tratem esse estado como parte constitutiva do conteúdo do documento.
-Não foram removidos do enum de §2.12.2: retirá-los seria uma alteração
-incompatível sem necessidade demonstrada. A decisão de os usar, ou de
-manter esse estado apenas no sistema de workflow, cabe ao sistema produtor.
+`participantes` regista apenas intervenção **observável e identificada** pelo
+sistema produtor. A ausência de uma entrada **NÃO DEVE** ser interpretada como
+demonstração de que ninguém mais interveio.
+
+A razão é concreta e não teórica: quando um terceiro atua com as credenciais
+do titular — um contabilista ou um familiar que submete uma declaração no
+portal com as credenciais do contribuinte — o sistema produtor não tem como o
+distinguir do titular. Registá-lo seria inventar informação que o sistema não
+observou; omiti-lo é o comportamento correto.
+
+Daqui decorre que um `participantes` vazio ou ausente é **silêncio, não
+negação**. Um leitor — incluindo um sistema de análise ou uma parte em
+contencioso — NÃO DEVE derivar de tal silêncio qualquer conclusão sobre a
+inexistência de intervenção de terceiros.
+
+Esta cláusula é o correspondente, no eixo dos participantes, do princípio já
+adotado em §2.13.3 para a revisão humana: o formato distingue **o que é
+afirmado** do **que não é conhecido**, em vez de deixar a omissão fazer
+afirmações por conta própria.
+
+#### 2.12.6 `qualificacao` — qualidade profissional como condição de validade
+
+Há documentos cuja validade depende da intervenção de pessoa com qualidade
+profissional determinada: contabilista certificado numa declaração Modelo 22
+ou num anexo de rendimentos empresariais, revisor oficial de contas numa
+certificação legal, advogado mandatado num requerimento, engenheiro ou
+arquiteto num termo de responsabilidade de licenciamento urbanístico, médico
+num atestado.
+
+Nesses casos, o bloco opcional `qualificacao` regista a qualidade e a
+inscrição na ordem profissional respetiva:
+
+```json
+{
+  "participantes": [
+    { "participante_ref": "user:123", "papel": "autor" },
+    {
+      "participante_ref": "user:900",
+      "papel": "responsavel_tecnico",
+      "qualificacao": { "tipo": "contabilista_certificado", "identificador": "occ:12345" }
+    }
+  ]
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `tipo` | Sim | Qualidade profissional. Enum aberto: `contabilista_certificado`, `revisor_oficial_contas`, `advogado`, `engenheiro`, `arquiteto`, `medico`, entre outros. |
+| `identificador` | Sim | Identificador de inscrição na ordem profissional. Referência externa, não resolvida pelo NDF — mesmo princípio de §2.12.4. |
+
+`qualificacao` é ortogonal a `papel`. Um advogado mandatado é
+`representante` com `qualificacao.tipo: "advogado"`; um contabilista
+certificado que responde tecnicamente pela declaração é
+`responsavel_tecnico` com `qualificacao.tipo: "contabilista_certificado"`.
+
+A distinção face a `imputacao` (§2.15) é a seguinte: o contabilista responde
+tecnicamente, mas a declaração continua imputada ao sujeito passivo; o
+advogado atua por conta do mandante, e é ao mandante que o requerimento é
+imputado. Ambos ficam em `participantes`, não em `imputacao`.
+
+#### 2.12.7 Nota de migração — papéis e campos removidos
+
+Esta ronda de preparação removeu de `participantes` os seguintes elementos.
+`ndf_version` mantém-se em `1.0.0` (ADR-007): o NDF está em Draft, sem revisão
+pública aberta e sem implementação externa conhecida, pelo que não há
+compatibilidade retroativa a preservar.
+
+| Removido | Motivo | Onde passa a ficar |
+|---|---|---|
+| campo `tipo` (`pessoa`/`sistema`/`entidade`) | Sem sistemas nem entidades, um campo com um só valor possível é ruído no core canonicalizado | — (implícito: todos os participantes são pessoas singulares) |
+| `papel: sistema_tecnico` | Um sistema não participa, produz | `proveniencia_sistema` (§2.14) ou `proveniencia_ia` (§2.13) |
+| `papel: entidade_produtora` | Redundante — a mesma informação existiria em três sítios | `metadados.entidade_produtora` (§2.7.3) e `imputacao` (§2.15) |
+| `papel: validador` | Estado de fluxo de aprovação, não facto do conteúdo | Sistema de workflow do produtor (GED/GCA) |
+| `papel: aprovador` | Idem | Idem |
+
+A remoção de `validador` e `aprovador` encerra a lacuna L10 de `LACUNAS.md`,
+que identificara estes dois papéis como descrevendo estado processual e não
+autoria do conteúdo canonicalizado, e deixara a decisão em aberto.
 
 ### 2.13 Proveniência de IA (`proveniencia_ia`)
 
@@ -936,17 +1225,406 @@ estar presentes.
 textual — o mesmo padrão já usado em
 `avaliacao.prazo_conservacao_administrativa.forma_contagem_detalhe` (§3.3).
 
-#### 2.13.4 IA não é signatária nem decisora
+#### 2.13.4 IA não é signatária, participante nem decisora
 
-Um sistema de IA NÃO DEVE ser registado como `signatario` de uma assinatura
-(§4), nem como `participante` com papel de autor, aprovador ou decisor
-(§2.12.2). A IA **PODE** ser registada em `proveniencia_ia.intervencoes[].sistema`
-como sistema técnico interveniente, e opcionalmente em `participantes` com
-`papel: "sistema_tecnico"`. O ato administrativo depende sempre de
-intervenção humana identificável.
+Um sistema de IA **NÃO DEVE** ser registado como `signatario` de uma
+assinatura (§4) nem como `participante` sob qualquer papel (§2.12.2) — o
+papel `sistema_tecnico`, que anteriormente o admitia, foi removido. A IA
+**DEVE** ser registada exclusivamente em
+`proveniencia_ia.intervencoes[].sistema`. O ato administrativo depende sempre
+de intervenção humana identificável.
 
 Os requisitos normativos de produtor e leitor para `proveniencia_ia` estão
-enumerados em §9.1 e §9.2.
+enumerados em §9.1 e §9.2. A fronteira entre `proveniencia_ia` e
+`proveniencia_sistema` está definida em §2.14.4 e é normativa.
+
+---
+
+### 2.14 Proveniência de sistema produtor (`proveniencia_sistema`)
+
+#### 2.14.1 Objetivo e âmbito
+
+Uma parte substancial dos documentos da Administração Pública é gerada por
+sistemas determinísticos, sem autor humano material: liquidações de impostos,
+notificações, certidões automáticas, avisos de cobrança. Nesses documentos não
+há ninguém que tenha "escrito" o conteúdo, mas há um sistema identificável que
+o produziu, segundo regras identificáveis, numa versão identificável.
+
+O bloco opcional `proveniencia_sistema` regista essa origem técnica. É
+independente de:
+
+- `metadados.entidade_produtora` (§2.7.3) — o organismo, para efeitos
+  arquivísticos;
+- `imputacao` (§2.15) — quem responde juridicamente pelo documento. **O
+  sistema não é autor jurídico de coisa nenhuma**;
+- `participantes` (§2.12) — as pessoas singulares que intervieram.
+
+#### 2.14.2 Estrutura e campos
+
+```json
+{
+  "proveniencia_sistema": [
+    {
+      "sistema": {
+        "nome": "Sistema de Liquidação de IRS",
+        "identificador": "at:sliq-irs",
+        "versao": "2026.4.17"
+      },
+      "componente": "motor-calculo",
+      "versao_componente": "3.2.0",
+      "gerado_em": "2026-07-31T03:14:00Z",
+      "regra_ref": {
+        "tipo": "tabela-retencao",
+        "identificador": "at:tabelas-irs-2026",
+        "hash": "sha256:..."
+      }
+    }
+  ]
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `sistema.nome` | Sim | Designação do sistema produtor. |
+| `sistema.identificador` | Sim | Identificador institucional estável. Referência externa, não resolvida pelo NDF. |
+| `sistema.versao` | Sim | Versão em produção no momento em que o conteúdo foi produzido. |
+| `componente` | Não | Componente do sistema responsável por este passo. |
+| `versao_componente` | Não | Versão do componente. |
+| `gerado_em` | Sim | Instante em que este passo produziu o seu resultado. |
+| `regra_ref` | Não | Referência ao conjunto de regras, tabela ou base de cálculo aplicada. |
+| `build_ref` | Não | Referência ao *build* exato do sistema. |
+| `configuracao_ref` | Não | Referência à configuração em vigor. |
+
+`regra_ref`, `build_ref` e `configuracao_ref` seguem a mesma forma de
+`proveniencia_ia.intervencoes[].evidencia_ref` — `{ tipo, identificador,
+hash }` — e são **referências externas não resolvidas pelo NDF**, em paralelo
+explícito a `participante_ref` (§2.12.4) e a `tipo_classificacao_ref`
+(§3.2.1). O NDF regista a referência e o hash; o artefacto referenciado vive
+no sistema produtor, sob política própria de acesso e retenção.
+
+Esta especificação **não** promete reprodutibilidade byte a byte. Com
+`gerado_em` no NDF-core — e já com `ndf_id` como UUID v4 (§2.3) — reexecutar o
+mesmo motor sobre os mesmos dados não produz o mesmo documento canónico. O que
+o bloco entrega é **identificação estável da origem e das regras aplicadas**,
+e o caminho para ir buscar a evidência detalhada onde ela viva.
+
+#### 2.14.3 Cardinalidade e ordem
+
+`proveniencia_sistema` é um **array**, não um objeto único, porque um
+documento atravessa por vezes uma cadeia de produção — motor de cálculo, sistema
+de validação, sistema de emissão — cada um com produtor e versão próprios.
+
+As entradas **DEVEM** estar ordenadas cronologicamente, por `gerado_em` não
+decrescente (ver §9.1 e §9.2).
+
+Esta regra não é estética. JCS (RFC 8785, §2.5) preserva a ordem dos elementos
+de um array; a ordem entra, portanto, nos `payload_bytes` e no `payload_hash`.
+Sem ordem normativa, dois produtores que registem exatamente os mesmos factos
+produziriam documentos com hashes diferentes, o que quebraria a comparação por
+hash de que dependem `relacoes[].alvo.payload_hash` (§2.11) e a cadeia de
+custódia.
+
+A ordem cronológica não é exprimível em JSON Schema — nenhum vocabulário Draft
+2020-12 compara elementos de um array entre si. É, por isso, uma verificação
+semântica obrigatória, com caso de conformidade próprio.
+
+#### 2.14.4 Fronteira com `proveniencia_ia` (normativa)
+
+**Qualquer componente não determinístico pertence a `proveniencia_ia`, sem
+exceção**, mesmo quando embebido num *pipeline* automático declarado em
+`proveniencia_sistema` (ver §9.1 e §9.2).
+
+Um sistema que incorpore um modelo de linguagem, um classificador estatístico
+ou qualquer componente cujo resultado não seja função determinística das
+entradas **NÃO DEVE** declarar esse componente em `proveniencia_sistema`. Deve
+declarar em `proveniencia_sistema` a parte determinística do *pipeline*, e a
+intervenção do componente não determinístico em `proveniencia_ia`, com o
+`revisao_humana.estado` que §2.13.3 exige.
+
+A regra existe porque a alternativa tem consequência prática direta: declarar
+um modelo como "sistema" contornaria o estado de revisão humana obrigatório,
+que é o mecanismo de garantia central de §2.13. A fronteira entre os dois
+blocos não é uma questão de arrumação — é o que impede que a supervisão humana
+seja evitada por escolha de campo.
+
+#### 2.14.5 Âmbito mínimo e circulação externa
+
+`proveniencia_sistema` regista o **mínimo necessário** para identificação
+estável e para localizar a evidência detalhada. **NÃO DEVE** ser usado como
+SBOM, inventário de dependências ou registo de execução. *Logs*, *traces* e
+configuração operacional ficam fora do NDF, pelas mesmas razões já decididas
+para a IA em §2.13.2: o NDF-core é conservado, por vezes permanentemente, e
+embutir material operacional significa conservá-lo indefinidamente.
+
+Consideração adicional, informativa: o NDF-core é assinado e legível por quem
+receber o pacote — incluindo o particular notificado de um ato. Nomes,
+versões e referências de *build* de sistemas internos constituem superfície de
+ataque. RECOMENDA-SE ponderar a omissão de `build_ref` e `configuracao_ref`
+em documentos de circulação externa. Esta especificação não define nem
+garante controlo de acesso ao artefacto (§1.5); a proteção é responsabilidade
+do sistema de custódia.
+
+---
+
+### 2.15 Imputação jurídica (`imputacao`)
+
+#### 2.15.1 Objetivo
+
+`participantes`, `proveniencia_sistema` e `proveniencia_ia` registam **factos**
+— quem ou o quê produziu materialmente o conteúdo. `imputacao` regista
+**direito**: quem responde juridicamente pelo documento, e a que título.
+
+Os dois eixos são independentes por desenho. Podem coincidir (uma declaração
+entregue pelo próprio), divergir (uma declaração pré-preenchida por um sistema
+e confirmada pelo interessado) ou ser mutuamente exclusivos (uma declaração
+produzida por um sistema e imputada por efeito da lei a quem nada fez).
+
+O bloco responde a exigências legais concretas do direito administrativo
+português:
+
+- **CPA, art. 151.º, n.º 1, al. a)** — do ato tem de constar a indicação da
+  autoridade que o pratica **e a menção da delegação ou subdelegação de
+  poderes, quando exista**;
+- **CPPT, art. 36.º, n.º 2** — as notificações têm de conter a indicação da
+  entidade que praticou o ato e se o fez no uso de delegação ou subdelegação;
+- **CPPT, art. 66.º, n.º 2** — o recurso hierárquico é dirigido ao mais
+  elevado superior hierárquico **do autor do ato**, o que exige que o órgão
+  autor seja identificável.
+
+Sem estas menções, o interessado não consegue determinar a quem recorrer, e o
+ato fica ferido de vício de forma. `imputacao` torna a informação estrutural e
+verificável, em vez de a deixar dispersa no texto do documento.
+
+Esta especificação fornece o mecanismo de registo; **não** garante, por si só,
+a legalidade do ato nem a suficiência das menções em qualquer caso concreto —
+mesmo limite de âmbito de §1.1 e §1.4.
+
+#### 2.15.2 Campos e títulos
+
+```json
+{
+  "imputacao": [
+    {
+      "imputado": { "designacao": "Diretor de Serviços do IRS", "ref": "at:dsirs" },
+      "titulo": "delegacao",
+      "fundamento": {
+        "descricao": "Despacho n.º 000/2026",
+        "publicacao_ref": "DR, 2.ª série, n.º 000, de 2026-01-15"
+      }
+    }
+  ]
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `imputado.designacao` | Sim | Designação do órgão ou pessoa que responde juridicamente. |
+| `imputado.ref` | Não | Identificador institucional estável. Referência externa, não resolvida pelo NDF. |
+| `titulo` | Sim | Título ao abrigo do qual a responsabilidade é assumida. Enum fechado — ver abaixo. |
+| `fundamento.descricao` | Condicional | Fundamento em forma legível. |
+| `fundamento.publicacao_ref` | Condicional | Referência de publicação oficial do ato habilitante. |
+| `em` | Condicional | Instante do ato que estabeleceu a imputação. Numa submissão autenticada, o instante da submissão. |
+| `autenticacao` | Não | Meio pelo qual este imputado foi autenticado. Ver §2.15.4. |
+
+| `titulo` | Regime | Significado | Exige |
+|---|---|---|---|
+| `competencia_propria` | Ato administrativo | O órgão pratica o ato ao abrigo de competência própria | — |
+| `delegacao` | Ato administrativo | O órgão pratica ao abrigo de poderes delegados | `fundamento.publicacao_ref` |
+| `subdelegacao` | Ato administrativo | O órgão pratica ao abrigo de poderes subdelegados | `fundamento.publicacao_ref` |
+| `declaracao_propria` | Declarativo | O declarante produziu e apresentou a declaração | — |
+| `aceitacao_expressa` | Declarativo | O conteúdo foi produzido por outrem e expressamente aceite pelo imputado | `em` |
+| `efeito_legal` | Declarativo | A imputação resulta de efeito da lei, sem ato do imputado | `fundamento.descricao` |
+
+A exigência de `publicacao_ref` em `delegacao` e `subdelegacao` é o reflexo
+direto da menção obrigatória do CPA art. 151.º, n.º 1, al. a): declarar que se
+atua por delegação sem identificar o ato de delegação publicado seria registar
+metade da menção que a lei exige.
+
+Estas condicionais são exprimíveis em JSON Schema (`if`/`then`) e estão lá,
+pelo que qualquer validador Draft 2020-12 as aplica sem código adicional.
+
+#### 2.15.3 Cardinalidade — co-titularidade, não cadeia de delegação
+
+`imputacao` é um array. Mais do que uma entrada significa **co-titularidade da
+responsabilidade jurídica** — várias pessoas ou órgãos respondem pelo mesmo
+documento. Dois casos típicos:
+
+- **ato conjunto**: dois ou mais órgãos praticam o mesmo ato administrativo;
+- **declaração conjunta**: dois ou mais declarantes respondem pela mesma
+  declaração. Numa declaração de IRS em tributação conjunta, ambos os sujeitos
+  passivos (A e B) são imputados, cada um com a sua entrada e a sua
+  `autenticacao` (§2.15.4).
+
+Uma delegação **NÃO DEVE** ser modelada como duas entradas (delegante e
+delegado). É **uma** entrada, com `titulo: "delegacao"` e o `fundamento` a
+identificar o ato de delegação. Modelar delegação como duas autoridades
+destruiria a distinção entre "dois órgãos praticaram o ato" e "um órgão
+praticou ao abrigo de poderes de outro" — que é precisamente a distinção que o
+CPA manda mencionar.
+
+#### 2.15.4 Submissão por meio autenticado
+
+Uma parte substancial dos documentos entregues à Administração não tem
+assinatura eletrónica: é submetida através de um canal autenticado — Portal
+das Finanças, Segurança Social Direta e equivalentes. Nesses casos, o acesso
+autenticado desempenha a função que a assinatura manuscrita desempenhava no
+suporte em papel.
+
+O documento é **imputável ao titular das credenciais**. O bloco opcional
+`autenticacao`, em cada entrada de `imputacao`, regista o facto que fundamenta
+essa imputação:
+
+```json
+{
+  "imputacao": [
+    {
+      "imputado": { "designacao": "Sujeito passivo A", "ref": "nif:123456789" },
+      "titulo": "declaracao_propria",
+      "em": "2026-05-20T14:03:00Z",
+      "autenticacao": { "meio": "chave_movel_digital", "nivel_garantia": "elevado" }
+    },
+    {
+      "imputado": { "designacao": "Sujeito passivo B", "ref": "nif:987654321" },
+      "titulo": "declaracao_propria",
+      "em": "2026-05-20T14:06:00Z",
+      "autenticacao": { "meio": "senha_acesso", "nivel_garantia": "substancial" }
+    }
+  ]
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `meio` | Sim | Meio de autenticação. Enum aberto: `chave_movel_digital`, `cartao_cidadao`, `senha_acesso`, `certificado_qualificado`, `presencial`. |
+| `nivel_garantia` | Não | Nível de garantia, na terminologia eIDAS: `baixo`, `substancial`, `elevado`. Opcional — o sistema produtor poderá não o classificar. |
+
+O enum é aberto e **inclui deliberadamente o atendimento presencial**. A
+identificação de um contribuinte ao balcão e a autenticação num canal digital
+produzem o mesmo efeito jurídico; um vocabulário que só exprimisse meios
+digitais obrigaria a modelar o caso presencial por omissão, tornando-o
+indistinguível de um documento sem identificação nenhuma.
+
+**Por entrada, não por documento.** Quando a lei exige autenticação de mais do
+que um interessado — o caso da declaração de IRS em tributação conjunta, que
+requer a autenticação de ambos os sujeitos passivos —, cada um constitui uma
+entrada própria, com o seu instante e o seu meio. Registar a autenticação ao
+nível do documento perderia essa informação, que é exatamente a que
+demonstra que a exigência legal foi satisfeita.
+
+**A imputação não é qualificável.** Esta especificação **NÃO DEFINE** nenhum
+mecanismo para exprimir grau de confiança, presunção ou reserva sobre uma
+imputação. Um documento submetido por meio autenticado é imputado ao titular
+das credenciais, sem gradação. Alegações de extravio ou uso indevido de
+credenciais dirimem-se pelas vias judiciais competentes, fora do formato: o
+NDF regista o facto que fundamenta a imputação e **não arbitra** sobre ele —
+mesmo limite de âmbito de §1.5. Um produtor **NÃO DEVE** introduzir campos
+próprios com essa finalidade.
+
+**`nivel_garantia` não gradua a imputação.** Este ponto merece regra própria,
+porque o campo tem aparência de qualificador e não o é. `nivel_garantia`
+descreve o nível de garantia **técnico do mecanismo de autenticação**, na
+terminologia eIDAS, para efeitos de interoperabilidade e de caracterização do
+canal. NÃO descreve a força com que o documento é imputado.
+
+Senha do portal, Chave Móvel Digital e Cartão de Cidadão são credenciais
+pessoais e intransmissíveis, e o seu uso é inerentemente da responsabilidade
+do respetivo titular. A imputação é **idêntica** nos três casos. Um leitor
+conforme **NÃO DEVE** derivar de um `nivel_garantia` mais baixo uma imputação
+mais fraca, uma presunção ilidível, ou qualquer tratamento diferenciado do
+documento (ver §9.2).
+
+**A imputação é histórica, não revogável no documento.** A imputação registada
+num NDF afirma a quem o ato era imputado **no momento da finalização**. Uma
+anulação posterior — judicial ou administrativa — **NÃO ALTERA** o NDF: o
+NDF-core é imutável e assinado (§2.1), e o ato existiu, na forma em que foi
+praticado, ainda que venha a ser anulado.
+
+A anulação é um **documento novo**, ligado ao anterior por
+`relacoes[].tipo: "anula"` (§2.11.2). Um leitor conforme **NÃO DEVE** tratar a
+imputação de um documento anulado como viciada, retroativamente inválida ou
+inexistente: era correta quando foi registada, e a anulação é um facto
+distinto e posterior, legível no grafo de relações.
+
+O mesmo se aplica à alegação de uso indevido de credenciais. Enquanto não
+houver decisão que anule o ato, o ato é formalmente do titular das
+credenciais; havendo-a, o registo do ato mantém-se e passa a existir o
+registo da anulação a par dele. O NDF preserva os dois, em vez de apagar o
+primeiro.
+
+**Equivalência entre canais.** Um pedido apresentado por canal autenticado —
+e-balcão e equivalentes — e um pedido apresentado presencialmente por
+interessado identificado têm o mesmo valor jurídico, incluindo para efeitos de
+legitimidade para obter informação sujeita a sigilo. Um produtor **DEVE**
+modelar os dois casos da mesma forma, variando apenas `autenticacao.meio`. O
+formato **NÃO DEVE** ser usado de modo que o canal, por si só, produza
+diferença de tratamento entre situações que a lei equipara.
+
+**Dupla função do registo de autenticação.** O mesmo facto fundamenta duas
+coisas distintas: a **imputação de autoria** do documento submetido, e a
+**legitimidade de acesso** do interessado a informação que lhe respeite,
+incluindo informação sob sigilo. Quando um documento divulga informação
+protegida em resposta a um pedido, é a autenticação do **requerente**, no
+documento do pedido, que fundamenta a divulgação — não a imputação do
+documento de resposta, que pertence ao órgão que responde.
+
+Essa ligação não exige campo novo: exprime-se pela relação
+`relacoes[].tipo: "responde_a"` (§2.11.2) entre a resposta e o pedido, sendo o
+registo de autenticação legível na `imputacao` do pedido. A cadeia
+pedido→resposta é assim reconstruível e verificável por hash.
+
+Note-se o limite: este registo é **prova, não autorização**. Esta
+especificação não define nem garante controlo de acesso, nem verifica
+legitimidade (§1.5, §2.7.4). Regista o facto em que uma decisão de divulgação
+se apoiou; a decisão em si é do sistema de custódia.
+
+**Relação com `nivel_assinatura`.** `nivel_assinatura: "nenhuma"` (§2.10) e
+`imputacao[].autenticacao` **não são contraditórios**, e um leitor conforme
+não os trata como tal. `nivel_assinatura` descreve a existência e o nível de uma assinatura
+eletrónica no sentido do eIDAS, materializada no envelope (§4);
+`autenticacao` descreve o meio pelo qual o interessado foi identificado no
+canal de submissão. Um documento é capaz de não ter assinatura
+eletrónica e ainda assim ter autoria vinculativa. Um leitor **NÃO DEVE** concluir, de
+`nivel_assinatura: "nenhuma"`, que o documento é anónimo ou não imputável.
+
+#### 2.15.5 Casos de referência
+
+Os casos seguintes, quase todos sobre a mesma tipologia documental (a
+declaração Modelo 3 de IRS e a liquidação subsequente), motivaram o desenho
+deste bloco e ilustram a independência dos eixos.
+
+| Caso | `participantes` | `proveniencia_sistema` | `imputacao` |
+|---|---|---|---|
+| Declaração entregue pelo sujeito passivo (CIRS art. 56.º) | `autor` | — | 1 entrada, `declaracao_propria` + `autenticacao` |
+| Declaração conjunta, tributação conjunta | `autor`, `coautor` | — | **2 entradas** (A e B), `declaracao_propria` + `autenticacao` cada |
+| Declaração automática confirmada (CIRS art. 58.º-A) | — | sistema da AT | 1 entrada, `aceitacao_expressa` + `autenticacao` |
+| Declaração automática convertida sem confirmação (CIRS art. 58.º-A) | — | sistema da AT | 1 entrada, `efeito_legal` |
+| Liquidação oficiosa (CIRS art. 76.º, n.º 1, al. b)) | — | sistema da AT | 1 entrada, `competencia_propria` ou `delegacao` |
+| Pedido por e-balcão ou ao balcão | `autor` | — | 1 entrada, `declaracao_propria` + `autenticacao` (`meio` distingue o canal) |
+
+O terceiro caso é o que justifica a existência do bloco. Não havendo
+confirmação nem entrega até ao termo do prazo, a declaração provisória
+converte-se em declaração apresentada pelo sujeito passivo nos termos legais:
+a autoria é imputada, por efeito da lei, a quem não produziu o conteúdo nem
+praticou qualquer ato. Registar o sujeito passivo como
+`participantes[].papel: "autor"` seria juridicamente correto e **factualmente
+falso**; registar apenas `proveniencia_sistema` seria factualmente correto e
+**juridicamente incompleto**. Os dois eixos, em conjunto, dizem a verdade nos
+dois planos.
+
+Note-se ainda que, no terceiro e no quarto casos, `participantes` está
+legitimamente ausente — o invariante de origem de §2.2.1 é satisfeito por
+`proveniencia_sistema`, e nenhum autor humano é fabricado para o cumprir.
+
+#### 2.15.6 Obrigatoriedade
+
+`imputacao` é **opcional** no NDF-core: nem todo o NDF é ato administrativo ou
+declaração. Uma informação técnica interna, uma nota de serviço ou um registo
+de trabalho não têm imputação no sentido aqui definido.
+
+O schema do tipo documental (`metadados.tipo_documento_ref`, §2.9.2) **PODE**
+tornar `imputacao` obrigatória para os tipos em que a lei o exige — mesma
+camada de exigência já usada noutros pontos desta especificação. Um tipo
+documental que represente um ato administrativo notificável DEVERIA fazê-lo.
 
 ---
 
@@ -1442,10 +2120,21 @@ documento.ndfpkg (ZIP)
 ├── envelope.json          — assinaturas, timestamps, material de validação
 ├── ndt/
 │   └── <schema_id>@<versao>.ndt.json   — NDT referenciado por ndt_version_ref
+├── schemas/               — schemas necessários à validação autónoma do pacote
+│   └── <tipo_id>.schema.json           — schema do tipo referenciado por tipo_documento_ref
 └── recursos/              — recursos visuais partilhados por NDT e NCRTF
     ├── <sha256>.<ext>     — recursos NDT com modo referenciado_por_hash (nome = hash)
     └── <nome>.<ext>       — imagens NCRTF referenciadas por image.ref (nome declarado no campo)
 ```
+
+O diretório `schemas/` torna o pacote autonomamente validável: um verificador
+independente valida `documento` contra o schema que veio no pacote, sem acesso
+ao registo canónico. É **obrigatório** quando `tipo_documento_ref` usa uma
+extensão qualificada `ext.<entidade>.<tipo>@<versao>` (§2.9.5), por não haver
+outro local onde o schema possa ser resolvido, e RECOMENDADO nos restantes
+casos. O nome do ficheiro é o identificador do tipo sem a versão — por exemplo
+`schemas/ext.at.liquidacao-irs.schema.json` para
+`ext.at.liquidacao-irs@2026.1`.
 
 ### 8.2 `manifest.json`
 
@@ -1503,6 +2192,11 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 12. **NDF-PROD-012 — DEVE**, quando `relacoes` estiver presente, incluir em cada elemento `tipo`, `alvo.ndf_id` e `alvo.payload_hash` (§2.11).
 13. **NDF-PROD-013 — DEVE** incluir `intervencoes` com pelo menos um elemento quando `proveniencia_ia.utilizada` for `true`, e omitir ou esvaziar `intervencoes` quando for `false` (§2.13).
 14. **NDF-PROD-014 — DEVE** incluir `revisao_humana.estado` em cada elemento de `proveniencia_ia.intervencoes`, e `revisor_ref`+`revisto_em` quando o estado for terminal (§2.13.3).
+15. **NDF-PROD-015 — DEVE** declarar pelo menos uma origem identificável do conteúdo: `participantes` com pelo menos uma entrada de papel `autor`, `coautor` ou `decisor`; ou `proveniencia_sistema` não vazio; ou `proveniencia_ia.utilizada: true` (§2.2.1).
+16. **NDF-PROD-016 — DEVE** ordenar as entradas de `proveniencia_sistema` cronologicamente, por `gerado_em` não decrescente (§2.14.3).
+17. **NDF-PROD-017 — DEVE**, quando `imputacao` estiver presente, incluir em cada elemento `imputado.designacao` e `titulo`, e satisfazer as condicionais do título: `fundamento.publicacao_ref` para `delegacao` e `subdelegacao`, `em` para `aceitacao_expressa`, `fundamento.descricao` para `efeito_legal` (§2.15.2).
+18. **NDF-PROD-018 — DEVE**, quando `metadados.tipo_documento_ref` usar uma extensão qualificada `ext.<entidade>.<tipo>@<versao>`, incluir o schema correspondente em `schemas/<tipo_id>.schema.json` no `.ndfpkg` (§2.9.5, §8.1).
+19. **NDF-PROD-019 — NÃO DEVE** declarar em `proveniencia_sistema` qualquer componente não determinístico; tais componentes pertencem a `proveniencia_ia` (§2.14.4).
 
 ### 9.2 Leitor conforme
 
@@ -1521,6 +2215,13 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 11. **NDF-READ-011 — DEVE** rejeitar uma relação em `relacoes` sem `alvo.payload_hash`, ou com `alvo.payload_hash` em formato inválido, ou com `tipo` fora do vocabulário base fechado de §2.11.2 e fora do formato de extensão qualificada de §2.11.7.
 12. **NDF-READ-012 — DEVE** rejeitar `proveniencia_ia` com `utilizada: false` e `intervencoes` não vazio.
 13. **NDF-READ-013 — DEVE** rejeitar uma intervenção de `proveniencia_ia` com estado de revisão terminal (`revisto_e_aprovado`, `revisto_com_alteracoes` ou `rejeitado`) sem `revisor_ref` ou sem `revisto_em`.
+14. **NDF-READ-014 — DEVE** rejeitar um NDF que não declare nenhuma origem do conteúdo nos termos de §2.2.1.
+15. **NDF-READ-015 — DEVE** rejeitar uma entrada de `imputacao` com `titulo` `delegacao` ou `subdelegacao` sem `fundamento.publicacao_ref`, com `aceitacao_expressa` sem `em`, ou com `efeito_legal` sem `fundamento.descricao` (§2.15.2).
+16. **NDF-READ-016 — DEVE** rejeitar `proveniencia_sistema` cujas entradas não estejam ordenadas por `gerado_em` não decrescente (§2.14.3).
+17. **NDF-READ-017 — NÃO DEVE** aceitar como determinística uma entrada de `proveniencia_sistema` que declare um componente não determinístico; tais componentes pertencem a `proveniencia_ia` (§2.14.4).
+18. **NDF-READ-018 — DEVE**, quando não conseguir resolver o schema referenciado por `metadados.tipo_documento_ref`, rejeitar o documento **ou** tratar `documento` como opaco, sem declarar interpretação completa; e **NÃO DEVE**, em caso algum, declarar `documento` validado sem o ter validado (§2.9.5). Em contexto de pacote, a ausência do schema de um tipo de extensão é falta de conformidade do pacote — ver §9.3.
+19. **NDF-READ-019 — NÃO DEVE** interpretar a ausência de entradas em `participantes` como prova de ausência de intervenção de terceiros (§2.12.5).
+20. **NDF-READ-020 — NÃO DEVE** derivar de `imputacao[].autenticacao.nivel_garantia` qualquer gradação da imputação, presunção ilidível ou tratamento diferenciado do documento; o campo descreve o mecanismo de autenticação, não a força da imputação (§2.15.4).
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 
@@ -1532,6 +2233,7 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 4. **NDF-PKG-004** — `SHA-256(ndf-core.json)` **DEVE** coincidir com `manifest.inventario[ndf-core.json].hash_sha256`.
 5. **NDF-PKG-005** — `ndf-core.json` **DEVE** ser um NDF-core conforme (§9.1).
 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`.
+7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** ser resolúvel a partir do pacote em `schemas/<tipo_id>.schema.json` quando o tipo for uma extensão qualificada (§2.9.5); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver.
 
 ### 9.4 Suite de conformidade e test runner
 

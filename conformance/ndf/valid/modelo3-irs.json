@@ -103,6 +103,17 @@
       }
     }
   },
+  "participantes": [
+    { "participante_ref": "nif:123456789", "papel": "autor" }
+  ],
+  "imputacao": [
+    {
+      "imputado": { "designacao": "Sujeito passivo A", "ref": "nif:123456789" },
+      "titulo": "declaracao_propria",
+      "em": "2026-05-20T14:03:00Z",
+      "autenticacao": { "meio": "chave_movel_digital", "nivel_garantia": "elevado" }
+    }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "pcaap/120.20.001",
     "prazo_conservacao_administrativa": {

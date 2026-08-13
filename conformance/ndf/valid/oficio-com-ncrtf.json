@@ -51,6 +51,9 @@
     },
     "signatario": { "nome": "Maria Costa", "cargo": "Directora de Serviços" }
   },
+  "participantes": [
+    { "participante_ref": "user:210", "papel": "autor" }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "lc/450.10.001",
     "prazo_conservacao_administrativa": {

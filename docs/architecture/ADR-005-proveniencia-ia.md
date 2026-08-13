@@ -76,9 +76,25 @@ repositório externo de evidência detalhada quando aplicável — fora do
 âmbito desta especificação, tal como já acontece para anexos binários
 (§2.9.4).
 
+## Nota de superveniência (2026-08-13)
+
+Complementado por ADR-013, que introduz `proveniencia_sistema` para sistemas
+**determinísticos**. Duas consequências para este ADR:
+
+1. A IA deixa de ter qualquer destino em `participantes` — o papel
+   `sistema_tecnico` foi removido. `proveniencia_ia` passa a ser o único
+   lugar onde um sistema de IA é registado.
+2. Fica normativa a fronteira entre os dois blocos: **qualquer componente não
+   determinístico pertence a `proveniencia_ia`, sem exceção**, mesmo quando
+   embebido num *pipeline* automático declarado em `proveniencia_sistema`.
+   Sem esta regra, declarar um modelo como "sistema" contornaria o
+   `revisao_humana.estado` obrigatório de §2.13.3, que é o mecanismo de
+   garantia central deste ADR.
+
 ## Referências
 
 - SPEC.md §2.13
 - `docs/normalization/AI-PROVENANCE-GUIDANCE.md`
 - Regulamento (UE) 2024/1689 (AI Act) — referência informativa, não
   normativa para este ADR
+- ADR-013-proveniencia-sistema.md

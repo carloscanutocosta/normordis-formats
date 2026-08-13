@@ -72,8 +72,42 @@ documento, independente de campos de exibição específicos de cada tipo.
 como dívida técnica para uma versão futura, não como decisão de fusão
 imediata.
 
+## Nota de superveniência (2026-08-13)
+
+Parcialmente superado por ADR-013 e ADR-012. `participantes` passa a ser um
+índice exclusivamente de **pessoas singulares**:
+
+- removido o campo `tipo` (`pessoa` | `sistema` | `entidade`) — sem sistemas
+  nem entidades, um campo com um só valor possível é ruído no core
+  canonicalizado;
+- removidos do enum `papel`: `sistema_tecnico` (um sistema não participa,
+  produz — ver ADR-013), `entidade_produtora` (redundante com
+  `metadados.entidade_produtora` e com `imputacao` — ver ADR-012),
+  `validador` e `aprovador` (estado de fluxo de aprovação, não facto do
+  conteúdo — fecha `LACUNAS.md` L10);
+- acrescentado `responsavel_tecnico`, para quem responde tecnicamente em nome
+  próprio sem representar (contabilista certificado, ROC, autor de termo de
+  responsabilidade);
+- acrescentado o bloco opcional `qualificacao` (`{ tipo, identificador }`),
+  para registar a qualidade profissional quando esta é condição de validade do
+  documento.
+
+Enum resultante: `autor`, `coautor`, `revisor_humano`, `decisor`,
+`representante`, `responsavel_tecnico`.
+
+Fica também normativo que `participantes` regista apenas intervenção
+**observável e identificada** pelo sistema produtor, e que a ausência de uma
+entrada **não é prova de ausência de intervenção** — um terceiro que atue com
+as credenciais do titular é indistinguível do titular.
+
+A afirmação acima de que um sistema de IA pode ser registado como
+`participante` com `papel: "sistema_tecnico"` deixa de ser válida: a IA fica
+exclusivamente em `proveniencia_ia`.
+
 ## Referências
 
 - SPEC.md §2.12
 - ADR-004-assinatura-autocontida.md
 - ADR-005-proveniencia-ia.md §2.13.4
+- ADR-012-imputacao-juridica.md
+- ADR-013-proveniencia-sistema.md
