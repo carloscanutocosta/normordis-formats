@@ -1,0 +1,57 @@
+{
+  "ndfpkg_version": "1.0.0",
+  "ndf_id": "3f7a91c2-8d4e-4b06-9a15-2c6e8f0b7d34",
+  "ndf_version": "1.0.0",
+  "schema_id": "liquidacao-irs",
+  "estado": "ativo",
+  "nivel_assinatura": "nenhuma",
+  "finalizado_em": "2026-07-31T03:15:30Z",
+  "payload_hash": "sha256:95a5be73337a0b1a1477e6c17fb0befeb1f32d653d1322546fa7f4f7f574bee0",
+  "validation_code": "NDF-FOKJDN6F3LRW2B6GKTON",
+  "inventario": [
+    {
+      "ficheiro": "envelope.json",
+      "hash_sha256": "sha256:6cbf299037dfb902c26bf662de612265b36641acc7592022813b2307ea0cf145"
+    },
+    {
+      "ficheiro": "ndf-core.json",
+      "hash_sha256": "sha256:95a5be73337a0b1a1477e6c17fb0befeb1f32d653d1322546fa7f4f7f574bee0"
+    },
+    {
+      "ficheiro": "ndt/liquidacao-irs@2026.1.ndt.json",
+      "hash_sha256": "sha256:c625845c9328e497dba50cddeacd2e4b43859fa9016cbbbda7db7b02612438a3"
+    },
+    {
+      "ficheiro": "recursos/brasao-republica.svg",
+      "hash_sha256": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
+    },
+    {
+      "ficheiro": "schemas/custody-event.schema.json",
+      "hash_sha256": "sha256:816a7656c545b3be04d28fdb0c724db840e871dd4e3c4c99341584a886d10861"
+    },
+    {
+      "ficheiro": "schemas/envelope.schema.json",
+      "hash_sha256": "sha256:d55c2dc452f6e0979a39cbf463715a4ce9ac6837e3b684d6c0f0606fb2dc82c9"
+    },
+    {
+      "ficheiro": "schemas/ext.at.liquidacao-irs.schema.json",
+      "hash_sha256": "sha256:4fa137b855ae7811ab46e43dd4313b4da4f2cb2d069f7229bd9e700cef1bcc28"
+    },
+    {
+      "ficheiro": "schemas/manifest.schema.json",
+      "hash_sha256": "sha256:2aca2688e2be95c254024b1832e1f01045c82c95da9ced39a54a32d734dc2c69"
+    },
+    {
+      "ficheiro": "schemas/ncrtf.schema.json",
+      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+    },
+    {
+      "ficheiro": "schemas/ndf-core.schema.json",
+      "hash_sha256": "sha256:681e8093b716347d302948fc5723b2da23287dfe249eee72fb1000b00c5fc4e3"
+    },
+    {
+      "ficheiro": "schemas/ndt.schema.json",
+      "hash_sha256": "sha256:f262c3aa819230be7e966528839e6e9e59a6daf4275942a2db9d92969d0c08f3"
+    }
+  ]
+}

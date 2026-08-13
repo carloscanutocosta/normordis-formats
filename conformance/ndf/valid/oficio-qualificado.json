@@ -49,6 +49,9 @@
       "cargo": "Director-Geral"
     }
   },
+  "participantes": [
+    { "participante_ref": "user:100", "papel": "autor" }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "lc/450.10.001",
     "prazo_conservacao_administrativa": {

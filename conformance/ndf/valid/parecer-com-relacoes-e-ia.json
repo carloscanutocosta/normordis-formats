@@ -36,8 +36,8 @@
     }
   ],
   "participantes": [
-    { "participante_ref": "user:305", "tipo": "pessoa", "papel": "autor" },
-    { "participante_ref": "user:306", "tipo": "pessoa", "papel": "revisor_humano" }
+    { "participante_ref": "user:305", "papel": "autor" },
+    { "participante_ref": "user:306", "papel": "revisor_humano" }
   ],
   "proveniencia_ia": {
     "utilizada": true,

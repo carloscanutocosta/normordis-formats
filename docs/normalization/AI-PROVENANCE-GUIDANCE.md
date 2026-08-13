@@ -46,8 +46,34 @@ retenção, e referenciá-la a partir de `evidencia_ref` (identificador + hash)
 não substitui a atribuição de autoria em `participantes` (SPEC.md §2.12). Um
 documento redigido com apoio de IA e revisto por um humano continua a ter
 esse humano como autor em `participantes`; a IA aparece apenas como sistema
-interveniente em `proveniencia_ia.intervencoes[].sistema`, nunca como
-`participante` com papel de autor, aprovador ou decisor (§2.13.4).
+interveniente em `proveniencia_ia.intervencoes[].sistema`, **nunca em
+`participantes`, sob nenhum papel** (§2.13.4).
+
+Desde 2026-08-13, `participantes` é um índice exclusivamente de pessoas
+singulares: o papel `sistema_tecnico`, que antes admitia lá um sistema de IA,
+foi removido (SPEC.md §2.12.7, ADR-013).
+
+## Fronteira com `proveniencia_sistema` — regra normativa
+
+O NDF tem dois blocos de proveniência técnica, e a fronteira entre eles é
+normativa, não uma questão de arrumação:
+
+| Bloco | Para quê |
+|---|---|
+| `proveniencia_sistema` (§2.14) | sistemas **determinísticos** — motores de cálculo, emissores, validadores |
+| `proveniencia_ia` (§2.13) | qualquer componente **não determinístico** |
+
+**Qualquer componente não determinístico pertence a `proveniencia_ia`, sem
+exceção**, mesmo quando embebido num *pipeline* automático (§2.14.4). Um
+sistema que incorpore um modelo de linguagem ou um classificador estatístico
+declara em `proveniencia_sistema` a parte determinística, e a intervenção do
+componente não determinístico em `proveniencia_ia`, com o
+`revisao_humana.estado` que §2.13.3 exige.
+
+A razão é prática e não formal: declarar um modelo como "sistema" contornaria
+o estado de revisão humana obrigatório — que é o mecanismo de garantia central
+deste bloco. A escolha de campo não pode ser um caminho para evitar a
+supervisão humana.
 
 ## Revisão humana — porque `"pendente"` é um valor válido e útil
 

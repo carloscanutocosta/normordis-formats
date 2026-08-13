@@ -78,8 +78,51 @@
     "proveniencia_ia": {
       "$ref": "#/$defs/proveniencia_ia",
       "description": "Evidence of AI system involvement in producing or reviewing this document. Optional — only meaningful when AI materially influenced the content. See SPEC.md §2.13."
+    },
+    "proveniencia_sistema": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/proveniencia_sistema_entrada" },
+      "description": "Deterministic system(s) that produced this document's content. Array, ordered chronologically by 'gerado_em', to support production chains (calculation engine → validation → issuance). Optional. Any non-deterministic component belongs in proveniencia_ia, never here. See SPEC.md §2.14."
+    },
+    "imputacao": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/imputacao_entrada" },
+      "description": "Legal responsibility for the document and the title under which it is held — distinct from who materially produced it. More than one entry means a joint act by two or more bodies, never a delegation chain. Optional. See SPEC.md §2.15."
     }
   },
+  "anyOf": [
+    {
+      "title": "Human origin",
+      "required": ["participantes"],
+      "properties": {
+        "participantes": {
+          "contains": {
+            "type": "object",
+            "required": ["papel"],
+            "properties": {
+              "papel": { "enum": ["autor", "coautor", "decisor"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "System origin",
+      "required": ["proveniencia_sistema"]
+    },
+    {
+      "title": "AI origin",
+      "required": ["proveniencia_ia"],
+      "properties": {
+        "proveniencia_ia": {
+          "required": ["utilizada"],
+          "properties": { "utilizada": { "const": true } }
+        }
+      }
+    }
+  ],
   "$defs": {
     "metadados": {
       "type": "object",
@@ -87,9 +130,12 @@
       "properties": {
         "tipo_documento_ref": {
           "type": "string",
-          "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$",
-          "description": "Versioned reference to the document type schema. Format: '<id>@<versao>'.",
-          "examples": ["oficio@1.0.0", "informacao-tecnica@1.0.0", "despacho@1.0.0"]
+          "oneOf": [
+            { "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$" },
+            { "pattern": "^ext\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*@[0-9].+$" }
+          ],
+          "description": "Versioned reference to the document type schema. Canonical form '<id>@<versao>' for cross-organisational document forms held in specs/registry/, or qualified extension 'ext.<entidade>.<tipo>@<versao>' for domain-specific types defined and maintained by a producing entity. An extension type's schema MUST travel inside the .ndfpkg under schemas/. See SPEC.md §2.9.2 and ADR-014.",
+          "examples": ["oficio@1.0.0", "informacao-tecnica@1.0.0", "despacho@1.0.0", "ext.at.liquidacao-irs@2026.1"]
         },
         "entidade_produtora": {
           "type": "object",
@@ -299,22 +345,212 @@
         "participante_ref": {
           "type": "string",
           "minLength": 1,
-          "description": "Stable institutional identifier of the participant (person, entity or system). Not a display name — display data belongs to the tipo_documento_ref schema and/or the NDT."
-        },
-        "tipo": {
-          "type": "string",
-          "enum": ["pessoa", "sistema", "entidade"],
-          "description": "Nature of the participant. Defaults to 'pessoa' when omitted."
+          "description": "Stable institutional identifier of the natural person. Not a display name — display data belongs to the tipo_documento_ref schema and/or the NDT."
         },
         "papel": {
           "type": "string",
           "enum": [
-            "autor", "coautor", "revisor_humano", "validador", "aprovador",
-            "decisor", "representante", "entidade_produtora", "sistema_tecnico"
+            "autor", "coautor", "revisor_humano",
+            "decisor", "representante", "responsavel_tecnico"
           ],
-          "description": "Role exercised by this participant in producing this document. Independent of any electronic signature — a participant may be an author without signing, and a signatory may sign without being an author."
+          "description": "Role exercised by this natural person in producing this document. Independent of any electronic signature — a participant may be an author without signing, and a signatory may sign without being an author. Systems belong in proveniencia_sistema, AI in proveniencia_ia, and legal responsibility in imputacao."
+        },
+        "qualificacao": {
+          "type": "object",
+          "required": ["tipo", "identificador"],
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Professional capacity, when it is a condition of the document's validity. Open enum: 'contabilista_certificado', 'revisor_oficial_contas', 'advogado', 'engenheiro', 'arquiteto', 'medico'."
+            },
+            "identificador": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Professional body membership identifier. External reference, not resolved by the NDF.",
+              "examples": ["occ:12345", "oa:54321"]
+            }
+          },
+          "additionalProperties": false,
+          "description": "Optional. Professional capacity of this person, when legally required for the document to be valid. See SPEC.md §2.12.6."
         }
       },
+      "additionalProperties": false
+    },
+    "referencia_externa": {
+      "type": "object",
+      "description": "Reference to an artefact kept outside the NDF, under its own access and retention policy. Not resolved by the NDF — same principle as participante_ref (§2.12.4) and tipo_classificacao_ref (§3.2.1).",
+      "properties": {
+        "tipo": { "type": "string", "minLength": 1 },
+        "identificador": { "type": "string", "minLength": 1 },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "proveniencia_sistema_entrada": {
+      "type": "object",
+      "required": ["sistema", "gerado_em"],
+      "properties": {
+        "sistema": {
+          "type": "object",
+          "required": ["nome", "identificador", "versao"],
+          "properties": {
+            "nome": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Name of the producing system."
+            },
+            "identificador": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Stable institutional identifier of the system. External reference, not resolved by the NDF.",
+              "examples": ["at:sliq-irs"]
+            },
+            "versao": {
+              "type": "string",
+              "minLength": 1,
+              "description": "System version at the time the content was produced. The version determines how the result was computed — it is the field that makes this block worth recording.",
+              "examples": ["2026.4.17"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "componente": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional. Component within the system responsible for this production step.",
+          "examples": ["motor-calculo", "emissor-notificacoes"]
+        },
+        "versao_componente": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional. Version of the component."
+        },
+        "gerado_em": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Instant at which this step produced its output. Entries are ordered by non-decreasing gerado_em (SPEC.md §2.14.3) — JCS preserves array order, so the order is covered by payload_hash."
+        },
+        "regra_ref": {
+          "$ref": "#/$defs/referencia_externa",
+          "description": "Optional. Reference to the rule set, rate table or calculation basis applied."
+        },
+        "build_ref": {
+          "$ref": "#/$defs/referencia_externa",
+          "description": "Optional. Reference to the exact build of the system. Consider omitting in externally circulated documents — see SPEC.md §2.14.5."
+        },
+        "configuracao_ref": {
+          "$ref": "#/$defs/referencia_externa",
+          "description": "Optional. Reference to the configuration in force. Consider omitting in externally circulated documents — see SPEC.md §2.14.5."
+        }
+      },
+      "additionalProperties": false
+    },
+    "imputacao_entrada": {
+      "type": "object",
+      "required": ["imputado", "titulo"],
+      "properties": {
+        "imputado": {
+          "type": "object",
+          "required": ["designacao"],
+          "properties": {
+            "designacao": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Designation of the body or person legally answerable for the document.",
+              "examples": ["Diretor de Serviços do IRS"]
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Optional. Stable institutional identifier. External reference, not resolved by the NDF.",
+              "examples": ["at:dsirs", "nif:123456789"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "titulo": {
+          "type": "string",
+          "enum": [
+            "competencia_propria", "delegacao", "subdelegacao",
+            "declaracao_propria", "aceitacao_expressa", "efeito_legal"
+          ],
+          "description": "Title under which legal responsibility is held. Administrative-act regime: competencia_propria, delegacao, subdelegacao. Declarative regime: declaracao_propria, aceitacao_expressa, efeito_legal. See SPEC.md §2.15.2."
+        },
+        "fundamento": {
+          "type": "object",
+          "properties": {
+            "descricao": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Legal basis in human-readable form.",
+              "examples": ["Despacho n.º 000/2026", "CIRS, art. 58.º-A"]
+            },
+            "publicacao_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Official publication reference of the enabling act. Required for delegacao and subdelegacao — CPA art. 151.º/1/a) makes the mention of delegation mandatory.",
+              "examples": ["DR, 2.ª série, n.º 000, de 2026-01-15"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "em": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Instant of the act that established the imputation. Required for aceitacao_expressa. For an authenticated submission, the instant of submission."
+        },
+        "autenticacao": {
+          "type": "object",
+          "required": ["meio"],
+          "description": "Optional. Means by which this imputado was authenticated. Recorded per entry, not per document: where the law requires authentication of more than one party (e.g. a joint IRS declaration by both sujeitos passivos), each has its own entry and may authenticate by a different means. See SPEC.md §2.15.4.",
+          "properties": {
+            "meio": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Authentication means. Open enum: 'chave_movel_digital', 'cartao_cidadao', 'senha_acesso', 'certificado_qualificado', 'presencial'. In-person identification is deliberately included: it has the same legal effect as authenticated digital access, and a digital-only vocabulary would force the in-person case to be modelled by omission."
+            },
+            "nivel_garantia": {
+              "type": "string",
+              "enum": ["baixo", "substancial", "elevado"],
+              "description": "Technical level of assurance of the authentication mechanism, in eIDAS terms. Optional — the producing system may not classify it. This does NOT grade the imputation: portal password, Chave Móvel Digital and Cartão de Cidadão are all personal, non-transferable credentials whose use is inherently the holder's responsibility, and the imputation is identical in all three cases. See SPEC.md §2.15.4."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["titulo"],
+            "properties": { "titulo": { "enum": ["delegacao", "subdelegacao"] } }
+          },
+          "then": {
+            "required": ["fundamento"],
+            "properties": { "fundamento": { "required": ["publicacao_ref"] } }
+          }
+        },
+        {
+          "if": {
+            "required": ["titulo"],
+            "properties": { "titulo": { "const": "aceitacao_expressa" } }
+          },
+          "then": { "required": ["em"] }
+        },
+        {
+          "if": {
+            "required": ["titulo"],
+            "properties": { "titulo": { "const": "efeito_legal" } }
+          },
+          "then": {
+            "required": ["fundamento"],
+            "properties": { "fundamento": { "required": ["descricao"] } }
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "proveniencia_ia": {

@@ -125,6 +125,24 @@
       }
     }
   },
+  "participantes": [
+    { "participante_ref": "nif:123456789", "papel": "autor" },
+    { "participante_ref": "nif:987654321", "papel": "coautor" }
+  ],
+  "imputacao": [
+    {
+      "imputado": { "designacao": "Sujeito passivo A", "ref": "nif:123456789" },
+      "titulo": "declaracao_propria",
+      "em": "2026-05-20T14:03:00Z",
+      "autenticacao": { "meio": "chave_movel_digital", "nivel_garantia": "elevado" }
+    },
+    {
+      "imputado": { "designacao": "Sujeito passivo B", "ref": "nif:987654321" },
+      "titulo": "declaracao_propria",
+      "em": "2026-05-20T14:06:00Z",
+      "autenticacao": { "meio": "senha_acesso", "nivel_garantia": "substancial" }
+    }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "pcaap/120.20.001",
     "prazo_conservacao_administrativa": {

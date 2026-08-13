@@ -34,6 +34,9 @@
       "cargo": "Subdirectora-Geral"
     }
   },
+  "participantes": [
+    { "participante_ref": "user:110", "papel": "decisor" }
+  ],
   "avaliacao": {
     "tipo_classificacao_ref": "lc/150.30.400",
     "prazo_conservacao_administrativa": {
