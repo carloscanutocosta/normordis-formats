@@ -1,6 +1,7 @@
 {
   "_comment": "Inválido: content vazio na raiz. Viola minItems:1 no schema.",
   "_expected_error": "content deve ter pelo menos 1 elemento",
+  "_expected_match": "\\[\\] is too short.*campo: content",
   "ncrtf_version": "2.0.0",
   "content": []
 }

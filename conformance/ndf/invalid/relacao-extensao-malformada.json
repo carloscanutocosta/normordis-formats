@@ -1,6 +1,7 @@
 {
   "_comment": "INVÁLIDO: relacoes[0].tipo tenta usar extensão qualificada mas o formato está malformado (entidade em maiúsculas). Violação: §2.11.7 — 'entidade' DEVE ser lowercase [a-z][a-z0-9-]*.",
   "_expected_error": "relacoes[0].tipo 'ext.AT.retificacao-oficiosa' não corresponde nem ao enum fechado de §2.11.2 nem ao padrão de extensão qualificada de §2.11.7",
+  "_expected_match": "'ext\\.AT\\.retificacao-oficiosa' is not valid under any of the given schemas.*relacoes/0/tipo",
   "ndf_version": "1.0.0",
   "ndf_id": "b3c4d5e6-f7a8-4901-b234-56789abcdef0",
   "estado": "ativo",
@@ -9,29 +10,45 @@
   "ndt_version_ref": "despacho-generico@1.0.0",
   "metadados": {
     "tipo_documento_ref": "despacho@1.0.0",
-    "entidade_produtora": { "designacao": "Autoridade Tributária e Aduaneira" },
-    "contem_dados_pessoais": false,
-    "responsavel_tratamento": "Autoridade Tributária e Aduaneira"
+    "entidade_produtora": {
+      "designacao": "Autoridade Tributária e Aduaneira"
+    },
+    "entidade_responsavel": "Autoridade Tributária e Aduaneira",
+    "contem_dados_pessoais": false
   },
   "documento": {
     "numero": "AT/2026/00321",
     "data": "2026-06-20",
     "texto": "Retificação oficiosa.",
-    "decisor": { "nome": "Carla Nunes", "cargo": "Chefe de Divisão" }
+    "decisor": {
+      "nome": "Carla Nunes",
+      "cargo": "Chefe de Divisão"
+    }
   },
+  "participantes": [
+    {
+      "participante_ref": "user:100",
+      "papel": "autor"
+    }
+  ],
   "relacoes": [
     {
       "tipo": "ext.AT.retificacao-oficiosa",
       "alvo": {
-        "ndf_id": "c4d5e6f7-a8b9-4012-c345-6789abcdef01",
+        "ndf_id": "c4d5e6f7-a8b9-4012-8345-6789abcdef01",
         "payload_hash": "sha256:5c1e2f3a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a"
       }
     }
   ],
   "avaliacao": {
-    "tipo_classificacao_ref": "lc/450.10.001",
-    "prazo_conservacao_administrativa": { "valor": 10, "unidade": "anos", "forma_contagem": "data_documento" },
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao": {
+      "valor": 10,
+      "unidade": "anos",
+      "forma_contagem": "data_documento"
+    },
     "destino_final": "eliminacao",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }

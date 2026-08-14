@@ -1,6 +1,7 @@
 {
   "_comment": "Inválido: nó image com campo 'src' (data URL) em vez de 'ref'. Em v2.0.0, 'ref' é obrigatório e 'src' não é um campo permitido (additionalProperties: false). Viola §4.6 e §10.1.",
   "_expected_error": "image: campo 'ref' obrigatório em falta; 'src' não é campo permitido em NCRTF canónico",
+  "_expected_match": "'type': 'image'.*'src':.*is not valid under any of the given schemas",
   "ncrtf_version": "2.0.0",
   "content": [
     {

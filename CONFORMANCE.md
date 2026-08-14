@@ -13,6 +13,10 @@ conformidade com uma especificação NORMORDIS.
 - Uma declaração é sempre específica de versão, papel e perfil.
 - A suite complementa, mas não substitui, requisitos normativos ainda não
   traduzidos em testes.
+- Um caso negativo tem de ser rejeitado **pela violação que documenta**.
+  Rejeição por defeito acidental não constitui evidência: o caso deixa de
+  cobrir a regra sem que a suite o assinale. Ver NDF SPEC.md §9.4.1 e o campo
+  `_expected_match` dos casos em `conformance/*/invalid/`.
 
 ## Papéis
 

@@ -1,5 +1,6 @@
 {
   "_expected_error": "dimensões devem ser positivas",
+  "_expected_match": "largura deve ser maior que zero",
   "ndt_version": "2.0.0",
   "schema_id": "teste",
   "versao_ndt": "1.0.0",
@@ -9,12 +10,20 @@
       "graficos": [
         {
           "tipo": "rectangulo",
-          "posicao": { "x": 0, "y": 0 },
+          "posicao": {
+            "x": 0,
+            "y": 0
+          },
           "largura": 0,
           "altura": 10
         }
       ]
     }
   ],
-  "sequencia": [{ "pagina_def": "p1" }]
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
 }

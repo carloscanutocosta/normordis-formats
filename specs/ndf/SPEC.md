@@ -96,7 +96,7 @@ NDF-core + NDT (referenciado) → reprodução visual (PDF, Word, ...)
 
 | Parte | Conteúdo | Canonicalizado/assinado? |
 |---|---|---|
-| **NDF-core** | conteúdo do documento, metadados descritivos, classificação, avaliação arquivística (PCA/DF), referência ao NDT | Sim — é exatamente o que é canonicalizado (JCS) e assinado |
+| **NDF-core** | conteúdo do documento, metadados descritivos, classificação, avaliação arquivística (prazo de conservação e destino final), referência ao NDT | Sim — é exatamente o que é canonicalizado (JCS) e assinado |
 | **Envelope** | assinaturas CAdES-B-LTA, timestamps RFC 3161, material de validação (cadeia de certificados + revogação) | Não — é produzido a partir da assinatura sobre o NDF-core; adicionado depois |
 
 A separação evita circularidade: o envelope fica fora dos bytes sobre os quais a própria assinatura é calculada.
@@ -129,7 +129,7 @@ O NDF admite dados pessoais (NIF, dados fiscais, dados de saúde, dados processu
 
 A tensão é resolvida pela articulação de três mecanismos legais e técnicos:
 
-1. **Base legal de conservação prevalente**: documentos da Administração Pública são conservados com base em obrigação legal (Art.º 6.º, n.º 1, al. c) RGPD) e missão de interesse público (al. e)). O direito ao apagamento cede face a obrigações legais de conservação (Art.º 17.º, n.º 3, al. b) RGPD) — o PCA/DF resolve esta decisão por tipo de documento.
+1. **Base legal de conservação prevalente**: documentos da Administração Pública são conservados com base em obrigação legal (Art.º 6.º, n.º 1, al. c) RGPD) e missão de interesse público (al. e)). O direito ao apagamento cede face a obrigações legais de conservação (Art.º 17.º, n.º 3, al. b) RGPD) — o prazo de conservação e o destino final (§3) resolvem esta decisão por tipo de documento.
 
 2. **Pseudonimização pré-arquivo**: quando aplicável, é possível pseudonimizar dados pessoais antes da finalização. O NDF finalizado contém o pseudónimo; a tabela de correspondência é gerida fora do NDF com controlos de acesso próprios.
 
@@ -140,15 +140,19 @@ A tensão é resolvida pela articulação de três mecanismos legais e técnicos
 
 #### Campos de metadados obrigatórios relativos a proteção de dados
 
-O bloco `metadados` DEVE incluir:
+O bloco `metadados` DEVE declarar sempre `contem_dados_pessoais` e, **se e só se**
+esse valor for `true`, o bloco `protecao_dados`:
 
 ```json
 {
   "metadados": {
+    "entidade_responsavel": "string (entidade que custodia o registo)",
     "contem_dados_pessoais": true,
-    "categorias_dados_pessoais": ["identificacao_fiscal", "rendimentos"],
-    "base_legal_conservacao": "obrigacao_legal",
-    "responsavel_tratamento": "string (identificador da entidade)"
+    "protecao_dados": {
+      "categorias": ["identificacao_fiscal", "rendimentos"],
+      "base_legal_conservacao": "obrigacao_legal",
+      "responsavel_tratamento": "string (identificador da entidade)"
+    }
   }
 }
 ```
@@ -156,9 +160,22 @@ O bloco `metadados` DEVE incluir:
 | Campo | Obrigatório | Descrição |
 |---|---|---|
 | `contem_dados_pessoais` | Sim | `true` \| `false` |
-| `categorias_dados_pessoais` | Condicional | Obrigatório se `contem_dados_pessoais: true`. Enum aberto: `identificacao_fiscal`, `rendimentos`, `saude`, `dados_processuais`, `outros`. |
-| `base_legal_conservacao` | Condicional | Obrigatório se `contem_dados_pessoais: true`. `obrigacao_legal` \| `interesse_publico` \| `consentimento` \| `contrato`. |
-| `responsavel_tratamento` | Sim | Identificador da entidade responsável pelo tratamento. |
+| `protecao_dados` | Condicional | Obrigatório se `contem_dados_pessoais: true`; **PROIBIDO** caso contrário. |
+| `protecao_dados.categorias` | Sim, dentro do bloco | Pelo menos um valor. Enum aberto: `identificacao_fiscal`, `rendimentos`, `saude`, `dados_processuais`, `biometricos`, `outros`. |
+| `protecao_dados.base_legal_conservacao` | Sim, dentro do bloco | `obrigacao_legal` \| `interesse_publico` \| `consentimento` \| `contrato`. |
+| `protecao_dados.responsavel_tratamento` | Sim, dentro do bloco | Identificador da entidade responsável pelo tratamento (RGPD, Art.º 13.º–14.º). |
+
+**Responsável pelo tratamento e custódia do registo são conceitos distintos.**
+A responsabilidade pelo tratamento na aceção do RGPD só existe quando há dados
+pessoais e vive dentro de `protecao_dados`. A responsabilidade pela custódia do
+registo existe em qualquer documento e declara-se em
+`metadados.entidade_responsavel` (§2.7.2), que é obrigatório sempre. As duas
+entidades coincidem com frequência, mas não têm de coincidir. Ver ADR-016.
+
+`contem_dados_pessoais` mantém-se obrigatório mesmo quando é `false`: num
+documento imutável e assinado, a declaração explícita de ausência de dados
+pessoais é uma afirmação com valor probatório, distinta da simples omissão de
+informação sobre o assunto.
 
 ### 1.5 Confidencialidade e controlo de acesso
 
@@ -227,7 +244,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_ndt"`. Ver §2.6. |
 | `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
-| `avaliacao` | Sim | Avaliação arquivística (PCA/DF), conforme MEG/DGLAB. Ver §3. |
+| `avaliacao` | Sim | Avaliação arquivística — prazo de conservação e destino final, sob o perfil declarado. Ver §3. |
 | `relacoes` | Não | Relações verificáveis com outros documentos NDF. Ver §2.11. |
 | `participantes` | Não | Pessoas singulares que intervieram na produção, distintas de quem assina. Ver §2.12. |
 | `proveniencia_ia` | Não | Evidência de utilização de sistemas de IA na produção ou revisão do documento. Ver §2.13. |
@@ -406,8 +423,8 @@ evitando um segundo schema a versionar, testar e manter sincronizado.
     "payload_hash": "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b",
     "validation_code": "NDF-A3F7K2MXPQR9ZTNW8VJ",
     "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3",
-    "tipo_classificacao_ref": "lc/450.10.001",
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3",
+    "classificacao_ref": "lc/450.10.001",
     "autorizado_por": "user:123"
   },
   "previous_event_hash": "sha256:9f2c1a7b3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4",
@@ -483,15 +500,28 @@ O bloco `metadados` contém os campos descritivos transversais a qualquer tipo d
       "nif": "123456789",
       "codigo_dglab": "PT-DGE-000"
     },
+    "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Resposta ao ofício n.º 123/2026",
     "numero_referencia": "OF/2026/00123",
     "processo_ref": "proc.º 456/2026",
     "idioma": "pt",
     "classificacao_seguranca": "uso_interno",
-    "contem_dados_pessoais": false,
-    "categorias_dados_pessoais": [],
-    "base_legal_conservacao": null,
-    "responsavel_tratamento": "Direção-Geral de Exemplo"
+    "contem_dados_pessoais": false
+  }
+}
+```
+
+Com dados pessoais, o mesmo bloco acresce `protecao_dados` (§1.4):
+
+```json
+{
+  "metadados": {
+    "contem_dados_pessoais": true,
+    "protecao_dados": {
+      "categorias": ["identificacao_fiscal", "dados_processuais"],
+      "base_legal_conservacao": "obrigacao_legal",
+      "responsavel_tratamento": "Direção-Geral de Exemplo"
+    }
   }
 }
 ```
@@ -502,15 +532,14 @@ O bloco `metadados` contém os campos descritivos transversais a qualquer tipo d
 |---|---|---|---|
 | `tipo_documento_ref` | Sim | string | Referência versionada ao schema do tipo de documento. Formato canónico `"<id>@<versao>"` ou extensão qualificada `"ext.<entidade>.<tipo>@<versao>"`. Define a estrutura de `documento`. Ver §2.9.2, §2.9.5 e `specs/registry/`. |
 | `entidade_produtora` | Sim | objeto | Entidade responsável pela produção do documento. Ver §2.7.3. |
+| `entidade_responsavel` | Sim | string | Designação da entidade responsável pela **custódia do registo**. Obrigatório em qualquer documento, com ou sem dados pessoais. NÃO DEVE ser confundido com `protecao_dados.responsavel_tratamento` (§1.4), que é o responsável pelo tratamento na aceção do RGPD e só existe quando há dados pessoais. Ver ADR-016. |
 | `assunto` | Recomendado | string | Título ou descrição breve do documento — indexável para pesquisa e arquivo. |
 | `numero_referencia` | Recomendado | string | Número de referência documental (ex.: `"OF/2026/00123"`). |
 | `processo_ref` | Opcional | string | Referência ao processo ou procedimento a que o documento pertence. |
 | `idioma` | Opcional | string (ISO 639-1) | Idioma principal do documento. Quando omitido, assume-se `"pt"`. |
 | `classificacao_seguranca` | Recomendado | string (enum) | Classificação de segurança da informação. Ver §2.7.4. Quando omitido, o sistema produtor DEVE assumir `"uso_interno"`. |
 | `contem_dados_pessoais` | Sim | boolean | `true` se o documento contiver dados pessoais na acepção do RGPD. |
-| `categorias_dados_pessoais` | Condicional | array de string | Obrigatório se `contem_dados_pessoais: true`. Enum aberto: `"identificacao_fiscal"`, `"rendimentos"`, `"saude"`, `"dados_processuais"`, `"biometricos"`, `"outros"`. Ver §1.4. |
-| `base_legal_conservacao` | Condicional | string (enum) | Obrigatório se `contem_dados_pessoais: true`. `"obrigacao_legal"` \| `"interesse_publico"` \| `"consentimento"` \| `"contrato"`. Ver §1.4. |
-| `responsavel_tratamento` | Sim | string | Designação da entidade responsável pelo tratamento. Obrigatório mesmo quando `contem_dados_pessoais: false` — identifica o responsável pela custódia do registo. |
+| `protecao_dados` | Condicional | objeto | Obrigatório se `contem_dados_pessoais: true`; **PROIBIDO** caso contrário. Agrupa `categorias`, `base_legal_conservacao` e `responsavel_tratamento`. Ver §1.4. |
 
 #### 2.7.3 `entidade_produtora`
 
@@ -1072,7 +1101,7 @@ diferença, quando exista, seja intencional e não acidental.
 #### 2.12.4 `participante_ref` como referência externa
 
 `participante_ref` é uma referência externa, não resolvida pelo NDF —
-paralelo direto a `avaliacao.tipo_classificacao_ref` (§3.2.1), que também
+paralelo direto a `avaliacao.classificacao_ref` (§3.2.1), que também
 referencia um instrumento externo sem o incorporar. O NDF não define nem
 embute um esquema de identidade verificável: a resolução de
 `participante_ref` para uma identidade concreta (nome, função,
@@ -1223,7 +1252,7 @@ estar presentes.
 `pesquisa`, `traducao`, `deteccao_erros`, `outro`). Quando o valor for
 `"outro"`, RECOMENDA-SE preencher `finalidade_detalhe` com uma descrição
 textual — o mesmo padrão já usado em
-`avaliacao.prazo_conservacao_administrativa.forma_contagem_detalhe` (§3.3).
+`avaliacao.prazo_conservacao.forma_contagem_detalhe` (§3.3).
 
 #### 2.13.4 IA não é signatária, participante nem decisora
 
@@ -1298,7 +1327,7 @@ independente de:
 `regra_ref`, `build_ref` e `configuracao_ref` seguem a mesma forma de
 `proveniencia_ia.intervencoes[].evidencia_ref` — `{ tipo, identificador,
 hash }` — e são **referências externas não resolvidas pelo NDF**, em paralelo
-explícito a `participante_ref` (§2.12.4) e a `tipo_classificacao_ref`
+explícito a `participante_ref` (§2.12.4) e a `classificacao_ref`
 (§3.2.1). O NDF regista a referência e o hash; o artefacto referenciado vive
 no sistema produtor, sob política própria de acesso e retenção.
 
@@ -1628,53 +1657,74 @@ documental que represente um ato administrativo notificável DEVERIA fazê-lo.
 
 ---
 
-## 3. Avaliação arquivística (PCA/DF — MEG/DGLAB)
+## 3. Avaliação arquivística
 
 ### 3.1 Fundamento
 
-Conforme o MEG e os instrumentos da DGLAB (Lista Consolidada e Tabelas de Seleção), todo o documento de arquivo DEVE ter associada uma decisão de avaliação que determina:
+Todo o documento de arquivo DEVE ter associada uma decisão de avaliação que
+determina:
 
-- O **Prazo de Conservação Administrativa (PCA)** — período de manutenção da informação segundo o instrumento aplicável.
-- O **Destino Final (DF)** — decisão de conservação permanente, eliminação, ou conservação parcial por amostragem.
+- O **prazo de conservação** — período durante o qual a informação é mantida,
+  contado a partir de um facto desencadeador declarado.
+- O **destino final** — decisão sobre o que sucede ao documento decorrido esse
+  prazo.
+- O **instrumento** que autoriza a decisão, na versão consultada.
 
-A Lista Consolidada da DGLAB integra estas decisões de avaliação para os processos de negócio executados pela Administração Pública, numa perspetiva suprainstitucional.
+Este trio é comum aos sistemas arquivísticos europeus, ainda que com
+terminologia distinta: em Portugal, PCA e Destino Final segundo os instrumentos
+da DGLAB (Lista Consolidada, Tabelas de Seleção, Portarias de Gestão de
+Documentos); em França, *durée d'utilité administrative* e *sort final* segundo o
+*tableau de gestion*; nos Países Baixos, *bewaartermijn* e *waardering* segundo a
+*selectielijst*; na Alemanha, *Aufbewahrungsfrist* seguida de apreciação pelo
+arquivo competente; no Reino Unido e nas instituições europeias, *retention
+period* e *disposal action* segundo a *retention and disposal schedule*.
+
+O NDF-core fixa a **estrutura** deste trio e delega o **vocabulário** num perfil
+declarado (§3.2.3). O bloco `avaliacao` é obrigatório em qualquer NDF-core.
 
 ### 3.2 Estrutura do bloco `avaliacao`
 
 ```json
 {
   "avaliacao": {
-    "tipo_classificacao_ref": "string",
-    "prazo_conservacao_administrativa": {
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao": {
       "valor": 5,
       "unidade": "anos",
-      "forma_contagem": "string (enum)"
+      "forma_contagem": "data_documento"
     },
-    "destino_final": "string (enum)",
-    "instrumento_avaliacao_versao_ref": "string"
+    "destino_final": "eliminacao",
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }
 ```
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `tipo_classificacao_ref` | string | Referência à classe/série no instrumento de avaliação arquivística. Formato normativo: `"<instrumento>/<codigo_classe>"`. Ver §3.2.1. |
-| `prazo_conservacao_administrativa.valor` | número inteiro ≥ 0 | Quantidade do prazo. |
-| `prazo_conservacao_administrativa.unidade` | string (enum) | `dias \| meses \| anos`. |
-| `prazo_conservacao_administrativa.forma_contagem` | string (enum) | Ver §3.3. |
-| `destino_final` | string (enum) | `conservacao_permanente \| eliminacao \| conservacao_parcial_por_amostragem`. |
-| `instrumento_avaliacao_versao_ref` | string | Instrumento de avaliação e versão usada para resolver PCA/DF no momento da finalização. Formato: `"<instrumento>/<versao>"`. Ver §3.2.2. |
+| Campo | Obrigatório | Tipo | Descrição |
+|---|---|---|---|
+| `perfil` | Sim | string | Perfil de avaliação arquivística aplicável. Determina o vocabulário e a sintaxe de `classificacao_ref` e `instrumento_ref`. Ver §3.2.3. |
+| `classificacao_ref` | Sim | string | Referência à classe/série no instrumento aplicável. Sintaxe definida pelo perfil. Ver §3.2.1. |
+| `prazo_conservacao.valor` | Sim | inteiro ≥ 0 | Quantidade do prazo. |
+| `prazo_conservacao.unidade` | Sim | string (enum) | `dias` \| `meses` \| `anos`. |
+| `prazo_conservacao.forma_contagem` | Sim | string (enum) | Facto a partir do qual o prazo é contado. Ver §3.3. |
+| `destino_final` | Sim | string (enum) | Destino decorrido o prazo. Ver §3.4. |
+| `autoridade_avaliacao` | Condicional | string | Obrigatório **se e só se** `destino_final: "a_determinar"`. Ver §3.4.1. |
+| `instrumento_ref` | Sim | string | Instrumento e versão consultados para resolver prazo e destino no momento da finalização. Sintaxe definida pelo perfil. Ver §3.2.2. |
 
-### 3.2.1 Formato normativo de `tipo_classificacao_ref`
+#### 3.2.1 `classificacao_ref`
 
-A string segue o formato `"<instrumento>/<codigo_classe>"`:
+Identifica a classe, série ou entrada do instrumento de avaliação sob a qual o
+documento é classificado. A sintaxe **DEVE** obedecer ao schema do perfil
+declarado; o NDF-core exige apenas que seja uma string não vazia.
+
+No perfil `pt-dglab`, a string segue o formato `"<instrumento>/<codigo_classe>"`:
 
 | Componente | Descrição |
 |---|---|
-| `instrumento` | Identificador do instrumento de avaliação. Valores canónicos: `"lc"` (Lista Consolidada DGLAB), `"ts"` (Tabela de Seleção institucional), `"portaria"` (Portaria de Gestão de Documentos). Extensível por entidades com instrumentos próprios homologados pela DGLAB. |
-| `codigo_classe` | Código da classe ou série dentro do instrumento — segue a codificação definida pelo próprio instrumento (ex.: `"450.10.001"` para a Lista Consolidada DGLAB). |
+| `instrumento` | Identificador do instrumento. Valores canónicos: `"lc"` (Lista Consolidada DGLAB), `"ts"` (Tabela de Seleção institucional), `"portaria"` (Portaria de Gestão de Documentos). Extensível por entidades com instrumentos próprios homologados pela DGLAB. |
+| `codigo_classe` | Código da classe ou série dentro do instrumento — segue a codificação definida pelo próprio instrumento. |
 
-**Exemplos válidos**:
+**Exemplos válidos no perfil `pt-dglab`**:
 ```
 "lc/450.10.001"    — classe 450.10.001 da Lista Consolidada DGLAB
 "lc/150.30.400"    — classe 150.30.400 da Lista Consolidada DGLAB
@@ -1682,26 +1732,29 @@ A string segue o formato `"<instrumento>/<codigo_classe>"`:
 "portaria/1253-A/2009/II-3"  — série II-3 da Portaria n.º 1253-A/2009
 ```
 
-O instrumento e a versão consultados são registados em `instrumento_avaliacao_versao_ref`, permitindo que a regra aplicável seja rastreável mesmo após atualização do instrumento.
-
-**RECOMENDA-SE** que o sistema produtor resolva `tipo_classificacao_ref`
+**RECOMENDA-SE** que o sistema produtor resolva `classificacao_ref`
 automaticamente a partir do tipo de documento, para reduzir erro humano e
 garantir consistência entre documentos do mesmo tipo. O NDF não exige um
-processo específico de resolução — manual, automático, ou por outra regra
-é responsabilidade da aplicação produtora — apenas que o valor final seja
-válido, coerente com o instrumento referenciado, e imutável após a
-finalização (§2.1).
+processo específico de resolução — manual, automático, ou por outra regra é
+responsabilidade da aplicação produtora — apenas que o valor final seja válido
+para o perfil declarado, coerente com o instrumento referenciado, e imutável
+após a finalização (§2.1).
 
-### 3.2.2 Formato normativo de `instrumento_avaliacao_versao_ref`
+#### 3.2.2 `instrumento_ref`
 
-A string segue o formato `"<instrumento>/<versao>"`:
+Regista o instrumento e a versão consultados, permitindo que a regra aplicável
+seja rastreável mesmo após atualização do instrumento. A sintaxe **DEVE**
+obedecer ao schema do perfil declarado; o NDF-core exige apenas que seja uma
+string não vazia.
+
+No perfil `pt-dglab`, a string segue o formato `"<instrumento>/<versao>"`:
 
 | Componente | Descrição |
 |---|---|
-| `instrumento` | Identificador do instrumento. Valores canónicos: `"lc"` (Lista Consolidada DGLAB), `"pgd"` (Plano de Gestão de Documentos), `"portaria"` (Portaria de Gestão de Documentos), `"ts"` (Tabela de Seleção institucional). Extensível por entidades com instrumentos próprios. |
+| `instrumento` | Identificador do instrumento. Valores canónicos: `"lc"`, `"pgd"` (Plano de Gestão de Documentos), `"portaria"`, `"ts"`. Extensível por entidades com instrumentos próprios. |
 | `versao` | Identificador da versão ou edição consultada — suficiente para localizar o instrumento exato. Não há formato imposto; RECOMENDA-SE incluir ano e número de revisão. |
 
-**Exemplos válidos**:
+**Exemplos válidos no perfil `pt-dglab`**:
 ```
 "lc/lista-consolidada-dglab-2023-v3"   — Lista Consolidada DGLAB, edição 2023 v3
 "pgd/pgd-mf-2019-v2"                  — PGD do Ministério das Finanças, v2
@@ -1709,43 +1762,122 @@ A string segue o formato `"<instrumento>/<versao>"`:
 "ts/at/tabela-2022"                    — Tabela de Seleção da AT, edição 2022
 ```
 
-`tipo_classificacao_ref` e `instrumento_avaliacao_versao_ref` DEVEM referenciar o mesmo instrumento: o prefixo de `tipo_classificacao_ref` DEVE corresponder ao `instrumento` de `instrumento_avaliacao_versao_ref`. Exemplo: `"lc/450.10.001"` exige `"lc/..."` em `instrumento_avaliacao_versao_ref`.
+No perfil `pt-dglab`, `classificacao_ref` e `instrumento_ref` **DEVEM**
+referenciar o mesmo instrumento: o prefixo de `classificacao_ref` DEVE
+corresponder ao `instrumento` de `instrumento_ref`. Exemplo: `"lc/450.10.001"`
+exige `"lc/..."` em `instrumento_ref`. Esta regra é específica deste perfil e
+não se aplica a perfis que não a declarem.
+
+#### 3.2.3 Perfis de avaliação
+
+O campo `perfil` identifica o sistema arquivístico sob o qual a decisão de
+avaliação foi tomada. É um enum aberto, com o padrão
+`^([a-z]{2}-[a-z0-9-]+|generic)$` — tipicamente código ISO 3166-1 alpha-2 da
+jurisdição seguido do identificador da autoridade ou do quadro aplicável.
+
+Cada perfil registado tem um schema em
+`specs/registry/profiles/<perfil>.schema.json` que restringe o bloco `avaliacao`
+para essa jurisdição. O schema do perfil **DEVE viajar dentro do `.ndfpkg`**, em
+`schemas/` — pela mesma razão e com o mesmo mecanismo dos schemas de tipo
+documental (§2.9.5, ADR-014): um verificador independente tem de conseguir
+validar o bloco sem acesso a registo nenhum, hoje e daqui a décadas.
+
+Perfis definidos por esta especificação:
+
+| Perfil | Âmbito |
+|---|---|
+| `pt-dglab` | Administração Pública portuguesa — MEG/DGLAB. Impõe a sintaxe `<instrumento>/<...>` (§3.2.1, §3.2.2) e a regra de correspondência de instrumento. |
+| `generic` | Sem restrições jurisdicionais. Para entidades cujo sistema arquivístico não tem ainda perfil registado: a estrutura do bloco continua exigida, nenhuma sintaxe nacional é imposta. |
+
+Um perfil não resolúvel em contexto de pacote é **erro** — o pacote tem de o
+transportar. Fora de contexto de pacote, um perfil não registado é validado
+apenas contra a estrutura do NDF-core.
+
+**Definir um perfil não é matéria desta especificação**: um perfil nacional
+exige confirmação contra os instrumentos legais da jurisdição respetiva, e é
+introduzido por acréscimo ao registo, sem alteração incompatível do NDF-core.
+
+#### 3.2.4 Porque a estrutura fica no core e o vocabulário no perfil
+
+A alternativa considerada — delegar o bloco inteiro ao schema do perfil — foi
+rejeitada por falhar o critério que dá sentido à generalização (ADR-015):
+
+> Um leitor que nunca ouviu falar do perfil declarado DEVE conseguir, apenas com
+> o NDF-core, determinar se o documento é elegível para aplicação do destino
+> final e a partir de que facto se conta o prazo.
+
+Por isso `prazo_conservacao` e `destino_final` são campos concretos do NDF-core,
+com enums fechados, e o perfil restringe vocabulário sem substituir estrutura.
+É o que permite gerir retenção sobre um acervo multi-jurisdicional sem resolver
+perfil nenhum.
 
 ### 3.3 Enum `forma_contagem`
 
-Conjunto fechado, alinhado com as formas de contagem de prazo previstas pela Lista Consolidada/MEG. Valores de referência (a confirmar/ajustar contra a Lista Consolidada vigente no momento da implementação):
+Conjunto fechado. Declara o facto desencadeador a partir do qual o prazo é
+contado — o *trigger* das *retention schedules* anglo-saxónicas e o critério de
+contagem dos instrumentos português e francês.
 
 - `data_documento` — a partir da data de finalização do próprio documento.
 - `encerramento_processo` — a partir do encerramento do processo/procedimento a que o documento pertence.
 - `fim_ano_civil` — a partir do final do ano civil em que o documento foi finalizado.
 - `fim_vigencia` — a partir do termo de vigência (ex.: contratos, regulamentos com prazo de validade).
-- `outro` — forma de contagem específica, com descrição textual adicional (campo `forma_contagem_detalhe`, opcional).
+- `outro` — forma de contagem específica, com descrição textual obrigatória em `forma_contagem_detalhe`.
 
 ### 3.4 Enum `destino_final`
 
-- `conservacao_permanente` — o documento, decorrido o PCA, é destinado a conservação permanente em arquivo.
-- `eliminacao` — o documento, decorrido o PCA, é elegível para eliminação.
-- `conservacao_parcial_por_amostragem` — apenas uma amostra (conforme critério de amostragem definido na Lista Consolidada/Tabela de Seleção) é conservada permanentemente; o remanescente é eliminado.
+- `conservacao_permanente` — decorrido o prazo, o documento é destinado a conservação permanente em arquivo. Cobre tanto a conservação no produtor como a transferência para o arquivo competente; o NDF não distingue os dois casos.
+- `eliminacao` — decorrido o prazo, o documento é elegível para eliminação.
+- `conservacao_parcial_por_amostragem` — apenas uma amostra, conforme o critério definido no instrumento, é conservada permanentemente; o remanescente é eliminado.
+- `a_determinar` — a decisão de destino final não está tomada no momento da finalização. Ver §3.4.1.
 
-### 3.5 Resolução de `prazo_conservacao_administrativa` e `destino_final`
+#### 3.4.1 `a_determinar` e `autoridade_avaliacao`
 
-`prazo_conservacao_administrativa` e `destino_final` DEVEM ser coerentes
-com `tipo_classificacao_ref` e com o instrumento de avaliação identificado
-em `instrumento_avaliacao_versao_ref` no momento da finalização — este
-último regista qual o instrumento e versão consultados, preservando a
-regra aplicável mesmo que o instrumento seja atualizado posteriormente. O
-NDF não impõe o processo pelo qual esses valores são determinados;
-**RECOMENDA-SE** resolvê-los automaticamente a partir do instrumento de
-avaliação carregado no sistema, para reduzir erro humano — mas essa é uma
-decisão de implementação da aplicação produtora, não um requisito do
-formato.
+Em vários sistemas arquivísticos europeus a decisão de destino final **não
+compete à entidade produtora**: esta conserva o documento pelo prazo legal e, no
+termo, oferece-o à autoridade arquivística, que aprecia o seu valor e decide.
+É o modelo alemão de `Anbietung`/`Bewertung`, e corresponde também a
+`voorlopig te bewaren` e `nader te bepalen` nos Países Baixos e à ação `review`
+das *retention schedules* britânicas e das instituições europeias.
+
+Nesses casos, exigir ao produtor que declare um destino final concreto
+obrigá-lo-ia a afirmar o que não sabe. O valor `a_determinar` declara
+explicitamente que a decisão está diferida, e `autoridade_avaliacao` — obrigatório
+se e só se este valor for usado — identifica quem tem competência para a tomar.
+
+O prazo de conservação continua obrigatório: nos sistemas em causa o prazo é
+legal e conhecido mesmo quando a apreciação está pendente. `a_determinar`
+difere o **destino**, nunca o **prazo**.
+
+`autoridade_avaliacao` é PROIBIDO quando `destino_final` tem qualquer outro
+valor — declarar quem decidiria um destino que já está decidido não tem
+significado.
+
+### 3.5 Resolução de `prazo_conservacao` e `destino_final`
+
+`prazo_conservacao` e `destino_final` DEVEM ser coerentes com
+`classificacao_ref` e com o instrumento identificado em `instrumento_ref` no
+momento da finalização — este último regista qual o instrumento e versão
+consultados, preservando a regra aplicável mesmo que o instrumento seja
+atualizado posteriormente. O NDF não impõe o processo pelo qual esses valores
+são determinados; **RECOMENDA-SE** resolvê-los automaticamente a partir do
+instrumento carregado no sistema, para reduzir erro humano — mas essa é uma
+decisão de implementação da aplicação produtora, não um requisito do formato.
 
 ### 3.6 Dados derivados (fora do NDF-core)
 
-A partir de `avaliacao.prazo_conservacao_administrativa` e da data de finalização (`finalizado_em`, campo do envelope/metadados operacionais — não do NDF-core), o sistema calcula e mantém uma data de elegibilidade para aplicação do destino final. Este valor:
+A partir de `avaliacao.prazo_conservacao` e da data de finalização
+(`finalizado_em`, campo do envelope/metadados operacionais — não do NDF-core), o
+sistema calcula e mantém uma data de elegibilidade para aplicação do destino
+final. Este valor:
 
 - **Não** faz parte do NDF-core (não é canonicalizado nem assinado).
-- É puramente operacional, recalculável, e usado para processos de gestão de arquivo (identificação de documentos elegíveis para aplicação de destino final).
+- É puramente operacional, recalculável, e usado para processos de gestão de
+  arquivo (identificação de documentos elegíveis para aplicação de destino
+  final).
+
+Quando `destino_final` é `a_determinar`, a data calculada identifica o momento
+de submissão do documento à autoridade indicada em `autoridade_avaliacao`, e não
+um momento de eliminação ou de conservação definitiva.
 
 ---
 
@@ -1974,7 +2106,7 @@ A finalização **DEVE falhar** se:
 - `nivel_assinatura` contiver um valor fora do enum definido em §2.10.
 - `nivel_assinatura ∈ {"avancada", "qualificada"}` e não estiver disponível um certificado eletrónico conforme (SEA ou SEQ, respectivamente).
 - `nivel_assinatura = "qualificada"` e o certificado não for emitido por um PSSC inscrito na lista de confiança eIDAS.
-- `avaliacao.prazo_conservacao_administrativa` ou `avaliacao.destino_final` não puderem ser resolvidos a partir de `tipo_classificacao_ref` (Lista Consolidada indisponível ou sem entrada correspondente).
+- `avaliacao.prazo_conservacao` ou `avaliacao.destino_final` não puderem ser resolvidos a partir de `classificacao_ref` e do instrumento identificado em `instrumento_ref` (instrumento indisponível ou sem entrada correspondente). Quando o instrumento existe mas a decisão de destino compete a outra autoridade, o caso não é de recusa: declara-se `destino_final: "a_determinar"` (§3.4.1).
 - O conteúdo de `documento`/`metadados` violar as regras de tipos permitidos (§2.8).
 
 ### 5.2 Pipeline (ordem estrita)
@@ -2121,7 +2253,8 @@ documento.ndfpkg (ZIP)
 ├── ndt/
 │   └── <schema_id>@<versao>.ndt.json   — NDT referenciado por ndt_version_ref
 ├── schemas/               — schemas necessários à validação autónoma do pacote
-│   └── <tipo_id>.schema.json           — schema do tipo referenciado por tipo_documento_ref
+│   ├── <tipo_id>.schema.json           — schema do tipo referenciado por tipo_documento_ref
+│   └── <perfil>.schema.json            — schema do perfil referenciado por avaliacao.perfil
 └── recursos/              — recursos visuais partilhados por NDT e NCRTF
     ├── <sha256>.<ext>     — recursos NDT com modo referenciado_por_hash (nome = hash)
     └── <nome>.<ext>       — imagens NCRTF referenciadas por image.ref (nome declarado no campo)
@@ -2135,6 +2268,12 @@ outro local onde o schema possa ser resolvido, e RECOMENDADO nos restantes
 casos. O nome do ficheiro é o identificador do tipo sem a versão — por exemplo
 `schemas/ext.at.liquidacao-irs.schema.json` para
 `ext.at.liquidacao-irs@2026.1`.
+
+O schema do perfil de avaliação declarado em `avaliacao.perfil` (§3.2.3) é
+**sempre obrigatório** em `schemas/`, pela mesma razão: sem ele, um verificador
+independente não consegue validar o bloco `avaliacao` contra as regras da
+jurisdição sob a qual a decisão de avaliação foi tomada. O nome do ficheiro é o
+identificador do perfil — por exemplo `schemas/pt-dglab.schema.json`.
 
 ### 8.2 `manifest.json`
 
@@ -2183,8 +2322,8 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 5. **NDF-PROD-005 — DEVE** executar os passos do pipeline de finalização conforme `nivel_assinatura` declarado (§5.2):
    - Para `"nenhuma"`: passos 1–3 e 8 obrigatórios.
    - Para `"avancada"` ou `"qualificada"`: todos os passos 1–8 obrigatórios.
-6. **NDF-PROD-006 — DEVE** incluir todos os campos obrigatórios de `metadados` (§2.7.2), incluindo os condicionais RGPD quando `contem_dados_pessoais: true`.
-7. **NDF-PROD-007 — DEVE** definir `tipo_classificacao_ref` no formato `<instrumento>/<codigo>` (§3.2.1).
+6. **NDF-PROD-006 — DEVE** incluir todos os campos obrigatórios de `metadados` (§2.7.2), incluindo o bloco `protecao_dados` quando `contem_dados_pessoais: true` e omitindo-o quando é `false`.
+7. **NDF-PROD-007 — DEVE** declarar `avaliacao.perfil` e definir `classificacao_ref` e `instrumento_ref` em conformidade com o schema desse perfil (§3.2.1, §3.2.2, §3.2.3).
 8. **NDF-PROD-008 — DEVE** gerar `ndf_id` como UUID v4 válido (RFC 9562), único no espaço de nomes do sistema produtor.
 9. **NDF-PROD-009 — DEVE** definir `estado: "ativo"` no NDF-core de qualquer documento recém-finalizado.
 10. **NDF-PROD-010 — DEVE** persistir `payload_bytes` e o envelope de forma atómica — nenhuma escrita parcial ou inconsistente entre os dois deve ficar visível a um leitor (§5.2, passo 8). Não inclui o Perfil de Ciclo de Vida NORMORDIS — ver §9.5.
@@ -2234,6 +2373,7 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 5. **NDF-PKG-005** — `ndf-core.json` **DEVE** ser um NDF-core conforme (§9.1).
 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`.
 7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** ser resolúvel a partir do pacote em `schemas/<tipo_id>.schema.json` quando o tipo for uma extensão qualificada (§2.9.5); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver.
+8. **NDF-PKG-008** — O schema do perfil referenciado por `avaliacao.perfil` **DEVE** estar presente em `schemas/<perfil>.schema.json` (§3.2.3, §8.1), e o bloco `avaliacao` **DEVE** validar contra ele; um verificador **DEVE** resolvê-lo preferencialmente a partir do pacote.
 
 ### 9.4 Suite de conformidade e test runner
 
@@ -2259,7 +2399,32 @@ python3 tools/validate.py --invalid-only
 
 Uma implementação conforme **DEVE** passar todos os casos de `conformance/ndf/valid/` e **DEVE** rejeitar todos os casos de `conformance/ndf/invalid/`.
 
-**Nota**: os ficheiros de conformidade contêm campos `_comment` e `_expected_error` prefixados com `_` para documentação interna. Estes campos **NÃO DEVEM** constar do NDF-core produzido por uma implementação — o test runner remove-os automaticamente antes de validar.
+#### 9.4.1 Rejeição pelo motivo certo
+
+Rejeitar um caso inválido não basta: um caso rejeitado por um defeito acidental
+— um identificador malformado, um campo obrigatório em falta — é
+indistinguível, para um runner que compare apenas aceite/rejeitado, de um caso
+que exerça a regra que documenta. Um caso nessas condições não testa nada, e
+continua a passar mesmo que a regra que devia cobrir seja removida da
+especificação.
+
+Por isso, cada ficheiro de `invalid/` declara `_expected_match`: uma expressão
+regular — ou lista de expressões — que **DEVE** encontrar correspondência em
+pelo menos um dos erros reportados. O runner de referência trata como falha
+tanto a ausência do campo como a ausência de correspondência, mesmo quando o
+caso é corretamente rejeitado.
+
+Uma implementação alternativa não é obrigada a reproduzir as mensagens do
+runner de referência, e portanto não é obrigada a satisfazer estes padrões. É
+obrigada a rejeitar os casos, e **RECOMENDA-SE** que verifique, por meio
+equivalente, a correspondência entre a rejeição e a violação documentada em
+`_expected_error`.
+
+**Nota**: os ficheiros de conformidade contêm campos `_comment`,
+`_expected_error` e `_expected_match` prefixados com `_` para documentação e
+verificação internas. Estes campos **NÃO DEVEM** constar do NDF-core produzido
+por uma implementação — o test runner remove-os automaticamente antes de
+validar.
 
 ### 9.5 Perfil de Ciclo de Vida NORMORDIS (opcional)
 

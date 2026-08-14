@@ -52,7 +52,7 @@
     },
     "metadados": {
       "$ref": "#/$defs/metadados",
-      "description": "Descriptive metadata, GDPR fields, and document type reference. See SPEC.md §2.7."
+      "description": "Descriptive metadata, custody, GDPR block, and document type reference. See SPEC.md §2.7."
     },
     "documento": {
       "type": "object",
@@ -61,7 +61,7 @@
     },
     "avaliacao": {
       "$ref": "#/$defs/avaliacao",
-      "description": "Archival evaluation (PCA/DF — MEG/DGLAB). See SPEC.md §3."
+      "description": "Archival appraisal: retention period and final disposition, under the declared profile. See SPEC.md §3."
     },
     "relacoes": {
       "type": "array",
@@ -126,7 +126,7 @@
   "$defs": {
     "metadados": {
       "type": "object",
-      "required": ["tipo_documento_ref", "entidade_produtora", "contem_dados_pessoais", "responsavel_tratamento"],
+      "required": ["tipo_documento_ref", "entidade_produtora", "entidade_responsavel", "contem_dados_pessoais"],
       "properties": {
         "tipo_documento_ref": {
           "type": "string",
@@ -158,6 +158,11 @@
           },
           "additionalProperties": false
         },
+        "entidade_responsavel": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Entity responsible for custody of the record. Always required, and distinct from the GDPR data controller (protecao_dados.responsavel_tratamento). See SPEC.md §2.7.2 and ADR-016."
+        },
         "assunto": {
           "type": "string",
           "minLength": 1,
@@ -186,64 +191,80 @@
           "type": "boolean",
           "description": "True if the document contains personal data as defined by GDPR."
         },
-        "categorias_dados_pessoais": {
-          "type": "array",
-          "items": {
-            "type": "string"
+        "protecao_dados": {
+          "type": "object",
+          "required": ["categorias", "base_legal_conservacao", "responsavel_tratamento"],
+          "properties": {
+            "categorias": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              },
+              "description": "Categories of personal data. Open enum: 'identificacao_fiscal', 'rendimentos', 'saude', 'dados_processuais', 'biometricos', 'outros'."
+            },
+            "base_legal_conservacao": {
+              "type": "string",
+              "enum": ["obrigacao_legal", "interesse_publico", "consentimento", "contrato"],
+              "description": "Legal basis for conservation under GDPR Art. 6."
+            },
+            "responsavel_tratamento": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Name of the data controller (GDPR Art. 13-14). Distinct from metadados.entidade_responsavel, which identifies custody of the record."
+            }
           },
-          "description": "Required when contem_dados_pessoais is true. Open enum: 'identificacao_fiscal', 'rendimentos', 'saude', 'dados_processuais', 'biometricos', 'outros'."
-        },
-        "base_legal_conservacao": {
-          "type": ["string", "null"],
-          "enum": ["obrigacao_legal", "interesse_publico", "consentimento", "contrato", null],
-          "description": "Required when contem_dados_pessoais is true. Legal basis for conservation under GDPR Art. 6."
-        },
-        "responsavel_tratamento": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Name of the data controller (GDPR Art. 13-14). Required even when contem_dados_pessoais is false."
+          "additionalProperties": false,
+          "description": "GDPR block. Required if and only if contem_dados_pessoais is true. See SPEC.md §1.4, §2.7.2 and ADR-016."
         }
       },
       "if": {
-        "properties": { "contem_dados_pessoais": { "const": true } }
+        "properties": { "contem_dados_pessoais": { "const": true } },
+        "required": ["contem_dados_pessoais"]
       },
       "then": {
-        "required": ["categorias_dados_pessoais", "base_legal_conservacao"],
-        "properties": {
-          "categorias_dados_pessoais": { "minItems": 1 },
-          "base_legal_conservacao": { "not": { "type": "null" } }
-        }
+        "required": ["protecao_dados"]
+      },
+      "else": {
+        "not": { "required": ["protecao_dados"] }
       },
       "additionalProperties": false
     },
     "avaliacao": {
       "type": "object",
       "required": [
-        "tipo_classificacao_ref",
-        "prazo_conservacao_administrativa",
+        "perfil",
+        "classificacao_ref",
+        "prazo_conservacao",
         "destino_final",
-        "instrumento_avaliacao_versao_ref"
+        "instrumento_ref"
       ],
       "properties": {
-        "tipo_classificacao_ref": {
+        "perfil": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*/[^/]+$",
-          "description": "Reference to the archival class/series. Format: '<instrumento>/<codigo_classe>'. See SPEC.md §3.2.1.",
-          "examples": ["lc/450.10.001", "lc/150.30.400", "ts/at/300.20"]
+          "pattern": "^([a-z]{2}-[a-z0-9-]+|generic)$",
+          "description": "Archival appraisal profile in force. Determines the vocabulary and syntax of classificacao_ref and instrumento_ref. Open enum; a registered profile's schema lives in specs/registry/profiles/<perfil>.schema.json and MUST travel inside the .ndfpkg under schemas/. See SPEC.md §3.2 and ADR-015.",
+          "examples": ["pt-dglab", "generic"]
         },
-        "prazo_conservacao_administrativa": {
+        "classificacao_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference to the archival class/series within the instrument identified by instrumento_ref. Syntax is profile-dependent. See SPEC.md §3.2.1.",
+          "examples": ["lc/450.10.001", "ts/at/300.20", "selectielijst-2020/4.1.2"]
+        },
+        "prazo_conservacao": {
           "type": "object",
           "required": ["valor", "unidade", "forma_contagem"],
           "properties": {
             "valor": {
               "type": "integer",
               "minimum": 0,
-              "description": "PCA quantity."
+              "description": "Retention period quantity."
             },
             "unidade": {
               "type": "string",
               "enum": ["dias", "meses", "anos"],
-              "description": "PCA unit."
+              "description": "Retention period unit."
             },
             "forma_contagem": {
               "type": "string",
@@ -254,7 +275,7 @@
                 "fim_vigencia",
                 "outro"
               ],
-              "description": "PCA counting start. See SPEC.md §3.3."
+              "description": "Retention period counting start (trigger). See SPEC.md §3.3."
             },
             "forma_contagem_detalhe": {
               "type": "string",
@@ -274,16 +295,33 @@
           "enum": [
             "conservacao_permanente",
             "eliminacao",
-            "conservacao_parcial_por_amostragem"
+            "conservacao_parcial_por_amostragem",
+            "a_determinar"
           ],
-          "description": "Final disposition after PCA. See SPEC.md §3.4."
+          "description": "Final disposition once the retention period elapses. 'a_determinar' declares that the decision is not the producer's to take and is pending appraisal by the authority named in autoridade_avaliacao. See SPEC.md §3.4."
         },
-        "instrumento_avaliacao_versao_ref": {
+        "autoridade_avaliacao": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*/[^/\\s]+$",
-          "description": "Instrument and version used to resolve PCA/DF at finalisation time. Format: '<instrumento>/<versao>'. See SPEC.md §3.2.2.",
-          "examples": ["lc/lista-consolidada-dglab-2023-v3", "pgd/pgd-mf-2019-v2", "portaria/1253-A-2009"]
+          "minLength": 1,
+          "description": "Authority competent to decide the final disposition. Required if and only if destino_final is 'a_determinar'. See SPEC.md §3.4.1.",
+          "examples": ["Bundesarchiv", "Nationaal Archief"]
+        },
+        "instrumento_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instrument and version used to resolve the retention period and final disposition at finalisation time. Syntax is profile-dependent. See SPEC.md §3.2.2.",
+          "examples": ["lc/lista-consolidada-dglab-2023-v3", "portaria/1253-A-2009", "selectielijst-gemeenten-2020"]
         }
+      },
+      "if": {
+        "properties": { "destino_final": { "const": "a_determinar" } },
+        "required": ["destino_final"]
+      },
+      "then": {
+        "required": ["autoridade_avaliacao"]
+      },
+      "else": {
+        "not": { "required": ["autoridade_avaliacao"] }
       },
       "additionalProperties": false
     },
@@ -379,7 +417,7 @@
     },
     "referencia_externa": {
       "type": "object",
-      "description": "Reference to an artefact kept outside the NDF, under its own access and retention policy. Not resolved by the NDF — same principle as participante_ref (§2.12.4) and tipo_classificacao_ref (§3.2.1).",
+      "description": "Reference to an artefact kept outside the NDF, under its own access and retention policy. Not resolved by the NDF — same principle as participante_ref (§2.12.4) and classificacao_ref (§3.2.1).",
       "properties": {
         "tipo": { "type": "string", "minLength": 1 },
         "identificador": { "type": "string", "minLength": 1 },

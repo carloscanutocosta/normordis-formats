@@ -1,6 +1,7 @@
 {
   "_comment": "INVÁLIDO: usa o campo participantes[].tipo, removido. Violação: §2.12.2 e §2.12.7 — participantes é índice exclusivamente de pessoas singulares.",
   "_expected_error": "participantes[0]: propriedade 'tipo' não permitida (§2.12.2)",
+  "_expected_match": "Additional properties are not allowed \\('tipo' was unexpected\\).*participantes/0",
   "ndf_version": "1.0.0",
   "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
   "estado": "ativo",
@@ -14,18 +15,21 @@
       "nif": "123456789",
       "codigo_dglab": "PT-DGE-000"
     },
+    "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Resposta ao ofício n.º 45/2026 — Pedido de informação sobre processo X",
     "numero_referencia": "OF/2026/00123",
     "processo_ref": "proc.º 456/2026",
     "idioma": "pt",
     "classificacao_seguranca": "uso_interno",
     "contem_dados_pessoais": true,
-    "categorias_dados_pessoais": [
-      "identificacao_fiscal",
-      "dados_processuais"
-    ],
-    "base_legal_conservacao": "obrigacao_legal",
-    "responsavel_tratamento": "Direção-Geral de Exemplo"
+    "protecao_dados": {
+      "categorias": [
+        "identificacao_fiscal",
+        "dados_processuais"
+      ],
+      "base_legal_conservacao": "obrigacao_legal",
+      "responsavel_tratamento": "Direção-Geral de Exemplo"
+    }
   },
   "documento": {
     "numero": "OF/2026/00123",
@@ -67,13 +71,14 @@
     }
   ],
   "avaliacao": {
-    "tipo_classificacao_ref": "lc/450.10.001",
-    "prazo_conservacao_administrativa": {
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao": {
       "valor": 5,
       "unidade": "anos",
       "forma_contagem": "data_documento"
     },
     "destino_final": "eliminacao",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }

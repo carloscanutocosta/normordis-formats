@@ -1,6 +1,7 @@
 {
   "_comment": "Inválido: campo 'checked' num list_item de lista não-checklist. 'checked' é exclusivo de list_type: 'checklist'.",
   "_expected_error": "list_item com 'checked' fora de lista checklist",
+  "_expected_match": "'list_type': 'bullet'.*'checked': True.*is not valid under any of the given schemas",
   "ncrtf_version": "2.0.0",
   "content": [
     {
@@ -10,7 +11,12 @@
         {
           "type": "list_item",
           "checked": true,
-          "content": [ { "type": "text", "text": "Item com checked indevido" } ]
+          "content": [
+            {
+              "type": "text",
+              "text": "Item com checked indevido"
+            }
+          ]
         }
       ]
     }

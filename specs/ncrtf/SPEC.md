@@ -536,8 +536,8 @@ renderiza-o segundo as regras de layout do NDT.
     "entidade_produtora": { "designacao": "Direção-Geral de Exemplo", "nif": "123456789" },
     "assunto": "Resposta ao ofício n.º 45/2026",
     "numero_referencia": "OF/2026/00123",
-    "contem_dados_pessoais": false,
-    "responsavel_tratamento": "Direção-Geral de Exemplo"
+    "entidade_responsavel": "Direção-Geral de Exemplo",
+    "contem_dados_pessoais": false
   },
   "documento": {
     "numero": "OF/2026/00123",
@@ -571,10 +571,11 @@ renderiza-o segundo as regras de layout do NDT.
     }
   },
   "avaliacao": {
-    "tipo_classificacao_ref": "lc/450.10.001",
-    "prazo_conservacao_administrativa": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
     "destino_final": "eliminacao",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }
 ```

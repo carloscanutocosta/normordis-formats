@@ -1,0 +1,55 @@
+{
+  "_comment": "INVÁLIDO: bloco protecao_dados presente com contem_dados_pessoais false. Violação: §2.7.2, ADR-016 — a responsabilidade pelo tratamento RGPD só existe quando há dados pessoais; a custódia declara-se em entidade_responsavel.",
+  "_expected_error": "metadados.protecao_dados é proibido quando contem_dados_pessoais é false",
+  "_expected_match": "protecao_dados é proibido neste contexto.*campo: metadados",
+  "ndf_version": "1.0.0",
+  "ndf_id": "c7d8e9fa-0b1c-4d2e-9f3a-4b5c6d7e8f93",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "avancada",
+  "ndt_version_ref": "vermerk-generico@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "ext.example.vermerk@1.0.0",
+    "entidade_produtora": {
+      "designacao": "Stadtverwaltung Beispiel — Amt für Bauordnung"
+    },
+    "entidade_responsavel": "Stadtverwaltung Beispiel",
+    "assunto": "Vermerk zur Bauvoranfrage BV-2026-0417",
+    "numero_referencia": "VM/2026/0417",
+    "processo_ref": "BV-2026-0417",
+    "idioma": "de",
+    "classificacao_seguranca": "uso_interno",
+    "contem_dados_pessoais": false,
+    "protecao_dados": {
+      "categorias": [
+        "identificacao_fiscal"
+      ],
+      "base_legal_conservacao": "obrigacao_legal",
+      "responsavel_tratamento": "Stadtverwaltung Beispiel"
+    }
+  },
+  "documento": {
+    "titel": "Vermerk zur Bauvoranfrage BV-2026-0417",
+    "datum": "2026-07-09",
+    "sachverhalt": "Prüfung der Bauvoranfrage auf Vereinbarkeit mit dem Bebauungsplan Nr. 214.",
+    "ergebnis": "Die Voranfrage ist genehmigungsfähig."
+  },
+  "participantes": [
+    {
+      "participante_ref": "urn:beispiel:personal:4417",
+      "papel": "autor"
+    }
+  ],
+  "avaliacao": {
+    "perfil": "generic",
+    "classificacao_ref": "aktenplan-2021/63-40-02",
+    "prazo_conservacao": {
+      "valor": 10,
+      "unidade": "anos",
+      "forma_contagem": "fim_ano_civil"
+    },
+    "destino_final": "a_determinar",
+    "autoridade_avaliacao": "Landesarchiv Beispiel",
+    "instrumento_ref": "vwv-aufbewahrung-aussonderung-2023"
+  }
+}

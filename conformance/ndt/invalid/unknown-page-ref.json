@@ -1,8 +1,18 @@
 {
   "_expected_error": "sequencia deve referenciar pagina existente",
+  "_expected_match": "pagina_def referencia página inexistente",
   "ndt_version": "2.0.0",
   "schema_id": "teste",
   "versao_ndt": "1.0.0",
-  "paginas_def": [{ "id": "p1" }],
-  "sequencia": [{ "pagina_def": "p2" }]
+  "paginas_def": [
+    {
+      "id": "p1"
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p2",
+      "repeticao": "unica"
+    }
+  ]
 }
