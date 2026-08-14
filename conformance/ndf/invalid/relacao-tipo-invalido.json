@@ -1,6 +1,7 @@
 {
   "_comment": "INVÁLIDO: relacoes[0].tipo fora do vocabulário fechado. Violação: §2.11.2.",
   "_expected_error": "relacoes[0].tipo 'aprova' não pertence ao enum fechado de tipos de relação",
+  "_expected_match": "'aprova' is not valid under any of the given schemas.*relacoes/0/tipo",
   "ndf_version": "1.0.0",
   "ndf_id": "8e234253-b404-4aeb-80f0-f456e6d17e88",
   "estado": "ativo",
@@ -9,17 +10,28 @@
   "ndt_version_ref": "parecer@1.0.0",
   "metadados": {
     "tipo_documento_ref": "parecer@1.0.0",
-    "entidade_produtora": { "designacao": "Direção-Geral de Exemplo" },
-    "contem_dados_pessoais": false,
-    "responsavel_tratamento": "Direção-Geral de Exemplo"
+    "entidade_produtora": {
+      "designacao": "Direção-Geral de Exemplo"
+    },
+    "entidade_responsavel": "Direção-Geral de Exemplo",
+    "contem_dados_pessoais": false
   },
   "documento": {
     "numero": "PAR/2026/00012",
     "data": "2026-06-14",
-    "autor": { "nome": "Rui Martins", "cargo": "Jurista" },
+    "autor": {
+      "nome": "Rui Martins",
+      "cargo": "Jurista"
+    },
     "sentido": "favoravel",
     "corpo": "Texto do parecer."
   },
+  "participantes": [
+    {
+      "participante_ref": "user:100",
+      "papel": "autor"
+    }
+  ],
   "relacoes": [
     {
       "tipo": "aprova",
@@ -30,9 +42,14 @@
     }
   ],
   "avaliacao": {
-    "tipo_classificacao_ref": "lc/150.30.400",
-    "prazo_conservacao_administrativa": { "valor": 3, "unidade": "anos", "forma_contagem": "data_documento" },
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/150.30.400",
+    "prazo_conservacao": {
+      "valor": 3,
+      "unidade": "anos",
+      "forma_contagem": "data_documento"
+    },
     "destino_final": "eliminacao",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }

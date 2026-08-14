@@ -43,6 +43,25 @@ Tipos específicos de cada entidade (AT, SS, Municípios, etc.) são definidos f
 
 ---
 
+## 3.1 Perfis de avaliação arquivística
+
+Além dos tipos documentais, o registo mantém os **perfis de avaliação
+arquivística** referenciados por `NDF-core.avaliacao.perfil` (SPEC.md §3.2.3).
+Um perfil restringe o bloco `avaliacao` ao vocabulário e à sintaxe de uma
+jurisdição, sem alterar a estrutura fixada pelo NDF-core.
+
+| `avaliacao.perfil` | Âmbito | Schema |
+|---|---|---|
+| `pt-dglab` | Administração Pública portuguesa — MEG/DGLAB | [profiles/pt-dglab.schema.json](profiles/pt-dglab.schema.json) |
+| `generic` | Sem restrições jurisdicionais | [profiles/generic.schema.json](profiles/generic.schema.json) |
+
+O schema do perfil declarado **DEVE viajar dentro do `.ndfpkg`**, em
+`schemas/<perfil>.schema.json` (NDF-PKG-008). Perfis de outras jurisdições são
+acrescentados a este registo sem alteração incompatível do NDF-core, mediante
+confirmação contra os instrumentos legais da jurisdição respetiva.
+
+---
+
 ## 4. Resolução
 
 Um leitor NDF resolve `tipo_documento_ref` na seguinte ordem de precedência:

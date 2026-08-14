@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.org/schemas/profiles/generic.schema.json",
+  "title": "Perfil de avaliação arquivística — generic",
+  "description": "Perfil sem restrições jurisdicionais. Aplica-se quando avaliacao.perfil é 'generic'. Destina-se a entidades cujo sistema arquivístico não tem ainda perfil registado: a estrutura do NDF-core (prazo, destino, instrumento) continua a ser exigida, mas nenhuma sintaxe nacional é imposta às referências. Ver SPEC.md §3.2.3 e ADR-015.",
+  "type": "object",
+  "required": ["perfil", "classificacao_ref", "instrumento_ref"],
+  "properties": {
+    "perfil": {
+      "const": "generic"
+    },
+    "classificacao_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Referência à classe/série no instrumento aplicável. Sem sintaxe imposta.",
+      "examples": ["selectielijst-2020/4.1.2", "records-schedule-2019/HR-14"]
+    },
+    "instrumento_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Instrumento e versão que autorizam a decisão de avaliação. Sem sintaxe imposta.",
+      "examples": ["selectielijst-gemeenten-2020", "vwv-aufaus-2023"]
+    }
+  }
+}

@@ -1,5 +1,23 @@
 # Histórico NDF
 
+## [Não publicado] — avaliação arquivística por perfil e separação custódia ↔ RGPD
+
+`ndf_version` mantido em `1.0.0` (ADR-007) — alterações **incompatíveis**
+absorvidas antes de qualquer publicação. Ver `CHANGELOG.md` na raiz para o
+detalhe completo.
+
+- adicionado: `avaliacao.perfil`, com schemas de perfil em
+  `specs/registry/profiles/` e obrigação de viajarem no `.ndfpkg`
+  (NDF-PKG-008); perfis `pt-dglab` e `generic` (ADR-015);
+- adicionado: `destino_final: "a_determinar"` com `autoridade_avaliacao`, para
+  sistemas em que a decisão de destino não compete ao produtor;
+- alterado: `tipo_classificacao_ref` → `classificacao_ref`;
+  `instrumento_avaliacao_versao_ref` → `instrumento_ref`;
+  `prazo_conservacao_administrativa` → `prazo_conservacao`;
+- adicionado: `metadados.entidade_responsavel` (custódia do registo);
+- alterado: campos RGPD agrupados em `metadados.protecao_dados`, obrigatório
+  se e só se `contem_dados_pessoais: true` (ADR-016).
+
 ## [Não publicado] — proveniência de sistema e imputação jurídica
 
 `ndf_version` mantido em `1.0.0` (ADR-007). Ver `CHANGELOG.md` na raiz para o

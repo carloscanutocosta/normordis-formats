@@ -22,6 +22,16 @@ Catálogo oficial de identificadores canónicos (`schema_id`) para o ecossistema
 }
 ```
 
+## Perfis de avaliação arquivística
+
+`profiles/` contém os schemas dos perfis referenciados por
+`NDF-core.avaliacao.perfil` (NDF SPEC.md §3.2.3):
+
+| Perfil | Âmbito |
+|---|---|
+| `pt-dglab` | Administração Pública portuguesa — MEG/DGLAB |
+| `generic` | Sem restrições jurisdicionais |
+
 ## Entradas registadas
 
 > A definir.

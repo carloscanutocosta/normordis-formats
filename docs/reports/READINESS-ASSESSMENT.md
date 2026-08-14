@@ -241,7 +241,7 @@ por um revisor.
 | C4 | **Exige que a entidade já tenha os dados estruturados** | Uma entidade cujo processo termina num documento escrito à mão em Word não retira benefício imediato — teria primeiro de estruturar a produção documental. O NDF é mais fácil de adotar a jusante de sistemas aplicacionais do que a jusante de processos manuais |
 | C5 | **Sem estatuto normativo** | O PDF/A é ISO 19005 desde 2005 e é aceite por arquivos nacionais como formato de preservação. O NDF é um draft de projeto. Um arquivo pode recusá-lo por esse motivo isolado, independentemente do mérito técnico — e tem fundamento para o fazer |
 | C6 | **Dependência do par NDF+NDT para reconstituição fiel** | Preservar o NDF sem o NDT correspondente degrada a reconstituição. O `.ndfpkg` e `ndt_version_ref` mitigam, mas transferem para a entidade uma disciplina de preservação que o ficheiro de página não exigia |
-| C7 | **Acoplamento do bloco `avaliacao` ao modelo arquivístico português** | Barreira direta à adoção fora de Portugal e ponto sensível numa candidatura de âmbito europeu. Registado como `R11` e como nota para v2.0.0 |
+| C7 | ~~**Acoplamento do bloco `avaliacao` ao modelo arquivístico português**~~ | **Resolvido em 2026-08-14** — ver R11 e §5.4. `avaliacao.perfil` desacopla o vocabulário nacional da estrutura do core. Subsiste a condicionante menor de só existirem os perfis `pt-dglab` e `generic`: uma entidade de outra jurisdição usa `generic` até haver perfil próprio |
 | C8 | **Longevidade da cadeia criptográfica** | SHA-256 e as cadeias de certificados envelhecem. O CAdES-B-LTA e a re-selagem periódica (T6, Fase 5) são a resposta prevista, mas implicam infraestrutura viva ao longo de décadas — algo que um PDF/A em prateleira não exige |
 | C9 | **Alegação de eficiência refutável se mal enquadrada** | Ver D7. O `.ndfpkg` de exemplo tem 71 211 bytes contra 3 377 do NDF-core isolado; escolher mal a unidade de comparação entrega o argumento ao interlocutor |
 | C10 | **Complexidade acrescida no produtor** | Canonicalização JCS, pipeline de finalização de ordem estrita (SPEC §5.2), gestão de envelope e de custódia. Produzir um PDF é incomparavelmente mais simples. A complexidade paga-se em verificabilidade e em capacidade — mas é uma troca, não um ganho puro |
@@ -346,7 +346,7 @@ Estado: `aberto`, `em curso`, `fechado por decisão`, `resolvido`.
 | R15 | `Campo.referencia` (caminho para `NDF-core.documento`, mecanismo normativo de ligação de dados em NDT §campos) é desserializado no modelo mas **nunca lido** por nenhum componente de renderização. A ligação de dados efetiva é `{{placeholder}}` contra um mapa plano | Alto — é a junta entre NDF e NDT; sem ela não há fluxo NDF+NDT→PDF | **aberto** |
 | R9 | `normordis-odf` não existe: sem repositório, sem perfil mínimo definido, sem estimativa | Médio — evidência de segunda implementação; **não bloqueia** a abertura do debate, por D1 desacoplada | **aberto** |
 | R10 | `normordis-xml-adapters` não existe (milestone M3 do plano NGI, prazo 2026-08-31) | — | **fechado por decisão** (D2) |
-| R11 | O bloco `avaliacao` continua semanticamente acoplado ao modelo arquivístico português (PCA, DF, Lista Consolidada, DGLAB). Aceitável para 1.0 focada na AP portuguesa; relevante se o âmbito da candidatura for europeu | Médio — já registado em [`../../ROADMAP.md`](../../ROADMAP.md) como nota para v2.0.0, sem ação prevista | **aberto, sem ação** |
+| R11 | O bloco `avaliacao` continua semanticamente acoplado ao modelo arquivístico português (PCA, DF, Lista Consolidada, DGLAB). Aceitável para 1.0 focada na AP portuguesa; relevante se o âmbito da candidatura for europeu | Médio — estava registado em [`../../ROADMAP.md`](../../ROADMAP.md) como nota para v2.0.0 | **resolvido** (2026-08-14) — ver 5.4 |
 | R12 | O plano em [`../roadmap/NGI-MVP-2026.md`](../roadmap/NGI-MVP-2026.md) ficou desatualizado: M2 (2026-08-15), M3 (2026-08-31), M4 (2026-09-15) e M5 (2026-09-30) assentam numa cadeia sequencial que D1 e D2 alteram | Médio — documento de orientação a induzir em erro se não for anotado | **em curso** — anotado como parcialmente superado |
 | R13 | A tese escrita em `NGI-MVP-2026.md` §2 e §11 é de *interoperabilidade documental*, mas a evidência demonstrável passa a ser saída para dois formatos. Reformulado em 2026-08-11: o problema **não** é a ausência do adapter XML — é a confusão de camadas na própria tese. Ver 5.2 | Médio-alto — desalinhamento entre a tese comunicada e a evidência demonstrável | **resolvido** (2026-08-11) — nota informativa `docs/interoperability/INTEROPERABILITY-LAYERS.md`; a interoperabilidade a demonstrar é ao nível do **pacote documental** (depósito OAIS), não dos dados |
 
@@ -590,7 +590,7 @@ distinção fique explícita em qualquer apresentação.
 |---|---|---|
 | 1. Fixtures CAdES-B-LTA reais | certificado/TSA de teste ou parceria | R2 |
 | 2. Revisão criptográfica independente | especialista externo | — |
-| 3. Revisão arquivística | especialista competente | R11 |
+| 3. Revisão arquivística | especialista competente | R11 (resolvido); confirmação dos perfis não-PT contra fonte primária |
 | 4. Revisão jurídica PT/eIDAS | jurista | — |
 | 5. Revisão de acessibilidade | auditoria dos perfis de saída | R8, R9 |
 | 6. Implementação/piloto independente | terceiro sem acesso ao código do produtor | R4 |
@@ -636,6 +636,79 @@ Trabalho **não** nesta lista, por decisão: alargamento normativo do NDF-core
 
 ---
 
+### 5.4 R11 — resolução por perfil de avaliação (2026-08-14)
+
+R11 estava classificado "aberto, sem ação" desde 2026-08-08, com o fundamento
+de que o acoplamento era aceitável numa 1.0 dirigida à Administração Pública
+portuguesa. Duas coisas alteraram essa avaliação: o objetivo mais próximo
+passou a ser uma candidatura NGI/OSOR, de âmbito europeu; e, sendo a correção
+incompatível, o seu custo é hoje o mais baixo que alguma vez será — nível 1 —
+Draft, revisão pública por abrir, zero utilizadores externos. Adiar para v2.0.0
+significava publicar uma 1.0.0 com um defeito documentado em dois sítios do
+próprio repositório.
+
+Antes de decidir foi verificado se o modelo português é representativo. O
+levantamento sobre PT, FR, NL, DE e UK/CoE/Comissão Europeia
+([`../design/NDF-AVALIACAO-GENERALIZATION.md`](../design/NDF-AVALIACAO-GENERALIZATION.md) §2)
+mostrou o invariante `gatilho + prazo + ação de destino + instrumento` presente
+nos cinco, com PT e FR praticamente isomórficos. Isso reduziu a correção a
+generalização de vocabulário, com três divergências aditivas, e não a um
+redesenho.
+
+Resolução: `avaliacao.perfil` obrigatório, com schemas de perfil em
+`specs/registry/profiles/` que viajam no `.ndfpkg` (NDF-PKG-008); renomeação
+dos campos cujo nome era termo legal português; e
+`destino_final: "a_determinar"` com `autoridade_avaliacao`, para os sistemas em
+que a decisão de destino não compete ao produtor mas à autoridade arquivística.
+As regras portuguesas não foram enfraquecidas — passaram a condicionais ao
+perfil `pt-dglab`. Ver [ADR-015](../architecture/ADR-015-generalizacao-avaliacao-arquivistica.md).
+
+Evidência executável: `conformance/ndf/valid/avaliacao-perfil-generico.json`
+(documento não-PT, com decisão de destino diferida) e três casos inválidos para
+as novas regras. Sem esse caso, a alegação de suporte a sistemas arquivísticos
+europeus não teria prova — o padrão que R2 e R6 já representam neste projeto.
+
+**Fica em aberto**: só existem os perfis `pt-dglab` e `generic`. Publicar
+perfis nacionais (`fr-siaf`, `nl-na`, `de-bund`, `eu-crl`) exige confirmação
+contra fonte legal primária de cada jurisdição, e não contra as fontes
+secundárias que sustentaram o desenho. É acréscimo ao registo, sem alteração
+incompatível do NDF-core.
+
+### 5.5 Defeito colateral detetado — dois casos de conformidade vácuos (2026-08-14)
+
+Ao migrar a suite verificou-se que `mismatched-instrument` e
+`invalid-tipo-classificacao-ref` eram rejeitados por motivos que nada tinham a
+ver com a violação que documentavam: ambos omitiam a declaração de origem
+(§2.2.1) e o segundo tinha ainda um `ndf_id` não conforme, pelo que o validador
+falhava no schema antes de chegar a avaliar o bloco `avaliacao`. Passavam como
+"rejeitado como esperado" sem nunca exercer a regra que existiam para cobrir.
+
+Corrigidos: ambos passam a declarar origem, o `ndf_id` foi corrigido e o segundo
+foi renomeado para `invalid-classificacao-ref`. Verificou-se que a rejeição
+passa agora pela regra pretendida.
+
+Defeito **pré-existente**, não introduzido por esta ronda — e sintoma de uma
+fraqueza estrutural do runner, que comparava apenas aceite/rejeitado.
+
+**Corrigido na mesma ronda.** Cada caso de `invalid/` passa a declarar
+`_expected_match`, uma expressão regular que tem de corresponder a pelo menos um
+dos erros reportados; o runner falha tanto na ausência do campo como na ausência
+de correspondência, mesmo quando o caso é rejeitado (NDF SPEC.md §9.4.1). A
+instrumentação dos 46 casos das três suites revelou que a vacuidade era mais
+extensa do que os dois casos inicialmente detetados:
+
+| Suite | Defeito | Casos |
+|---|---|---|
+| NDF | sem declaração de origem (§2.2.1), rejeitados por esse motivo em vez do documentado | 17 |
+| NDF | `ndf_id` malformado em testes que nada têm a ver com identificadores | 7 |
+| NDF | `documento` incompleto face ao schema do tipo, nos dois casos NCRTF | 2 |
+| NDT | `sequencia[].repeticao` em falta — 3 dos 5 casos negativos nunca chegavam à regra semântica que documentavam | 3 |
+
+Todos saneados: cada caso passa agora pela sua própria regra, verificado por
+mutação (remover a violação documentada e introduzir outra faz o runner falhar).
+Melhorou-se também `fmt_schema_error` para as proibições condicionais
+`if/then/else`, que produziam mensagens com o objeto validado inteiro.
+
 ## 8. Registo de verificação
 
 Executado em 2026-08-11 sobre o commit `3fdea7d`, árvore limpa:
@@ -643,6 +716,8 @@ Executado em 2026-08-11 sobre o commit `3fdea7d`, árvore limpa:
 | Verificação | Resultado |
 |---|---|
 | `python3 tools/validate.py` | 58/58 |
+
+> Reexecutado em 2026-08-14, após a resolução de R11 (§5.4): `tools/validate.py` 75/75; `check_spec_coherence`, `audit_normative` (68 IDs), `build_conformance_index`, `build_requirements_index`, `check_package_vectors` (8/8), `check_jcs_vectors`, `check_ndt_semantic_corpus`, `check_publication_profile` e ambos os pacotes de exemplo — todos PASS. `check_cades_gate` mantém-se em 12 casos `skeleton` (R2, inalterado).
 | `python3 tools/check_cades_gate.py` | 12 casos pendentes, `fixture_state=skeleton` |
 | Ficheiros `*.en.md` no repositório | 0 |
 | Resultados de benchmark | 1 ficheiro |

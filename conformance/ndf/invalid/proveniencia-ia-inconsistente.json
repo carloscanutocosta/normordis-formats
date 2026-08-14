@@ -1,6 +1,7 @@
 {
   "_comment": "INVÁLIDO: proveniencia_ia.utilizada é false mas intervencoes não está vazio. Violação: §2.13.2 — quando utilizada é false, intervencoes DEVE estar ausente ou vazio.",
   "_expected_error": "proveniencia_ia: 'intervencoes' não deve ter elementos quando 'utilizada' é false",
+  "_expected_match": "deve estar vazio ou ausente neste contexto.*proveniencia_ia/intervencoes",
   "ndf_version": "1.0.0",
   "ndf_id": "8e234253-b404-4aeb-80f0-f456e6d17e88",
   "estado": "ativo",
@@ -9,34 +10,55 @@
   "ndt_version_ref": "parecer@1.0.0",
   "metadados": {
     "tipo_documento_ref": "parecer@1.0.0",
-    "entidade_produtora": { "designacao": "Direção-Geral de Exemplo" },
-    "contem_dados_pessoais": false,
-    "responsavel_tratamento": "Direção-Geral de Exemplo"
+    "entidade_produtora": {
+      "designacao": "Direção-Geral de Exemplo"
+    },
+    "entidade_responsavel": "Direção-Geral de Exemplo",
+    "contem_dados_pessoais": false
   },
   "documento": {
     "numero": "PAR/2026/00012",
     "data": "2026-06-14",
-    "autor": { "nome": "Rui Martins", "cargo": "Jurista" },
+    "autor": {
+      "nome": "Rui Martins",
+      "cargo": "Jurista"
+    },
     "sentido": "favoravel",
     "corpo": "Texto do parecer."
   },
+  "participantes": [
+    {
+      "participante_ref": "user:100",
+      "papel": "autor"
+    }
+  ],
   "proveniencia_ia": {
     "utilizada": false,
     "intervencoes": [
       {
         "intervencao_id": "a9b8c7d6-e5f4-4321-9876-543210fedcba",
         "finalidade": "apoio_redacao",
-        "sistema": { "nome": "assistente-redacao-interno", "fornecedor": "NORMORDIS Lab" },
+        "sistema": {
+          "nome": "assistente-redacao-interno",
+          "fornecedor": "NORMORDIS Lab"
+        },
         "executada_em": "2026-06-13T16:00:00Z",
         "resultado_incorporado": "parcialmente",
-        "revisao_humana": { "estado": "pendente" }
+        "revisao_humana": {
+          "estado": "pendente"
+        }
       }
     ]
   },
   "avaliacao": {
-    "tipo_classificacao_ref": "lc/150.30.400",
-    "prazo_conservacao_administrativa": { "valor": 3, "unidade": "anos", "forma_contagem": "data_documento" },
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/150.30.400",
+    "prazo_conservacao": {
+      "valor": 3,
+      "unidade": "anos",
+      "forma_contagem": "data_documento"
+    },
     "destino_final": "eliminacao",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }

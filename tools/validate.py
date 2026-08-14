@@ -40,6 +40,7 @@ REPO_ROOT = Path(__file__).parent.parent
 NDF_SCHEMA_PATH   = REPO_ROOT / "specs/ndf/schemas/ndf-core.schema.json"
 NCRTF_SCHEMA_PATH = REPO_ROOT / "specs/ncrtf/schemas/ncrtf.schema.json"
 REGISTRY_SCHEMA_DIR = REPO_ROOT / "specs/registry/schemas"
+REGISTRY_PROFILE_DIR = REPO_ROOT / "specs/registry/profiles"
 MANIFEST_SCHEMA_PATH = REPO_ROOT / "specs/ndf/schemas/manifest.schema.json"
 ENVELOPE_SCHEMA_PATH = REPO_ROOT / "specs/ndf/schemas/envelope.schema.json"
 NDT_SCHEMA_PATH = REPO_ROOT / "specs/ndt/schemas/ndt.schema.json"
@@ -189,6 +190,21 @@ def fmt_schema_error(e) -> str:
             "(§2.2.1)"
         )
     field = "/".join(str(p) for p in e.absolute_path)
+
+    # As regras condicionais expressas por `if/then/else` com `not` produzem
+    # nativamente uma mensagem que despeja o objeto validado inteiro. São
+    # proibições — o leitor precisa de saber o que sobra, não o que existe.
+    if e.validator == "not" and isinstance(e.validator_value, dict):
+        proibidos = e.validator_value.get("required")
+        if proibidos:
+            alvo = field or "raiz"
+            return (
+                f"{', '.join(proibidos)} é proibido neste contexto "
+                f"(campo: {alvo}) — ver a condição if/then/else do schema"
+            )
+    if e.validator == "maxItems" and e.validator_value == 0:
+        return f"deve estar vazio ou ausente neste contexto (campo: {field})"
+
     return e.message + (f" (campo: {field})" if field else "")
 
 
@@ -209,41 +225,62 @@ def _resolve_tipo_schema(tipo_id: str, pkg_root: Path | None):
     return None, None
 
 
+def _resolve_perfil_schema(perfil: str, pkg_root: Path | None):
+    """Resolve o schema do perfil de avaliação, preferindo o que viaja no pacote.
+
+    Mesma precedência de _resolve_tipo_schema, pela mesma razão (ADR-015 §6,
+    ADR-014): dentro de um .ndfpkg o bloco avaliacao tem de ser validável sem
+    acesso a registo nenhum. Devolve (schema, origem).
+    """
+    if pkg_root is not None:
+        in_pkg = pkg_root / "schemas" / f"{perfil}.schema.json"
+        if in_pkg.is_file():
+            return _load_schema(in_pkg), "pacote"
+    in_registry = REGISTRY_PROFILE_DIR / f"{perfil}.schema.json"
+    if in_registry.is_file():
+        return _load_schema(in_registry), "registo"
+    return None, None
+
+
 def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
     errors = []
 
     meta = doc.get("metadados", {})
-    if meta.get("contem_dados_pessoais") is True:
-        if not meta.get("categorias_dados_pessoais"):
-            errors.append(
-                "metadados.categorias_dados_pessoais deve ter pelo menos 1 item "
-                "quando contem_dados_pessoais é true (§2.7.2)"
-            )
-        if meta.get("base_legal_conservacao") is None:
-            errors.append(
-                "metadados.base_legal_conservacao é obrigatório "
-                "quando contem_dados_pessoais é true (§2.7.2, §1.6)"
-            )
-
     avaliacao = doc.get("avaliacao", {})
-    tcr = avaliacao.get("tipo_classificacao_ref", "")
-    if tcr and "/" not in tcr:
-        errors.append(
-            f"avaliacao.tipo_classificacao_ref '{tcr}' deve seguir o formato "
-            "'<instrumento>/<codigo_classe>' (§3.2.1)"
-        )
+    perfil = avaliacao.get("perfil", "")
 
-    iar = avaliacao.get("instrumento_avaliacao_versao_ref", "")
-    if tcr and iar and tcr.split("/", 1)[0] != iar.split("/", 1)[0]:
-        errors.append(
-            "avaliacao.tipo_classificacao_ref e instrumento_avaliacao_versao_ref "
-            "devem referenciar o mesmo instrumento (§3.2.2)"
-        )
+    # Perfil de avaliação: o schema do perfil restringe o bloco para a
+    # jurisdição declarada (§3.2.3). Perfil não resolúvel em contexto de pacote
+    # é erro — o pacote tem de o transportar (NDF-PKG-007).
+    if perfil:
+        perfil_schema, origem = _resolve_perfil_schema(perfil, pkg_root)
+        if perfil_schema is None:
+            if pkg_root is not None:
+                errors.append(
+                    f"avaliacao.perfil '{perfil}' não resolve: não existe em "
+                    f"specs/registry/profiles/ e o pacote não contém "
+                    f"schemas/{perfil}.schema.json (§3.2.3, NDF-PKG-007)"
+                )
+        else:
+            for e in Draft202012Validator(perfil_schema).iter_errors(avaliacao):
+                errors.append(f"avaliacao (perfil {perfil}, {origem}): {fmt_schema_error(e)}")
 
-    pca = avaliacao.get("prazo_conservacao_administrativa", {})
-    if pca.get("forma_contagem") == "outro" and not pca.get("forma_contagem_detalhe"):
+    # Regra de coerência do perfil pt-dglab: classificacao_ref e instrumento_ref
+    # referenciam o mesmo instrumento (§3.2.2). É semântica, não exprimível no
+    # schema do perfil, e aplica-se apenas a este perfil.
+    if perfil == "pt-dglab":
+        cref = avaliacao.get("classificacao_ref", "")
+        iref = avaliacao.get("instrumento_ref", "")
+        if cref and iref and cref.split("/", 1)[0] != iref.split("/", 1)[0]:
+            errors.append(
+                "avaliacao.classificacao_ref e instrumento_ref devem referenciar "
+                "o mesmo instrumento no perfil pt-dglab (§3.2.2)"
+            )
+
+    prazo = avaliacao.get("prazo_conservacao", {})
+    if prazo.get("forma_contagem") == "outro" and not prazo.get("forma_contagem_detalhe"):
         errors.append(
-            "avaliacao.prazo_conservacao_administrativa.forma_contagem_detalhe é "
+            "avaliacao.prazo_conservacao.forma_contagem_detalhe é "
             "obrigatório quando forma_contagem é 'outro' (§3.3)"
         )
 
@@ -400,11 +437,44 @@ def strip_meta(obj):
     return obj
 
 
-def _print_result(name: str, ok: bool, expect_valid: bool, errors: list, expected_error: str = ""):
+def check_expected_match(raw: dict, errors: list[str]) -> str | None:
+    """Confirma que a rejeição se deve à violação que o caso documenta.
+
+    Um caso inválido rejeitado pelo motivo errado é indistinguível de um caso
+    correto se o runner comparar apenas aceite/rejeitado — foi assim que dois
+    casos vácuos sobreviveram na suite (READINESS-ASSESSMENT §5.5). Cada caso
+    inválido declara `_expected_match`, uma expressão regular (ou lista delas)
+    que DEVE encontrar correspondência em pelo menos um dos erros reportados.
+
+    Devolve None quando está conforme, ou a descrição do problema.
+    """
+    patterns = raw.get("_expected_match")
+    if patterns is None:
+        return "sem _expected_match — não é verificável que a rejeição tenha o motivo pretendido"
+    if isinstance(patterns, str):
+        patterns = [patterns]
+    for pattern in patterns:
+        try:
+            rx = re.compile(pattern)
+        except re.error as exc:
+            return f"_expected_match não é uma expressão regular válida ({pattern!r}): {exc}"
+        if not any(rx.search(e) for e in errors):
+            return f"nenhum erro reportado corresponde a _expected_match {pattern!r}"
+    return None
+
+
+def _print_result(name: str, ok: bool, expect_valid: bool, errors: list, expected_error: str = "",
+                  match_problem: str | None = None):
     if expect_valid and ok:
         print(f"  {GREEN}PASS{RESET}  {name}")
     elif not expect_valid and not ok:
-        print(f"  {GREEN}PASS{RESET}  {name}  (rejeitado como esperado)")
+        if match_problem:
+            print(f"  {RED}FAIL{RESET}  {name}  (rejeitado pelo motivo errado)")
+            print(f"        {match_problem}")
+            for e in errors[:3]:
+                print(f"        → {e}")
+        else:
+            print(f"  {GREEN}PASS{RESET}  {name}  (rejeitado como esperado)")
     elif expect_valid and not ok:
         print(f"  {RED}FAIL{RESET}  {name}  (esperado válido, mas tem erros)")
         for e in errors[:3]:
@@ -439,13 +509,17 @@ def validate_ndf_file(path: Path, schema: dict, expect_valid: bool) -> bool:
     all_errors = [fmt_schema_error(e) for e in schema_errors] + semantic
     is_valid = not all_errors
 
-    _print_result(path.name, is_valid, expect_valid, all_errors, expected_error)
+    match_problem = None
+    if not expect_valid and not is_valid:
+        match_problem = check_expected_match(raw, all_errors)
+
+    _print_result(path.name, is_valid, expect_valid, all_errors, expected_error, match_problem)
 
     if is_valid:
         for advisory in check_ndf_advisories(doc):
             print(f"  {YELLOW}AVISO{RESET}  {path.name}: {advisory}")
 
-    return is_valid == expect_valid
+    return is_valid == expect_valid and match_problem is None
 
 
 # ── NCRTF file validator ──────────────────────────────────────────────────────
@@ -463,8 +537,12 @@ def validate_ncrtf_file(path: Path, expect_valid: bool) -> bool:
     errors = check_ncrtf_value(doc, "ncrtf")
     is_valid = not errors
 
-    _print_result(path.name, is_valid, expect_valid, errors, expected_error)
-    return is_valid == expect_valid
+    match_problem = None
+    if not expect_valid and not is_valid:
+        match_problem = check_expected_match(raw, errors)
+
+    _print_result(path.name, is_valid, expect_valid, errors, expected_error, match_problem)
+    return is_valid == expect_valid and match_problem is None
 
 
 # ── suite runners ─────────────────────────────────────────────────────────────
@@ -590,11 +668,12 @@ def run_ndt_suite(valid_only=False, invalid_only=False) -> tuple[int, int]:
             raw = json.loads(path.read_text(encoding="utf-8"))
             schema_errors = list(Draft202012Validator(schema).iter_errors(strip_meta(raw)))
             semantic = check_ndt_semantic(strip_meta(raw)) if not schema_errors else []
-            ok = bool(schema_errors or semantic)
-            _print_result(path.name, not ok, False,
-                          [e.message for e in schema_errors] + semantic,
-                          raw.get("_expected_error", ""))
-            if ok: passed += 1
+            all_errors = [e.message for e in schema_errors] + semantic
+            ok = bool(all_errors)
+            match_problem = check_expected_match(raw, all_errors) if ok else None
+            _print_result(path.name, not ok, False, all_errors,
+                          raw.get("_expected_error", ""), match_problem)
+            if ok and match_problem is None: passed += 1
             else: failed += 1
     return passed, failed
 

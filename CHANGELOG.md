@@ -5,6 +5,95 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Generalização da avaliação arquivística e separação custódia ↔ RGPD (2026-08-14)
+
+Duas alterações **incompatíveis**, absorvidas em `1.0.0` por a especificação
+estar em nível 1 — Draft, sem revisão pública aberta e sem utilizadores
+externos (ADR-007). Fecham o risco R11 e retiram do ROADMAP v2.0.0 o item de
+generalização de `avaliacao`. Detalhe em ADR-015, ADR-016 e
+`docs/design/NDF-AVALIACAO-GENERALIZATION.md`.
+
+O bloco `avaliacao` obrigava qualquer produtor a exprimir a decisão de
+avaliação no vocabulário do MEG/DGLAB — PCA, Destino Final, Lista Consolidada —
+o que tornava o NDF, na prática, um formato da Administração Pública
+portuguesa. O levantamento comparativo sobre PT, FR, NL, DE e UK/CoE/Comissão
+Europeia mostrou que o modelo português é uma instância de um padrão europeu
+comum (`gatilho + prazo + ação de destino + instrumento`), e não uma
+idiossincrasia: PT e FR são praticamente isomórficos, incluindo o valor de
+amostragem. A generalização é, por isso, de vocabulário — a estrutura mantém-se
+no core.
+
+- adicionado: `avaliacao.perfil` (obrigatório) — perfil de avaliação
+  arquivística aplicável, enum aberto com padrão
+  `^([a-z]{2}-[a-z0-9-]+|generic)$`. As regras de sintaxe de cada jurisdição
+  passam a viver no schema do perfil, em `specs/registry/profiles/`, que
+  **DEVE viajar dentro do `.ndfpkg`** (NDF-PKG-008), pelo mesmo mecanismo dos
+  schemas de tipo documental (ADR-014);
+- adicionado: perfis `pt-dglab` — que preserva integralmente as regras
+  portuguesas atuais, incluindo a correspondência de instrumento entre
+  `classificacao_ref` e `instrumento_ref` — e `generic`, sem restrições
+  jurisdicionais;
+- adicionado: `destino_final: "a_determinar"`, com `autoridade_avaliacao`
+  obrigatório quando usado e proibido nos restantes casos. Cobre os sistemas em
+  que a decisão de destino não compete ao produtor mas à autoridade
+  arquivística — `Anbietung`/`Bewertung` na Alemanha, `voorlopig te bewaren` e
+  `nader te bepalen` nos Países Baixos, `review` no Reino Unido e nas
+  instituições europeias. Antes desta alteração, um produtor nesses sistemas
+  não conseguia produzir um NDF-core honesto;
+- alterado: `tipo_classificacao_ref` → `classificacao_ref`;
+  `instrumento_avaliacao_versao_ref` → `instrumento_ref`;
+  `prazo_conservacao_administrativa` → `prazo_conservacao`. Renomeados apenas
+  os campos cujo nome é um termo legal português; `destino_final` e
+  `forma_contagem` mantêm-se, por traduzirem diretamente para os equivalentes
+  das outras jurisdições;
+- adicionado: `metadados.entidade_responsavel` (obrigatório sempre) —
+  responsável pela **custódia do registo**. É o conceito que a SPEC já
+  descrevia, mas alojado no campo errado;
+- alterado: `categorias_dados_pessoais`, `base_legal_conservacao` e
+  `responsavel_tratamento` saem do topo de `metadados` e passam ao bloco
+  `metadados.protecao_dados`, **obrigatório se e só se**
+  `contem_dados_pessoais: true` e **proibido** caso contrário. Antes, o formato
+  exigia declarar um responsável pelo tratamento RGPD mesmo em documentos que
+  afirmavam não conter dados pessoais, e a incoerência inversa não era
+  detetável (ADR-016);
+- adicionado: casos de conformidade `avaliacao-perfil-generico` (documento
+  não-PT com `a_determinar`), `avaliacao-sem-perfil`,
+  `avaliacao-a-determinar-sem-autoridade` e
+  `protecao-dados-sem-dados-pessoais`;
+- corrigido: `mismatched-instrument` e `invalid-tipo-classificacao-ref`
+  (renomeado para `invalid-classificacao-ref`) eram **testes vácuos** — ambos
+  omitiam a declaração de origem (§2.2.1) e o primeiro tinha ainda um `ndf_id`
+  não conforme, pelo que eram rejeitados por erro de schema antes de a
+  violação que pretendiam cobrir chegar a ser avaliada. Defeito pré-existente,
+  detetado ao migrá-los, e ponto de partida para a entrada seguinte.
+
+### Casos negativos verificados pelo motivo da rejeição (2026-08-14)
+
+O runner comparava apenas aceite/rejeitado, pelo que um caso negativo rejeitado
+por um defeito acidental era indistinguível de um caso que exercesse a regra
+documentada — e continuaria a passar mesmo que essa regra fosse removida da
+especificação. Detetado ao migrar dois casos de `avaliacao`; a instrumentação
+mostrou que o problema era mais extenso.
+
+- adicionado: campo `_expected_match` em todos os 46 casos de
+  `conformance/{ndf,ncrtf,ndt}/invalid/` — expressão regular que **DEVE**
+  corresponder a pelo menos um dos erros reportados. `tools/validate.py` trata
+  como falha a ausência do campo e a ausência de correspondência, mesmo quando
+  o caso é corretamente rejeitado;
+- adicionado: SPEC.md §9.4.1, que fixa a regra e delimita o que é exigível a
+  uma implementação alternativa — rejeitar os casos é obrigatório, reproduzir
+  as mensagens do runner de referência não é;
+- corrigido: 17 casos NDF sem declaração de origem, 7 com `ndf_id` malformado
+  e 2 com `documento` incompleto face ao schema do tipo — todos rejeitados por
+  motivo alheio ao que documentavam;
+- corrigido: 3 dos 5 casos negativos NDT (`duplicate-page-id`,
+  `non-positive-dimension`, `unknown-page-ref`) omitiam
+  `sequencia[].repeticao`, pelo que falhavam no schema sem nunca chegar à
+  verificação semântica que existiam para cobrir;
+- melhorado: `fmt_schema_error` passa a produzir mensagem legível para as
+  proibições condicionais `if/then/else` — antes despejavam o objeto validado
+  inteiro, o que as tornava inúteis como evidência.
+
 ### Proveniência de sistema produtor e imputação jurídica (2026-08-13)
 
 Motivada por uma categoria não coberta: documentos gerados por sistemas
@@ -274,7 +363,8 @@ formato/perfil não tinha sido aplicada até ao fim:
   bloco `avaliacao` — hoje semanticamente acoplado ao modelo arquivístico
   português (PCA/DF/DGLAB), relevante para adoção por outras
   administrações europeias. Sem ação prevista para 1.0, apenas registo da
-  questão.
+  questão. **Superado em 2026-08-14**: a generalização foi antecipada para
+  1.0.0 — ver a entrada no topo deste ficheiro e ADR-015.
 
 ### Harmonização editorial e de normalização
 

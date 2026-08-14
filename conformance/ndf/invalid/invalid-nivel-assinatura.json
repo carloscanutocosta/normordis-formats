@@ -1,23 +1,45 @@
 {
   "_comment": "INVÁLIDO: nivel_assinatura com valor fora do enum. Violação: §2.10.1.",
   "_expected_error": "Valor 'eletronico_simples' não pertence ao enum {nenhuma, avancada, qualificada}.",
+  "_expected_match": "'eletronico_simples' is not one of.*nivel_assinatura",
   "ndf_version": "1.0.0",
-  "ndf_id": "c3d4e5f6-a7b8-4901-cdef-012345678901",
+  "ndf_id": "c3d4e5f6-a7b8-4901-8def-012345678901",
   "estado": "ativo",
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "eletronico_simples",
   "ndt_version_ref": "oficio-generico@1.0.0",
   "metadados": {
     "tipo_documento_ref": "oficio@1.0.0",
-    "entidade_produtora": { "designacao": "Entidade Teste" },
-    "contem_dados_pessoais": false,
-    "responsavel_tratamento": "Entidade Teste"
+    "entidade_produtora": {
+      "designacao": "Entidade Teste"
+    },
+    "entidade_responsavel": "Entidade Teste",
+    "contem_dados_pessoais": false
   },
-  "documento": { "numero": "OF/2026/00003", "data": "2026-06-18", "destinatario": { "nome": "Teste" }, "assunto": "Teste", "corpo": "Teste" },
+  "documento": {
+    "numero": "OF/2026/00003",
+    "data": "2026-06-18",
+    "destinatario": {
+      "nome": "Teste"
+    },
+    "assunto": "Teste",
+    "corpo": "Teste"
+  },
+  "participantes": [
+    {
+      "participante_ref": "user:100",
+      "papel": "autor"
+    }
+  ],
   "avaliacao": {
-    "tipo_classificacao_ref": "lc/450.10.001",
-    "prazo_conservacao_administrativa": { "valor": 5, "unidade": "anos", "forma_contagem": "data_documento" },
+    "perfil": "pt-dglab",
+    "classificacao_ref": "lc/450.10.001",
+    "prazo_conservacao": {
+      "valor": 5,
+      "unidade": "anos",
+      "forma_contagem": "data_documento"
+    },
     "destino_final": "eliminacao",
-    "instrumento_avaliacao_versao_ref": "lc/lista-consolidada-dglab-2023-v3"
+    "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3"
   }
 }

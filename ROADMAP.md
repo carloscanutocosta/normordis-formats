@@ -453,25 +453,31 @@ normordis-migrate --batch *.ndfpkg --out-dir migrado/
 | Extensões de namespace (`ext.<entidade>`) | Permite que AT, SS, Municípios estendam o NDF-core com campos próprios sem alterar esta especificação base |
 | Espaço de nomes por entidade produtora em `ndf_id` (A10, `LACUNAS.md` L6) | Resolvido em conjunto com extensões de namespace, acima — evita duas rondas de alteração incompatível separadas |
 | Revisão de `tipo_documento_ref` para URI formal | Alinhamento com Linked Data / European Interoperability Framework |
-| Generalização do bloco `avaliacao` (conceito abstrato + perfil PT/DGLAB) | Ver nota "Generalização arquivística europeia" abaixo |
 
-#### Generalização arquivística europeia (nota, sem ação prevista para 1.0)
+#### Generalização arquivística europeia — RESOLVIDO em 1.0.0 (2026-08-14)
 
-Identificado em revisão externa (2026-08-08): a ADR-010 desacoplou o NDF do
-modelo operacional NORMORDIS (custódia, lifecycle), mas o bloco `avaliacao`
-continua semanticamente acoplado ao modelo arquivístico português (PCA,
-DF, Lista Consolidada, DGLAB, PGD, Tabela de Seleção — SPEC.md §3). Isto é
-aceitável para uma versão 1.0 focada na AP portuguesa, mas é a próxima
-questão de generalização a considerar caso o objetivo seja adoção por
-outras administrações públicas europeias (relevante para uma eventual
-candidatura NGI com âmbito além de Portugal).
+Identificado em revisão externa (2026-08-08) e reidentificado em 2026-08-14: o
+bloco `avaliacao` estava semanticamente acoplado ao modelo arquivístico
+português (PCA, DF, Lista Consolidada, DGLAB, PGD, Tabela de Seleção).
 
-Direção a explorar, sem comprometer agora: separar um conceito abstrato de
-avaliação arquivística (`retention_classification`, `retention_period`,
-`disposition`, `governing_instrument` — nomes ilustrativos) de um perfil
-`PT-DGLAB` que o instancia com os termos portugueses atuais
-(`tipo_classificacao_ref`, PCA, DF). Não decidido nem desenhado — registo
-da questão para não se perder, não uma proposta.
+Antecipado de v2.0.0 para **1.0.0** por decisão de 2026-08-14, com dois
+fundamentos: o objetivo mais próximo passou a ser uma candidatura NGI/OSOR, de
+âmbito europeu; e a alteração é incompatível, pelo que o seu custo é hoje o
+mais baixo que alguma vez será — a especificação está em nível 1 — Draft, sem
+revisão pública aberta e sem utilizadores externos.
+
+A direção então esboçada — conceito abstrato + perfil PT/DGLAB — confirmou-se,
+depois de verificado que o modelo português é uma instância de um padrão
+europeu comum e não uma idiossincrasia. Resultado: `avaliacao.perfil` com
+schemas em `specs/registry/profiles/`, renomeação dos campos cujo nome era um
+termo legal português, e o valor `destino_final: "a_determinar"` para os
+sistemas em que a decisão não compete ao produtor. Ver ADR-015 e
+`docs/design/NDF-AVALIACAO-GENERALIZATION.md`.
+
+Fica em aberto, sem prazo: publicar perfis para outras jurisdições
+(`fr-siaf`, `nl-na`, `de-bund`, `eu-crl`), o que exige confirmação contra
+fonte legal primária de cada uma. É acréscimo ao registo, não alteração
+incompatível do NDF-core.
 
 ### NCRTF v2.0.0 ✅
 
