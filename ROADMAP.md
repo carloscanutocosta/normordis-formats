@@ -80,6 +80,85 @@ resto: esta reabertura é pontual, fundamentada nos três ADR, e não constitui
 autorização genérica para alargar o NDF-core. `ndf_version` mantém-se em
 `1.0.0` (ADR-007).
 
+### Teste de admissão de novas primitivas no NDF-core (2026-08-15)
+
+D5 declara o congelamento de âmbito mas não definia **o que o quebra**. A
+reabertura de 2026-08-13 foi decidida caso a caso, por juízo, sem critério
+escrito — e correu bem, mas não é método. Este teste fixa o critério.
+
+**Âmbito.** Aplica-se **apenas ao NDF-core**. NDT e NCRTF não estão sob D5:
+pelo contrário, D5 desloca explicitamente o esforço para eles. Trabalho de
+afinação em NDT e NCRTF não carece deste teste e não constitui reabertura de
+nada.
+
+#### O teste
+
+Perante a proposta de uma nova primitiva no NDF-core, percorrer por ordem. A
+primeira resposta afirmativa encerra a questão — a proposta **não** entra no
+core:
+
+1. **É informação documental?** Se for estado de procedimento, regra de
+   workflow, prazo processual, entrega, notificação, ou facto posterior à
+   finalização, é do sistema de gestão. Ver o princípio de âmbito de
+   [`LACUNAS.md`](LACUNAS.md).
+2. **Cabe em `documento`, via schema do tipo documental?** Se for específico de
+   uma tipologia, o lugar é o schema do tipo, não o core (SPEC §2.9.1).
+3. **Cabe num bloco transversal existente?** `metadados`, `avaliacao`,
+   `relacoes`, `participantes`, `proveniencia_sistema`, `proveniencia_ia`,
+   `imputacao`. Estes blocos foram desenhados para absorver casos novos sem
+   crescer o topo do core.
+4. **É variação jurisdicional de algo que já existe?** Então é matéria de
+   perfil (SPEC §3.2.3), não de core. Ver [`docs/profiles/`](docs/profiles/README.md).
+5. **Pode viver fora do NDF, referenciada por hash?** É o padrão já usado para
+   evidência de IA, regras de sistema e artefactos externos. Referência mais
+   hash preserva a verificabilidade sem inchar o documento.
+6. **Pode simplesmente não existir?** Se nenhum caso real a exige, não entra.
+
+Só depois de as seis respostas serem negativas se considera alterar o core. E
+mesmo aí aplica-se a regra do [ADR-015](docs/architecture/ADR-015-generalizacao-avaliacao-arquivistica.md):
+não abstrair por antecipação — só se generaliza um eixo quando for possível
+**nomear três sistemas reais que divergem nesse eixo**.
+
+As duas regras são complementares e respondem a perguntas diferentes: este
+teste decide se uma primitiva **entra**; a regra do ADR-015 decide se uma
+primitiva existente **se generaliza**.
+
+#### O que NÃO é alteração de formato
+
+Confusões frequentes, que não acionam este teste nem reabrem D5:
+
+| Trabalho | Porquê não é alteração de formato |
+|---|---|
+| acrescentar ou corrigir documentação | o texto não é o contrato; o schema e os vetores são |
+| acrescentar casos de conformidade | aumenta a cobertura do contrato existente |
+| acrescentar um tipo documental | é `tipo_documento_ref` mais schema próprio; o core não muda |
+| acrescentar um perfil de avaliação | é acréscimo ao registo (SPEC §3.2.3) |
+| acrescentar ou afinar um NDT | fora de D5, e fora do NDF-core |
+| corrigir defeito, ambiguidade ou incoerência editorial | admitido expressamente pelo alcance de D5 |
+
+#### Validação retrospetiva
+
+Aplicado ao caso que reabriu D5 em 2026-08-13, o teste dá a resposta certa.
+`proveniencia_sistema` e `imputacao`: (1) é informação documental — quem
+produziu e quem responde juridicamente pertencem ao documento, não ao
+procedimento; (2) não é específico de uma tipologia — atravessa liquidações,
+notificações e certidões; (3) não cabia em nenhum bloco existente —
+`participantes` é índice de pessoas singulares e `entidade_produtora` é a
+pessoa coletiva, nenhum exprime imputação jurídica nem cadeia de sistemas;
+(4) não é variação jurisdicional; (5) não pode viver fora, por ser menção
+legalmente obrigatória do próprio ato; (6) havia casos reais e numerosos.
+
+Seis negativas: a primitiva entra. Foi o que se fez, e o teste confirma-o —
+o que dá alguma confiança de que não é apenas uma racionalização das decisões
+já tomadas.
+
+#### Consequência prática
+
+A partir daqui, a pergunta de trabalho deixa de ser *"o que falta ao NDF?"* e
+passa a ser *"o que é que uma implementação real não consegue fazer com o NDF
+tal como está?"*. A primeira pergunta produz âmbito; a segunda produz
+evidência — e é evidência o que falta, não âmbito.
+
 ### Sequência de trabalho resultante
 
 **Caminho crítico até à abertura do debate**
