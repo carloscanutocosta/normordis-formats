@@ -5,6 +5,26 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Teste de admissão de novas primitivas no NDF-core (2026-08-15)
+
+D5 (2026-08-11) congelou o âmbito do NDF-core mas não definia o que o quebra; a
+reabertura de 2026-08-13, para `proveniencia_sistema` e `imputacao`, foi
+decidida por juízo caso a caso, sem critério escrito.
+
+- adicionado: teste de admissão em [`ROADMAP.md`](ROADMAP.md) — seis perguntas
+  por ordem, em que a primeira resposta afirmativa exclui a primitiva do core,
+  mais a tabela do que **não** é alteração de formato (documentação, casos de
+  conformidade, tipos documentais, perfis, NDTs, correção de defeito);
+- registado: o teste aplica-se **apenas ao NDF-core**. NDT e NCRTF não estão
+  sob D5 — D5 desloca-lhes expressamente o esforço —, pelo que trabalho de
+  afinação nesses formatos não o aciona;
+- registado: articulação com a regra do ADR-015. Este teste decide se uma
+  primitiva **entra**; a regra dos três sistemas divergentes decide se uma
+  primitiva existente **se generaliza**;
+- validado retrospetivamente contra a reabertura de 2026-08-13: o teste devolve
+  a mesma decisão que foi tomada, o que reduz o risco de ser racionalização das
+  escolhas já feitas.
+
 ### Namespace de perfis, terminologia dos artefactos e matriz jurisdicional (2026-08-15)
 
 Ronda de consolidação após revisão externa, sem alteração de âmbito. Um item
