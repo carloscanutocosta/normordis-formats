@@ -668,11 +668,27 @@ Evidência executável: `conformance/ndf/valid/avaliacao-perfil-generico.json`
 as novas regras. Sem esse caso, a alegação de suporte a sistemas arquivísticos
 europeus não teria prova — o padrão que R2 e R6 já representam neste projeto.
 
-**Fica em aberto**: só existem os perfis `pt-dglab` e `generic`. Publicar
-perfis nacionais (`fr-siaf`, `nl-na`, `de-bund`, `eu-crl`) exige confirmação
-contra fonte legal primária de cada jurisdição, e não contra as fontes
-secundárias que sustentaram o desenho. É acréscimo ao registo, sem alteração
-incompatível do NDF-core.
+**Atualizado em 2026-08-15.** A confirmação contra fonte primária foi feita e
+está em [`../profiles/`](../profiles/README.md): Code du patrimoine L212-2 e
+R212-13; Bundesarchivgesetz §5; Archiefwet 1995 e Archiefbesluit 1995 art. 5;
+Decisão (UE) 2021/2121 art. 15.º. A matriz de compatibilidade fecha nos cinco
+regimes, o que constitui a primeira evidência documentada de que a abstração de
+`avaliacao` foi destilada de divergências reais e não postulada.
+
+Dois resultados relevantes. O caso alemão confirma que
+`destino_final: "a_determinar"` não é acomodação cosmética: o §5 do BArchG
+atribui ao Bundesarchiv, e não ao produtor, a determinação do `bleibender Wert`.
+E o caso francês é o mais próximo de uma perda semântica encontrada — o R212-13
+distingue duas durações (courante e intermédiaire) onde o NDF tem um único
+`prazo_conservacao`; a análise conclui que não há perda para o efeito do NDF,
+e o raciocínio está registado em [`../profiles/fr-siaf.md`](../profiles/fr-siaf.md) §5.
+
+**Continua em aberto**: só `pt-dglab` e `generic` têm schema publicado. Os
+restantes quatro estão mapeados mas não codificados, por não haver evidência de
+sintaxe nacional passível de ser imposta — e, no caso de `eu-ec`, por não ter
+sido possível obter o SEC(2019)900 integral. Falta também confirmação por
+interlocutor de cada jurisdição, matéria do gate externo 3. É acréscimo ao
+registo, sem alteração incompatível do NDF-core.
 
 ### 5.5 Defeito colateral detetado — dois casos de conformidade vácuos (2026-08-14)
 

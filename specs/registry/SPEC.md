@@ -60,6 +60,13 @@ O schema do perfil declarado **DEVE viajar dentro do `.ndfpkg`**, em
 acrescentados a este registo sem alteração incompatível do NDF-core, mediante
 confirmação contra os instrumentos legais da jurisdição respetiva.
 
+O identificador de perfil é opaco e qualificado — dois ou mais segmentos, o
+primeiro tipicamente o código da jurisdição, o segundo a **autoridade** com
+competência sobre o regime e não o instrumento que ela publica. Perfis já
+mapeados mas ainda sem schema publicado (`fr-siaf`, `de-barch`, `nl-na`,
+`eu-ec`) estão documentados em
+[`docs/profiles/`](../../docs/profiles/README.md).
+
 ---
 
 ## 4. Resolução

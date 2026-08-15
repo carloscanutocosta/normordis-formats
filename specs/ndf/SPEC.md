@@ -87,19 +87,35 @@ Referências de contexto, estimativas, mapeamento jurídico, perfil físico de a
 
 ### 1.2 Composição
 
-Um NDF completo é composto por três partes logicamente distintas:
+O modelo documental NDF distingue **três artefactos**, com funções e ciclos de
+vida distintos:
 
-```
-NDF completo = NDF-core + Envelope
-NDF-core + NDT (referenciado) → reprodução visual (PDF, Word, ...)
-```
-
-| Parte | Conteúdo | Canonicalizado/assinado? |
+| Artefacto | Função | Canonicalizado/assinado? |
 |---|---|---|
-| **NDF-core** | conteúdo do documento, metadados descritivos, classificação, avaliação arquivística (prazo de conservação e destino final), referência ao NDT | Sim — é exatamente o que é canonicalizado (JCS) e assinado |
-| **Envelope** | assinaturas CAdES-B-LTA, timestamps RFC 3161, material de validação (cadeia de certificados + revogação) | Não — é produzido a partir da assinatura sobre o NDF-core; adicionado depois |
+| **NDF-core** | Fonte de verdade documental: conteúdo, metadados descritivos, classificação, avaliação arquivística e a referência ao NDT | Sim — é exatamente o que é canonicalizado (JCS) e assinado |
+| **Envelope** | Provas criptográficas: assinaturas CAdES-B-LTA, timestamps RFC 3161, material de validação (cadeia de certificados + revogação) | Não — é produzido a partir da assinatura sobre o NDF-core; adicionado depois |
+| **NDT** | Definição de apresentação, necessária à reprodução visual | Não — não integra os bytes assinados; é referenciado por `ndt_version_ref` |
 
-A separação evita circularidade: o envelope fica fora dos bytes sobre os quais a própria assinatura é calculada.
+Estes três artefactos combinam-se em duas unidades com nome próprio:
+
+```
+artefacto NDF assinado  = NDF-core + Envelope
+pacote NDF (.ndfpkg)    = NDF-core + Envelope + NDT + schemas + recursos
+```
+
+O **artefacto NDF assinado** é a unidade mínima verificável: contém tudo o que
+é necessário para provar integridade e autoria. O **pacote NDF** é a unidade
+mínima autossuficiente: contém, além disso, tudo o que é necessário para
+interpretar e reproduzir o documento sem depender de qualquer serviço externo
+(§8).
+
+O NDT não pertence aos bytes assinados, mas é indispensável à reprodução: sem
+ele os dados continuam interpretáveis e verificáveis, e a apresentação não é
+reconstituível. É por isso um artefacto do modelo, e não uma parte do
+artefacto assinado.
+
+A separação entre NDF-core e Envelope evita circularidade: o envelope fica fora
+dos bytes sobre os quais a própria assinatura é calculada.
 
 ### 1.2.1 Recursos desta especificação
 
@@ -1771,9 +1787,21 @@ não se aplica a perfis que não a declarem.
 #### 3.2.3 Perfis de avaliação
 
 O campo `perfil` identifica o sistema arquivístico sob o qual a decisão de
-avaliação foi tomada. É um enum aberto, com o padrão
-`^([a-z]{2}-[a-z0-9-]+|generic)$` — tipicamente código ISO 3166-1 alpha-2 da
-jurisdição seguido do identificador da autoridade ou do quadro aplicável.
+avaliação foi tomada. É um **identificador opaco qualificado**: dois ou mais
+segmentos separados por hífen, com o padrão
+`^(generic|[a-z][a-z0-9]*(-[a-z0-9]+)+)$`.
+
+A convenção do registo é `<namespace>-<autoridade>` — por exemplo `pt-dglab`,
+`fr-siaf`, `de-barch`, `eu-ec`. O `namespace` é tipicamente o código ISO 3166-1
+alpha-2 da jurisdição, mas **o padrão não o impõe**, e deliberadamente: nem
+todos os regimes arquivísticos são nacionais. Perfis institucionais
+(`eu-ec`), internacionais (`int-un`) ou setoriais têm de caber no mesmo
+mecanismo sem alteração incompatível. O significado de um identificador vem do
+registo, não da sua forma.
+
+Os perfis nomeiam a **autoridade** com competência sobre o regime, não o
+instrumento que ela publica: os instrumentos mudam de nome e de edição, a
+autoridade é o que se mantém estável ao longo da vida do documento.
 
 Cada perfil registado tem um schema em
 `specs/registry/profiles/<perfil>.schema.json` que restringe o bloco `avaliacao`
@@ -1793,9 +1821,14 @@ Um perfil não resolúvel em contexto de pacote é **erro** — o pacote tem de 
 transportar. Fora de contexto de pacote, um perfil não registado é validado
 apenas contra a estrutura do NDF-core.
 
-**Definir um perfil não é matéria desta especificação**: um perfil nacional
+**Definir um perfil não é matéria desta especificação**: um perfil jurisdicional
 exige confirmação contra os instrumentos legais da jurisdição respetiva, e é
 introduzido por acréscimo ao registo, sem alteração incompatível do NDF-core.
+
+O mapeamento entre estas primitivas e os regimes de Portugal, França, Alemanha
+federal, Países Baixos e Comissão Europeia, com as respetivas fontes jurídicas
+primárias, consta da matriz de compatibilidade em
+[`docs/profiles/`](../../docs/profiles/README.md) — informativa, não normativa.
 
 #### 3.2.4 Porque a estrutura fica no core e o vocabulário no perfil
 
@@ -2447,10 +2480,13 @@ Ferramenta de referência: `tools/check_custody.py`; vetores em
 
 | Termo | Significado |
 |---|---|
-| NDF | NORMORDIS Document Format — formato completo (NDF-core + envelope) |
-| NDF-core | Parte de dados do NDF, canonicalizada e assinada |
-| Envelope | Assinaturas, timestamps e material de validação, associados ao NDF-core mas não assinados |
+| NDF | NORMORDIS Document Format — o formato e o seu modelo documental, no seu conjunto |
+| NDF-core | Fonte de verdade documental: o objeto JSON canonicalizado e assinado (§2) |
+| Envelope | Assinaturas, timestamps e material de validação, associados ao NDF-core mas não abrangidos pela assinatura (§4) |
+| artefacto NDF assinado | NDF-core + Envelope — a unidade mínima verificável (§1.2) |
+| pacote NDF (`.ndfpkg`) | NDF-core + Envelope + NDT + schemas + recursos — a unidade mínima autossuficiente (§8) |
 | NDT | NORMORDIS Document Template — estrutura/layout para reprodução visual |
+| perfil de avaliação | Identificador do regime arquivístico aplicável, declarado em `avaliacao.perfil` (§3.2.3) |
 | JCS | JSON Canonicalization Scheme (RFC 8785) |
 | PCA | Prazo de Conservação Administrativa |
 | DF | Destino Final |

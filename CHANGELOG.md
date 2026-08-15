@@ -5,6 +5,43 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Namespace de perfis, terminologia dos artefactos e matriz jurisdicional (2026-08-15)
+
+Ronda de consolidação após revisão externa, sem alteração de âmbito. Um item
+com janela temporal — o identificador de perfil entra nos bytes assinados — e
+dois editoriais.
+
+- alterado: padrão de `avaliacao.perfil` de `^([a-z]{2}-[a-z0-9-]+|generic)$`
+  para `^(generic|[a-z][a-z0-9]*(-[a-z0-9]+)+)$`. O padrão anterior codificava
+  a hipótese de que um regime arquivístico é sempre nacional, que é falsa: a
+  Comissão Europeia tem regime institucional próprio, e nada exclui perfis
+  internacionais ou setoriais. `eu-ec` passava por acaso — `eu` tem duas letras
+  — mas `int-un` ou `org-oecd` não passariam. O identificador passa a ser
+  **opaco e qualificado**, com a semântica a vir do registo e não do padrão;
+- alterado: candidatos `de-bund` → `de-barch` (o perfil é o regime sob
+  competência do Bundesarchiv, não o regime federal em geral, que inclui os
+  Länder) e `eu-crl` → `eu-ec` (os perfis nomeiam a autoridade, não o
+  instrumento que ela publica);
+- alterado: SPEC §1.2 deixa de anunciar "três partes" e apresentar duas. Passa a
+  distinguir os três **artefactos** (NDF-core, Envelope, NDT) das duas
+  **unidades** com nome próprio: *artefacto NDF assinado* (core + envelope,
+  unidade mínima verificável) e *pacote NDF* (`.ndfpkg`, unidade mínima
+  autossuficiente). A expressão "NDF completo" é abandonada por ser ambígua
+  entre as duas;
+- adicionado: os termos ao Anexo A da SPEC e a `TERMINOLOGY.md`;
+- adicionado: [`docs/profiles/`](docs/profiles/README.md) — matriz de
+  compatibilidade jurisdicional e documentos de mapeamento para PT, FR, DE
+  federal, NL e Comissão Europeia, cada um com base jurídica **primária
+  verificada**, mapeamento NDF, o que um schema poderia impor, e limitações.
+  Nenhum schema de perfil novo foi publicado: mapear um regime não é o mesmo que
+  ter evidência de sintaxe que possa ser imposta, e só Portugal a tem. `eu-ec`
+  fica **experimental** por não ter sido possível obter o SEC(2019)900 integral;
+- registado: o R212-13 francês estrutura a avaliação em duas durações mais o
+  destino, onde o NDF tem um único `prazo_conservacao`. Analisado como sem perda
+  semântica para o efeito do NDF — o prazo relevante é o termo da conservação
+  intermédia —, mas é o teste mais exigente que o modelo enfrentou e fica
+  documentado como tal.
+
 ### Generalização da avaliação arquivística e separação custódia ↔ RGPD (2026-08-14)
 
 Duas alterações **incompatíveis**, absorvidas em `1.0.0` por a especificação

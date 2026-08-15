@@ -19,6 +19,9 @@ na especificação aplicável.
 | autocontido | self-contained | sem dependências externas para o perfil declarado |
 | perfil de custódia | custody profile | representação otimizada para persistência e deduplicação |
 | perfil portátil | portable profile | `.ndfpkg` autocontido |
+| artefacto NDF assinado | signed NDF artefact | NDF-core + envelope; unidade mínima verificável. Evitar "NDF completo" |
+| pacote NDF | NDF package | `.ndfpkg`; unidade mínima autossuficiente. Evitar "NDF completo" |
+| perfil de avaliação | appraisal profile | regime arquivístico declarado em `avaliacao.perfil`; identificador opaco qualificado |
 | interoperabilidade | interoperability | interpretação equivalente por implementações independentes |
 | conformidade | conformance | satisfação de requisitos desta especificação |
 | declaração de conformidade | conformance claim | declaração de terceiro, não certificação do projeto |

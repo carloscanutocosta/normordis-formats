@@ -84,7 +84,7 @@ legais primários. É suficiente para decidir a arquitetura — o invariante é
 estável nas cinco fontes — e **não é suficiente para publicar perfis
 nacionais**. Por isso esta ronda cria apenas dois perfis (§3.3): `pt-dglab`,
 fundamentado nos instrumentos que o projeto já usa, e `generic`, sem restrições
-jurisdicionais. Perfis `fr-siaf`, `nl-na`, `de-bund` e `eu-crl` ficam como
+jurisdicionais. Perfis `fr-siaf`, `de-barch`, `nl-na` e `eu-ec` ficam como
 candidatos documentados, a confirmar contra fonte primária antes de existirem.
 
 ---
@@ -136,7 +136,8 @@ conhecido mesmo quando a apreciação está pendente.
 
 ### 3.3 Perfis
 
-`perfil` é um enum aberto com padrão `^([a-z]{2}-[a-z0-9-]+|generic)$`. Cada
+`perfil` é um identificador opaco qualificado, com padrão
+`^(generic|[a-z][a-z0-9]*(-[a-z0-9]+)+)$`. Cada
 perfil registado tem um schema em `specs/registry/profiles/<perfil>.schema.json`
 que restringe o bloco `avaliacao` para essa jurisdição.
 
@@ -232,7 +233,7 @@ Implica: retirar o item de generalização de `avaliacao` de v2.0.0 no
 
 ## 6. Explicitamente fora desta ronda
 
-- **Perfis `fr-siaf`, `nl-na`, `de-bund`, `eu-crl`** — carecem de confirmação
+- **Perfis `fr-siaf`, `de-barch`, `nl-na`, `eu-ec`** — carecem de confirmação
   contra fonte primária (§2.1).
 - **Separar transferência de conservação permanente** (§2, divergência 3) — não
   bloqueia nenhuma jurisdição; `conservacao_permanente` é interpretável em todas.

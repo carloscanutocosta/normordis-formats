@@ -39,9 +39,11 @@ idiossincrasia. Isso reduz a generalização a três divergências, todas aditiv
 ## Decisão
 
 1. **`avaliacao` passa a declarar um `perfil`** (obrigatório) que identifica o
-   sistema arquivístico aplicável. Enum aberto, padrão
-   `^([a-z]{2}-[a-z0-9-]+|generic)$`. Cada perfil registado tem schema próprio em
-   `specs/registry/profiles/<perfil>.schema.json`.
+   sistema arquivístico aplicável. Identificador opaco qualificado de dois ou
+   mais segmentos, padrão `^(generic|[a-z][a-z0-9]*(-[a-z0-9]+)+)$`. Cada
+   perfil registado tem schema próprio em
+   `specs/registry/profiles/<perfil>.schema.json`. O padrão **não** impõe que o
+   primeiro segmento seja um código de país — ver §"Namespace dos perfis".
 
 2. **Renomear os campos cujo nome é um termo legal português**:
    `tipo_classificacao_ref` → `classificacao_ref`;
@@ -66,8 +68,8 @@ idiossincrasia. Isso reduz a generalização a três divergências, todas aditiv
 6. **O schema do perfil viaja no `.ndfpkg`**, em `schemas/` — mesmo mecanismo e
    mesma justificação de ADR-014 para os schemas de tipo documental.
 
-7. Perfis criados nesta ronda: `pt-dglab` e `generic`. `fr-siaf`, `nl-na`,
-   `de-bund` e `eu-crl` ficam como candidatos documentados, a confirmar contra
+7. Perfis criados nesta ronda: `pt-dglab` e `generic`. `fr-siaf`, `de-barch`,
+   `nl-na` e `eu-ec` ficam como candidatos documentados, a confirmar contra
    fonte primária.
 
 8. As alterações são absorvidas em **1.0.0**, não numa 2.0.0.
@@ -149,6 +151,31 @@ do core.
 O ponto 6 é o que a torna verificável a longo prazo, pela mesma razão que ADR-014
 invocou: dentro de um `.ndfpkg`, um verificador independente valida o bloco contra
 o schema de perfil que veio no pacote, sem acesso a registo nenhum.
+
+## Namespace dos perfis
+
+O padrão inicial desta decisão era `^([a-z]{2}-[a-z0-9-]+|generic)$`, que
+codificava a hipótese de que um regime arquivístico é sempre nacional. Revisto
+em 2026-08-15, antes de qualquer perfil ser publicado, por essa hipótese ser
+falsa em pelo menos dois eixos: a Comissão Europeia tem regime arquivístico
+próprio, institucional e não nacional (Decisão (UE) 2021/2121); e nada exclui
+perfis internacionais ou setoriais.
+
+`eu-ec` passaria no padrão antigo por acaso — `eu` tem duas letras — mas
+`int-un` ou `org-oecd` não passariam. Um padrão que aceita o caso certo por
+coincidência e rejeita o caso seguinte é um padrão errado.
+
+O padrão passa a exigir apenas dois ou mais segmentos alfanuméricos
+minúsculos. A semântica do primeiro segmento é convenção do registo, não regra
+de schema. A correção é feita agora porque o identificador do perfil entra nos
+bytes assinados: alterá-lo depois de existirem documentos é migração de
+acervo, não edição de especificação.
+
+Na mesma revisão corrigiram-se dois nomes de candidatos: `de-bund` → `de-barch`
+(o perfil é o regime sob competência do Bundesarchiv, não o regime federal em
+geral, que inclui os Länder) e `eu-crl` → `eu-ec` (os restantes perfis nomeiam
+a autoridade; `crl` nomeava o instrumento — a *Common Retention List* — que é
+precisamente o que muda de edição ao longo do tempo).
 
 ## Consequências
 
