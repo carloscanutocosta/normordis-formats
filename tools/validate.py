@@ -242,6 +242,121 @@ def _resolve_perfil_schema(perfil: str, pkg_root: Path | None):
     return None, None
 
 
+def _deref(schema, root):
+    """Resolve $ref local (#/$defs/... ou #/definitions/...) contra a raiz."""
+    seen = 0
+    while isinstance(schema, dict) and "$ref" in schema and seen < 16:
+        ref = schema["$ref"]
+        if not ref.startswith("#/"):
+            return schema
+        alvo = root
+        for seg in ref[2:].split("/"):
+            if not isinstance(alvo, dict) or seg not in alvo:
+                return schema
+            alvo = alvo[seg]
+        schema, seen = alvo, seen + 1
+    return schema if isinstance(schema, dict) else {}
+
+
+def _propriedades(schema, root) -> dict:
+    """Propriedades declaradas, incluindo as trazidas por allOf/anyOf/oneOf."""
+    schema = _deref(schema, root)
+    props = dict(schema.get("properties") or {})
+    for chave in ("allOf", "anyOf", "oneOf"):
+        for ramo in schema.get(chave) or []:
+            props.update(_propriedades(ramo, root))
+    return props
+
+
+def _proibe_adicionais(schema, root) -> bool:
+    schema = _deref(schema, root)
+    if schema.get("additionalProperties") is False:
+        return True
+    return any(
+        _proibe_adicionais(ramo, root)
+        for chave in ("allOf", "anyOf", "oneOf")
+        for ramo in schema.get(chave) or []
+    )
+
+
+def _resolver_caminho(root, caminho: str):
+    """Resolve um caminho de dados do NDT contra o schema do tipo documental.
+
+    Devolve (subschema, erro). `erro` não-nulo significa caminho impossível —
+    o schema proíbe propriedades adicionais e não declara o segmento. Ambos
+    nulos significa indeterminado: o schema é permissivo nesse ponto e nada
+    se pode afirmar.
+    """
+    atual, percorrido = root, []
+    for seg in caminho.split("."):
+        props = _propriedades(atual, root)
+        if seg in props:
+            atual = props[seg]
+            percorrido.append(seg)
+            continue
+        onde = ".".join(percorrido + [seg])
+        if _proibe_adicionais(atual, root):
+            return None, f"'{onde}' não é declarado pelo schema do tipo"
+        return None, None
+    return _deref(atual, root), None
+
+
+def _referencias_ndt(node, out=None):
+    """Recolhe as ligações de dados do NDT: (contexto, referencia, colunas)."""
+    if out is None:
+        out = []
+    if isinstance(node, dict):
+        ref = node.get("referencia")
+        if isinstance(ref, str):
+            colunas = [c.get("id") for c in node.get("colunas") or [] if isinstance(c, dict)]
+            out.append((node.get("tipo") or "campo", ref, colunas))
+        for v in node.values():
+            _referencias_ndt(v, out)
+    elif isinstance(node, list):
+        for v in node:
+            _referencias_ndt(v, out)
+    return out
+
+
+def check_ndt_bindings(ndt: dict, tipo_schema: dict, tipo_id: str) -> list[str]:
+    """Verifica que as ligações de dados do NDT resolvem no schema do tipo.
+
+    NDT SPEC §80: todos os caminhos de dados do NDT são relativos a
+    `NDF-core.documento`. Nada verificava se resolvem — apenas a sintaxe do
+    caminho (`NDT_PATH_RE`). Um NDT que referencie campos que o tipo
+    documental não pode ter é irrenderizável, e passava a verde.
+
+    Distingue caminho impossível (o schema proíbe adicionais e não o declara)
+    de campo opcional ausente numa instância concreta: resolve contra o
+    schema, nunca contra o documento.
+    """
+    errors = []
+    for contexto, ref, colunas in _referencias_ndt(ndt):
+        if "{{" in ref:
+            continue  # token reservado, resolvido pelo renderizador
+        sub, erro = _resolver_caminho(tipo_schema, ref)
+        if erro:
+            errors.append(f"NDT: {contexto} referencia '{ref}' — {erro} ({tipo_id})")
+            continue
+        if sub is None or not colunas:
+            continue
+        if sub.get("type") != "array":
+            errors.append(
+                f"NDT: bloco tabela referencia '{ref}', que o schema do tipo "
+                f"não declara como array ({tipo_id})"
+            )
+            continue
+        itens = _deref(sub.get("items") or {}, tipo_schema)
+        props_item = _propriedades(itens, tipo_schema)
+        for cid in colunas:
+            if cid and cid not in props_item and _proibe_adicionais(itens, tipo_schema):
+                errors.append(
+                    f"NDT: coluna '{cid}' da tabela '{ref}' não é declarada "
+                    f"nos itens do array ({tipo_id})"
+                )
+    return errors
+
+
 def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
     errors = []
 
@@ -789,6 +904,16 @@ def validate_package_dir(root: Path) -> bool:
         expected_ref = f"{ndt.get('schema_id', '')}@{ndt.get('versao_ndt', '')}"
         if expected_ref != ndt_ref:
             errors.append("ndt_version_ref não corresponde à identidade do NDT")
+
+        # Ligações de dados NDT → schema do tipo documental. Dentro de um
+        # pacote existem os dois artefactos, logo é aqui que a junta pode ser
+        # verificada sem depender de instância.
+        tipo_ref = core.get("metadados", {}).get("tipo_documento_ref", "")
+        tipo_id = tipo_ref.rsplit("@", 1)[0] if "@" in tipo_ref else ""
+        if tipo_id:
+            tipo_schema, _origem = _resolve_tipo_schema(tipo_id, root)
+            if tipo_schema is not None:
+                errors.extend(check_ndt_bindings(ndt, tipo_schema, tipo_ref))
 
     if errors:
         print(f"{RED}FAIL{RESET}  pacote {root}")

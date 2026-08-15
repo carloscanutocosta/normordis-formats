@@ -45,6 +45,26 @@ def cases(root: Path):
     yield "PKG-NEG-006-identidade-ndt-divergente", lambda p: _mismatch_ndt(p)
     yield "PKG-NEG-007-envelope-sem-timestamps", lambda p: _remove_timestamps(p)
     yield "PKG-NEG-008-assinatura-sem-id", lambda p: _remove_assinatura_id(p)
+    yield "PKG-NEG-009-ndt-referencia-pendurada", lambda p: _dangling_ndt_ref(p)
+
+
+def _dangling_ndt_ref(root: Path) -> None:
+    """Acrescenta ao NDT um campo que liga a um caminho impossível no tipo.
+
+    'oficio.schema.json' tem additionalProperties: false, logo nenhum ofício
+    conforme pode ter 'campo_inexistente' — o NDT fica irrenderizável e isso
+    DEVE ser detectado sem depender de instância.
+    """
+    ndt_path = next((root / "ndt").glob("*.ndt.json"))
+    ndt = load(ndt_path)
+    ndt["paginas_def"][0].setdefault("campos", []).append({
+        "referencia": "campo_inexistente.subcampo",
+        "posicao": {"x": 10, "y": 10},
+        "largura": 50,
+        "altura": 6,
+    })
+    dump(ndt_path, ndt)
+    update_inventory_hash(root, str(ndt_path.relative_to(root)))
 
 
 def _tamper_hash(root: Path) -> None:
@@ -105,10 +125,11 @@ def main() -> int:
     if not validate_package_dir(SOURCE):
         print("FAIL package baseline")
         return 1
-    failed = 0
+    failed = total = 0
     with tempfile.TemporaryDirectory(prefix="normordis-package-") as tmp:
         base = Path(tmp)
         for name, mutate in cases(base):
+            total += 1
             target = base / name
             shutil.copytree(SOURCE, target)
             mutate(target)
@@ -117,7 +138,6 @@ def main() -> int:
                 failed += 1
             else:
                 print(f"PASS {name}: rejeitado como esperado")
-    total = 8
     print(f"PASS package vectors: {total - failed}/{total}" if not failed else f"FAIL package vectors: {failed}")
     return 1 if failed else 0
 
