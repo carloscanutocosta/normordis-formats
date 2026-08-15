@@ -5,6 +5,40 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Verificação das ligações de dados NDT → schema do tipo (2026-08-15)
+
+A pergunta que originou isto foi se o NDF estava estável para se avançar para
+NDT sem regressões. Ao testar a junta NDF↔NDT antes de responder, descobriu-se
+que **nada a verificava**: `tools/validate.py` conferia a sintaxe dos caminhos
+do NDT contra `NDT_PATH_RE` e nunca a sua resolubilidade contra o schema do
+tipo documental. Dois NDTs de exemplo tinham ligações impossíveis e ambos os
+pacotes estavam verdes.
+
+- adicionado: `check_ndt_bindings` em `tools/validate.py`, ligado a
+  `validate_package_dir` — resolve cada `referencia` do NDT contra o schema
+  declarado em `tipo_documento_ref`, e cada `colunas[].id` contra os itens do
+  array referenciado. Resolve contra o **schema**, nunca contra a instância,
+  para distinguir caminho impossível de campo opcional ausente;
+- adicionado: vetor `PKG-NEG-009-ndt-referencia-pendurada`, que prova que a
+  verificação morde;
+- corrigido: `tools/check_package_vectors.py` reportava `8/8` a partir de um
+  literal em vez de contar os casos — um vetor novo não aparecia na contagem;
+- corrigido: NDT `oficio-generico@2.0.0` referenciava `destinatario.localidade`
+  e `signatario_b.nome`/`.cargo`. `oficio.schema.json` tem
+  `additionalProperties: false` e declara `destinatario` sem `localidade` e um
+  único `signatario` — nenhum ofício conforme poderia ter esses campos, pelo
+  que eram template morto. Removidos o campo e a coluna correspondente da
+  `linha_lateral`. Se ofícios com dois signatários forem desejáveis, a
+  alteração é em `oficio.schema.json` e a coluna regressa — agora com
+  verificação a manter os dois artefactos coerentes;
+- **em aberto**: o NDT `liquidacao-irs@2026.1` é, no conteúdo, um template de
+  ofício — referencia `numero`, `assunto`, `data`, `destinatario.*`, `corpo`,
+  `signatario.*`, enquanto o `documento` da liquidação tem `ano_fiscal`,
+  `apuramento`, `data_liquidacao`, `meios_reacao`, `nif_sujeito_passivo`,
+  `numero_liquidacao` e `prazo_pagamento`. **0 de 13 ligações resolvem.** O
+  pacote fica a vermelho deliberadamente: é trabalho de desenho de NDT, não de
+  correção mecânica, e o vermelho é o achado.
+
 ### Teste de admissão de novas primitivas no NDF-core (2026-08-15)
 
 D5 (2026-08-11) congelou o âmbito do NDF-core mas não definia o que o quebra; a

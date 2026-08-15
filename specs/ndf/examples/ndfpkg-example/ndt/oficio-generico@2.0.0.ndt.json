@@ -4,21 +4,48 @@
   "versao_ndt": "2.0.0",
   "titulo": "Ofício Genérico",
   "estilos": {
-    "fonte_padrao": { "familia": "Times", "tamanho": 11 },
+    "fonte_padrao": {
+      "familia": "Times",
+      "tamanho": 11
+    },
     "cor_texto": "#1A1A1A",
     "cor_primaria": "#003366",
     "espacamento_entre_paragrafos_mm": 4,
     "identacao_lista_mm": 6,
     "cabecalhos": [
-      { "nivel": 1, "fonte": { "tamanho": 14, "peso": "bold" } },
-      { "nivel": 2, "fonte": { "tamanho": 12, "peso": "bold" } },
-      { "nivel": 3, "fonte": { "tamanho": 11, "peso": "bold", "estilo": "italico" } }
+      {
+        "nivel": 1,
+        "fonte": {
+          "tamanho": 14,
+          "peso": "bold"
+        }
+      },
+      {
+        "nivel": 2,
+        "fonte": {
+          "tamanho": 12,
+          "peso": "bold"
+        }
+      },
+      {
+        "nivel": 3,
+        "fonte": {
+          "tamanho": 11,
+          "peso": "bold",
+          "estilo": "italico"
+        }
+      }
     ]
   },
   "layout": {
     "formato": "A4",
     "orientacao": "portrait",
-    "margens": { "topo": 20, "fundo": 20, "esq": 20, "dir": 20 }
+    "margens": {
+      "topo": 20,
+      "fundo": 20,
+      "esq": 20,
+      "dir": 20
+    }
   },
   "recursos": [
     {
@@ -36,7 +63,10 @@
         {
           "tipo": "imagem",
           "referencia_recurso": "brasao-republica.svg",
-          "posicao": { "x": 0, "y": 0 },
+          "posicao": {
+            "x": 0,
+            "y": 0
+          },
           "largura": 25,
           "altura": 25,
           "manter_proporcao": true,
@@ -44,8 +74,14 @@
         },
         {
           "tipo": "linha",
-          "de": { "x": 0, "y": 35 },
-          "para": { "x": 170, "y": 35 },
+          "de": {
+            "x": 0,
+            "y": 35
+          },
+          "para": {
+            "x": 170,
+            "y": 35
+          },
           "espessura": 0.5,
           "cor": "#003366",
           "estilo": "solido"
@@ -54,7 +90,10 @@
           "tipo": "codigo_barras",
           "formato_barras": "qrcode",
           "conteudo": "https://validar.normordis.pt/{{validation_code}}",
-          "posicao": { "x": 145, "y": 5 },
+          "posicao": {
+            "x": 145,
+            "y": 5
+          },
           "largura": 22,
           "altura": 22,
           "nivel_correcao": "M"
@@ -63,27 +102,46 @@
       "campos": [
         {
           "referencia": "numero",
-          "posicao": { "x": 30, "y": 2 },
+          "posicao": {
+            "x": 30,
+            "y": 2
+          },
           "largura": 110,
           "altura": 6,
-          "fonte": { "familia": "Helvetica", "tamanho": 9 },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 9
+          },
           "alinhamento": "esquerda"
         },
         {
           "referencia": "assunto",
-          "posicao": { "x": 30, "y": 10 },
+          "posicao": {
+            "x": 30,
+            "y": 10
+          },
           "largura": 110,
           "altura": 6,
-          "fonte": { "familia": "Helvetica", "tamanho": 9, "peso": "bold" },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 9,
+            "peso": "bold"
+          },
           "alinhamento": "esquerda"
         },
         {
           "referencia": "data",
-          "posicao": { "x": 30, "y": 18 },
+          "posicao": {
+            "x": 30,
+            "y": 18
+          },
           "largura": 110,
           "altura": 6,
           "formato": "data",
-          "fonte": { "familia": "Helvetica", "tamanho": 9 },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 9
+          },
           "alinhamento": "esquerda"
         }
       ],
@@ -93,15 +151,15 @@
           {
             "tipo": "campo",
             "referencia": "destinatario.nome",
-            "fonte": { "familia": "Times", "tamanho": 11, "peso": "bold" }
+            "fonte": {
+              "familia": "Times",
+              "tamanho": 11,
+              "peso": "bold"
+            }
           },
           {
             "tipo": "campo",
             "referencia": "destinatario.morada"
-          },
-          {
-            "tipo": "campo",
-            "referencia": "destinatario.localidade"
           },
           {
             "tipo": "espaco",
@@ -140,35 +198,19 @@
                   {
                     "tipo": "campo",
                     "referencia": "signatario.nome",
-                    "fonte": { "familia": "Times", "tamanho": 10, "peso": "bold" }
+                    "fonte": {
+                      "familia": "Times",
+                      "tamanho": 10,
+                      "peso": "bold"
+                    }
                   },
                   {
                     "tipo": "campo",
                     "referencia": "signatario.cargo",
-                    "fonte": { "familia": "Times", "tamanho": 9 }
-                  }
-                ]
-              },
-              {
-                "largura": 85,
-                "conteudo": [
-                  {
-                    "tipo": "assinatura",
-                    "id": "sig_vogal",
-                    "rotulo": "O Vogal",
-                    "largura": 75,
-                    "altura": 20,
-                    "modo": "hibrido"
-                  },
-                  {
-                    "tipo": "campo",
-                    "referencia": "signatario_b.nome",
-                    "fonte": { "familia": "Times", "tamanho": 10, "peso": "bold" }
-                  },
-                  {
-                    "tipo": "campo",
-                    "referencia": "signatario_b.cargo",
-                    "fonte": { "familia": "Times", "tamanho": 9 }
+                    "fonte": {
+                      "familia": "Times",
+                      "tamanho": 9
+                    }
                   }
                 ]
               }
@@ -180,14 +222,28 @@
         {
           "tipo": "numero_pagina",
           "formato": "Pág. {n}/{total}",
-          "posicao": { "x": 145, "y": 281 },
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+          "posicao": {
+            "x": 145,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
         },
         {
           "tipo": "texto_fixo",
           "conteudo": "Proc. {ndf:cabecalho.referencia} — {ndf:cabecalho.entidade}",
-          "posicao": { "x": 0, "y": 281 },
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+          "posicao": {
+            "x": 0,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
         }
       ]
     },
@@ -197,7 +253,10 @@
         {
           "tipo": "imagem",
           "referencia_recurso": "brasao-republica.svg",
-          "posicao": { "x": 0, "y": 0 },
+          "posicao": {
+            "x": 0,
+            "y": 0
+          },
           "largura": 15,
           "altura": 15,
           "manter_proporcao": true,
@@ -205,8 +264,14 @@
         },
         {
           "tipo": "linha",
-          "de": { "x": 0, "y": 20 },
-          "para": { "x": 170, "y": 20 },
+          "de": {
+            "x": 0,
+            "y": 20
+          },
+          "para": {
+            "x": 170,
+            "y": 20
+          },
           "espessura": 0.3,
           "cor": "#003366",
           "estilo": "solido"
@@ -226,17 +291,31 @@
         {
           "tipo": "numero_pagina",
           "formato": "Pág. {n}/{total}",
-          "posicao": { "x": 145, "y": 281 },
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+          "posicao": {
+            "x": 145,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
         },
         {
           "tipo": "campo_ndf",
           "referencia": "numero",
-          "posicao": { "x": 0, "y": 281 },
+          "posicao": {
+            "x": 0,
+            "y": 281
+          },
           "largura": 100,
           "altura": 5,
           "alinhamento": "esquerda",
-          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
         }
       ]
     }
