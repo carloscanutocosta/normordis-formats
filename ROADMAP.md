@@ -474,9 +474,12 @@ termo legal português, e o valor `destino_final: "a_determinar"` para os
 sistemas em que a decisão não compete ao produtor. Ver ADR-015 e
 `docs/design/NDF-AVALIACAO-GENERALIZATION.md`.
 
-Fica em aberto, sem prazo: publicar perfis para outras jurisdições
-(`fr-siaf`, `nl-na`, `de-bund`, `eu-crl`), o que exige confirmação contra
-fonte legal primária de cada uma. É acréscimo ao registo, não alteração
+Fica em aberto, sem prazo: publicar schemas de perfil para outras jurisdições
+(`fr-siaf`, `de-barch`, `nl-na`, `eu-ec`). O mapeamento jurídico já está feito e
+verificado contra fonte primária em [`docs/profiles/`](docs/profiles/README.md);
+o que falta é evidência de que exista sintaxe nacional passível de ser imposta
+por schema — que só se confirmou para Portugal — e, de preferência, confirmação
+por interlocutor de cada jurisdição. É acréscimo ao registo, não alteração
 incompatível do NDF-core.
 
 ### NCRTF v2.0.0 ✅

@@ -242,9 +242,9 @@
       "properties": {
         "perfil": {
           "type": "string",
-          "pattern": "^([a-z]{2}-[a-z0-9-]+|generic)$",
-          "description": "Archival appraisal profile in force. Determines the vocabulary and syntax of classificacao_ref and instrumento_ref. Open enum; a registered profile's schema lives in specs/registry/profiles/<perfil>.schema.json and MUST travel inside the .ndfpkg under schemas/. See SPEC.md §3.2 and ADR-015.",
-          "examples": ["pt-dglab", "generic"]
+          "pattern": "^(generic|[a-z][a-z0-9]*(-[a-z0-9]+)+)$",
+          "description": "Archival appraisal profile in force. Determines the vocabulary and syntax of classificacao_ref and instrumento_ref. Opaque qualified identifier of two or more segments: meaning comes from the registry, not from the pattern. Open enum; a registered profile's schema lives in specs/registry/profiles/<perfil>.schema.json and MUST travel inside the .ndfpkg under schemas/. See SPEC.md §3.2.3 and ADR-015.",
+          "examples": ["pt-dglab", "fr-siaf", "de-barch", "eu-ec", "generic"]
         },
         "classificacao_ref": {
           "type": "string",
