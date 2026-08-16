@@ -24,7 +24,7 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/valid/relacao-extensao-qualificada.json` | Caso de teste: relacoes[0].tipo usa extensão qualificada 'ext.<entidade>.<tipo>' (§2.11.7), fora do vocabulário base fechado mas estruturalmente válida. |
 | `ndf/valid/versao-substituicao.json` | Caso de teste: NDF-core de um documento que SUBSTITUI um anterior, via relacoes[{tipo:'substitui'}] no core assinado (§6, ADR-011). O NDF-core em si tem estado=… |
 
-### `invalid/` — devem ser rejeitados (32)
+### `invalid/` — devem ser rejeitados (33)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -32,6 +32,7 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/invalid/avaliacao-sem-perfil.json` | INVÁLIDO: bloco avaliacao sem perfil. Violação: §3.2 — sem perfil não é determinável o sistema arquivístico que dá sentido a classificacao_ref e instrumento_ref… |
 | `ndf/invalid/dados-pessoais-sem-base-legal.json` | INVÁLIDO: contem_dados_pessoais: true mas base_legal_conservacao ausente. Violação: §2.7.2, §1.6. |
 | `ndf/invalid/document-schema-mismatch.json` | INVÁLIDO: documento não cumpre o schema oficio@1.0.0. |
+| `ndf/invalid/idioma-locale-posix.json` | INVÁLIDO: idioma usa a forma de locale POSIX 'pt_PT' em vez da etiqueta BCP 47 'pt-PT'. Violação: §2.7.2 — o separador é hífen, não underscore. |
 | `ndf/invalid/imputacao-aceitacao-sem-data.json` | INVÁLIDO: imputação por aceitação expressa sem o instante 'em'. Violação: §2.15.2 — a aceitação é um ato datado. |
 | `ndf/invalid/imputacao-delegacao-sem-publicacao.json` | INVÁLIDO: imputação por delegação sem fundamento.publicacao_ref. Violação: §2.15.2 — a menção da delegação é obrigatória (CPA art. 151.º/1/a), e declarar delega… |
 | `ndf/invalid/imputacao-efeito-legal-sem-fundamento.json` | INVÁLIDO: imputação por efeito legal sem fundamento.descricao. Violação: §2.15.2 — sem o fundamento, a imputação por ficção legal fica sem base identificável. |
@@ -129,4 +130,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 75 casos.**
+**Total: 76 casos.**

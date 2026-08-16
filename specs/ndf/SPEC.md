@@ -196,9 +196,10 @@ informação sobre o assunto.
 ### 1.5 Confidencialidade e controlo de acesso
 
 O NDF admite documentos com diferentes níveis de sensibilidade, declarados
-em `metadados.classificacao_seguranca` (§2.7.4) — de `"publico"` a
-`"muito_secreto"`. Este campo é descritivo: sinaliza o nível de
-sensibilidade do conteúdo. O NDF NÃO DEVE ser apresentado, nem
+em `metadados.classificacao_seguranca` (§2.7.4) — um par `{perfil, nivel}`, em
+que `perfil` identifica o regime de classificação aplicável e `nivel` é uma
+escala abstrata de `"publico"` a `"muito_secreto"`. Este campo é descritivo:
+sinaliza o nível de sensibilidade do conteúdo. O NDF NÃO DEVE ser apresentado, nem
 interpretado, como garantindo confidencialidade, cifra ou controlo de
 acesso por si só.
 
@@ -570,8 +571,8 @@ Com dados pessoais, o mesmo bloco acresce `protecao_dados` (§1.4):
 | `assunto` | Recomendado | string | Título ou descrição breve do documento — indexável para pesquisa e arquivo. |
 | `numero_referencia` | Recomendado | string | Número de referência documental (ex.: `"OF/2026/00123"`). |
 | `processo_ref` | Opcional | string | Referência ao processo ou procedimento a que o documento pertence. |
-| `idioma` | Opcional | string (BCP 47) | Idioma principal do documento, como etiqueta BCP 47 (`língua[-escrita][-região]`) — ex.: `"pt-PT"`, `"en-GB"`, `"zh-Hant"`. Quando omitido, assume-se `"pt"`. |
-| `classificacao_seguranca` | Recomendado | objeto | Classificação de segurança da informação, com o regime aplicável e o nível ordinal. Ver §2.7.4. Quando omitido, o sistema produtor DEVE assumir o nível `"uso_interno"`. |
+| `idioma` | Opcional | string | Idioma principal do documento, no subconjunto `língua[-escrita][-região]` das etiquetas BCP 47 (RFC 5646) — ex.: `"pt-PT"`, `"en-GB"`, `"zh-Hant"`. **Não** é a gramática BCP 47 completa: extlang, variants, extensions, private-use e grandfathered tags não são admitidos, por não terem uso documental estabelecido e por não serem exprimíveis de forma fiável em JSON Schema. Quando omitido, assume-se `"pt"`. |
+| `classificacao_seguranca` | Recomendado | objeto | Classificação de segurança da informação, com o regime aplicável e o nível ordinal. Ver §2.7.4. A omissão significa **não declarada** — ver §2.7.4.2. |
 | `contem_dados_pessoais` | Sim | boolean | `true` se o documento contiver dados pessoais na acepção do RGPD. |
 | `protecao_dados` | Condicional | objeto | Obrigatório se `contem_dados_pessoais: true`; **PROIBIDO** caso contrário. Agrupa `categorias`, `base_legal_conservacao` e `responsavel_tratamento`. Ver §1.4. |
 
@@ -633,7 +634,7 @@ tem `entidade_produtora` "Autoridade Tributária e Aduaneira",
 | Valor | Descrição |
 |---|---|
 | `"publico"` | Informação de acesso livre — sem restrições. DEVE ser atribuída explicitamente; NÃO DEVE ser assumida por omissão. |
-| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. O sistema produtor DEVE assumir este nível quando `classificacao_seguranca` é omitido. |
+| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. |
 | `"reservado"` | Divulgação restrita a destinatários identificados. |
 | `"confidencial"` | Acesso controlado com registo de acessos. |
 | `"secreto"` | Regime de gestão documental especial. |
@@ -649,22 +650,47 @@ de manuseamento.
 
 Aplica-se aqui a mesma solução de `avaliacao` (§3.2.4): **o vocabulário legal é
 do perfil, a estrutura fica no core**. A estrutura, neste caso, é a escala
-ordinal — o que permite a um leitor que desconheça o regime declarado
-responder à única pergunta transversal com sentido:
+ordinal — o que permite a um leitor que desconheça o regime declarado ordenar
+documentos pelo **nível abstrato que os respetivos produtores declararam**.
 
-> este documento é mais ou menos sensível do que aquele?
+O alcance dessa ordenação DEVE ser lido com precisão. Ordenar `nivel` **não**
+constitui comparação objetiva entre regimes de classificação soberanos, e não
+autoriza concluir que um documento é juridicamente mais protegido do que outro:
+`{"perfil": "eu", "nivel": "reservado"}` e `{"perfil": "pt", "nivel":
+"reservado"}` declaram o mesmo nível abstrato, não uma equivalência entre
+`RESTREINT UE` e o regime português. O que a escala suporta é triagem e
+priorização operacional dentro de um acervo; não substitui a leitura do regime
+declarado.
 
-Ordenar por sensibilidade num acervo multi-jurisdicional continua possível sem
-resolver perfil nenhum. Mapear `nivel` para a etiqueta legal do regime — e para
-as obrigações de manuseamento que dela decorrem — é matéria do perfil e do
-sistema custodiante.
-
+Mapear `nivel` para a etiqueta legal do regime — e para as obrigações de
+manuseamento que dela decorrem — é matéria do perfil e do sistema custodiante.
 O mapeamento é declarado pelo produtor e **não é verificado por esta
 especificação**: o NDF regista qual o regime e qual o nível, não arbitra se a
 correspondência entre ambos está juridicamente correta.
 
 Reforça-se o que §1.5 já estabelece: este campo é um **sinal descritivo** para
 o sistema de custódia, nunca um mecanismo de controlo de acesso.
+
+#### 2.7.4.2 Ausência de `classificacao_seguranca`
+
+`classificacao_seguranca` é opcional. A sua **ausência significa que a
+classificação não foi declarada** — não um nível por omissão.
+
+Versões anteriores desta especificação fixavam `"uso_interno"` como valor
+assumido quando o campo era omitido. Essa regra deixou de ser exprimível quando
+o campo passou a objeto `{perfil, nivel}` (ADR-017): não é possível inferir um
+**regime** a partir do silêncio, e um nível sem regime não tem significado
+determinado. Uma regra que só se aplica a metade do campo é pior do que nenhuma.
+
+A regra é, por isso, retirada. Um sistema custodiante que aplique um nível
+conservador por omissão está a exercer **política própria de custódia**, o que é
+legítimo e expressamente previsto por §1.5 — mas essa decisão não é uma leitura
+do NDF nem é oponível como declaração do produtor. Um leitor conforme NÃO DEVE
+representar um nível não declarado como se tivesse sido declarado.
+
+**RECOMENDA-SE** declarar sempre o campo. Um produtor que conheça a
+sensibilidade do documento e a omita perde a única oportunidade de a fixar
+dentro dos bytes assinados.
 
 ### 2.8 Tipos de conteúdo permitidos
 

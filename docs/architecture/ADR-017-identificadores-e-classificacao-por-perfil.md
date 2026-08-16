@@ -57,6 +57,14 @@ sistemas reais que divergem em cada eixo.
 5. Mantém-se o que §1.5 estabelece: o campo é sinal descritivo para o sistema
    de custódia, nunca mecanismo de controlo de acesso.
 
+6. **O nível assumido por omissão é retirado.** A regra anterior — omitir o
+   campo equivale a `"uso_interno"` — deixou de ser exprimível ao passar de
+   escalar a objeto: não é possível inferir um **regime** a partir do silêncio,
+   e um nível sem regime não tem significado determinado. A ausência passa a
+   significar *não declarada* (§2.7.4.2). Um custodiante que aplique um nível
+   conservador por omissão exerce política própria, legítima por §1.5, mas que
+   não é leitura do NDF nem declaração do produtor.
+
 ## Alternativas consideradas
 
 ### `classificacao_seguranca` como string qualificada (`"pt:reservado"`)

@@ -5,6 +5,39 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Correções à ronda de neutralização jurisdicional (2026-08-15)
+
+Revisão externa da mesma ronda, no próprio dia. Três correções, uma delas a um
+defeito introduzido nessa ronda.
+
+- corrigido: `classificacao_seguranca` mantinha a regra "quando omitido, assumir
+  `uso_interno`", que deixou de ser exprimível ao passar de escalar a objeto —
+  não é possível inferir um **regime** a partir do silêncio, e um nível sem
+  regime não tem significado determinado. A regra é retirada: a ausência passa a
+  significar **não declarada** (nova §2.7.4.2). Um custodiante que aplique um
+  nível conservador por omissão exerce política própria, legítima por §1.5, que
+  não é leitura do NDF nem declaração do produtor;
+- corrigido: a migração em bloco atribuíra `perfil: "pt"` a **todos** os casos,
+  incluindo `avaliacao-perfil-generico`, o documento alemão — que passava assim
+  a declarar o regime de segurança português. O campo foi removido desse caso,
+  que passa a exercer também a regra de ausência;
+- corrigido: `idioma` era descrito como "BCP 47" quando o padrão implementa o
+  subconjunto `língua[-escrita][-região]`. RFC 5646 admite ainda extlang,
+  variants, extensions, private-use e grandfathered tags. O texto passa a
+  declarar o subconjunto explicitamente, em vez de alegar conformidade com a
+  gramática completa. O padrão **não** foi alargado: BCP 47 integral por
+  expressão regular seria pior do que um subconjunto declarado;
+- precisado: §2.7.4.1 afirmava que um leitor pode ordenar documentos por
+  sensibilidade sem conhecer o regime. Passa a delimitar o alcance — ordena os
+  **níveis abstratos declarados**, o que suporta triagem operacional e **não**
+  constitui comparação objetiva entre regimes soberanos nem equivalência entre
+  `RESTREINT UE` e o nível português homónimo;
+- atualizado: §1.5, que descrevia o campo na forma escalar anterior;
+- adicionado: caso `invalid/idioma-locale-posix.json` — `pt_PT` em vez de
+  `pt-PT`. O subconjunto BCP 47 não tinha qualquer cobertura negativa, e os
+  valores existentes (`pt`) eram válidos também sob o padrão antigo, pelo que a
+  alteração estava sem prova.
+
 ### Últimos vestígios de vocabulário nacional no NDF-core (2026-08-15)
 
 Revisão externa observou que ADR-015 generalizou `avaliacao` mas deixou dois

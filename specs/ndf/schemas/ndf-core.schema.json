@@ -194,7 +194,7 @@
           "type": "string",
           "pattern": "^[a-z]{2,3}(-[A-Za-z]{4})?(-([A-Za-z]{2}|[0-9]{3}))?$",
           "default": "pt",
-          "description": "Primary language of the document as a BCP 47 language tag (language[-script][-region]). Defaults to 'pt' when absent. See SPEC.md §2.7.2.",
+          "description": "Primary language of the document, in the language[-script][-region] subset of BCP 47 (RFC 5646). Not the full BCP 47 grammar: extlang, variants, extensions, private-use and grandfathered tags are not admitted. Defaults to 'pt' when absent. See SPEC.md §2.7.2.",
           "examples": ["pt", "pt-PT", "pt-BR", "en-GB", "de-DE", "zh-Hant"]
         },
         "classificacao_seguranca": {
@@ -214,7 +214,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "Information security classification. Descriptive signal for the custodian system, never an access control mechanism (§1.5). Defaults to nivel 'uso_interno' when absent. See SPEC.md §2.7.4 and ADR-017."
+          "description": "Information security classification. Descriptive signal for the custodian system, never an access control mechanism (§1.5). Optional; absence means NOT DECLARED, not a default level — a regime cannot be inferred from silence. See SPEC.md §2.7.4, §2.7.4.2 and ADR-017."
         },
         "contem_dados_pessoais": {
           "type": "boolean",
