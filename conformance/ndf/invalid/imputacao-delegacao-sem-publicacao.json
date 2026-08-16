@@ -12,15 +12,26 @@
     "tipo_documento_ref": "oficio@1.0.0",
     "entidade_produtora": {
       "designacao": "Direção-Geral de Exemplo",
-      "nif": "123456789",
-      "codigo_dglab": "PT-DGE-000"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "123456789"
+        },
+        {
+          "sistema": "pt-dglab",
+          "valor": "PT-DGE-000"
+        }
+      ]
     },
     "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Resposta ao ofício n.º 45/2026 — Pedido de informação sobre processo X",
     "numero_referencia": "OF/2026/00123",
     "processo_ref": "proc.º 456/2026",
     "idioma": "pt",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": true,
     "protecao_dados": {
       "categorias": [

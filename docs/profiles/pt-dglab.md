@@ -72,10 +72,10 @@ Casos de conformidade que a exercem: `invalid-classificacao-ref` (sintaxe) e
   próprios; o schema aceita qualquer prefixo em minúsculas, sem validar que o
   instrumento existe. Verificar a existência do instrumento é responsabilidade
   do sistema produtor, não do formato.
-- `metadados.entidade_produtora.codigo_dglab` continua no NDF-core como campo
-  opcional específico de Portugal. Está sinalizado em [`LACUNAS.md`](../../LACUNAS.md)
-  como candidato a generalização por lista de identificadores, sem ação prevista
-  para 1.0 por ser opcional e não bloquear nenhuma jurisdição.
+- O código institucional DGLAB deixou de ser um campo próprio do NDF-core:
+  declara-se em `metadados.entidade_produtora.identificadores` como
+  `{ "sistema": "pt-dglab", "valor": "..." }` (SPEC §2.7.3, ADR-017). O mesmo
+  vale para o NIF, com `sistema: "pt-nif"`.
 
 ## 6. Fontes
 

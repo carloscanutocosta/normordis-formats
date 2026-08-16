@@ -12,12 +12,20 @@
     "tipo_documento_ref": "oficio@1.0.0",
     "entidade_produtora": {
       "designacao": "Entidade de Teste",
-      "nif": "000000001"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "000000001"
+        }
+      ]
     },
     "entidade_responsavel": "Entidade de Teste",
     "assunto": "Teste de validação NCRTF",
     "idioma": "pt",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": false
   },
   "documento": {

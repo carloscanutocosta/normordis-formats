@@ -323,6 +323,18 @@ O estado arquivístico corrente ao longo do ciclo de vida do documento é uma pr
 
 **Valor normativo**: `"ativo"` — único valor válido no NDF-core no momento da finalização.
 
+**Porque é que um campo com um único valor admissível não é redundante.** Num
+documento imutável e assinado, afirmar explicitamente um facto não é
+equivalente a omiti-lo: a ausência de `estado` seria indistinguível de um
+produtor que não sabe, não verificou, ou não considerou a questão. Com o campo
+presente, os bytes assinados contêm uma **declaração** de que estes são um
+documento finalizado e ativo, oponível a terceiros como qualquer outro campo
+assinado. É o mesmo raciocínio já aceite para `proveniencia_ia.utilizada:
+false` (§2.13.2, ADR-005) e para `contem_dados_pessoais: false` (§1.4,
+ADR-016) — em ambos os casos o valor por omissão é declarado, e não inferido
+do silêncio. O `enum` de um só valor é ainda o que torna detetável, e não
+silenciosa, qualquer futura admissão de outros valores.
+
 > **Âmbito de §2.4.1–§2.4.3.** As subsecções seguintes descrevem o **Perfil
 > de Ciclo de Vida NORMORDIS** — um modelo de referência para sistemas que
 > gerem NDF depois da finalização (transições de estado, log de auditoria,
@@ -457,14 +469,18 @@ reconstituir o seu conteúdo.
 
 O campo `payload_hash_alg` declara o algoritmo usado para calcular o digest sobre o qual recai a assinatura CAdES.
 
-**Valor normativo para NDF v1.x**: `"sha256"` — SHA-256 conforme NIST FIPS 180-4. Este é o único valor válido nesta versão da especificação.
+**Valor normativo para NDF 1.0.0**: `"sha256"` — SHA-256 conforme NIST FIPS 180-4. Este é o único valor válido nesta versão da especificação.
 
 Justificação: SHA-256 é amplamente suportado pelos perfis e bibliotecas CAdES
 e TSP relevantes. A conformidade jurídica e criptográfica depende também da
 política de algoritmos aplicável no instante de assinatura; nem o eIDAS nem o
 RFC 3161 fixam SHA-256 como único algoritmo para sempre.
 
-A transição para suporte a múltiplos algoritmos em paralelo (`"sha256"` + `"sha3-256"`) está prevista na versão 1.2.0 desta especificação (ver roadmap informativo).
+A introdução de outros algoritmos, isoladamente ou em paralelo, **exige uma
+versão futura desta especificação**. O `enum` fechado de `payload_hash_alg` é o
+mecanismo que torna essa transição explícita e detetável, em vez de silenciosa.
+Esta especificação não fixa em que versão isso acontecerá: compromissos de
+versão pertencem ao roadmap informativo, não ao texto normativo.
 
 ### 2.6 `ndt_version_ref`
 
@@ -513,15 +529,17 @@ O bloco `metadados` contém os campos descritivos transversais a qualquer tipo d
     "tipo_documento_ref": "oficio@1.0.0",
     "entidade_produtora": {
       "designacao": "Direção-Geral de Exemplo",
-      "nif": "123456789",
-      "codigo_dglab": "PT-DGE-000"
+      "identificadores": [
+        { "sistema": "pt-nif", "valor": "123456789" },
+        { "sistema": "pt-dglab", "valor": "PT-DGE-000" }
+      ]
     },
     "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Resposta ao ofício n.º 123/2026",
     "numero_referencia": "OF/2026/00123",
     "processo_ref": "proc.º 456/2026",
-    "idioma": "pt",
-    "classificacao_seguranca": "uso_interno",
+    "idioma": "pt-PT",
+    "classificacao_seguranca": { "perfil": "pt", "nivel": "uso_interno" },
     "contem_dados_pessoais": false
   }
 }
@@ -552,8 +570,8 @@ Com dados pessoais, o mesmo bloco acresce `protecao_dados` (§1.4):
 | `assunto` | Recomendado | string | Título ou descrição breve do documento — indexável para pesquisa e arquivo. |
 | `numero_referencia` | Recomendado | string | Número de referência documental (ex.: `"OF/2026/00123"`). |
 | `processo_ref` | Opcional | string | Referência ao processo ou procedimento a que o documento pertence. |
-| `idioma` | Opcional | string (ISO 639-1) | Idioma principal do documento. Quando omitido, assume-se `"pt"`. |
-| `classificacao_seguranca` | Recomendado | string (enum) | Classificação de segurança da informação. Ver §2.7.4. Quando omitido, o sistema produtor DEVE assumir `"uso_interno"`. |
+| `idioma` | Opcional | string (BCP 47) | Idioma principal do documento, como etiqueta BCP 47 (`língua[-escrita][-região]`) — ex.: `"pt-PT"`, `"en-GB"`, `"zh-Hant"`. Quando omitido, assume-se `"pt"`. |
+| `classificacao_seguranca` | Recomendado | objeto | Classificação de segurança da informação, com o regime aplicável e o nível ordinal. Ver §2.7.4. Quando omitido, o sistema produtor DEVE assumir o nível `"uso_interno"`. |
 | `contem_dados_pessoais` | Sim | boolean | `true` se o documento contiver dados pessoais na acepção do RGPD. |
 | `protecao_dados` | Condicional | objeto | Obrigatório se `contem_dados_pessoais: true`; **PROIBIDO** caso contrário. Agrupa `categorias`, `base_legal_conservacao` e `responsavel_tratamento`. Ver §1.4. |
 
@@ -562,8 +580,30 @@ Com dados pessoais, o mesmo bloco acresce `protecao_dados` (§1.4):
 | Campo | Obrigatório | Descrição |
 |---|---|---|
 | `designacao` | Sim | Designação oficial da entidade (ex.: `"Autoridade Tributária e Aduaneira"`). |
-| `nif` | Recomendado | NIF institucional — 9 dígitos sem espaços ou pontuação. |
-| `codigo_dglab` | Opcional | Código de entidade DGLAB para identificação no contexto arquivístico (MEG). |
+| `identificadores` | Recomendado | Array de identificadores institucionais, cada um qualificado pelo esquema a que pertence. Ver abaixo. |
+
+```json
+{
+  "entidade_produtora": {
+    "designacao": "Autoridade Tributária e Aduaneira",
+    "identificadores": [
+      { "sistema": "pt-nif", "valor": "600037398" },
+      { "sistema": "pt-dglab", "valor": "PT-AT-000" }
+    ]
+  }
+}
+```
+
+`sistema` é um **identificador opaco qualificado** de dois ou mais segmentos,
+pela mesma razão de `avaliacao.perfil` (§3.2.3): o significado vem do esquema
+referenciado, não da forma da string. Exemplos: `pt-nif`, `pt-dglab`,
+`fr-siren`, `nl-kvk`, `eu-vat`, `eu-pic`.
+
+A validade do `valor` face às regras do esquema — número de dígitos, dígito de
+controlo, formato — é responsabilidade do esquema e do sistema produtor, não
+desta especificação. Impor no NDF-core a sintaxe de um identificador nacional
+tornaria o formato dependente de regras que mudam por decisão de uma
+jurisdição, e que o NDF não tem competência para arbitrar.
 
 `entidade_produtora` identifica a **pessoa coletiva** para efeitos
 arquivísticos — o organismo cuja produção documental é objeto de avaliação e
@@ -575,18 +615,56 @@ tem `entidade_produtora` "Autoridade Tributária e Aduaneira",
 `imputacao[].imputado` o órgão concreto com competência para o ato, e
 `proveniencia_sistema[].sistema` o motor de liquidação.
 
-#### 2.7.4 `classificacao_seguranca` (enum fechado)
+#### 2.7.4 `classificacao_seguranca`
 
-Alinhado com o DL n.º 11/2023 (Segurança de Informação do Estado) e a nomenclatura da UE:
+```json
+{
+  "classificacao_seguranca": { "perfil": "pt", "nivel": "reservado" }
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `perfil` | Sim | Regime de classificação de segurança cujas etiquetas legais correspondem a `nivel`. Enum aberto — ex.: `"pt"`, `"eu"`, `"nato"`. |
+| `nivel` | Sim | Nível ordinal neutro de sensibilidade. Enum fechado. |
+
+**Enum fechado de `nivel`** — escala ordinal, do menos para o mais restrito:
 
 | Valor | Descrição |
 |---|---|
 | `"publico"` | Informação de acesso livre — sem restrições. DEVE ser atribuída explicitamente; NÃO DEVE ser assumida por omissão. |
-| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. O sistema produtor DEVE assumir este valor quando `classificacao_seguranca` é omitido. |
+| `"uso_interno"` | Circulação interna à entidade; não destinada ao exterior. O sistema produtor DEVE assumir este nível quando `classificacao_seguranca` é omitido. |
 | `"reservado"` | Divulgação restrita a destinatários identificados. |
-| `"confidencial"` | Classificação de segurança formal — acesso controlado com registo de acessos. |
-| `"secreto"` | Classificação de segurança elevada — regime de gestão documental especial. |
+| `"confidencial"` | Acesso controlado com registo de acessos. |
+| `"secreto"` | Regime de gestão documental especial. |
 | `"muito_secreto"` | Nível mais elevado — requer infraestrutura de segurança dedicada. |
+
+#### 2.7.4.1 Porque o nível fica no core e o regime no perfil
+
+A classificação de segurança não é universalmente representável por um único
+vocabulário: o regime português do DL n.º 11/2023, o regime da União Europeia
+(`RESTREINT UE`, `CONFIDENTIEL UE`, `SECRET UE`, `TRÈS SECRET UE`) e os regimes
+NATO e de cada Estado-membro divergem em etiquetas, número de níveis e regras
+de manuseamento.
+
+Aplica-se aqui a mesma solução de `avaliacao` (§3.2.4): **o vocabulário legal é
+do perfil, a estrutura fica no core**. A estrutura, neste caso, é a escala
+ordinal — o que permite a um leitor que desconheça o regime declarado
+responder à única pergunta transversal com sentido:
+
+> este documento é mais ou menos sensível do que aquele?
+
+Ordenar por sensibilidade num acervo multi-jurisdicional continua possível sem
+resolver perfil nenhum. Mapear `nivel` para a etiqueta legal do regime — e para
+as obrigações de manuseamento que dela decorrem — é matéria do perfil e do
+sistema custodiante.
+
+O mapeamento é declarado pelo produtor e **não é verificado por esta
+especificação**: o NDF regista qual o regime e qual o nível, não arbitra se a
+correspondência entre ambos está juridicamente correta.
+
+Reforça-se o que §1.5 já estabelece: este campo é um **sinal descritivo** para
+o sistema de custódia, nunca um mecanismo de controlo de acesso.
 
 ### 2.8 Tipos de conteúdo permitidos
 

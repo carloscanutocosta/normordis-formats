@@ -12,14 +12,25 @@
     "tipo_documento_ref": "modelo3-irs@2026",
     "entidade_produtora": {
       "designacao": "Autoridade Tributária e Aduaneira",
-      "nif": "600037398",
-      "codigo_dglab": "PT-AT-000"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "600037398"
+        },
+        {
+          "sistema": "pt-dglab",
+          "valor": "PT-AT-000"
+        }
+      ]
     },
     "entidade_responsavel": "Autoridade Tributária e Aduaneira",
     "assunto": "Modelo 3 IRS — Declaração de Rendimentos 2025",
     "numero_referencia": "2026-123456789-0001",
     "idioma": "pt",
-    "classificacao_seguranca": "confidencial",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "confidencial"
+    },
     "contem_dados_pessoais": true,
     "protecao_dados": {
       "categorias": [

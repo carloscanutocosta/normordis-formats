@@ -533,7 +533,7 @@ renderiza-o segundo as regras de layout do NDT.
   "ndt_version_ref": "oficio-generico@1.0.0",
   "metadados": {
     "tipo_documento_ref": "oficio@1.0.0",
-    "entidade_produtora": { "designacao": "Direção-Geral de Exemplo", "nif": "123456789" },
+    "entidade_produtora": { "designacao": "Direção-Geral de Exemplo", "identificadores": [ { "sistema": "pt-nif", "valor": "123456789" } ] },
     "assunto": "Resposta ao ofício n.º 45/2026",
     "numero_referencia": "OF/2026/00123",
     "entidade_responsavel": "Direção-Geral de Exemplo",
