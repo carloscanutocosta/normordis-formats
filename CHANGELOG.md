@@ -5,6 +5,49 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Últimos vestígios de vocabulário nacional no NDF-core (2026-08-15)
+
+Revisão externa observou que ADR-015 generalizou `avaliacao` mas deixou dois
+campos de `metadados` a codificar Portugal diretamente no core. Corrigido em
+[ADR-017](docs/architecture/ADR-017-identificadores-e-classificacao-por-perfil.md),
+com o mesmo critério e antes de existirem utilizadores externos.
+
+- alterado: `entidade_produtora.nif` e `.codigo_dglab` → `identificadores`,
+  array de `{sistema, valor}` com `sistema` como identificador opaco
+  qualificado (`pt-nif`, `pt-dglab`, `fr-siren`, `nl-kvk`, `eu-vat`, `eu-pic`).
+  O core deixa de conhecer a sintaxe de qualquer identificador nacional — a
+  validação do valor é do esquema, não do formato;
+- alterado: `classificacao_seguranca` de string para `{perfil, nivel}`.
+  `perfil` nomeia o regime (`pt`, `eu`, `nato`); `nivel` mantém o enum de seis
+  valores, agora definido como **escala ordinal neutra**. Rejeitou-se a forma
+  `"pt:reservado"`: delegaria ao perfil a própria noção de nível e impediria
+  ordenar dois documentos por sensibilidade sem conhecer os dois regimes — o
+  mesmo erro que ADR-015 recusou ao não delegar `avaliacao` inteira;
+- registado: a correspondência entre `nivel` e a etiqueta legal do regime é
+  declarada pelo produtor e **não é verificada** pela especificação. Arbitrar
+  equivalências entre regimes de segurança de Estados soberanos está fora da
+  competência do formato (§2.7.4.1);
+- alterado: `idioma` de `^[a-z]{2}$` (ISO 639-1) para etiqueta **BCP 47**
+  (`língua[-escrita][-região]`), o que passa a distinguir `pt-PT` de `pt-BR` e
+  admite `zh-Hant`. Relaxamento de padrão: valores existentes continuam
+  válidos;
+- corrigido: contradição normativa sobre SHA-256. §2.5 declarava `sha256` como
+  único valor válido em **v1.x** e, quatro linhas abaixo, anunciava suporte a
+  múltiplos algoritmos na **1.2.0** — que é v1.x. O texto normativo passa a
+  fixar 1.0.0 e a remeter compromissos de versão para o roadmap informativo;
+- adicionado: justificação escrita de `estado` (§2.4). Um `enum` de um só valor
+  parece redundante, mas num documento imutável e assinado declarar um facto
+  não equivale a omiti-lo — mesmo raciocínio já aceite para
+  `proveniencia_ia.utilizada: false` (ADR-005) e `contem_dados_pessoais: false`
+  (ADR-016). Considerada e **rejeitada** a remoção do campo, que seria
+  incoerente com dois ADRs;
+- migrados 31 `entidade_produtora` e 35 `classificacao_seguranca` em casos de
+  conformidade e exemplos; pacotes e cadeia informação→parecer→despacho
+  reconstruídos com hashes e referências cruzadas recalculadas;
+- registado em `LACUNAS.md`: **L13** (`base_legal_conservacao` — precisão RGPD,
+  matéria para revisão jurídica externa) e **L14** (documentos multilingues —
+  não resolvido por antecipação, por falta de caso real verificado).
+
 ### Verificação das ligações de dados NDT → schema do tipo (2026-08-15)
 
 A pergunta que originou isto foi se o NDF estava estável para se avançar para

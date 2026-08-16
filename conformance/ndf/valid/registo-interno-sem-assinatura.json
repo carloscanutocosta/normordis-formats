@@ -10,12 +10,20 @@
     "tipo_documento_ref": "informacao-tecnica@1.0.0",
     "entidade_produtora": {
       "designacao": "Sistema de Gestão Documental NORMORDIS",
-      "nif": "000000000"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "000000000"
+        }
+      ]
     },
     "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Registo de deliberação de reunião — 2026-06-18",
     "numero_referencia": "REG/2026/00012",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": false
   },
   "documento": {

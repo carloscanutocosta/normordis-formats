@@ -18,7 +18,10 @@
     "numero_referencia": "VM/2026/0417",
     "processo_ref": "BV-2026-0417",
     "idioma": "de",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": false,
     "protecao_dados": {
       "categorias": [

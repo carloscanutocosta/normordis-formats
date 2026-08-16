@@ -12,14 +12,22 @@
     "tipo_documento_ref": "oficio@1.0.0",
     "entidade_produtora": {
       "designacao": "Direção-Geral de Exemplo",
-      "nif": "123456789"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "123456789"
+        }
+      ]
     },
     "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Informação sobre prazo de decisão — proc.º 789/2026",
     "numero_referencia": "OF/2026/00200",
     "processo_ref": "proc.º 789/2026",
     "idioma": "pt",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": false
   },
   "documento": {

@@ -10,12 +10,20 @@
     "tipo_documento_ref": "despacho@1.0.0",
     "entidade_produtora": {
       "designacao": "Autoridade Tributária e Aduaneira",
-      "nif": "600084779"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "600084779"
+        }
+      ]
     },
     "entidade_responsavel": "Autoridade Tributária e Aduaneira",
     "assunto": "Retificação oficiosa da declaração Modelo 3 IRS 2025/00123",
     "numero_referencia": "AT/2026/00321",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": false
   },
   "documento": {

@@ -10,12 +10,20 @@
     "tipo_documento_ref": "parecer@1.0.0",
     "entidade_produtora": {
       "designacao": "Direção-Geral de Exemplo",
-      "nif": "987654321"
+      "identificadores": [
+        {
+          "sistema": "pt-nif",
+          "valor": "987654321"
+        }
+      ]
     },
     "entidade_responsavel": "Direção-Geral de Exemplo",
     "assunto": "Parecer jurídico sobre a Informação Técnica IT/2026/00045",
     "numero_referencia": "PAR/2026/00012",
-    "classificacao_seguranca": "uso_interno",
+    "classificacao_seguranca": {
+      "perfil": "pt",
+      "nivel": "uso_interno"
+    },
     "contem_dados_pessoais": false
   },
   "documento": {

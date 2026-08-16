@@ -111,6 +111,40 @@ radius de seis ficheiros para resolver algo já resolvido de outra forma.
 
 ---
 
+### L13 — `base_legal_conservacao` pode confundir tratamento com conservação
+
+`metadados.protecao_dados.base_legal_conservacao` tem quatro valores
+(`obrigacao_legal`, `interesse_publico`, `consentimento`, `contrato`), das seis
+bases do Art. 6.º RGPD — faltam interesses vitais e interesse legítimo, este
+último relevante se o formato servir entidades privadas.
+
+Há ainda um ponto conceptual mais fino, levantado em revisão externa de
+2026-08-15: a **base jurídica do tratamento** e a **base jurídica da
+conservação** não são necessariamente a mesma. O nome do campo funde as duas.
+
+**Não resolvido deliberadamente.** É questão jurídica, não de desenho, e a
+resposta certa depende de leitura do RGPD que este projeto não tem competência
+para fazer sozinho. Matéria para o gate externo de revisão jurídica
+(`docs/normalization/READINESS.md`), não para decisão interna.
+
+### L14 — documentos multilingues não têm representação explícita
+
+`metadados.idioma` passou a etiqueta BCP 47 em 2026-08-15, o que resolve
+`pt-PT` vs `pt-BR` e permite escrita e região. Continua a ser **um único**
+idioma, descrito como principal.
+
+Documentos com duas ou mais línguas igualmente autênticas são comuns nas
+instituições europeias e em Estados plurilingues. Declarar apenas a língua
+principal não impede nada — o conteúdo está em `documento` — mas limita a
+indexação.
+
+**Não resolvido por antecipação**, aplicando a regra do ADR-015: falta
+verificar, contra casos reais, se a declaração da segunda língua em metadados é
+necessária para reconstituir, verificar ou interpretar o documento, ou se é
+conveniência de indexação — que é responsabilidade do sistema de gestão.
+
+---
+
 ## Lacunas reformuladas pelo esclarecimento de âmbito
 
 ### L7 (era "papel na assinatura não tem imposição face a nivel_assinatura")

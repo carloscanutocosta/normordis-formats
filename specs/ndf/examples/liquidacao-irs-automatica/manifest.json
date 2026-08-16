@@ -6,16 +6,16 @@
   "estado": "ativo",
   "nivel_assinatura": "nenhuma",
   "finalizado_em": "2026-07-31T03:15:30Z",
-  "payload_hash": "sha256:36adeeb82270ed7051245d78894c2c58bc9570a6bbc33720fed3ee49d30241b5",
-  "validation_code": "NDF-SCVE3GPUCWRCENK5UAH5",
+  "payload_hash": "sha256:e3b5521afe8b6088366d05635d99b915c34561d0dfb34c2e3e3ac203764101af",
+  "validation_code": "NDF-2LRQEP752ZFWL5IYEVKC",
   "inventario": [
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:6bb59e6ebbce50b083b50ed00123626cd7472e754c2dc701733166a1387660ed"
+      "hash_sha256": "sha256:b0ff02530b606e8a2baeafd9df6151c2b792e69a6dc47532ecccdfef053ce131"
     },
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:36adeeb82270ed7051245d78894c2c58bc9570a6bbc33720fed3ee49d30241b5"
+      "hash_sha256": "sha256:e3b5521afe8b6088366d05635d99b915c34561d0dfb34c2e3e3ac203764101af"
     },
     {
       "ficheiro": "ndt/liquidacao-irs@2026.1.ndt.json",
@@ -47,7 +47,7 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:773e7d58bc2831871754bf73d26bb6e5c2c87cfcedd3415570c3cd6eb7fc6141"
+      "hash_sha256": "sha256:a9cda78fe45a98aeae47dda99eba4d2913255a0c43feab27086a42fff3951f4f"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",

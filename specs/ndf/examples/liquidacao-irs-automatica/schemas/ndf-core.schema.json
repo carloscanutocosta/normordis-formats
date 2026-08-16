@@ -37,7 +37,7 @@
     "payload_hash_alg": {
       "type": "string",
       "enum": ["sha256"],
-      "description": "Hash algorithm used to compute payload_hash. Normative value for NDF v1.x: 'sha256' (NIST FIPS 180-4)."
+      "description": "Hash algorithm used to compute payload_hash. NDF 1.0.0 supports 'sha256' (NIST FIPS 180-4) exclusively. Introducing further algorithms requires a future version of this specification."
     },
     "nivel_assinatura": {
       "type": "string",
@@ -146,14 +146,28 @@
               "minLength": 1,
               "description": "Official name of the producing entity."
             },
-            "nif": {
-              "type": "string",
-              "pattern": "^[0-9]{9}$",
-              "description": "Institutional NIF (9 digits, no separators)."
-            },
-            "codigo_dglab": {
-              "type": "string",
-              "description": "DGLAB institutional code for archival context (MEG)."
+            "identificadores": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["sistema", "valor"],
+                "properties": {
+                  "sistema": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)+$",
+                    "description": "Identifier scheme, as a qualified opaque identifier. Convention: '<jurisdicao>-<esquema>'.",
+                    "examples": ["pt-nif", "pt-dglab", "fr-siren", "nl-kvk", "eu-vat", "eu-pic"]
+                  },
+                  "valor": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Identifier value, in the form used by the scheme. Syntax is the scheme's responsibility, not this schema's."
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": "Institutional identifiers of the producing entity, each qualified by its scheme. Optional. See SPEC.md §2.7.3 and ADR-017."
             }
           },
           "additionalProperties": false
@@ -178,14 +192,29 @@
         },
         "idioma": {
           "type": "string",
-          "pattern": "^[a-z]{2}$",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z]{4})?(-([A-Za-z]{2}|[0-9]{3}))?$",
           "default": "pt",
-          "description": "ISO 639-1 language code. Defaults to 'pt' when absent."
+          "description": "Primary language of the document as a BCP 47 language tag (language[-script][-region]). Defaults to 'pt' when absent. See SPEC.md §2.7.2.",
+          "examples": ["pt", "pt-PT", "pt-BR", "en-GB", "de-DE", "zh-Hant"]
         },
         "classificacao_seguranca": {
-          "type": "string",
-          "enum": ["publico", "uso_interno", "reservado", "confidencial", "secreto", "muito_secreto"],
-          "description": "Information security classification (DL n.º 11/2023). Defaults to 'uso_interno' when absent."
+          "type": "object",
+          "required": ["perfil", "nivel"],
+          "properties": {
+            "perfil": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "description": "Security classification regime whose legal labels map onto 'nivel'. Open enum; the meaning of a regime comes from the registry, not from this pattern.",
+              "examples": ["pt", "eu", "nato"]
+            },
+            "nivel": {
+              "type": "string",
+              "enum": ["publico", "uso_interno", "reservado", "confidencial", "secreto", "muito_secreto"],
+              "description": "Neutral ordinal sensitivity level, from least to most restricted. A reader that does not know the regime can still order two documents by sensitivity. See SPEC.md §2.7.4."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Information security classification. Descriptive signal for the custodian system, never an access control mechanism (§1.5). Defaults to nivel 'uso_interno' when absent. See SPEC.md §2.7.4 and ADR-017."
         },
         "contem_dados_pessoais": {
           "type": "boolean",
