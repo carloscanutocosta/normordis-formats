@@ -1,0 +1,34 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: campo com família 'Arial', que não é base nem está declarada em recursos[]. Violação de NDT-PROD-017 (§5.8).",
+  "_expected_error": "família tipográfica não base tem de ser declarada em recursos",
+  "_expected_match": "não é base nem está declarada em recursos",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "campos": [
+        {
+          "referencia": "cabecalho.referencia",
+          "posicao": {
+            "x": 15,
+            "y": 30
+          },
+          "largura": 80,
+          "altura": 6,
+          "fonte": {
+            "familia": "Arial",
+            "tamanho": 10
+          }
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}

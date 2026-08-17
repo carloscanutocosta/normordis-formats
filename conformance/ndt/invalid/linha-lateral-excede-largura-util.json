@@ -1,0 +1,57 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: colunas de linha_lateral somam 200 mm numa A4 com margens de 15 mm (largura útil 180 mm). Violação de NDT-PROD-011 (§5.2.2).",
+  "_expected_error": "soma das colunas da linha_lateral excede a largura útil",
+  "_expected_match": "excede a largura útil",
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": {
+      "topo": 20,
+      "fundo": 20,
+      "esq": 15,
+      "dir": 15
+    }
+  },
+  "paginas_def": [
+    {
+      "id": "p1",
+      "fluxo": {
+        "y_inicio": 60,
+        "elementos": [
+          {
+            "tipo": "linha_lateral",
+            "elementos": [
+              {
+                "largura": 100,
+                "conteudo": [
+                  {
+                    "tipo": "campo",
+                    "referencia": "signatario_a.nome"
+                  }
+                ]
+              },
+              {
+                "largura": 100,
+                "conteudo": [
+                  {
+                    "tipo": "campo",
+                    "referencia": "signatario_b.nome"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}

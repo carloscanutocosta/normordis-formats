@@ -1,0 +1,40 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: elemento imagem sem alt. Violação de NDT-PROD-019 (§8.2) — elementos decorativos declaram alt vazio; nenhum omite o campo.",
+  "_expected_error": "imagem e svg exigem alt",
+  "_expected_match": "'alt' is a required property",
+  "recursos": [
+    {
+      "id": "brasao.svg",
+      "tipo": "svg",
+      "modo": "referenciado_por_hash",
+      "hash_sha256": "sha256:3f786850e387550fdab836ed7e6dc881de23001b",
+      "content_type": "image/svg+xml"
+    }
+  ],
+  "paginas_def": [
+    {
+      "id": "p1",
+      "graficos": [
+        {
+          "tipo": "imagem",
+          "referencia_recurso": "brasao.svg",
+          "posicao": {
+            "x": 15,
+            "y": 10
+          },
+          "largura": 25,
+          "altura": 25
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}
