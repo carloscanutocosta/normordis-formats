@@ -1,0 +1,31 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: campo de formato checkbox sem rotulo_acessivel. Violação de NDT-PROD-018 (§5.4, §8.2) — campos interativos exigem /TU para PDF/UA-2.",
+  "_expected_error": "checkbox e radio exigem rotulo_acessivel",
+  "_expected_match": "'rotulo_acessivel' is a required property",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "campos": [
+        {
+          "referencia": "regime.taxa_especial",
+          "posicao": {
+            "x": 20,
+            "y": 140
+          },
+          "largura": 5,
+          "altura": 5,
+          "formato": "checkbox"
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}

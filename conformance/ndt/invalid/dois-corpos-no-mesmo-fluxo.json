@@ -1,0 +1,32 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: dois elementos de tipo corpo no mesmo fluxo. Violação de NDT-PROD-009 (§5.2.1) — o corpo é único por fluxo porque o seu extravasamento governa a sequencia[].",
+  "_expected_error": "fluxo aceita no máximo um elemento corpo",
+  "_expected_match": "Too many items match the given schema \\(expected at most 1\\)",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "fluxo": {
+        "y_inicio": 60,
+        "elementos": [
+          {
+            "tipo": "corpo",
+            "referencia": "corpo"
+          },
+          {
+            "tipo": "corpo",
+            "referencia": "anexo"
+          }
+        ]
+      }
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}

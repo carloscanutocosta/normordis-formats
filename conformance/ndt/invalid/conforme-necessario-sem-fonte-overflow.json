@@ -1,0 +1,19 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: entrada de sequencia com repeticao conforme_necessario e sem fonte_overflow. Violação de NDT-PROD-013 (§5.7) — sem fonte de extravasamento o renderizador não sabe o que distribuir.",
+  "_expected_error": "conforme_necessario exige fonte_overflow",
+  "_expected_match": "'fonte_overflow' is a required property",
+  "paginas_def": [
+    {
+      "id": "p1"
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "conforme_necessario"
+    }
+  ]
+}

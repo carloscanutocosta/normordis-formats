@@ -1,0 +1,39 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: pagina_def com fluxo e blocos preenchidos. Violação de NDT-PROD-008 (§5.2.1) — os dois modelos de conteúdo são mutuamente exclusivos.",
+  "_expected_error": "fluxo e blocos são mutuamente exclusivos na mesma pagina_def",
+  "_expected_match": "should not be valid under .*'fluxo'.*'blocos'",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "blocos": [
+        {
+          "tipo": "corpo",
+          "referencia": "corpo",
+          "posicao": {
+            "x": 15,
+            "y": 60
+          },
+          "largura": 180
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 60,
+        "elementos": [
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "x"
+          }
+        ]
+      }
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}

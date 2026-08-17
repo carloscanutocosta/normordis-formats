@@ -1,0 +1,30 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: caminho de dados prefixado com 'documento.'. Violação de NDT-PROD-005 (§4) — a raiz NDF-core.documento é implícita.",
+  "_expected_error": "caminhos de dados não devem repetir a raiz implícita",
+  "_expected_match": "usa prefixo de raiz proibido",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "campos": [
+        {
+          "referencia": "documento.corpo",
+          "posicao": {
+            "x": 15,
+            "y": 60
+          },
+          "largura": 80,
+          "altura": 6
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}

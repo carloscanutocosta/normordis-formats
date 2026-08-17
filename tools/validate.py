@@ -27,6 +27,7 @@ from pathlib import Path
 
 try:
     from jsonschema import Draft202012Validator, SchemaError, FormatChecker
+    from jsonschema.exceptions import best_match
 except ImportError:
     print("ERRO: jsonschema não instalado. Execute: pip install -r tools/requirements.txt")
     sys.exit(1)
@@ -725,6 +726,103 @@ def _validate_schema_file(path: Path, schema: dict, expect_valid: bool) -> bool:
 
 
 NDT_PATH_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*$")
+# NDT-PROD-005: a raiz NDF-core.documento é implícita (SPEC NDT §4).
+NDT_PATH_PREFIXOS_PROIBIDOS = ("documento.", "NDF-core.")
+# NDT-PROD-017: famílias que qualquer renderizador conforme suporta (§5.8).
+NDT_FAMILIAS_BASE = frozenset({"Helvetica", "Times", "Courier"})
+# Dimensões nominais em mm dos formatos declarados em §5.1.
+NDT_FORMATOS_MM = {"A4": (210.0, 297.0), "A3": (297.0, 420.0), "Letter": (215.9, 279.4)}
+
+
+def _ndt_largura_util(pagina: dict, layout: dict) -> float | None:
+    """Largura útil de uma pagina_def em mm, dentro das margens (§5.1, §5.2).
+
+    Devolve None quando o formato é desconhecido — um formato não declarado
+    herda do layout global, e um formato personalizado traz as dimensões
+    consigo.
+    """
+    formato = pagina.get("formato", layout.get("formato"))
+    if isinstance(formato, dict):
+        largura = formato.get("largura")
+    elif isinstance(formato, str):
+        dimensoes = NDT_FORMATOS_MM.get(formato)
+        largura = dimensoes[0] if dimensoes else None
+    else:
+        largura = None
+    if not isinstance(largura, (int, float)):
+        return None
+    if layout.get("orientacao") == "landscape":
+        if isinstance(formato, dict):
+            altura = formato.get("altura")
+            largura = altura if isinstance(altura, (int, float)) else largura
+        elif isinstance(formato, str) and formato in NDT_FORMATOS_MM:
+            largura = NDT_FORMATOS_MM[formato][1]
+    margens = pagina.get("margens", layout.get("margens", {}))
+    esq = margens.get("esq", 0) if isinstance(margens, dict) else 0
+    dir_ = margens.get("dir", 0) if isinstance(margens, dict) else 0
+    return float(largura) - float(esq) - float(dir_)
+
+
+def _ndt_familias_usadas(node, out=None):
+    """Famílias tipográficas referidas por objetos `fonte` (§5.8).
+
+    Exclui `recursos[]`, onde `familia` declara — e não usa — uma família.
+    """
+    out = set() if out is None else out
+    if isinstance(node, dict):
+        for key, child in node.items():
+            if key == "recursos":
+                continue
+            if key in {"fonte", "fonte_padrao", "fonte_base"} and isinstance(child, dict):
+                familia = child.get("familia")
+                if isinstance(familia, str):
+                    out.add(familia)
+            _ndt_familias_usadas(child, out)
+    elif isinstance(node, list):
+        for child in node:
+            _ndt_familias_usadas(child, out)
+    return out
+
+
+def ndt_schema_messages(schema_errors) -> list[str]:
+    """Mensagens de erro de schema com a causa concreta dos ramos `oneOf`.
+
+    Os tipos NDT são uniões discriminadas por `tipo`: um elemento defeituoso
+    produz "is not valid under any of the given schemas", que não identifica a
+    regra violada. Um caso negativo tem de ser rejeitado pela violação que
+    documenta (CONFORMANCE.md), pelo que se junta a mensagem do ramo mais
+    próximo.
+    """
+    messages = []
+    for error in schema_errors:
+        messages.append(error.message)
+        if not error.context:
+            continue
+        # Agrupar os sub-erros por ramo da união e descartar os ramos que
+        # falham no próprio discriminante `tipo`: o ramo pretendido é aquele
+        # cujo `tipo` casa e que falha por outra razão.
+        ramos: dict[object, list] = {}
+        for sub in error.context:
+            ramo = sub.schema_path[0] if sub.schema_path else None
+            ramos.setdefault(ramo, []).append(sub)
+        def descartavel(sub) -> bool:
+            # Ramo rejeitado pelo discriminante `tipo`, ou por o valor nem
+            # sequer ser do tipo JSON que o ramo aceita (ex.: `null`).
+            if "tipo" in list(sub.schema_path):
+                return True
+            return sub.validator == "type" and not list(sub.relative_path)
+
+        candidatos = [
+            subs for subs in ramos.values()
+            if not any(descartavel(s) for s in subs)
+        ]
+        if len(candidatos) == 1:
+            messages.extend(sub.message for sub in candidatos[0])
+        else:
+            closest = best_match(error.context)
+            if closest is not None:
+                messages.append(closest.message)
+    return messages
 
 
 def check_ndt_semantic(doc: dict) -> list[str]:
@@ -754,12 +852,67 @@ def check_ndt_semantic(doc: dict) -> list[str]:
                 if key in {"referencia", "incluir_se", "fonte_overflow"} and isinstance(child, str):
                     if "{{" not in child and not NDT_PATH_RE.fullmatch(child):
                         errors.append(f"{here} não é um caminho NDF canónico")
+                    if child.startswith(NDT_PATH_PREFIXOS_PROIBIDOS):
+                        errors.append(
+                            f"{here} usa prefixo de raiz proibido — "
+                            "a raiz NDF-core.documento é implícita"
+                        )
                 walk(child, here)
         elif isinstance(value, list):
             for i, child in enumerate(value):
                 walk(child, f"{path}[{i}]")
 
     walk(doc)
+
+    # NDT-PROD-017 — famílias não base têm de estar declaradas em recursos[].
+    declaradas = {
+        r.get("familia") for r in doc.get("recursos", []) if isinstance(r, dict)
+    }
+    for familia in sorted(_ndt_familias_usadas(doc)):
+        if familia not in NDT_FAMILIAS_BASE and familia not in declaradas:
+            errors.append(
+                f"família tipográfica '{familia}' não é base nem está declarada "
+                "em recursos"
+            )
+
+    layout = doc.get("layout", {}) if isinstance(doc.get("layout"), dict) else {}
+    for pagina in doc.get("paginas_def", []):
+        if not isinstance(pagina, dict):
+            continue
+        pid = pagina.get("id", "?")
+        # NDT-PROD-012 — a soma das colunas de tabela_visual iguala a largura.
+        for i, grafico in enumerate(pagina.get("graficos", [])):
+            if not isinstance(grafico, dict) or grafico.get("tipo") != "tabela_visual":
+                continue
+            colunas = grafico.get("colunas")
+            largura = grafico.get("largura")
+            if isinstance(colunas, list) and isinstance(largura, (int, float)):
+                soma = sum(c for c in colunas if isinstance(c, (int, float)))
+                if abs(soma - largura) > 1e-6:
+                    errors.append(
+                        f"paginas_def[{pid}].graficos[{i}]: soma das colunas "
+                        f"({soma:g}) difere da largura da tabela_visual ({largura:g})"
+                    )
+        # NDT-PROD-011 — colunas de linha_lateral cabem na largura útil.
+        fluxo = pagina.get("fluxo")
+        if not isinstance(fluxo, dict):
+            continue
+        util = _ndt_largura_util(pagina, layout)
+        if util is None:
+            continue
+        for i, elemento in enumerate(fluxo.get("elementos", [])):
+            if not isinstance(elemento, dict) or elemento.get("tipo") != "linha_lateral":
+                continue
+            colunas = [
+                c.get("largura") for c in elemento.get("elementos", [])
+                if isinstance(c, dict) and isinstance(c.get("largura"), (int, float))
+            ]
+            soma = sum(colunas)
+            if soma - util > 1e-6:
+                errors.append(
+                    f"paginas_def[{pid}].fluxo.elementos[{i}]: soma das colunas da "
+                    f"linha_lateral ({soma:g} mm) excede a largura útil ({util:g} mm)"
+                )
     return errors
 
 
@@ -783,7 +936,7 @@ def run_ndt_suite(valid_only=False, invalid_only=False) -> tuple[int, int]:
             raw = json.loads(path.read_text(encoding="utf-8"))
             schema_errors = list(Draft202012Validator(schema).iter_errors(strip_meta(raw)))
             semantic = check_ndt_semantic(strip_meta(raw)) if not schema_errors else []
-            all_errors = [e.message for e in schema_errors] + semantic
+            all_errors = ndt_schema_messages(schema_errors) + semantic
             ok = bool(all_errors)
             match_problem = check_expected_match(raw, all_errors) if ok else None
             _print_result(path.name, not ok, False, all_errors,

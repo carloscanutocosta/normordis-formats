@@ -1,0 +1,36 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: tabela_visual com largura 180 e colunas que somam 120. Violação de NDT-PROD-012 (§5.3.11).",
+  "_expected_error": "soma das colunas difere da largura da tabela_visual",
+  "_expected_match": "soma das colunas .* difere da largura",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "graficos": [
+        {
+          "tipo": "tabela_visual",
+          "posicao": {
+            "x": 15,
+            "y": 50
+          },
+          "largura": 180,
+          "altura_linha": 6,
+          "num_linhas": 10,
+          "colunas": [
+            30,
+            50,
+            40
+          ]
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "p1",
+      "repeticao": "unica"
+    }
+  ]
+}
