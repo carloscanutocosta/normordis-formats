@@ -34,6 +34,21 @@ SCHEMAS = {
     "custody-event": ROOT / "specs/ndf/schemas/custody-event.schema.json",
 }
 
+# C1/C2 para as especificações cujos blocos JSON são fragmentos de um documento
+# maior — um elemento gráfico, um nó de texto — e não documentos completos.
+FRAGMENT_SPECS = {
+    "ndt": {
+        "spec": ROOT / "specs/ndt/SPEC.md",
+        "schema": ROOT / "specs/ndt/schemas/ndt.schema.json",
+        "discriminante": "tipo",
+    },
+    "ncrtf": {
+        "spec": ROOT / "specs/ncrtf/SPEC.md",
+        "schema": ROOT / "specs/ncrtf/schemas/ncrtf.schema.json",
+        "discriminante": "type",
+    },
+}
+
 # Propriedades removidas por decisão arquitetural — não devem reaparecer.
 # (nome, ADR que as removeu)
 REMOVED_PROPERTIES = [
@@ -136,6 +151,80 @@ def c1_spec_blocks(schemas, failures):
     return checked
 
 
+def defs_por_discriminante(schema: dict, discriminante: str) -> dict[str, list[str]]:
+    """Mapeia o valor do discriminante para os `$defs` que o declaram.
+
+    Um mesmo valor pode pertencer a vários contextos — `imagem` existe como
+    elemento gráfico e como elemento de fluxo — pelo que o valor é uma lista.
+    """
+    encontrados: dict[str, list[str]] = {}
+    for nome, definicao in schema.get("$defs", {}).items():
+        propriedade = definicao.get("properties", {}).get(discriminante, {})
+        if isinstance(propriedade, dict):
+            const = propriedade.get("const")
+            if isinstance(const, str):
+                encontrados.setdefault(const, []).append(nome)
+    return encontrados
+
+
+def c1_fragment_blocks(failures) -> int:
+    """C1 para fragmentos: cada bloco JSON discriminado valida contra o `$def`.
+
+    Um bloco cujo discriminante admita vários contextos é aceite se validar
+    contra pelo menos um deles — a SPEC ilustra ora um, ora outro.
+    """
+    checked = 0
+    for nome, cfg in FRAGMENT_SPECS.items():
+        schema = load(cfg["schema"])
+        candidatos = defs_por_discriminante(schema, cfg["discriminante"])
+        texto = cfg["spec"].read_text(encoding="utf-8")
+        for start, sec, obj in json_blocks(texto):
+            if not isinstance(obj, dict):
+                continue
+            valor = obj.get(cfg["discriminante"])
+            if not isinstance(valor, str) or valor not in candidatos:
+                continue
+            checked += 1
+            motivos = []
+            for def_name in candidatos[valor]:
+                fragmento = dict(schema)
+                fragmento.pop("$defs", None)
+                validador = Draft202012Validator(
+                    {**schema["$defs"][def_name], "$defs": schema["$defs"]},
+                    format_checker=FormatChecker(),
+                )
+                erros = [e.message for e in validador.iter_errors(obj)]
+                if not erros:
+                    motivos = []
+                    break
+                motivos.append(f"{def_name}: {erros[0]}")
+            if motivos:
+                failures.append(
+                    f"C1 {cfg['spec'].relative_to(ROOT)} §{sec} (linha {start}): "
+                    f"bloco `{valor}` não valida contra nenhum $def — "
+                    + " | ".join(motivos)
+                )
+    return checked
+
+
+def c2_fragment_fields(failures) -> int:
+    """C2 para as SPEC de fragmentos: campo no schema, ausente da SPEC."""
+    checked = 0
+    for nome, cfg in FRAGMENT_SPECS.items():
+        schema = load(cfg["schema"])
+        texto = cfg["spec"].read_text(encoding="utf-8")
+        for field in sorted(schema_properties(schema)):
+            if field in DOCUMENTATION_EXEMPT:
+                continue
+            checked += 1
+            if f"`{field}`" not in texto and f'"{field}"' not in texto:
+                failures.append(
+                    f"C2 {cfg['schema'].relative_to(ROOT)} declara `{field}`, "
+                    f"que nunca é mencionado em {cfg['spec'].relative_to(ROOT)}"
+                )
+    return checked
+
+
 def c2_documented_fields(schemas, failures):
     """Um campo conta como documentado se aparecer em prosa (`campo`) ou como
     chave num exemplo normativo JSON ("campo":) da SPEC."""
@@ -235,8 +324,8 @@ def main() -> int:
     schemas = {n: load(p) for n, p in SCHEMAS.items()}
     failures: list[str] = []
 
-    n1 = c1_spec_blocks(schemas, failures)
-    n2 = c2_documented_fields(schemas, failures)
+    n1 = c1_spec_blocks(schemas, failures) + c1_fragment_blocks(failures)
+    n2 = c2_documented_fields(schemas, failures) + c2_fragment_fields(failures)
     n3 = c3_section_refs(failures)
     n4 = c4_duplicated_enums(schemas, failures)
     n5 = c5_removed_properties(failures)

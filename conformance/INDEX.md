@@ -102,13 +102,22 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndt/valid/recurso-referenciado-por-hash.json` | Recurso SVG referenciado por hash SHA-256 (modo: referenciado_por_hash). Verifica RecursoReferenciadoPorHash com hash_sha256 e content_type. |
 | `ndt/valid/sequencia-overflow.json` | Sequência com página de continuação (repeticao: conforme_necessario). Verifica fonte_overflow, linhas_por_pagina e incluir_se em SequenciaEntrada. |
 
-### `invalid/` — devem ser rejeitados (5)
+### `invalid/` — devem ser rejeitados (14)
 
 | Ficheiro | Descrição |
 |---|---|
+| `ndt/invalid/caminho-com-prefixo-raiz.json` | INVÁLIDO: caminho de dados prefixado com 'documento.'. Violação de NDT-PROD-005 (§4) — a raiz NDF-core.documento é implícita. |
+| `ndt/invalid/checkbox-sem-rotulo-acessivel.json` | INVÁLIDO: campo de formato checkbox sem rotulo_acessivel. Violação de NDT-PROD-018 (§5.4, §8.2) — campos interativos exigem /TU para PDF/UA-2. |
+| `ndt/invalid/conforme-necessario-sem-fonte-overflow.json` | INVÁLIDO: entrada de sequencia com repeticao conforme_necessario e sem fonte_overflow. Violação de NDT-PROD-013 (§5.7) — sem fonte de extravasamento o renderiza… |
+| `ndt/invalid/dois-corpos-no-mesmo-fluxo.json` | INVÁLIDO: dois elementos de tipo corpo no mesmo fluxo. Violação de NDT-PROD-009 (§5.2.1) — o corpo é único por fluxo porque o seu extravasamento governa a seque… |
 | `ndt/invalid/duplicate-page-id.json` | ids de pagina devem ser únicos |
+| `ndt/invalid/fluxo-e-blocos-na-mesma-pagina.json` | INVÁLIDO: pagina_def com fluxo e blocos preenchidos. Violação de NDT-PROD-008 (§5.2.1) — os dois modelos de conteúdo são mutuamente exclusivos. |
+| `ndt/invalid/fonte-nao-declarada.json` | INVÁLIDO: campo com família 'Arial', que não é base nem está declarada em recursos[]. Violação de NDT-PROD-017 (§5.8). |
+| `ndt/invalid/imagem-sem-alt.json` | INVÁLIDO: elemento imagem sem alt. Violação de NDT-PROD-019 (§8.2) — elementos decorativos declaram alt vazio; nenhum omite o campo. |
+| `ndt/invalid/linha-lateral-excede-largura-util.json` | INVÁLIDO: colunas de linha_lateral somam 200 mm numa A4 com margens de 15 mm (largura útil 180 mm). Violação de NDT-PROD-011 (§5.2.2). |
 | `ndt/invalid/missing-sequencia.json` | sequencia é obrigatória |
 | `ndt/invalid/non-positive-dimension.json` | dimensões devem ser positivas |
+| `ndt/invalid/tabela-visual-colunas-nao-somam.json` | INVÁLIDO: tabela_visual com largura 180 e colunas que somam 120. Violação de NDT-PROD-012 (§5.3.11). |
 | `ndt/invalid/unknown-page-ref.json` | sequencia deve referenciar pagina existente |
 | `ndt/invalid/wrong-version.json` | ndt_version deve ser 2.0.0 |
 
@@ -130,4 +139,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 76 casos.**
+**Total: 85 casos.**
