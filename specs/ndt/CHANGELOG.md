@@ -3,6 +3,89 @@
 > Nota: descrições históricas de `ndt_hash`, `NDF.outputs[]` e reutilização do
 > mesmo CAdES foram substituídas pelo modelo normativo comum em
 > `docs/architecture/ARCHITECTURE.md`. Não constituem requisitos actuais.
+>
+> As entradas afetadas foram **rectificadas no lugar** e assinaladas com
+> `[rectificado]`, indicando a cláusula que hoje governa a matéria. A entrada
+> original não é reescrita silenciosamente: um registo de alterações que
+> contradiz a especificação a que respeita deixa de servir para auditar como o
+> formato evoluiu.
+
+## [Não publicado]
+
+### Conformidade — cláusula §9 (novo)
+
+- Nova §9 na SPEC com os requisitos de conformidade por papel, antes dispersos
+  por prosa sem identificador: `NDT-PROD-001` a `NDT-PROD-021` (produtor de
+  templates) e `NDT-RENDER-001` a `NDT-RENDER-011` (renderizador).
+- `NDT-RENDER-001..006` migram de `RENDERER-CONFORMANCE.md` para a SPEC sem
+  alteração de texto nem de numeração. `RENDERER-CONFORMANCE.md` passa a
+  descrever apenas como os requisitos são verificados, por perfil de saída.
+- `NDT-RENDER-007..011` formalizam regras que existiam como prosa: tratamento
+  de dados ausentes, `min_linhas_visivel`, extravasamento em `fluxo`, espaços
+  de tokens e resolução de famílias tipográficas NCRTF.
+- §9.1 declara a separação entre estrutura (NDT) e dados (NDF) como fundamento
+  da cláusula, e agrupa os requisitos por perfil de documento — impresso e
+  texto corrido — para que a numeração não fique enviesada para o impresso
+  fiscal.
+- §8 renomeada para "Perfis de saída, assinatura e migração"; numeração de
+  §8.1 e §8.2 inalterada.
+- Nova cláusula em §5 para dimensões estritamente positivas (`NDT-PROD-014`),
+  regra que o validador já impunha sem estar escrita na especificação.
+
+### Imposição das regras estruturais
+
+Nove requisitos passaram de prosa a regra verificável, com um caso negativo
+cada em `conformance/ndt/invalid/`:
+
+- no schema — `NDT-PROD-008` (`fluxo`/`blocos` mutuamente exclusivos),
+  `NDT-PROD-009` (`corpo` único por `fluxo`), `NDT-PROD-013` (`fonte_overflow`
+  em `conforme_necessario`), `NDT-PROD-018` (`rotulo_acessivel` em
+  `checkbox`/`radio`), `NDT-PROD-019` (`alt` em `imagem` e `svg`);
+- em `tools/validate.py` — `NDT-PROD-005` (prefixo de raiz proibido),
+  `NDT-PROD-011` (colunas de `linha_lateral` dentro da largura útil),
+  `NDT-PROD-012` (colunas de `tabela_visual` somam a largura),
+  `NDT-PROD-017` (famílias tipográficas declaradas).
+
+Correção de schema: `graficos[].svg` aceita `alt`, como §8.2 já exigia. O
+campo estava ausente do schema, que rejeitava qualquer `svg` com texto
+alternativo por `additionalProperties: false`.
+
+### Autonomia de cada versão do template
+
+§8.2 reescrita. A redação anterior — "estabilidade de caminhos" — pressupunha
+continuidade entre versões de um mesmo template: identificadores não renomeados
+e elementos removidos marcados `descontinuado` em vez de eliminados. **A
+premissa estava errada.**
+
+Cada `versao_ndt` é uma unidade autónoma. Um impresso pode mudar radicalmente
+de um ano para o seguinte por alteração legislativa, e o template novo não
+arrasta nada do anterior. A continuidade histórica não depende dessa relação:
+cada NDF declara `ndt_version_ref` dentro do payload assinado e o `.ndfpkg`
+incorpora essa versão exata, pelo que um documento se renderiza sempre com o
+template com que foi produzido. O que permanece estável é o `schema_id` — a
+identidade do **tipo** de documento.
+
+Em consequência:
+
+- removidos `NDT-PROD-020` e `NDT-PROD-021`, que impunham essa continuidade;
+- removidos `tools/check_ndt_compat.py` e `conformance/ndt/compat/`, criados na
+  mesma ronda para os verificar, e os passos de CI correspondentes;
+- `descontinuado` mantém-se no schema, agora documentado como **facultativo e
+  informativo**, útil em revisões menores do mesmo impresso;
+- clarificado que `versao_ndt` não segue SemVer e não implica compatibilidade —
+  o SemVer aplica-se a `ndt_version`, a versão do formato (§2).
+
+Todos os requisitos de produtor NDT passam a ser verificáveis sobre um único
+ficheiro.
+
+### Guardrails
+
+- `tools/check_spec_coherence.py` passa a cobrir NDT e NCRTF nas verificações
+  C1 (blocos JSON normativos validam contra o schema) e C2 (campos do schema
+  documentados na SPEC), antes limitadas ao NDF. A cobertura subiu de 3 para
+  31 blocos JSON e de 127 para 248 campos.
+- Rectificados os exemplos de §5.3.4 e §5.3.10, que o novo guardrail apanhou
+  como inválidos por omissão de `alt`.
 
 ## [2.0.0] — Draft — Revisão pública
 
@@ -30,7 +113,7 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 
 ### Endereçamento NDF
 - Caminhos canónicos como **convenção de endereçamento**, não como schema
-- **Formatos de display** (§3.3): hints de renderização visual sem semântica de validação (`texto`, `numero`, `inteiro`, `monetario`, `data`, `booleano`, `checkbox`, `radio`)
+- **Formatos de display** (§4.3 na numeração final): hints de renderização visual sem semântica de validação (`texto`, `numero`, `inteiro`, `monetario`, `data`, `booleano`, `checkbox`, `radio`)
 - Ausência de valor no NDF → campo em branco, sem erro
 
 ### Layout
@@ -52,6 +135,10 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 ### NDF ↔ NDT: reprodutibilidade
 - NDF referencia `schema_id@versao_ndt` — não incorpora o NDT, mantém-se eficiente
 - Para documentos fechados: `ndt_hash` (SHA-256 do NDT) garante reprodutibilidade bit-perfeita
+  — **[rectificado]** não existe campo `ndt_hash` no NDF-core v1.0.0. O hash do
+  ficheiro NDT é registado no inventário do `.ndfpkg` (SPEC §1.1). Reprodutibilidade
+  visual não implica identidade binária: esta exige um perfil de renderizador que
+  fixe motor, fontes e parâmetros de serialização (SPEC §7).
 
 ### Estilos globais (`estilos`) [novo]
 - `fonte_padrao`, `cor_texto`, `cor_primaria`, `espacamento_entre_paragrafos_mm`, `identacao_lista_mm`, `cabecalhos[]`
@@ -69,6 +156,10 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 - Novo tipo em `graficos[]` e em `fluxo.elementos`
 - Novo campo `modo`: `"visual_apenas"` | `"hibrido"` (default) | `"ndf_attachment"`
 - **Modelo híbrido (default)**: CAdES-B-LTA do NDF (que inclui `pdf_hash`) é também o contentor PAdES do campo AcroForm no PDF; CAdES embutido como attachment PDF/A-3. PDF autossuficiente para validadores eIDAS; NDF é a fonte de verdade.
+  — **[rectificado]** o CAdES do envelope e uma assinatura PAdES são operações,
+  valores criptográficos e timestamps distintos, ainda que possam usar o mesmo
+  certificado. O modo `hibrido` cria um campo AcroForm que suporta uma operação
+  PAdES **independente** (SPEC §5.3.6, §8.1).
 - ODF: linha de assinatura com campo de formulário; HTML: `<div class="signature-field" data-id="...">`. `modo` ignorado em formatos de fluxo.
 - Campos: `id`, `rotulo`, `posicao` (obrigatório em `graficos[]`, omitido em `fluxo`), `largura`, `altura`, `modo`
 
@@ -83,6 +174,10 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 - Workflow de fecho: `pdf_hash` adicionado ao NDF antes de assinar; CAdES-B-LTA cobre NDF + `pdf_hash`
 - Workflow de verificação determinística: regenerar PDF → confirmar `sha256(PDF) == NDF.outputs[].sha256`
 - Distinção CAdES/PAdES: mesmo algoritmo CMS; objetos assinados distintos (NDF JSON vs. PDF ByteRange); cross-referenciados via `pdf_hash` e `ndf_ref`
+- **[rectificado]** o NDF-core v1.0.0 não tem campos `outputs[]`, `signatures[]`
+  nem `pdf_hash` implícitos. Referências cruzadas entre NDF e PDF, quando
+  existam, pertencem a um perfil de saída versionado que as declare (SPEC §8.1).
+  A ausência de PAdES não altera a validade estrutural do NDF.
 
 ### `incluir_se` ao nível de elemento [novo]
 - Anteriormente só disponível em `sequencia[]`; agora disponível em `campos[]`, `blocos[]` e `fluxo.elementos`
@@ -90,6 +185,9 @@ Face ao draft anterior, foram **removidos** por não pertencerem ao NDT:
 
 ### Fidelidade por formato de saída [novo §1.3]
 - **PDF/A** — formato primário; fidelidade normativa (bit-idêntico para o mesmo NDT+NDF); arquivo, prova, entrega formal
+  — **[rectificado]** a fidelidade de layout é normativa **segundo o perfil de
+  renderizador declarado**; a identidade byte a byte só é exigível a um perfil que
+  fixe motor, fontes, recursos e parâmetros de serialização (SPEC §1.3, §7).
 - **ODF** — formato secundário; fidelidade de conteúdo via `estilos` NDT; intercâmbio, edição, revisão. Escolha motivada por soberania digital: ISO/IEC 26300, sem dependência de licença proprietária, alinhado com o RNID. Implementações: LibreOffice, Collabora, OpenOffice, EuroOffice, OnlyOffice.
 - **HTML** — fidelidade de conteúdo; publicação e consulta; layout CSS flow
 - **Typst** — fidelidade alta; mm coords como dicas; composição tipográfica avançada
