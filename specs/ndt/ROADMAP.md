@@ -88,15 +88,23 @@ O NDF estrutura o array com itens marcados como `"tipo_linha": "cabecalho_grupo"
 
 **Problema**: o `corpo` do NDT referencia conteúdo NCRTF do NDF. A qualidade do saída ODF/HTML para documentos administrativos depende diretamente do que o NCRTF expressa. Padrões a verificar antes de implementar o renderizador ODF:
 
+**Verificação concluída** contra NCRTF v2.0.0 (§4, §5, §6, §11.3):
+
 | Padrão | Status NCRTF v2.0.0 | Impacto se ausente |
 |---|---|---|
-| Notas de rodapé | A verificar | Documentos legais e contratos |
-| Referências cruzadas internas | A verificar | Despachos com remissão para artigos |
-| Listas numeradas multi-nível | A verificar (list_item existe) | Normas, regulamentos |
-| Tabelas com colspan/rowspan em corpo | A verificar | Relatórios técnicos |
-| Citações em bloco | A verificar | Pareceres jurídicos |
+| Notas de rodapé | **Ausente** | Documentos legais e contratos |
+| Referências cruzadas internas | **Ausente** | Despachos com remissão para artigos |
+| Listas numeradas multi-nível | Parcial — `list`/`list_item` existem; `start` é candidato futuro (§11.3) e não há estilo de numeração por nível | Normas, regulamentos, articulado legal |
+| Tabelas com colspan/rowspan em corpo | **Ausente** | Relatórios técnicos |
+| Citações em bloco | **Coberto** — `blockquote` (§4.4) | Pareceres jurídicos |
 
-Se algum padrão estiver ausente do NCRTF, a solução é na spec NCRTF — o NDT não precisa de ser alterado.
+Lacuna adicional identificada na mesma verificação: as células de `table` são strings de texto plano (§4.5), sem formatação inline. Já consta de §11.3 do NCRTF como candidato ("Rich text em células de tabela").
+
+Todos os padrões em falta são **aditivos** na política de extensão do NCRTF (§11.1: novo nó bloco opcional ou novo campo opcional ⇒ MINOR). A solução é na spec NCRTF — o NDT não precisa de ser alterado.
+
+**Critério de importação a partir do ODF**: o ODF é a referência de vocabulário para o que falta, mas nem tudo o que o ODF exprime pertence ao NCRTF. Importa-se o que é *estrutura semântica de texto finalizado* — notas, remissões, numeração por nível, células ricas. Não se importa o que é *estado de edição*: `text:tracked-changes` e `office:annotation` colidem com a imutabilidade do NDF. Nem o que é *apresentação*, que pertence ao NDT.
+
+O estudo completo — incluindo as lacunas do próprio NDT face ao ODF, as decisões de fronteira NDT↔NCRTF e o plano faseado — está em [`docs/design/ODF-ALIGNMENT-STUDY.md`](../../docs/design/ODF-ALIGNMENT-STUDY.md).
 
 ---
 
