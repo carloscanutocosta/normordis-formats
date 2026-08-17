@@ -14,7 +14,8 @@ subordinados, são inventariadas em `NORMATIVE-STATEMENTS.md` por
 | `NDF-PROD-*`, `NDF-READ-*`, `NDF-PKG-*` | schemas NDF + verificações semânticas | suite NDF válida/inválida e pacote | casos criptográficos reais |
 | `REG-REQ-*` — tipos documentais | `registry/schemas/*.json` | aplicação pelo `validate.py` | vetores dedicados do registo |
 | `NCRTF-PROD-*`, `NCRTF-READ-*` | schema + verificações semânticas | suite NCRTF válida/inválida | mapear R1–R6 individualmente |
-| `NDT-RENDER-*` — estrutura e renderização | schema + verificações semânticas | 9 casos `NDT-SEM-*` + suite negativa | árvores extraídas e resultados de referência independentes |
+| `NDT-PROD-*` — estrutura do template | schema NDT + verificações semânticas | suite NDT válida/inválida + exemplos render-ready | cobertura completa dos 19 requisitos |
+| `NDT-RENDER-*` — renderização | perfis de saída (`RENDERER-CONFORMANCE.md`) | 9 casos `NDT-SEM-*` + suite negativa | árvores extraídas e resultados de referência independentes |
 | `JCS-REQ-*` — bytes e digest | RFC 8785 + vetores JCS | vetores IEEE-754 incluídos | implementação independente adicional |
 | `PKG-REQ-*` — caminhos e inventário | schema do manifesto + verificador | pacote autocontido + 8 vetores negativos | ampliar cobertura de ZIP real |
 | `SIG-REQ-*` — assinaturas | verificações cruzadas | exemplo estrutural | fixtures CAdES-B-LTA reais |

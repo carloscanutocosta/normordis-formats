@@ -237,6 +237,11 @@ Formatos numéricos aceitam o parâmetro opcional `"casas_decimais"` (inteiro). 
 
 O bloco `layout` descreve a composição visual prescritiva do documento para PDF e impressão. É **normativo para renderizadores PDF**; renderizadores de fluxo (ODF, HTML) PODEM ignorá-lo em favor de `estilos` (§3).
 
+Salvo indicação em contrário, todas as dimensões e coordenadas são expressas em
+milímetros; o `tamanho` de fonte é expresso em pontos tipográficos. Os valores
+de `largura`, `altura` e `tamanho` **DEVEM** ser estritamente positivos — uma
+dimensão nula ou negativa não descreve nenhuma área renderizável.
+
 ### 5.1 Configuração global de página
 
 ```json
@@ -452,7 +457,8 @@ Primitiva específica para impressos fiscais — caixas individuais por carácte
   "posicao": { "x": 15, "y": 10 },
   "largura": 30,
   "altura": 12,
-  "manter_proporcao": true
+  "manter_proporcao": true,
+  "alt": "Logótipo da Autoridade Tributária"
 }
 ```
 
@@ -585,7 +591,8 @@ Quando `raio_x == raio_y`, a figura é um círculo.
   "posicao": { "x": 0, "y": 0 },
   "largura": 210,
   "altura": 297,
-  "layer": "background"
+  "layer": "background",
+  "alt": ""
 }
 ```
 
@@ -1075,12 +1082,14 @@ esta última exige um perfil de renderizador adicional.
 
 ---
 
-## 8. Conformidade e migração
+## 8. Perfis de saída, assinatura e migração
 
-Os requisitos por papel encontram-se em
-[`RENDERER-CONFORMANCE.md`](RENDERER-CONFORMANCE.md), com identificadores
-`NDT-RENDER-*`. Esta cláusula descreve a articulação dos perfis e não duplica a
-declaração de conformidade.
+Esta cláusula descreve a articulação entre o NDT e os perfis de saída —
+assinatura, acessibilidade e arquivo — e as regras de estabilidade entre
+versões de um template. Os requisitos de conformidade por papel, com
+identificadores `NDT-PROD-*` e `NDT-RENDER-*`, estão em §9. Os perfis de
+verificação de renderizadores e o corpus de testes golden estão em
+[`RENDERER-CONFORMANCE.md`](RENDERER-CONFORMANCE.md).
 
 ### 8.1 Assinatura do NDF e assinatura de representações
 
@@ -1153,9 +1162,128 @@ Elementos puramente decorativos (linhas, retângulos, fundos SVG) DEVEM ser marc
 - `assinatura` é renderizada como `<div class="signature-field" data-id="{{id}}">` para captura por JavaScript.
 - A fidelidade de conteúdo (NCRTF) é normativa; paginação e posicionamento são CSS flow.
 
-**Estabilidade de caminhos:**
-- Os `id` de campos, colunas de tabelas e `paginas_def` não são renomeados entre versões de `versao_ndt`.
-- Campos e colunas removidos são marcados `"descontinuado": true`, não eliminados.
+**Autonomia de cada versão do template:**
+
+Cada `versao_ndt` é um template autónomo do tipo de documento identificado por
+`schema_id`. Não existe garantia de continuidade, compatibilidade ou parecença
+entre duas versões: um impresso muda por vezes radicalmente de um ano para o
+seguinte, por alteração legislativa, e o template novo não arrasta nada do
+anterior. `versao_ndt` é uma etiqueta de identidade — não segue SemVer e não
+implica relação de compatibilidade (§2).
+
+A continuidade histórica não depende desta relação: cada NDF declara o seu
+`ndt_version_ref` dentro do payload assinado e o `.ndfpkg` incorpora essa versão
+exata do NDT, pelo que um documento se renderiza sempre com o template com que
+foi produzido (§1.1, §7).
+
+O que permanece estável é o `schema_id`, que identifica o **tipo de documento**.
+Um tipo documental que seja substituído por outro — e não meramente revisto —
+tem `schema_id` próprio; a relação entre tipos extintos e os que os sucedem é
+matéria do registo de tipos documentais, não do NDT.
+
+`descontinuado` em campos e colunas é **facultativo e informativo**: um produtor
+PODE usá-lo para sinalizar, numa revisão menor do mesmo impresso, um elemento
+que deixou de ser preenchido. Não é exigido, e a sua ausência não implica que o
+elemento tenha existido antes.
+
+---
+
+## 9. Conformidade
+
+### 9.1 Separação entre estrutura e dados
+
+O NDT declara o que é **estável** entre instâncias do mesmo tipo documental —
+estrutura, estilo, composição e sequência de páginas. O NDF fornece o que
+**varia** de documento para documento. É a mesma separação que o OpenDocument
+estabelece entre estilo e estrutura, por um lado, e conteúdo, por outro.
+
+Um template não é um documento incompleto: é a parte fixa, versionada e
+reutilizável do documento. Daqui decorrem duas regras de leitura desta cláusula:
+valores de dados não pertencem ao NDT, e decisões de formatação não pertencem ao
+NDF.
+
+Os requisitos aplicam-se a dois **perfis de documento**, que exercitam partes
+distintas do formato:
+
+| Perfil | Blocos determinantes | Exemplos | Requisitos críticos |
+|---|---|---|---|
+| **Impresso** | `graficos[]`, `campos[]`, `blocos[]` a coordenadas absolutas | Modelo 3 IRS e demais impressos fiscais | `NDT-PROD-011`, `NDT-PROD-012`, `NDT-PROD-018`; `NDT-RENDER-008` |
+| **Texto corrido** | `estilos`, `fluxo`, `corpo` NCRTF, `sequencia[]` | ofício, informação, parecer, despacho, diploma legal publicado | `NDT-PROD-008`, `NDT-PROD-009`; `NDT-RENDER-009`, `NDT-RENDER-011` |
+
+No perfil de impresso a geometria é o próprio documento oficial e a extensão do
+conteúdo é conhecida ao desenhar o template. No perfil de texto corrido a
+extensão do conteúdo NCRTF é arbitrária e desconhecida nesse momento: o que o
+template fixa é a estrutura e o estilo, e a paginação resulta do conteúdo. Um
+template **PODE** combinar os dois perfis. A distinção organiza a leitura dos
+requisitos; não cria classes de conformidade separadas.
+
+### 9.2 Produtor conforme
+
+Uma implementação — ou o próprio ficheiro que ela emite — é um **produtor NDT
+conforme** se e apenas se satisfizer todos os seguintes requisitos:
+
+1. **NDT-PROD-001 — DEVE** gerar NDT JSON que valida contra o schema `specs/ndt/schemas/ndt.schema.json` (JSON Schema Draft 2020-12).
+2. **NDT-PROD-002 — DEVE** declarar `ndt_version` com a versão do formato, `schema_id` estável para o tipo documental e `versao_ndt` para esta instância do template (§2).
+3. **NDT-PROD-003 — DEVE** garantir que `schema_id@versao_ndt` corresponde exatamente ao `ndt_version_ref` de qualquer NDF que o referencie (§1.1, §7).
+4. **NDT-PROD-004 — DEVE** exprimir todos os caminhos de dados na sintaxe canónica de segmentos definida em §4.
+5. **NDT-PROD-005 — NÃO DEVE** prefixar caminhos de dados com `documento.` ou `NDF-core.`; a raiz `NDF-core.documento` é implícita (§4).
+6. **NDT-PROD-006 — DEVE** usar em `incluir_se` um caminho NDF direto para um valor booleano, nunca uma expressão (§5.4).
+7. **NDT-PROD-007 — DEVE** atribuir `id` único a cada entrada de `paginas_def[]` e garantir que cada `sequencia[].pagina_def` resolve para uma dessas entradas (§5.2, §5.7).
+8. **NDT-PROD-008 — NÃO DEVE** declarar `fluxo` e `blocos[]` na mesma `pagina_def` (§5.2.1).
+9. **NDT-PROD-009 — NÃO DEVE** declarar mais do que um elemento `corpo` no mesmo `fluxo` (§5.2.1).
+10. **NDT-PROD-010 — NÃO DEVE** aninhar `linha_lateral` dentro de `linha_lateral`, nem incluir `corpo` no conteúdo de uma coluna lateral (§5.2.2).
+11. **NDT-PROD-011 — NÃO DEVE** declarar uma `linha_lateral` cuja soma das larguras das colunas exceda a largura útil da `pagina_def` (§5.2.2).
+12. **NDT-PROD-012 — DEVE** garantir que a soma de `colunas` de um `tabela_visual` iguala a sua `largura` (§5.3.11).
+13. **NDT-PROD-013 — DEVE** declarar `fonte_overflow` em cada entrada de `sequencia[]` com `repeticao: "conforme_necessario"` (§5.7).
+14. **NDT-PROD-014 — DEVE** declarar dimensões estritamente positivas em `largura`, `altura` e `tamanho` (§5).
+15. **NDT-PROD-015 — DEVE** atribuir `id` único a cada recurso e garantir que cada `referencia_recurso` resolve para um recurso declarado (§5.3.4, §5.9).
+16. **NDT-PROD-016 — DEVE** satisfazer as obrigatoriedades condicionais de `recursos[]`: `dados` no modo `embebido`; `hash_sha256` e `content_type` no modo `referenciado_por_hash`; `familia` em recursos de tipo fonte (§5.9).
+17. **NDT-PROD-017 — DEVE** declarar em `recursos[]` qualquer família tipográfica usada que não pertença às famílias base `"Helvetica"`, `"Times"` e `"Courier"` (§5.8).
+18. **NDT-PROD-018 — DEVE** declarar `rotulo_acessivel` em campos de formato `"checkbox"` e `"radio"` (§5.4, §8.2).
+19. **NDT-PROD-019 — DEVE** declarar `alt` em elementos `imagem` e `svg`, usando `alt: ""` nos elementos puramente decorativos (§8.2).
+Todos os requisitos de produtor são verificáveis sobre um único ficheiro NDT.
+Não existem requisitos de compatibilidade entre versões de um template: cada
+`versao_ndt` é autónoma (§8.2).
+
+### 9.3 Renderizador conforme
+
+Uma implementação é um **renderizador NDT conforme** se e apenas se satisfizer
+todos os seguintes requisitos. Os perfis de verificação e o corpus de testes
+golden que os sustentam estão em
+[`RENDERER-CONFORMANCE.md`](RENDERER-CONFORMANCE.md).
+
+1. **NDT-RENDER-001 — DEVE** verificar versão NDT e referências semânticas antes de renderizar.
+2. **NDT-RENDER-002 — DEVE** resolver caminhos relativamente a `NDF-core.documento`.
+3. **NDT-RENDER-003 — DEVE** rejeitar recursos obrigatórios ausentes ou com hash incorreto.
+4. **NDT-RENDER-004 — DEVE** preservar texto, ordem, ligações, listas, tabelas e texto alternativo NCRTF.
+5. **NDT-RENDER-005 — DEVE** comunicar capacidades de saída não suportadas em vez de declarar silenciosamente conformidade integral.
+6. **NDT-RENDER-006 — DEVE** registar nome e versão do renderizador e perfil de saída num relatório.
+7. **NDT-RENDER-007 — NÃO DEVE** recusar renderizar por um caminho de dados não existir ou o valor ser nulo; nesse caso o elemento renderiza em branco, sem erro e sem aviso (§4, §5.4).
+8. **NDT-RENDER-008 — DEVE** desenhar sempre a estrutura de um bloco `tabela` — moldura, cabeçalho e linhas — e completar com linhas em branco até `min_linhas_visivel` quando o NDF tiver menos itens (§5.5.1).
+9. **NDT-RENDER-009 — DEVE**, no extravasamento de um `corpo` em `fluxo`, renderizar os elementos posteriores ao `corpo` na última página da sequência, imediatamente após o fim do corpo, e os anteriores apenas na primeira instância da `pagina_def` (§5.2.1).
+10. **NDT-RENDER-010 — DEVE** resolver `{{validation_code}}` a partir do envelope NDF, e distinguir os três espaços de tokens: `{{placeholder_ndt}}` (metadados do template), `{ndf:caminho}` (dados do NDF) e `{n}`/`{total}` (paginação) (§5.3.5, §5.6).
+11. **NDT-RENDER-011 — DEVE** resolver famílias tipográficas NCRTF pela tabela canónica de §5.8, dando precedência a fontes declaradas em `recursos[]` com o mesmo nome canónico.
+
+### 9.4 Suite de conformidade
+
+A suite oficial está em `conformance/ndt/`, complementada pelos exemplos de
+`specs/ndt/examples/`, que são também casos válidos. O test runner de referência
+é `tools/validate.py`.
+
+```bash
+# Correr apenas a suite NDT
+python3 tools/validate.py --format ndt
+
+# Cobertura estrutural do corpus semântico
+python3 tools/check_ndt_semantic_corpus.py
+```
+
+Os casos de `conformance/ndt/valid/` **DEVEM** ser aceites; os de
+`conformance/ndt/invalid/` **DEVEM** ser rejeitados, e cada um declara em
+`_expected_match` o motivo da rejeição que documenta. A suite cobre hoje os
+requisitos de produtor; os requisitos de renderizador exigem resultados
+extraídos de implementações independentes, ainda pendentes — ver
+[`RENDERER-CONFORMANCE.md`](RENDERER-CONFORMANCE.md).
 
 ---
 

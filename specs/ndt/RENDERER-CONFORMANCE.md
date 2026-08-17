@@ -2,20 +2,27 @@
 
 **Estado:** Draft — revisão pública por abrir
 
-Este documento define papéis observáveis e independentes da linguagem. Não
-impõe um motor de renderização.
+Este documento define perfis de verificação observáveis e independentes da
+linguagem. Não impõe um motor de renderização.
+
+Os requisitos de renderizador — `NDT-RENDER-001` a `NDT-RENDER-011` — estão
+definidos em [`SPEC.md`](SPEC.md) §9.3. Este documento não os repete: descreve
+como são verificados, por perfil de saída, e que corpus sustenta essa
+verificação.
 
 ## Perfil comum
 
-Todo o renderizador DEVE:
+Aplica-se a qualquer saída. `NDT-RENDER-001` a `NDT-RENDER-003` são verificados
+por inspeção do comportamento perante entradas defeituosas — versão não
+suportada, referência que não resolve, recurso ausente ou com hash incorreto.
+`NDT-RENDER-005` e `NDT-RENDER-006` são verificados pelo relatório de
+renderização, que identifica implementação, versão, perfil de saída e
+aproximações aplicadas.
 
-- **NDT-RENDER-001** — verificar versão NDT e referências semânticas antes de renderizar;
-- **NDT-RENDER-002** — resolver caminhos relativamente a `NDF-core.documento`;
-- **NDT-RENDER-003** — rejeitar recursos obrigatórios ausentes ou com hash incorreto;
-- **NDT-RENDER-004** — preservar texto, ordem, ligações, listas, tabelas e texto alternativo NCRTF;
-- **NDT-RENDER-005** — comunicar capacidades de saída não suportadas em vez de declarar
-  silenciosamente conformidade integral;
-- **NDT-RENDER-006** — registar nome e versão do renderizador e perfil de saída num relatório.
+`NDT-RENDER-007` a `NDT-RENDER-011` regem o tratamento de dados ausentes,
+estrutura mínima de tabela, extravasamento em `fluxo`, espaços de tokens e
+resolução de famílias tipográficas; são verificados pelo corpus abaixo, em
+qualquer perfil de saída.
 
 ## Perfil de saída semântica
 

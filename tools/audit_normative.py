@@ -16,7 +16,15 @@ SOURCES = {
     ROOT / "specs/ndt/RENDERER-CONFORMANCE.md": "NDT-RENDER",
 }
 MODAL = re.compile(r"\b(NÃO DEVEM|NÃO DEVE|DEVEM|DEVE|PODEM|PODE|RECOMENDA-SE|NÃO RECOMENDADO|RECOMENDADO)\b")
-ID_RE = re.compile(r"\b((?:NDF-(?:PROD|READ|PKG)|NCRTF-(?:PROD|READ)|NDT-RENDER|CUST-REQ)-\d{3})\b")
+ID_PATTERN = (
+    r"(?:NDF-(?:PROD|READ|PKG)|NCRTF-(?:PROD|READ)"
+    r"|NDT-(?:PROD|RENDER)|CUST-REQ)-\d{3}"
+)
+ID_RE = re.compile(rf"\b({ID_PATTERN})\b")
+# Só a definição do requisito conta como origem: é marcada a negrito, tal como
+# em `tools/build_requirements_index.py`. Uma menção em prosa ou numa tabela de
+# agrupamento é referência cruzada, não redefinição.
+DEF_RE = re.compile(rf"\*\*({ID_PATTERN})")
 ENGLISH_MODAL = re.compile(r"\b(MUST|SHALL|SHOULD|MAY)(?: NOT)?\b")
 LOWER_MODAL = re.compile(r"\b(não devem|não deve|devem|deve|podem|pode|recomenda-se)\b", re.I)
 LOWER_ALLOWED = (
@@ -48,7 +56,19 @@ def coverage(document: str, section: str) -> str:
         }.get(major, "avaliação editorial")
     if document == "NCRTF":
         return "NCRTF-PROD-001..007; NCRTF-READ-001..005"
-    return "NDT-RENDER-001..006"
+    if document == "NDT":
+        return {
+            "1": "NDT-PROD-003; NDT-RENDER-005,007",
+            "2": "NDT-PROD-002",
+            "3": "NDT-RENDER-011",
+            "4": "NDT-PROD-004,005,006; NDT-RENDER-002,007",
+            "5": "NDT-PROD-007..019; NDT-RENDER-008..011",
+            "6": "NDT-PROD-001",
+            "7": "NDT-PROD-003; NDT-RENDER-001",
+            "8": "NDT-PROD-017..019; NDT-RENDER-005",
+            "9": "requisito identificado na própria cláusula",
+        }.get(major, "avaliação editorial")
+    return "NDT-RENDER-001..011"
 
 
 def main() -> int:
@@ -67,7 +87,7 @@ def main() -> int:
                 section = heading.group(1) or "anexo"
             if in_code:
                 continue
-            for found in ID_RE.findall(line):
+            for found in DEF_RE.findall(line):
                 if found in ids:
                     failures.append(f"ID duplicado {found}: {ids[found]} e {path}:{number}")
                 ids[found] = f"{path.relative_to(ROOT)}:{number}"
@@ -79,7 +99,7 @@ def main() -> int:
                     failures.append(f"modal minúsculo ambíguo em {path.relative_to(ROOT)}:{number}: {line.strip()}")
             if not MODAL.search(line):
                 continue
-            explicit = ID_RE.search(line)
+            explicit = DEF_RE.search(line)
             kind = "principal" if explicit else ("definição" if section in {"1.0", "2"} and "Term" in line else "subordinado")
             rows.append((document, section, path.relative_to(ROOT).as_posix(), number, kind, explicit.group(1) if explicit else coverage(document, section), line.strip()))
 
