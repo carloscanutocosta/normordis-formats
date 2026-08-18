@@ -3,7 +3,13 @@
 **NORMORDIS Document Template — Especificação Formal**
 
 Estado: Draft — revisão pública por abrir
-Âmbito: formato declarativo de layout para descrever a composição visual de qualquer documento institucional — desde impressos fiscais complexos (ex.: Modelo 3 IRS) a documentos administrativos correntes (ofícios, informações, despachos).
+Âmbito: formato declarativo de layout para descrever a composição visual de
+documentos administrativos e legais/normativos — predominantemente textuais,
+tabulares ou formularizados — desde impressos fiscais complexos (ex.: Modelo 3
+IRS) e documentos administrativos correntes (ofícios, informações, despachos)
+a texto legal publicado (ex.: diplomas no Diário da República). Não é âmbito
+do NDT representar equações complexas, notação musical, desenho técnico,
+dados geoespaciais, escrita manuscrita ou conteúdo multimédia.
 
 Objetivo de interoperabilidade: permitir que renderizadores independentes
 interpretem o mesmo template e produzam saídas equivalentes segundo um perfil

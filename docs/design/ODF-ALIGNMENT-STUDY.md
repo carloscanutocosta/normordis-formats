@@ -131,7 +131,7 @@ inline. A verificação T3 (roadmap NDT) está registada em `specs/ndt/ROADMAP.m
 | Ref | Lacuna | Vocabulário ODF | Impacto |
 |---|---|---|---|
 | **T1** | Páginas pares/ímpares e margens espelhadas | `style:page-usage` — `all` (predefinido), `left`, `right`, `mirrored` | O NDT não distingue página par de ímpar. Qualquer documento oficial impresso frente e verso precisa de margens espelhadas |
-| **T2** | Viúvas, órfãs e manter junto | `fo:orphans`, `fo:widows`, `fo:keep-with-next`, `fo:keep-together` em `style:paragraph-properties` | O NDT **não tem nada** nesta matéria. É a diferença entre um documento publicável e um com um título sozinho no fundo da página |
+| **T2** | Viúvas, órfãs e manter junto | `fo:orphans`, `fo:widows`, `fo:keep-with-next`, `fo:keep-together` em `style:paragraph-properties` | O NDT **não tem nada** nesta matéria. É a diferença entre um documento publicável e um com um título sozinho no fundo da página. Vocabulário e algoritmo de resolução de conflitos propostos em [`NDT-PAGINACAO-PRECEDENCIA.md`](NDT-PAGINACAO-PRECEDENCIA.md) |
 | **T3** | Área de notas de rodapé | configuração de notas na page-layout e separador de notas | Consequência direta de N1: sem declaração de área, o renderizador não sabe reservar espaço no fundo da página |
 
 ### Prioridade 2
@@ -307,6 +307,9 @@ pré-requisito da Fase C e condiciona T4.
    intra-documento — ao contrário de `relacoes[]`, não precisa de `payload_hash`,
    mas precisa de garantia de resolução. Implica requisitos novos de produtor e
    de leitor NCRTF: toda a referência resolve para uma marca existente.
+   Critério de identificador/`xref`, incluindo se `id` é conteúdo assinado,
+   desenvolvido em
+   [`NCRTF-IDENTIFICADORES-E-REFERENCIAS.md`](NCRTF-IDENTIFICADORES-E-REFERENCIAS.md).
 3. **Acoplamento.** T4/A3 **não** introduz a primeira dependência de estilo entre
    NCRTF e NDT: essa já existe, através de `font_family`, `alignment` e `indent`
    no NCRTF e da tabela de resolução tipográfica do NDT §5.8. O risco a gerir não
