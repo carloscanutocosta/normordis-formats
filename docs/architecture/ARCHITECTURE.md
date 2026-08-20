@@ -27,6 +27,30 @@ NDT + recursos ────────────────────┘
 NDF-core + envelope + NDT + schemas + recursos ──► .ndfpkg
 ```
 
+### 1.1 Dever do formato e responsabilidade do produtor
+
+O formato deve permitir que **toda a informação relevante e necessária possa ser
+guardada e reproduzida**. É esse o seu dever, e é só esse.
+
+| | Dever de quem |
+|---|---|
+| Capacidade de representação — existir lugar para tudo o que é relevante e necessário | **do formato** |
+| Correção do que se representa — que o declarado seja verdadeiro, competente, completo e legal | **do produtor** |
+
+O NDF não substitui a responsabilidade dos sistemas produtores e guarda o
+documento tal como o produtor o emitiu. Um produtor pode emitir um documento
+juridicamente incompleto e o NDF ser válido: o ato existe, e a sua validade é
+decidida pelas autoridades administrativas e judiciais competentes, como
+sucede com um documento em papel.
+
+O critério que separa os dois deveres é operacional: **um verificador consegue
+decidir isto tendo apenas o pacote em mãos?** Se sim, pode ser conformidade. Se
+exige o mundo — a lei, a orgânica, o procedimento, os factos — é do produtor.
+Ver [ADR-022](ADR-022-dever-do-formato.md).
+
+Decorre daqui que um `.ndfpkg` válido garante integridade, identidade e
+interpretabilidade — não legalidade, completude nem correção.
+
 ## 2. Responsabilidades
 
 ### 2.1 NDF
