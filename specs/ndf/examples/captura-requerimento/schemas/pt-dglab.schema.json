@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.org/schemas/profiles/pt-dglab.schema.json",
+  "title": "Perfil de avaliação arquivística — pt-dglab",
+  "description": "Restringe o bloco avaliacao do NDF-core ao modelo arquivístico português (MEG/DGLAB). Aplica-se quando avaliacao.perfil é 'pt-dglab'. Ver SPEC.md §3.2.3 e ADR-015.",
+  "type": "object",
+  "required": ["perfil", "classificacao_ref", "instrumento_ref"],
+  "properties": {
+    "perfil": {
+      "const": "pt-dglab"
+    },
+    "classificacao_ref": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*/[^/]+$",
+      "description": "Referência à classe/série. Formato '<instrumento>/<codigo_classe>'. Instrumentos canónicos: 'lc' (Lista Consolidada DGLAB), 'ts' (Tabela de Seleção institucional), 'portaria' (Portaria de Gestão de Documentos).",
+      "examples": ["lc/450.10.001", "lc/150.30.400", "ts/at/300.20"]
+    },
+    "instrumento_ref": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*/[^/\\s]+$",
+      "description": "Instrumento e versão consultados. Formato '<instrumento>/<versao>'. O prefixo DEVE corresponder ao de classificacao_ref — regra verificada semanticamente (§3.2.2).",
+      "examples": ["lc/lista-consolidada-dglab-2023-v3", "pgd/pgd-mf-2019-v2", "portaria/1253-A-2009"]
+    }
+  }
+}

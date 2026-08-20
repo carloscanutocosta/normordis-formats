@@ -1029,6 +1029,49 @@ def validate_package_dir(root: Path) -> bool:
         if actual != declared:
             errors.append(f"inventário: hash incorrecto para '{rel}'")
 
+    # NDF-PKG-009: cada componente declarado em `documento` (§2.8.1) tem de
+    # constar do inventário pelo seu digest, e o ficheiro tem de estar
+    # presente. A declaração vive nos bytes assinados; o inventário é físico.
+    # Sem esta junta, os dois podem divergir sem que nada o detecte.
+    componentes = core.get("documento", {}).get("componentes")
+    if isinstance(componentes, list):
+        digests_inventario = set(inventory.values())
+        for comp in componentes:
+            if not isinstance(comp, dict):
+                continue
+            cid = comp.get("id", "?")
+            digest_comp = comp.get("sha256")
+            if not digest_comp:
+                continue
+            if digest_comp not in digests_inventario:
+                errors.append(
+                    f"componente '{cid}': digest {digest_comp} não consta de "
+                    f"manifest.inventario (NDF-PKG-009, §2.8.1)"
+                )
+
+    # Sentido inverso: um ficheiro num diretório de papel sem componente
+    # declarado está inventariado — logo íntegro — mas não tem estatuto
+    # documental, e a assinatura não o cobre.
+    declarados = {
+        c.get("sha256")
+        for c in (componentes or [])
+        if isinstance(c, dict) and c.get("sha256")
+    }
+    for diretorio in ("original", "representacoes", "anexos", "evidencias"):
+        alvo = root / diretorio
+        if not alvo.is_dir():
+            continue
+        for ficheiro in sorted(alvo.rglob("*")):
+            if not ficheiro.is_file():
+                continue
+            digest_f = "sha256:" + hashlib.sha256(ficheiro.read_bytes()).hexdigest()
+            if digest_f not in declarados:
+                errors.append(
+                    f"'{ficheiro.relative_to(root)}' está em {diretorio}/ mas não "
+                    f"corresponde a nenhum componente declarado "
+                    f"(NDF-PKG-009, §2.8.1)"
+                )
+
     payload_hash = "sha256:" + hashlib.sha256(core_bytes).hexdigest()
     if rfc8785 is not None:
         try:

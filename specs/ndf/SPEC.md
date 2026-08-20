@@ -411,12 +411,25 @@ externa não impede reescrita integral por um custodiante comprometido.
 | `event_id` | Sim | Identificador único do evento (UUID v4). |
 | `ndf_id` | Sim | Identificador do NDF a que o evento respeita. |
 | `sequence` | Sim | Posição na cadeia; `0` no primeiro evento, incrementa exatamente uma unidade. |
-| `event_type` | Sim | Enum fechado: `finalizado`, `verificado`, `exportado`, `estado_alterado`, `assinatura_renovada`, `selo_acrescentado`, `transferido`, `eliminado`. |
+| `event_type` | Sim | Enum fechado: `capturado`, `finalizado`, `verificado`, `exportado`, `estado_alterado`, `assinatura_renovada`, `selo_acrescentado`, `transferido`, `eliminado`. |
 | `occurred_at` | Sim | Data/hora do evento (ISO 8601, UTC). |
 | `actor` | Sim | Quem originou o evento: `type` (`sistema` \| `utilizador` \| `entidade`), `id`, e `display_name` opcional. |
-| `details` | Não | Objeto livre para a semântica específica do tipo de evento. Para `estado_alterado`, RECOMENDA-SE `estado_anterior`, `estado_novo`, `motivo` e `instrumento_legal`. |
+| `details` | Não | Objeto livre para a semântica específica do tipo de evento. Para `estado_alterado`, RECOMENDA-SE `estado_anterior`, `estado_novo`, `motivo` e `instrumento_legal`. Para `capturado`, RECOMENDA-SE `componentes` (lista de digests), `canal` e `recebido_em`. Para `verificado` sobre componentes, RECOMENDA-SE `componentes_verificados`. |
 | `previous_event_hash` | Sim | `event_hash` do evento anterior; `null` no primeiro. |
 | `event_hash` | Sim | `SHA-256(JCS(evento sem a propriedade event_hash))`. |
+
+**Evento `capturado`**: um documento cujo conteúdo resida em componentes
+binários (§2.8.1) entra em custódia quando os bytes entram, o que antecede a
+finalização do NDF. O evento `capturado` regista esse momento — canal, instante
+e digests dos componentes recebidos — e é tipicamente o evento de `sequence` 0
+da cadeia, seguido de `finalizado`. Um documento cujo conteúdo seja estruturado
+não tem evento de captura.
+
+A verificação periódica de fixidez dos componentes regista-se como `verificado`,
+com os digests em `details.componentes_verificados`. Um objeto sem histórico de
+verificações tem **uma** verificação, não uma história de verificações — e é a
+história que sustenta a alegação de preservação (ver
+[`PREMIS-METS-MAPPING.md`](../../docs/interoperability/PREMIS-METS-MAPPING.md) §4).
 
 **Autorização**: um sistema que implemente este perfil DEVE registar, no
 evento de eliminação, a identidade de quem autorizou formalmente a operação
@@ -431,9 +444,16 @@ Quando `estado` transita para `"eliminado"`, um sistema que implemente este
 perfil DEVE:
 
 1. Destruir `payload_bytes` e todos os campos do envelope excepto `validation_code` e `payload_hash`.
-2. Registar um **evento terminal** no log de custódia (§2.4.2), com
+2. Destruir **todos os componentes binários** declarados em `documento`
+   (§2.8.1). Um documento cujo conteúdo resida em componentes não fica
+   eliminado pela destruição do NDF-core: o conteúdo do ato continuaria a
+   existir nos ficheiros preservados. A eliminação é uma operação única e
+   indivisível sobre o documento inteiro.
+3. Registar um **evento terminal** no log de custódia (§2.4.2), com
    `event_type: "eliminado"`, conservando em `details` a evidência mínima
-   necessária para rastreabilidade posterior.
+   necessária para rastreabilidade posterior — incluindo os digests dos
+   componentes destruídos, que subsistem como prova de que existiram e do que
+   eram, sem que os bytes subsistam.
 
 Não existe um artefacto normativo separado para este efeito: o evento de
 custódia já definido em `custody-event.schema.json` é a estrutura usada,
@@ -454,7 +474,10 @@ evitando um segundo schema a versionar, testar e manter sincronizado.
     "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
     "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3",
     "classificacao_ref": "lc/450.10.001",
-    "autorizado_por": "user:123"
+    "autorizado_por": "user:123",
+    "componentes_destruidos": [
+      { "id": "principal", "sha256": "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053" }
+    ]
   },
   "previous_event_hash": "sha256:9f2c1a7b3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4",
   "event_hash": "sha256:5c1e2f3a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a"
@@ -464,7 +487,50 @@ evitando um segundo schema a versionar, testar e manter sincronizado.
 O evento garante rastreabilidade sem preservar os dados eliminados:
 `validation_code` e `payload_hash` conservados em `details` permitem
 confirmar que o documento existiu e foi destruído de forma autorizada, sem
-reconstituir o seu conteúdo.
+reconstituir o seu conteúdo. Os digests dos componentes destruídos têm a mesma
+função e a mesma propriedade: provam o que existiu, sem que os bytes subsistam
+nem sejam reconstituíveis a partir do digest.
+
+#### 2.4.4 Evidência transferível e auditoria interna
+
+O log de custódia serve dois fins que não coincidem. Uma parte é **evidência do
+documento** — quando foi capturado, quando foi finalizado, que selagens
+recebeu, que verificações de fixidez passou, para quem foi transferido. Essa
+parte pertence ao documento e acompanha-o quando a custódia muda de mãos: sem
+ela, a entidade recetora recebe bytes íntegros sem história, e a alegação de
+preservação fica por sustentar. A outra parte é **operação do custodiante** —
+quem extraiu cópias e quando — e não pertence a quem recebe o documento.
+
+Classificação por tipo de evento:
+
+| Evento | Classe |
+|---|---|
+| `capturado`, `finalizado`, `estado_alterado`, `assinatura_renovada`, `selo_acrescentado`, `verificado`, `transferido`, `eliminado` | **evidência transferível** |
+| `exportado` | auditoria interna do custodiante |
+
+`verificado` é deliberadamente transferível: é o histórico de fixidez que
+sustenta a alegação de preservação ao longo do tempo, e omiti-lo esvaziaria a
+transferência daquilo que a torna útil.
+
+**A omissão é detetável, e é essa a garantia.** Cada evento transporta
+`sequence` e `previous_event_hash`. Uma cadeia transferida de que se tenham
+retirado eventos apresenta saltos de `sequence` e uma ligação de hash que não
+fecha. A entidade recetora sabe sempre **que** algo foi retido, ainda que não
+saiba o quê — e isso basta para não confundir uma história parcial com uma
+história completa.
+
+Daqui decorre `CUST-REQ-004`: os eventos transferem-se íntegros e não editados,
+e a cadeia **NÃO DEVE** ser renumerada ou recomposta para dissimular omissões.
+Uma cadeia recomposta é indistinguível de uma cadeia completa, e destrói
+precisamente a propriedade que torna a transferência parcial honesta.
+
+**Por definir.** Esta versão classifica a evidência e fixa a regra de
+integridade, mas **não define o veículo**: o `.ndfpkg` (§8) é a unidade de um
+documento e não transporta o log de custódia. Como um conjunto de documentos e
+a respetiva evidência se transferem para outra entidade, ou se depositam num
+arquivo conforme OAIS, é matéria de contrato próprio, ainda por especificar —
+ver a cláusula sobre transferência entre entidades em
+[`docs/design/NDFPKG-CAPTURA-E-INGESTAO.md`](../../docs/design/NDFPKG-CAPTURA-E-INGESTAO.md).
 
 ### 2.5 Algoritmo de hash (`payload_hash_alg`)
 
@@ -724,6 +790,15 @@ URI, *bucket*, caminho dentro do pacote ou nome de adaptador. O digest é a
 identidade do componente e a chave da sua resolução; um leitor **NÃO DEVE**
 resolver um componente pelo seu nome de origem, que é descritivo. Num `.ndfpkg`,
 a correspondência faz-se com `manifest.inventario` (§8.1, `NDF-PKG-009`).
+
+O invariante de origem de §2.2.1 aplica-se sem excepção a estes documentos. A
+origem do conteúdo é quem produziu o componente, e declara-se do modo normal:
+`participantes` com `papel: "autor"` para um documento produzido por pessoa —
+incluindo pessoa exterior à entidade, cujo `participante_ref` é opaco e
+resolvido fora do NDF (§2.12.4) —, ou `proveniencia_sistema` quando o
+componente tiver sido produzido por um sistema. A captura não dispensa declarar
+quem ou o que produziu o documento; apenas desloca o objeto dessa produção do
+texto para o componente.
 
 #### 2.8.2 Divergência entre declaração e componente
 
@@ -2213,7 +2288,8 @@ verificabilidade futura da assinatura contida for relevante.
 
 Uma assinatura PAdES produzida por este sistema sobre uma representação do
 documento é operação distinta da assinatura CAdES do envelope, sobre objeto
-distinto — ver SPEC NDT §8.1. Quando produzida, a ordem é normativa: assinar o
+distinto — ver a cláusula «Assinatura do NDF e assinatura de representações»
+em [`specs/ndt/SPEC.md`](../ndt/SPEC.md). Quando produzida, a ordem é normativa: assinar o
 PDF, calcular o hash do PDF **já assinado**, declarar esse hash no componente e
 só então finalizar o NDF. A ordem inversa produz um hash que não corresponde ao
 ficheiro distribuído.
@@ -2495,6 +2571,11 @@ Todos os componentes declarados em `documento` integram a materialização; um
 `.ndfpkg` que omita qualquer um deles não é conforme (`NDF-PKG-009`). Não há
 categoria de componente documental omissível.
 
+O fecho vale nos dois sentidos: um ficheiro colocado num destes diretórios sem
+corresponder a componente declarado também torna o pacote não conforme. Estar
+inventariado garante-lhe integridade, não estatuto documental — sem declaração
+em `documento`, nenhum leitor sabe que papel tem, e a assinatura não o cobre.
+
 O diretório `schemas/` torna o pacote autonomamente validável: um verificador
 independente valida `documento` contra o schema que veio no pacote, sem acesso
 ao registo canónico. É **obrigatório** quando `tipo_documento_ref` usa uma
@@ -2615,7 +2696,7 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`.
 7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** ser resolúvel a partir do pacote em `schemas/<tipo_id>.schema.json` quando o tipo for uma extensão qualificada (§2.9.5); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver.
 8. **NDF-PKG-008** — O schema do perfil referenciado por `avaliacao.perfil` **DEVE** estar presente em `schemas/<perfil>.schema.json` (§3.2.3, §8.1), e o bloco `avaliacao` **DEVE** validar contra ele; um verificador **DEVE** resolvê-lo preferencialmente a partir do pacote.
-9. **NDF-PKG-009** — Cada componente declarado em `documento` nos termos de §2.8.1 **DEVE** ter, em `manifest.inventario`, uma entrada cujo `hash_sha256` coincida com o seu digest, e o ficheiro correspondente **DEVE** estar presente no pacote. Um pacote que declare um componente ausente do inventário, ou cujo digest não coincida com os bytes presentes, **NÃO É** conforme.
+9. **NDF-PKG-009** — A correspondência entre componentes declarados e ficheiros do pacote **DEVE** fechar nos dois sentidos. Cada componente declarado em `documento` nos termos de §2.8.1 **DEVE** ter, em `manifest.inventario`, uma entrada cujo `hash_sha256` coincida com o seu digest, e o ficheiro correspondente **DEVE** estar presente. Inversamente, cada ficheiro contido em `original/`, `representacoes/`, `anexos/` ou `evidencias/` (§8.1) **DEVE** corresponder a um componente declarado. Um pacote que declare um componente ausente, cujo digest não coincida com os bytes presentes, ou que transporte num destes diretórios um ficheiro não declarado, **NÃO É** conforme.
 
 ### 9.4 Suite de conformidade e test runner
 
@@ -2678,7 +2759,8 @@ vida — ver ADR-010.
 
 1. **CUST-REQ-001 — DEVE** registar cada transição de estado (§2.4.1) num log de auditoria imutável, validando cada entrada contra `custody-event.schema.json` e mantendo a cadeia de hash encadeado (§2.4.2).
 2. **CUST-REQ-002 — DEVE** usar armazenamento append-only ou WORM para `payload_bytes`, envelope e log de custódia.
-3. **CUST-REQ-003 — DEVE** registar o evento terminal de eliminação (§2.4.3) antes de destruir `payload_bytes` de um documento elegível para eliminação, conservando `validation_code` e `payload_hash` em `details`.
+3. **CUST-REQ-003 — DEVE** registar o evento terminal de eliminação (§2.4.3) antes de destruir `payload_bytes` **e todos os componentes binários declarados em `documento`** (§2.8.1) de um documento elegível para eliminação, conservando `validation_code`, `payload_hash` e os digests dos componentes destruídos em `details`.
+4. **CUST-REQ-004 — DEVE**, ao transferir evidência de custódia para outra entidade, transferir eventos íntegros e não editados, e **NÃO DEVE** reescrever, renumerar ou recompor a cadeia para ocultar as omissões (§2.4.4).
 
 Ferramenta de referência: `tools/check_custody.py`; vetores em
 `conformance/custody/`.

@@ -261,20 +261,75 @@ integridade à declaração assinada.
 
 ## 8. Fase D — exemplos e conformidade
 
-| # | Tarefa | Produz | Esforço |
+| # | Tarefa | Produz | Estado |
 |---|---|---|---|
-| **D1** | Exemplo completo de captura, com PDF/A mínimo reproduzível | `specs/ndf/examples/captura-requerimento/` | G |
-| **D2** | Vetores negativos: componente declarado ausente do pacote; hash divergente entre `documento` e inventário; ficheiro em `original/` não declarado como componente; original reescrito; capturado sem estado de reconstituição | `conformance/package/` | M |
-| **D3** | `validate.py` valida componentes e a junta C3 | `tools/validate.py` | M |
-| **D4** | Regenerar índices e fechar a fase | `REQUIREMENTS.md`, `TRACEABILITY.md`, `NORMATIVE-STATEMENTS.md`, `conformance/INDEX.md` | P |
+| **D1** | Pacote de captura completo e conforme | [`captura-requerimento/`](../../specs/ndf/examples/captura-requerimento/) + `tools/scaffold_captura_fixture.py` | ✅ 2026-08-20 |
+| **D2** | `PKG-NEG-010` a `PKG-NEG-014` | `tools/check_package_vectors.py`, `conformance/package/README.md` | ✅ 2026-08-20 |
+| **D3** | `NDF-PKG-009` imposto nos dois sentidos | `tools/validate.py` | ✅ 2026-08-20 |
+| **D4** | Índices regenerados | `REQUIREMENTS.md`, `NORMATIVE-STATEMENTS.md`, `conformance/INDEX.md` | ✅ 2026-08-20 |
+
+Vetores de pacote passam de **9 para 14**. `validate.py` mantém 88/88.
+
+### 8.1 Dois achados da Fase D
+
+**D-A1 — `NDF-PKG-009` estava incompleto e o vetor expô-lo.** Tal como escrito
+em C3, o requisito fechava apenas o sentido «componente declarado → ficheiro
+presente». `PKG-NEG-012` — um ficheiro em `original/`, inventariado mas não
+declarado — passava. Estar inventariado garante integridade, não estatuto
+documental: sem declaração em `documento`, nenhum leitor sabe que papel o
+ficheiro tem, e a assinatura não o cobre. O requisito foi completado para fechar
+**nos dois sentidos**, e a implementação acompanha.
+
+Vale registar o método: o defeito não apareceu na revisão do texto, apareceu ao
+escrever o caso negativo. É o argumento do próprio repositório — requisito sem
+imposição é intenção.
+
+**D-A2 — o invariante de origem (§2.2.1) aplica-se ao capturado, e a definição
+de `autor` fica ligeiramente tensa.** Um NDF tem de declarar origem do
+conteúdo; para um requerimento recebido, a resposta natural é declarar o
+submissor como `participantes[{papel: "autor"}]`, com `participante_ref` opaco.
+Funciona e está no exemplo. Mas §2.12.2 define `autor` como quem «produziu
+materialmente o conteúdo canonicalizado» — e o que o cidadão produziu foi o
+**componente**, não o JSON canonicalizado.
+
+Não é defeito de conformidade: a regra é estrutural (`anyOf`) e valida. É
+imprecisão de definição, exposta pela captura. Acrescentei em §2.8.1 a
+clarificação de como o invariante se resolve neste caso; **rever a redação de
+§2.12.2 fica em aberto**, por tocar numa definição usada por um invariante e
+não dever ser feita de passagem.
 
 ## 9. Fase E — custódia
 
-| # | Tarefa | Produz | Decisões | Esforço |
+| # | Tarefa | Produz | Decisões | Estado |
 |---|---|---|---|---|
-| **E1** | Evento de captura no log de custódia | `custody-event.schema.json` | — | P |
-| **E2** | Eliminação abrange componentes; `CUST-REQ-003` estendido | schema + SPEC §9.5 | `CAP-31` | M |
-| **E3** | Separar **evidência transferível** (finalização, selagens, verificações, transferências) de **auditoria interna** (acessos) | nota de desenho + schema | — | M |
+| **E1** | `event_type: "capturado"` + semântica de `details` para fixidez de componentes | schema de custódia, SPEC §2.4.2 | — | ✅ 2026-08-20 |
+| **E2** | Eliminação abrange componentes; `CUST-REQ-003` alargado | SPEC §2.4.3, §9.5 | `CAP-31` | ✅ 2026-08-20 |
+| **E3** | §2.4.4 — evidência transferível vs auditoria interna, e `CUST-REQ-004` | SPEC §2.4.4, §9.5 | — | ✅ 2026-08-20 |
+
+Vetores de custódia passam de 2 para **4**, com os dois novos ligados ao CI.
+
+### 9.1 A propriedade que E3 encontrou
+
+A questão em aberto era como transferir evidência de custódia sem exportar
+operação interna do custodiante. A resposta não precisou de mecanismo novo — já
+estava na cadeia encadeada:
+
+**a omissão é detetável.** Retirar eventos de uma cadeia transferida produz
+saltos de `sequence` e uma ligação de hash que não fecha. A entidade recetora
+sabe sempre *que* algo foi retido, ainda que não saiba o quê. Transferência
+parcial é legítima e visível; o que não é possível é fazê-la passar por
+completa.
+
+Daí `CUST-REQ-004` — não renumerar nem recompor — e o vetor
+`omissao-recomposta.json`, que é a tentativa de dissimulação a ser rejeitada.
+
+Consequência para P2: o conjunto de transferência não precisa de resolver
+confidencialidade da cadeia por cifra ou por perfis de exportação. Precisa de
+transportar eventos íntegros e deixar as omissões à vista.
+
+**Continua por definir o veículo.** O `.ndfpkg` é a unidade de um documento e
+não transporta o log. É a lacuna L-T2, agora com a regra fixada e a falta
+reduzida ao contentor — que é P2.
 
 **E3 deixou de ser opcional.** Pelo critério `CAP-03`, a cadeia de custódia é
 informação relevante e necessária que hoje **não pode** acompanhar uma

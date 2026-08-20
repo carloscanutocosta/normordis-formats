@@ -1,0 +1,93 @@
+[
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "11111111-1111-4111-8111-111111111111",
+    "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+    "sequence": 0,
+    "event_type": "capturado",
+    "occurred_at": "2026-06-17T14:31:00Z",
+    "actor": {
+      "type": "sistema",
+      "id": "core-ingest"
+    },
+    "details": {
+      "canal": "e_balcao",
+      "recebido_em": "2026-06-17T14:31:00Z",
+      "componentes": [
+        {
+          "id": "principal",
+          "sha256": "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053"
+        }
+      ]
+    },
+    "previous_event_hash": null,
+    "event_hash": "sha256:17259d703de3f065120ab5857c8c41dd7117c05f7b131a394db43d264319522d"
+  },
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "22222222-2222-4222-8222-222222222222",
+    "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+    "sequence": 1,
+    "event_type": "finalizado",
+    "occurred_at": "2026-06-17T14:35:00Z",
+    "actor": {
+      "type": "sistema",
+      "id": "core-ingest"
+    },
+    "details": {
+      "payload_hash": "sha256:625d0b2281879bf460fc9611c77a5a3b070c010fc43ae6ff33a47184bfe28f96"
+    },
+    "previous_event_hash": "sha256:17259d703de3f065120ab5857c8c41dd7117c05f7b131a394db43d264319522d",
+    "event_hash": "sha256:9f567b76a623153b93746e703c2ca42bef1e15a888c181b03e32f335e5b1b667"
+  },
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "33333333-3333-4333-8333-333333333333",
+    "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+    "sequence": 2,
+    "event_type": "verificado",
+    "occurred_at": "2027-01-05T03:00:00Z",
+    "actor": {
+      "type": "sistema",
+      "id": "fixidez-batch"
+    },
+    "details": {
+      "componentes_verificados": [
+        {
+          "id": "principal",
+          "sha256": "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053",
+          "resultado": "integro"
+        }
+      ]
+    },
+    "previous_event_hash": "sha256:9f567b76a623153b93746e703c2ca42bef1e15a888c181b03e32f335e5b1b667",
+    "event_hash": "sha256:f4df1015cd7b20a7cca63cbe8dd297a336f281cf0db9ad3fe3c2ad6ff977a215"
+  },
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "44444444-4444-4444-8444-444444444444",
+    "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+    "sequence": 3,
+    "event_type": "eliminado",
+    "occurred_at": "2031-06-18T10:30:00Z",
+    "actor": {
+      "type": "utilizador",
+      "id": "user:456"
+    },
+    "details": {
+      "payload_hash": "sha256:625d0b2281879bf460fc9611c77a5a3b070c010fc43ae6ff33a47184bfe28f96",
+      "validation_code": "NDF-EBZLMKB3X7VALVMRMBJX",
+      "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
+      "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3",
+      "autorizado_por": "user:123",
+      "componentes_destruidos": [
+        {
+          "id": "principal",
+          "sha256": "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053"
+        }
+      ]
+    },
+    "previous_event_hash": "sha256:f4df1015cd7b20a7cca63cbe8dd297a336f281cf0db9ad3fe3c2ad6ff977a215",
+    "event_hash": "sha256:c6a21406e25c171a75a69f5280f7fc44e02a94674341738f3222e59fc13949a4"
+  }
+]

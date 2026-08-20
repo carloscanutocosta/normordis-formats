@@ -1,0 +1,791 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spec.normordis.pt/ndt/2.0.0/ndt.schema.json",
+  "title": "NDT — NORMORDIS Document Template v2.0.0",
+  "type": "object",
+  "required": ["ndt_version", "schema_id", "versao_ndt", "paginas_def", "sequencia"],
+  "additionalProperties": false,
+  "properties": {
+    "ndt_version": {
+      "const": "2.0.0",
+      "description": "Versão normativa do formato NDT deste schema."
+    },
+    "schema_id": {
+      "type": "string",
+      "description": "Identificador estável do tipo de documento."
+    },
+    "versao_ndt": {
+      "type": "string",
+      "description": "Versão desta instância do template."
+    },
+    "titulo": {
+      "type": "string",
+      "description": "Nome legível do template."
+    },
+    "emissor": {
+      "type": "string",
+      "description": "Entidade emissora."
+    },
+    "referencia_legal": {
+      "type": "string",
+      "description": "Referência legal do impresso."
+    },
+    "estilos": {
+      "$ref": "#/$defs/Estilos"
+    },
+    "layout": {
+      "$ref": "#/$defs/LayoutGlobal"
+    },
+    "recursos": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Recurso" }
+    },
+    "paginas_def": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/PaginaDef" }
+    },
+    "sequencia": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/SequenciaEntrada" }
+    },
+    "composicao": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ComposicaoEntrada" }
+    }
+  },
+  "$defs": {
+    "Posicao": {
+      "type": "object",
+      "description": "Coordenadas em mm a partir do canto superior-esquerdo da área útil.",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "Fonte": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "familia": { "type": "string" },
+        "tamanho": { "type": "number" },
+        "peso": { "type": "string", "enum": ["normal", "bold"] },
+        "estilo": { "type": "string", "enum": ["normal", "italico"] },
+        "cor": { "type": "string" }
+      }
+    },
+    "Contorno": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "espessura": { "type": "number" },
+        "cor": { "type": "string" }
+      }
+    },
+    "Estilos": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fonte_padrao": { "$ref": "#/$defs/Fonte" },
+        "cor_texto": { "type": "string" },
+        "cor_primaria": { "type": "string" },
+        "espacamento_entre_paragrafos_mm": { "type": "number" },
+        "identacao_lista_mm": { "type": "number" },
+        "cabecalhos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["nivel", "fonte"],
+            "additionalProperties": false,
+            "properties": {
+              "nivel": { "type": "integer", "minimum": 1, "maximum": 6 },
+              "fonte": { "$ref": "#/$defs/Fonte" }
+            }
+          }
+        }
+      }
+    },
+    "FormatoFormato": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["A4", "A3", "Letter"]
+        },
+        {
+          "type": "object",
+          "required": ["largura", "altura"],
+          "additionalProperties": false,
+          "properties": {
+            "largura": { "type": "number" },
+            "altura": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "Margens": {
+      "type": "object",
+      "required": ["topo", "fundo", "esq", "dir"],
+      "additionalProperties": false,
+      "properties": {
+        "topo": { "type": "number" },
+        "fundo": { "type": "number" },
+        "esq": { "type": "number" },
+        "dir": { "type": "number" }
+      }
+    },
+    "LayoutGlobal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "formato": { "$ref": "#/$defs/FormatoFormato" },
+        "orientacao": { "type": "string", "enum": ["portrait", "landscape"] },
+        "margens": { "$ref": "#/$defs/Margens" }
+      }
+    },
+    "GraficoLayer": {
+      "type": "string",
+      "enum": ["background", "content", "foreground", "overlay"]
+    },
+    "GraficoLinha": {
+      "type": "object",
+      "required": ["tipo", "de", "para"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "linha" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "de": { "$ref": "#/$defs/Posicao" },
+        "para": { "$ref": "#/$defs/Posicao" },
+        "espessura": { "type": "number" },
+        "cor": { "type": "string" },
+        "estilo": { "type": "string", "enum": ["solido", "tracejado", "ponteado"] }
+      }
+    },
+    "GraficoRectangulo": {
+      "type": "object",
+      "required": ["tipo", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "rectangulo" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "preenchimento": { "type": "string" },
+        "contorno": { "$ref": "#/$defs/Contorno" },
+        "raio_canto": { "type": "number" }
+      }
+    },
+    "GraficoGrelhaDigitos": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "num_caixas", "largura_caixa", "altura_caixa"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "grelha_digitos" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "num_caixas": { "type": "integer", "minimum": 1 },
+        "largura_caixa": { "type": "number" },
+        "altura_caixa": { "type": "number" },
+        "espacamento": { "type": "number" },
+        "cor_contorno": { "type": "string" },
+        "espessura_contorno": { "type": "number" },
+        "rotulo_acessivel": { "type": "string" }
+      }
+    },
+    "GraficoImagem": {
+      "type": "object",
+      "required": ["tipo", "referencia_recurso", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "imagem" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "referencia_recurso": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "manter_proporcao": { "type": "boolean" },
+        "alt": { "type": "string" }
+      }
+    },
+    "GraficoTextoFixo": {
+      "type": "object",
+      "required": ["tipo", "conteudo", "posicao"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "texto_fixo" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "conteudo": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "alinhamento": { "type": "string", "enum": ["esquerda", "centro", "direita"] }
+      }
+    },
+    "GraficoAssinatura": {
+      "type": "object",
+      "required": ["tipo", "id", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "assinatura" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "id": { "type": "string" },
+        "rotulo": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "modo": { "type": "string", "enum": ["visual_apenas", "hibrido", "ndf_attachment"] }
+      }
+    },
+    "GraficoCodigoBarras": {
+      "type": "object",
+      "required": ["tipo", "formato_barras", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "codigo_barras" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "formato_barras": { "type": "string", "enum": ["qrcode", "code128", "ean13"] },
+        "referencia": { "type": "string" },
+        "conteudo": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "nivel_correcao": { "type": "string", "enum": ["L", "M", "Q", "H"] }
+      }
+    },
+    "GraficoPoligono": {
+      "type": "object",
+      "required": ["tipo", "pontos"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "poligono" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "pontos": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/$defs/Posicao" }
+        },
+        "preenchimento": { "type": "string" },
+        "contorno": { "$ref": "#/$defs/Contorno" }
+      }
+    },
+    "GraficoElipse": {
+      "type": "object",
+      "required": ["tipo", "centro", "raio_x", "raio_y"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "elipse" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "centro": { "$ref": "#/$defs/Posicao" },
+        "raio_x": { "type": "number" },
+        "raio_y": { "type": "number" },
+        "preenchimento": { "type": "string" },
+        "contorno": { "$ref": "#/$defs/Contorno" }
+      }
+    },
+    "GraficoSvg": {
+      "type": "object",
+      "required": ["tipo", "referencia_recurso", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "svg" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "referencia_recurso": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" }
+      }
+    },
+    "GraficoTabelaVisual": {
+      "type": "object",
+      "required": ["tipo", "posicao", "largura", "altura_linha", "num_linhas", "colunas"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "tabela_visual" },
+        "layer": { "$ref": "#/$defs/GraficoLayer" },
+        "rotacao": { "type": "number" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura_linha": { "type": "number" },
+        "num_linhas": { "type": "integer", "minimum": 1 },
+        "colunas": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "contorno": { "$ref": "#/$defs/Contorno" }
+      }
+    },
+    "Grafico": {
+      "oneOf": [
+        { "$ref": "#/$defs/GraficoLinha" },
+        { "$ref": "#/$defs/GraficoRectangulo" },
+        { "$ref": "#/$defs/GraficoGrelhaDigitos" },
+        { "$ref": "#/$defs/GraficoImagem" },
+        { "$ref": "#/$defs/GraficoTextoFixo" },
+        { "$ref": "#/$defs/GraficoAssinatura" },
+        { "$ref": "#/$defs/GraficoCodigoBarras" },
+        { "$ref": "#/$defs/GraficoPoligono" },
+        { "$ref": "#/$defs/GraficoElipse" },
+        { "$ref": "#/$defs/GraficoSvg" },
+        { "$ref": "#/$defs/GraficoTabelaVisual" }
+      ]
+    },
+    "FormatoDisplay": {
+      "type": "string",
+      "enum": ["texto", "numero", "inteiro", "monetario", "data", "booleano", "checkbox", "radio"]
+    },
+    "AlinhamentoTexto": {
+      "type": "string",
+      "enum": ["esquerda", "centro", "direita"]
+    },
+    "Campo": {
+      "type": "object",
+      "required": ["referencia", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "formato": { "$ref": "#/$defs/FormatoDisplay" },
+        "casas_decimais": { "type": "integer", "minimum": 0 },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
+        "preenchimento_fundo": { "type": "string" },
+        "rotulo_acessivel": { "type": "string" },
+        "incluir_se": { "type": ["string", "null"] },
+        "descontinuado": { "type": "boolean" }
+      }
+    },
+    "ColunaTabela": {
+      "type": "object",
+      "required": ["id", "largura"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "cabecalho": { "type": "string" },
+        "largura": { "type": "number" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
+        "formato": { "$ref": "#/$defs/FormatoDisplay" },
+        "casas_decimais": { "type": "integer", "minimum": 0 },
+        "descontinuado": { "type": "boolean" }
+      }
+    },
+    "EstiloCabecalhoTabela": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fundo": { "type": "string" },
+        "fonte": { "$ref": "#/$defs/Fonte" }
+      }
+    },
+    "BlocoTabela": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "largura", "colunas"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "tabela" },
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura_linha": { "type": "number" },
+        "min_linhas_visivel": { "type": "integer", "minimum": 0 },
+        "repete_cabecalho": { "type": "boolean" },
+        "estilo_cabecalho": { "$ref": "#/$defs/EstiloCabecalhoTabela" },
+        "incluir_se": { "type": ["string", "null"] },
+        "colunas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ColunaTabela" }
+        }
+      }
+    },
+    "BlocoCorpo": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "largura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "corpo" },
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "fonte_base": { "$ref": "#/$defs/Fonte" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "BlocoCabecalho": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "largura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "cabecalho" },
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "BlocoRodape": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "largura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "rodape" },
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "Bloco": {
+      "oneOf": [
+        { "$ref": "#/$defs/BlocoTabela" },
+        { "$ref": "#/$defs/BlocoCorpo" },
+        { "$ref": "#/$defs/BlocoCabecalho" },
+        { "$ref": "#/$defs/BlocoRodape" }
+      ]
+    },
+    "FluxoTabelaSemPosicao": {
+      "type": "object",
+      "required": ["tipo", "referencia", "largura", "colunas"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "tabela" },
+        "referencia": { "type": "string" },
+        "largura": { "type": "number" },
+        "altura_linha": { "type": "number" },
+        "min_linhas_visivel": { "type": "integer", "minimum": 0 },
+        "repete_cabecalho": { "type": "boolean" },
+        "estilo_cabecalho": { "$ref": "#/$defs/EstiloCabecalhoTabela" },
+        "incluir_se": { "type": ["string", "null"] },
+        "colunas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ColunaTabela" }
+        }
+      }
+    },
+    "ElementoFluxoCorpo": {
+      "type": "object",
+      "required": ["tipo", "referencia"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "corpo" },
+        "referencia": { "type": "string" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoTextoFixo": {
+      "type": "object",
+      "required": ["tipo", "conteudo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "texto_fixo" },
+        "conteudo": { "type": "string" },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoCampo": {
+      "type": "object",
+      "required": ["tipo", "referencia"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "campo" },
+        "referencia": { "type": "string" },
+        "formato": { "$ref": "#/$defs/FormatoDisplay" },
+        "casas_decimais": { "type": "integer", "minimum": 0 },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
+        "rotulo_acessivel": { "type": "string" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoImagem": {
+      "type": "object",
+      "required": ["tipo", "referencia_recurso", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "imagem" },
+        "referencia_recurso": { "type": "string" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "manter_proporcao": { "type": "boolean" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
+        "alt": { "type": "string" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoEspaco": {
+      "type": "object",
+      "required": ["tipo", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "espaco" },
+        "altura": { "type": "number" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoSeparador": {
+      "type": "object",
+      "required": ["tipo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "separador" },
+        "espessura": { "type": "number" },
+        "cor": { "type": "string" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoAssinatura": {
+      "type": "object",
+      "required": ["tipo", "id", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "assinatura" },
+        "id": { "type": "string" },
+        "rotulo": { "type": "string" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "modo": { "type": "string", "enum": ["visual_apenas", "hibrido", "ndf_attachment"] },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxoQuebraPagina": {
+      "type": "object",
+      "required": ["tipo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "quebra_pagina" }
+      }
+    },
+    "ElementoFluxoLinhLateralConteudo": {
+      "oneOf": [
+        { "$ref": "#/$defs/FluxoTabelaSemPosicao" },
+        { "$ref": "#/$defs/ElementoFluxoTextoFixo" },
+        { "$ref": "#/$defs/ElementoFluxoCampo" },
+        { "$ref": "#/$defs/ElementoFluxoImagem" },
+        { "$ref": "#/$defs/ElementoFluxoEspaco" },
+        { "$ref": "#/$defs/ElementoFluxoSeparador" },
+        { "$ref": "#/$defs/ElementoFluxoAssinatura" }
+      ]
+    },
+    "LateralColuna": {
+      "type": "object",
+      "required": ["largura", "conteudo"],
+      "additionalProperties": false,
+      "properties": {
+        "largura": { "type": "number" },
+        "conteudo": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ElementoFluxoLinhLateralConteudo" }
+        }
+      }
+    },
+    "ElementoFluxoLinhaLateral": {
+      "type": "object",
+      "required": ["tipo", "elementos"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "linha_lateral" },
+        "elementos": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/LateralColuna" }
+        },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "ElementoFluxo": {
+      "oneOf": [
+        { "$ref": "#/$defs/ElementoFluxoCorpo" },
+        { "$ref": "#/$defs/FluxoTabelaSemPosicao" },
+        { "$ref": "#/$defs/ElementoFluxoTextoFixo" },
+        { "$ref": "#/$defs/ElementoFluxoCampo" },
+        { "$ref": "#/$defs/ElementoFluxoImagem" },
+        { "$ref": "#/$defs/ElementoFluxoEspaco" },
+        { "$ref": "#/$defs/ElementoFluxoSeparador" },
+        { "$ref": "#/$defs/ElementoFluxoAssinatura" },
+        { "$ref": "#/$defs/ElementoFluxoLinhaLateral" },
+        { "$ref": "#/$defs/ElementoFluxoQuebraPagina" }
+      ]
+    },
+    "Fluxo": {
+      "type": "object",
+      "required": ["y_inicio", "elementos"],
+      "additionalProperties": false,
+      "properties": {
+        "y_inicio": { "type": "number" },
+        "elementos": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ElementoFluxo" }
+        }
+      }
+    },
+    "MobiliaNumPagina": {
+      "type": "object",
+      "required": ["tipo", "formato", "posicao"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "numero_pagina" },
+        "formato": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "fonte": { "$ref": "#/$defs/Fonte" }
+      }
+    },
+    "MobiliaTextoFixo": {
+      "type": "object",
+      "required": ["tipo", "conteudo", "posicao"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "texto_fixo" },
+        "conteudo": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" }
+      }
+    },
+    "MobiliaCampoNdf": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "largura", "altura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "campo_ndf" },
+        "referencia": { "type": "string" },
+        "formato": { "$ref": "#/$defs/FormatoDisplay" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "altura": { "type": "number" },
+        "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
+        "fonte": { "$ref": "#/$defs/Fonte" }
+      }
+    },
+    "MobiliaMarcaAgua": {
+      "type": "object",
+      "required": ["tipo", "conteudo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "marca_agua" },
+        "conteudo": { "type": "string" },
+        "opacidade": { "type": "number", "minimum": 0, "maximum": 1 },
+        "angulo": { "type": "number" },
+        "fonte": { "$ref": "#/$defs/Fonte" }
+      }
+    },
+    "MobiliaItem": {
+      "oneOf": [
+        { "$ref": "#/$defs/MobiliaNumPagina" },
+        { "$ref": "#/$defs/MobiliaTextoFixo" },
+        { "$ref": "#/$defs/MobiliaCampoNdf" },
+        { "$ref": "#/$defs/MobiliaMarcaAgua" }
+      ]
+    },
+    "PaginaDef": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "formato": { "$ref": "#/$defs/FormatoFormato" },
+        "margens": { "$ref": "#/$defs/Margens" },
+        "graficos": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Grafico" }
+        },
+        "campos": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Campo" }
+        },
+        "blocos": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Bloco" }
+        },
+        "fluxo": {
+          "oneOf": [
+            { "$ref": "#/$defs/Fluxo" },
+            { "type": "null" }
+          ]
+        },
+        "mobilia": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MobiliaItem" }
+        }
+      }
+    },
+    "SequenciaEntrada": {
+      "type": "object",
+      "required": ["pagina_def", "repeticao"],
+      "additionalProperties": false,
+      "properties": {
+        "pagina_def": { "type": "string" },
+        "repeticao": { "type": "string", "enum": ["unica", "por_linha", "conforme_necessario"] },
+        "fonte_overflow": { "type": "string" },
+        "linhas_por_pagina": { "type": "integer", "minimum": 1 },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
+    "RecursoEmbebido": {
+      "type": "object",
+      "required": ["id", "tipo", "modo", "dados"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "tipo": { "type": "string", "enum": ["svg", "png", "jpeg", "fonte_ttf", "fonte_otf"] },
+        "modo": { "type": "string", "const": "embebido" },
+        "dados": { "type": "string", "pattern": "^base64:" },
+        "familia": { "type": "string" }
+      }
+    },
+    "RecursoReferenciadoPorHash": {
+      "type": "object",
+      "required": ["id", "tipo", "modo", "hash_sha256", "content_type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "tipo": { "type": "string", "enum": ["svg", "png", "jpeg", "fonte_ttf", "fonte_otf"] },
+        "modo": { "type": "string", "const": "referenciado_por_hash" },
+        "hash_sha256": { "type": "string", "pattern": "^sha256:" },
+        "content_type": { "type": "string" },
+        "familia": { "type": "string" }
+      }
+    },
+    "Recurso": {
+      "oneOf": [
+        { "$ref": "#/$defs/RecursoEmbebido" },
+        { "$ref": "#/$defs/RecursoReferenciadoPorHash" }
+      ]
+    },
+    "ComposicaoResolver": {
+      "type": "object",
+      "required": ["tipo", "template"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string" },
+        "template": { "type": "string" }
+      }
+    },
+    "ComposicaoEntrada": {
+      "type": "object",
+      "required": ["id", "schema_id", "resolver", "posicao"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "schema_id": { "type": "string" },
+        "resolver": { "$ref": "#/$defs/ComposicaoResolver" },
+        "posicao": { "type": "string", "enum": ["antes", "apos", "apos_bloco"] },
+        "apos_bloco": { "type": "string" },
+        "obrigatorio": { "type": "boolean" }
+      }
+    }
+  }
+}

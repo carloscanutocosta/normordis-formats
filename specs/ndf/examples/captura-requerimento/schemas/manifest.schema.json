@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/ndf/1.0.0/manifest.schema.json",
+  "title": "NDF Package Manifest v1.0.0",
+  "type": "object",
+  "required": [
+    "ndfpkg_version", "ndf_id", "ndf_version", "schema_id", "estado",
+    "nivel_assinatura", "finalizado_em", "payload_hash", "validation_code",
+    "inventario"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ndfpkg_version": { "const": "1.0.0" },
+    "ndf_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "ndf_version": { "const": "1.0.0" },
+    "schema_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "estado": {
+      "enum": ["ativo", "substituido", "em_conservacao", "conservado_permanentemente", "eliminado"]
+    },
+    "nivel_assinatura": { "enum": ["nenhuma", "avancada", "qualificada"] },
+    "finalizado_em": { "type": "string", "format": "date-time" },
+    "payload_hash": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$", "description": "Format '<alg>:<hex>', algorithm-agnostic. Normative value for NDF v1.x is sha256:<64 hex chars>." },
+    "validation_code": { "type": "string", "pattern": "^NDF-[A-Z2-7]{20}$" },
+    "inventario": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["ficheiro", "hash_sha256"],
+        "additionalProperties": false,
+        "properties": {
+          "ficheiro": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._@/-]+$"
+          },
+          "hash_sha256": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$" }
+        }
+      }
+    }
+  }
+}

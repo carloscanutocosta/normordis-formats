@@ -1,0 +1,61 @@
+{
+  "ndfpkg_version": "1.0.0",
+  "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+  "ndf_version": "1.0.0",
+  "schema_id": "documento-capturado",
+  "estado": "ativo",
+  "nivel_assinatura": "nenhuma",
+  "finalizado_em": "2026-06-17T14:35:00Z",
+  "payload_hash": "sha256:7fdba10fd07e9bc97cf5bfa0e8b21b2bf42481643e2a251877d2436949edbae6",
+  "validation_code": "NDF-EBZLMKB3X7VALVMRMBJX",
+  "inventario": [
+    {
+      "ficheiro": "envelope.json",
+      "hash_sha256": "sha256:e6c90e402d698349b9761ff0a12da1f8f1d8a5fa5e1914a5a3628a11082248c8"
+    },
+    {
+      "ficheiro": "ndf-core.json",
+      "hash_sha256": "sha256:7fdba10fd07e9bc97cf5bfa0e8b21b2bf42481643e2a251877d2436949edbae6"
+    },
+    {
+      "ficheiro": "ndt/documento-capturado@1.0.0.ndt.json",
+      "hash_sha256": "sha256:19d30d0679f79088b96108e3b6d0a4b9719d0dedcf6193d78e07968de099bdce"
+    },
+    {
+      "ficheiro": "original/requerimento.pdf",
+      "hash_sha256": "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053"
+    },
+    {
+      "ficheiro": "schemas/custody-event.schema.json",
+      "hash_sha256": "sha256:816a7656c545b3be04d28fdb0c724db840e871dd4e3c4c99341584a886d10861"
+    },
+    {
+      "ficheiro": "schemas/documento-capturado.schema.json",
+      "hash_sha256": "sha256:b1eb87e9b064414c3b6b15f5ad6e8a955aca42e3d33909f65a83328dbba6e7af"
+    },
+    {
+      "ficheiro": "schemas/envelope.schema.json",
+      "hash_sha256": "sha256:d55c2dc452f6e0979a39cbf463715a4ce9ac6837e3b684d6c0f0606fb2dc82c9"
+    },
+    {
+      "ficheiro": "schemas/manifest.schema.json",
+      "hash_sha256": "sha256:2aca2688e2be95c254024b1832e1f01045c82c95da9ced39a54a32d734dc2c69"
+    },
+    {
+      "ficheiro": "schemas/ncrtf.schema.json",
+      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+    },
+    {
+      "ficheiro": "schemas/ndf-core.schema.json",
+      "hash_sha256": "sha256:a9cda78fe45a98aeae47dda99eba4d2913255a0c43feab27086a42fff3951f4f"
+    },
+    {
+      "ficheiro": "schemas/ndt.schema.json",
+      "hash_sha256": "sha256:f262c3aa819230be7e966528839e6e9e59a6daf4275942a2db9d92969d0c08f3"
+    },
+    {
+      "ficheiro": "schemas/pt-dglab.schema.json",
+      "hash_sha256": "sha256:7c772ab34f1703834be42eb28f85ba749fc5df04b03086185bae0e865093f82a"
+    }
+  ]
+}
