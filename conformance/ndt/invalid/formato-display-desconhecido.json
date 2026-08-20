@@ -1,0 +1,23 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "teste",
+  "versao_ndt": "1.0.0",
+  "_comment": "INVÁLIDO: formato de display fora do enum fechado de §4.3. 'data-hora' com hífen é o erro plausível depois de 'data_hora' entrar no vocabulário; o enum é fechado e um valor desconhecido não é tolerado silenciosamente.",
+  "_expected_error": "formato de display desconhecido",
+  "_expected_match": "is not one of",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "campos": [
+        {
+          "referencia": "proveniencia.recebido_em",
+          "posicao": { "x": 10, "y": 10 },
+          "largura": 60,
+          "altura": 6,
+          "formato": "data-hora"
+        }
+      ]
+    }
+  ],
+  "sequencia": [{ "pagina_def": "p1", "repeticao": "unica" }]
+}

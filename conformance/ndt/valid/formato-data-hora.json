@@ -1,0 +1,36 @@
+{
+  "_comment": "Formato de display 'data_hora' em campo posicionado, elemento de fluxo e coluna de tabela. Verifica que o vocabulário de §4.3 o aceita nos três contextos; a regra de determinismo (NDT-RENDER-012, §4.3.1) é de renderizador e não é verificável por schema.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-data-hora",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "campos": [
+        {
+          "referencia": "entrada.recebido_em",
+          "posicao": { "x": 10, "y": 10 },
+          "largura": 60,
+          "altura": 6,
+          "formato": "data_hora"
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 30,
+        "elementos": [
+          { "tipo": "campo", "referencia": "entrada.confirmado_em", "formato": "data_hora" },
+          {
+            "tipo": "tabela",
+            "referencia": "eventos",
+            "largura": 170,
+            "colunas": [
+              { "id": "descricao", "cabecalho": "Evento", "largura": 120 },
+              { "id": "ocorrido_em", "cabecalho": "Instante", "largura": 50, "formato": "data_hora" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "sequencia": [{ "pagina_def": "p1", "repeticao": "unica" }]
+}

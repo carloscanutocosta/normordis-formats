@@ -10,6 +10,28 @@
 > contradiz a especificação a que respeita deixa de servir para auditar como o
 > formato evoluiu.
 
+## Não publicado
+
+### Acrescentado
+
+- **`formato: "data_hora"`** no vocabulário de formatos de display (§4.3). O
+  vocabulário só tinha `data` (DD/MM/YYYY), e um documento que precise de
+  carimbo temporal legível — auto de captura, comprovativo de entrada, registo
+  de evento — não conseguia exprimi-lo. Achado durante a construção do NDT
+  `documento-capturado` (`docs/roadmap/PLANO-CAPTURA-NDFPKG.md`, N-C1).
+- **`NDT-RENDER-012`** — um renderizador NÃO DEVE converter data e hora para o
+  fuso local. Sem esta regra, duas máquinas com fusos diferentes produziriam
+  páginas diferentes a partir do mesmo NDF, e a projeção passaria a ser função
+  do ambiente e não do documento (§4.3.1).
+- Vetores `conformance/ndt/valid/formato-data-hora.json` e
+  `conformance/ndt/invalid/formato-display-desconhecido.json`.
+
+Alteração aditiva ao enum, editada em `2.0.0` sem bump: nenhum consumidor
+externo depende do desenho atual (janela de desenho livre,
+`docs/roadmap/PLANO-NDT-NCRTF.md` §2.2), e vale o mesmo princípio do ADR-007 já
+aplicado em `ROADMAP.md` A8.
+
+
 ## [Não publicado]
 
 ### Conformidade — cláusula §9 (novo)

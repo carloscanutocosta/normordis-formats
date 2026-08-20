@@ -345,7 +345,7 @@
     },
     "FormatoDisplay": {
       "type": "string",
-      "enum": ["texto", "numero", "inteiro", "monetario", "data", "booleano", "checkbox", "radio"]
+      "enum": ["texto", "numero", "inteiro", "monetario", "data", "data_hora", "booleano", "checkbox", "radio"]
     },
     "AlinhamentoTexto": {
       "type": "string",

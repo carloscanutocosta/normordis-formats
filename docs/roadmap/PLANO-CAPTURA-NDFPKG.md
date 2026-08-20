@@ -193,23 +193,66 @@ requisitos enumerados (§9), não uma omissão.
 
 ## 6. Fase B — tipo documental e template
 
-| # | Tarefa | Produz | Decisões | Esforço |
+| # | Tarefa | Produz | Decisões | Estado |
 |---|---|---|---|---|
-| **B1** | Schema do tipo: `componentes[]`, casca descritiva, proveniência de submissão, estado da reconstituição, relatório de verificação de assinaturas externas, `tipo_equivalente` | `specs/registry/schemas/documento-capturado.schema.json` | `CAP-10` `CAP-11` `CAP-13` `CAP-21` `CAP-24` | G |
-| **B2** | Entrada no registo com os campos de governação decididos em 0.3 | `specs/registry/SPEC.md` | `CAP-29` | M |
-| **B3** | NDT do auto de captura: frontispício com `ndf_id`, `validation_code`, proveniência, inventário de componentes e resultado da validação | `specs/ndt/examples/documento-capturado.ndt.json` | `CAP-14` | M |
-| **B4** | Documentar a extensão qualificada `ext.<entidade>.instrui` | nota em SPEC §2.11.7 | — | P |
+| **B1** | Schema do tipo capturado | [`documento-capturado.schema.json`](../../specs/registry/schemas/documento-capturado.schema.json) | `CAP-10` `CAP-11` `CAP-13` `CAP-21` `CAP-24` | ✅ 2026-08-20 |
+| **B2** | Entrada no registo + valores recomendados de governação | `specs/registry/SPEC.md` §3, §3.2.4 | `CAP-29` | ✅ 2026-08-20 |
+| **B3** | NDT do auto de captura | [`documento-capturado.ndt.json`](../../specs/ndt/examples/documento-capturado.ndt.json) | `CAP-14` | ✅ 2026-08-20 |
+| **B4** | Extensão qualificada `ext.<entidade>.instrui` | SPEC NDF §2.11.7 | — | ✅ 2026-08-20 |
+
+**Seis regras condicionais impostas por B1**, cada uma com caso negativo
+verificado: `representacao_congelada` sem `derivado_de`; `reconstituicao`
+não-adequada sem `fundamento`; `validacao_formato` com resultado apurado sem
+validador nem instante; `canal: "outro"` sem detalhe; `componentes` vazio;
+`papel` fora do enum.
+
+**Decisão de desenho tomada em B1 — resolução por hash, nunca por caminho.**
+Um componente não declara o seu lugar no pacote. `nome_original` é descritivo e
+um leitor não o DEVE usar para resolver o componente; a correspondência com
+`manifest.inventario` faz-se pelo digest. Declarar o caminho poria a disposição
+física do pacote dentro dos bytes assinados, e o mesmo documento materializado
+de outra forma teria assinatura diferente.
+
+### 6.1 Achados sobre o NDT 2.0.0
+
+A construção do auto de captura expôs duas limitações reais do NDT — o género
+de evidência que o [`ROADMAP.md`](../../ROADMAP.md) procura («o que é que uma
+implementação real não consegue fazer»). Nenhuma bloqueou B3; ambas foram
+contornadas e ficam registadas para o
+[`PLANO-NDT-NCRTF.md`](PLANO-NDT-NCRTF.md):
+
+| # | Limitação | Contorno usado |
+|---|---|---|
+| **N-C1** | `FormatoDisplay` não tem valor para data e hora — só `data`. Um auto de captura precisa do **instante** de entrada, não do dia | `formato: "texto"`, que rende o ISO 8601 completo. Preciso, mas não localizável |
+| **N-C2** | `incluir_se` não suporta negação. Não é exprimível «mostrar este texto quando o bloco estiver ausente» | Elemento removido. A ausência de proveniência de submissão deixa de ser explicada no auto |
+
+N-C1 tem impacto para além da captura: qualquer documento que precise de
+carimbo temporal legível tem hoje o mesmo problema.
 
 ## 7. Fase C — especificação e pacote
 
-| # | Tarefa | Produz | Decisões | Esforço |
+| # | Tarefa | Produz | Decisões | Estado |
 |---|---|---|---|---|
-| **C1** | Alargar SPEC §2.8: o core não contém binários; um tipo pode declarar componentes por hash | SPEC §2.8 | `CAP-05` | M |
-| **C2** | Composição do pacote: `original/`, `representacoes/`, `anexos/`, `evidencias/` | SPEC §8.1 | `CAP-16` `CAP-21` | M |
-| **C3** | Requisito de coerência `documento.componentes[].sha256` ↔ `manifest.inventario` | `NDF-PKG-010` | `CAP-11` | M |
-| **C4** | Requisito de leitor: não renderizar capturado aplicando o NDT a `documento` | `NDF-READ-0XX` | `CAP-25` | P |
-| **C5** | Requisito de produtor: preservar o emitido; não reescrever binário assinado | `NDF-PROD-0XX` | `CAP-04` `CAP-09` | P |
-| **C6** | Cláusula de resolução de divergência metadados/binário, na secção decidida em 0.4 | SPEC | `CAP-24` | P |
+| **C1** | §2.8 alargada — componentes por hash; proibição recai sobre bytes embutidos | SPEC §2.8.1 | `CAP-05` `CAP-12` | ✅ 2026-08-20 |
+| **C2** | Composição do pacote com os quatro diretórios de papel | SPEC §8.1 | `CAP-16` `CAP-21` | ✅ 2026-08-20 |
+| **C3** | Coerência `componentes[].sha256` ↔ `manifest.inventario` | `NDF-PKG-009` | `CAP-11` | ✅ 2026-08-20 |
+| **C4** | Requisitos de leitor | `NDF-READ-021/022/023` | `CAP-25` `CAP-18` | ✅ 2026-08-20 |
+| **C5** | Requisitos de produtor | `NDF-PROD-020/021/022` | `CAP-04` `CAP-09` `CAP-12` | ✅ 2026-08-20 |
+| **C6** | Regra de divergência, absorvida por C1 conforme 0.4 | SPEC §2.8.2 | `CAP-24` | ✅ 2026-08-20 |
+
+**Sete identificadores novos** — o inventário normativo passa de 93 para 100 IDs
+e de 274 para 285 declarações. `NDF-PKG-009` foi usado por estar livre: não
+existia nem fora retirado, e deixar lacuna na numeração seria ruído.
+
+**`manifest.schema.json` não foi alterado**, como ADR-021 previa. O inventário
+já cobre a integridade física de qualquer ficheiro do pacote; o que faltava era
+a ligação à declaração assinada, e essa é `NDF-PKG-009`.
+
+**Dívida de A4 saldada:** os identificadores prometidos existem. Faltam os
+vetores que os provam — `NDF-PKG-009` tem imposição em D2/D3, e
+`NDF-PROD-020/022` e `NDF-READ-021/022/023` são regras de comportamento cuja
+evidência depende de produtor e leitor conformes, como já sucede com a maioria
+dos `NDF-READ-*`.
 
 **C3 é a única junta verificável genuinamente nova.** O inventário do manifesto
 já cobre a integridade física de qualquer ficheiro do pacote
