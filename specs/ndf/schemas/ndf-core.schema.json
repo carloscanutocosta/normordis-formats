@@ -20,35 +20,51 @@
     "ndf_version": {
       "const": "1.0.0",
       "description": "NDF specification version (SemVer 2.0.0). Normative value for this schema: '1.0.0'.",
-      "examples": ["1.0.0"]
+      "examples": [
+        "1.0.0"
+      ]
     },
     "ndf_id": {
       "type": "string",
       "format": "uuid",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
       "description": "Permanent document identifier. UUID v4 (RFC 9562). Generated before canonicalisation, immutable after finalisation.",
-      "examples": ["a1b2c3d4-e5f6-4789-abcd-ef0123456789"]
+      "examples": [
+        "a1b2c3d4-e5f6-4789-abcd-ef0123456789"
+      ]
     },
     "estado": {
       "type": "string",
-      "enum": ["ativo"],
+      "enum": [
+        "ativo"
+      ],
       "description": "Document state at time of finalisation. Always 'ativo' in the NDF-core — immutable, signed. Archival lifecycle transitions (substituido, em_conservacao, etc.) are managed by the custodian system outside the NDF-core. See SPEC.md §2.4."
     },
     "payload_hash_alg": {
       "type": "string",
-      "enum": ["sha256"],
+      "enum": [
+        "sha256"
+      ],
       "description": "Hash algorithm used to compute payload_hash. NDF 1.0.0 supports 'sha256' (NIST FIPS 180-4) exclusively. Introducing further algorithms requires a future version of this specification."
     },
     "nivel_assinatura": {
       "type": "string",
-      "enum": ["nenhuma", "avancada", "qualificada"],
+      "enum": [
+        "nenhuma",
+        "avancada",
+        "qualificada"
+      ],
       "description": "Minimum electronic signature level required by the legal nature of the act. See SPEC.md §2.10."
     },
     "ndt_version_ref": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$",
       "description": "NDT version reference. Format: '<schema_id>@<versao_ndt>'. Must be resolvable in the .ndfpkg or a compliant registry.",
-      "examples": ["oficio-generico@1.0.0", "modelo3-irs@2026.1", "informacao-tecnica@2.3.1"]
+      "examples": [
+        "oficio-generico@1.0.0",
+        "modelo3-irs@2026.1",
+        "informacao-tecnica@2.3.1"
+      ]
     },
     "metadados": {
       "$ref": "#/$defs/metadados",
@@ -66,13 +82,17 @@
     "relacoes": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/relacao" },
+      "items": {
+        "$ref": "#/$defs/relacao"
+      },
       "description": "Verifiable relations to other NDF documents (e.g. a parecer over an informação, a despacho deciding on a parecer). Optional. Part of the NDF-core — canonicalised and signed. See SPEC.md §2.11."
     },
     "participantes": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/participante" },
+      "items": {
+        "$ref": "#/$defs/participante"
+      },
       "description": "Structural index of individuals, entities or systems involved in producing this document, distinct from the electronic signatures in the envelope. Optional. See SPEC.md §2.12."
     },
     "proveniencia_ia": {
@@ -82,27 +102,41 @@
     "proveniencia_sistema": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/proveniencia_sistema_entrada" },
+      "items": {
+        "$ref": "#/$defs/proveniencia_sistema_entrada"
+      },
       "description": "Deterministic system(s) that produced this document's content. Array, ordered chronologically by 'gerado_em', to support production chains (calculation engine → validation → issuance). Optional. Any non-deterministic component belongs in proveniencia_ia, never here. See SPEC.md §2.14."
     },
     "imputacao": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/imputacao_entrada" },
+      "items": {
+        "$ref": "#/$defs/imputacao_entrada"
+      },
       "description": "Legal responsibility for the document and the title under which it is held — distinct from who materially produced it. More than one entry means a joint act by two or more bodies, never a delegation chain. Optional. See SPEC.md §2.15."
     }
   },
   "anyOf": [
     {
       "title": "Human origin",
-      "required": ["participantes"],
+      "required": [
+        "participantes"
+      ],
       "properties": {
         "participantes": {
           "contains": {
             "type": "object",
-            "required": ["papel"],
+            "required": [
+              "papel"
+            ],
             "properties": {
-              "papel": { "enum": ["autor", "coautor", "decisor"] }
+              "papel": {
+                "enum": [
+                  "autor",
+                  "coautor",
+                  "decisor"
+                ]
+              }
             }
           }
         }
@@ -110,15 +144,38 @@
     },
     {
       "title": "System origin",
-      "required": ["proveniencia_sistema"]
+      "required": [
+        "proveniencia_sistema"
+      ]
     },
     {
       "title": "AI origin",
-      "required": ["proveniencia_ia"],
+      "required": [
+        "proveniencia_ia"
+      ],
       "properties": {
         "proveniencia_ia": {
-          "required": ["utilizada"],
-          "properties": { "utilizada": { "const": true } }
+          "required": [
+            "utilizada"
+          ],
+          "properties": {
+            "utilizada": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Unidentifiable origin",
+      "required": [
+        "metadados"
+      ],
+      "properties": {
+        "metadados": {
+          "required": [
+            "origem_nao_identificavel"
+          ]
         }
       }
     }
@@ -126,20 +183,36 @@
   "$defs": {
     "metadados": {
       "type": "object",
-      "required": ["tipo_documento_ref", "entidade_produtora", "entidade_responsavel", "contem_dados_pessoais"],
+      "required": [
+        "tipo_documento_ref",
+        "entidade_produtora",
+        "entidade_responsavel",
+        "contem_dados_pessoais"
+      ],
       "properties": {
         "tipo_documento_ref": {
           "type": "string",
           "oneOf": [
-            { "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$" },
-            { "pattern": "^ext\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*@[0-9].+$" }
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*@[0-9].+$"
+            },
+            {
+              "pattern": "^ext\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*@[0-9].+$"
+            }
           ],
           "description": "Versioned reference to the document type schema. Canonical form '<id>@<versao>' for cross-organisational document forms held in specs/registry/, or qualified extension 'ext.<entidade>.<tipo>@<versao>' for domain-specific types defined and maintained by a producing entity. An extension type's schema MUST travel inside the .ndfpkg under schemas/. See SPEC.md §2.9.2 and ADR-014.",
-          "examples": ["oficio@1.0.0", "informacao-tecnica@1.0.0", "despacho@1.0.0", "ext.at.liquidacao-irs@2026.1"]
+          "examples": [
+            "oficio@1.0.0",
+            "informacao-tecnica@1.0.0",
+            "despacho@1.0.0",
+            "ext.at.liquidacao-irs@2026.1"
+          ]
         },
         "entidade_produtora": {
           "type": "object",
-          "required": ["designacao"],
+          "required": [
+            "designacao"
+          ],
           "properties": {
             "designacao": {
               "type": "string",
@@ -151,13 +224,23 @@
               "minItems": 1,
               "items": {
                 "type": "object",
-                "required": ["sistema", "valor"],
+                "required": [
+                  "sistema",
+                  "valor"
+                ],
                 "properties": {
                   "sistema": {
                     "type": "string",
                     "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)+$",
                     "description": "Identifier scheme, as a qualified opaque identifier. Convention: '<jurisdicao>-<esquema>'.",
-                    "examples": ["pt-nif", "pt-dglab", "fr-siren", "nl-kvk", "eu-vat", "eu-pic"]
+                    "examples": [
+                      "pt-nif",
+                      "pt-dglab",
+                      "fr-siren",
+                      "nl-kvk",
+                      "eu-vat",
+                      "eu-pic"
+                    ]
                   },
                   "valor": {
                     "type": "string",
@@ -195,21 +278,42 @@
           "pattern": "^[a-z]{2,3}(-[A-Za-z]{4})?(-([A-Za-z]{2}|[0-9]{3}))?$",
           "default": "pt",
           "description": "Primary language of the document, in the language[-script][-region] subset of BCP 47 (RFC 5646). Not the full BCP 47 grammar: extlang, variants, extensions, private-use and grandfathered tags are not admitted. Defaults to 'pt' when absent. See SPEC.md §2.7.2.",
-          "examples": ["pt", "pt-PT", "pt-BR", "en-GB", "de-DE", "zh-Hant"]
+          "examples": [
+            "pt",
+            "pt-PT",
+            "pt-BR",
+            "en-GB",
+            "de-DE",
+            "zh-Hant"
+          ]
         },
         "classificacao_seguranca": {
           "type": "object",
-          "required": ["perfil", "nivel"],
+          "required": [
+            "perfil",
+            "nivel"
+          ],
           "properties": {
             "perfil": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9-]*$",
               "description": "Security classification regime whose legal labels map onto 'nivel'. Open enum; the meaning of a regime comes from the registry, not from this pattern.",
-              "examples": ["pt", "eu", "nato"]
+              "examples": [
+                "pt",
+                "eu",
+                "nato"
+              ]
             },
             "nivel": {
               "type": "string",
-              "enum": ["publico", "uso_interno", "reservado", "confidencial", "secreto", "muito_secreto"],
+              "enum": [
+                "publico",
+                "uso_interno",
+                "reservado",
+                "confidencial",
+                "secreto",
+                "muito_secreto"
+              ],
               "description": "Neutral ordinal sensitivity level, from least to most restricted. A reader that does not know the regime can still order two documents by sensitivity. See SPEC.md §2.7.4."
             }
           },
@@ -222,7 +326,11 @@
         },
         "protecao_dados": {
           "type": "object",
-          "required": ["categorias", "base_legal_conservacao", "responsavel_tratamento"],
+          "required": [
+            "categorias",
+            "base_legal_conservacao",
+            "responsavel_tratamento"
+          ],
           "properties": {
             "categorias": {
               "type": "array",
@@ -234,7 +342,12 @@
             },
             "base_legal_conservacao": {
               "type": "string",
-              "enum": ["obrigacao_legal", "interesse_publico", "consentimento", "contrato"],
+              "enum": [
+                "obrigacao_legal",
+                "interesse_publico",
+                "consentimento",
+                "contrato"
+              ],
               "description": "Legal basis for conservation under GDPR Art. 6."
             },
             "responsavel_tratamento": {
@@ -245,17 +358,48 @@
           },
           "additionalProperties": false,
           "description": "GDPR block. Required if and only if contem_dados_pessoais is true. See SPEC.md §1.4, §2.7.2 and ADR-016."
+        },
+        "origem_nao_identificavel": {
+          "type": "object",
+          "required": [
+            "fundamento"
+          ],
+          "additionalProperties": false,
+          "description": "Declares that the origin of the content cannot be established. Fourth mode of the origin invariant (SPEC.md §2.2.1). Must not coexist with a declaration that identifies the origin.",
+          "properties": {
+            "fundamento": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Reason why the origin cannot be established. Mandatory: without it the field would be an escape hatch from the invariant.",
+              "examples": [
+                "Documento em papel digitalizado, sem menção de autor nem de serviço emissor.",
+                "Denúncia anónima recebida por via postal."
+              ]
+            }
+          }
         }
       },
       "if": {
-        "properties": { "contem_dados_pessoais": { "const": true } },
-        "required": ["contem_dados_pessoais"]
+        "properties": {
+          "contem_dados_pessoais": {
+            "const": true
+          }
+        },
+        "required": [
+          "contem_dados_pessoais"
+        ]
       },
       "then": {
-        "required": ["protecao_dados"]
+        "required": [
+          "protecao_dados"
+        ]
       },
       "else": {
-        "not": { "required": ["protecao_dados"] }
+        "not": {
+          "required": [
+            "protecao_dados"
+          ]
+        }
       },
       "additionalProperties": false
     },
@@ -273,17 +417,31 @@
           "type": "string",
           "pattern": "^(generic|[a-z][a-z0-9]*(-[a-z0-9]+)+)$",
           "description": "Archival appraisal profile in force. Determines the vocabulary and syntax of classificacao_ref and instrumento_ref. Opaque qualified identifier of two or more segments: meaning comes from the registry, not from the pattern. Open enum; a registered profile's schema lives in specs/registry/profiles/<perfil>.schema.json and MUST travel inside the .ndfpkg under schemas/. See SPEC.md §3.2.3 and ADR-015.",
-          "examples": ["pt-dglab", "fr-siaf", "de-barch", "eu-ec", "generic"]
+          "examples": [
+            "pt-dglab",
+            "fr-siaf",
+            "de-barch",
+            "eu-ec",
+            "generic"
+          ]
         },
         "classificacao_ref": {
           "type": "string",
           "minLength": 1,
           "description": "Reference to the archival class/series within the instrument identified by instrumento_ref. Syntax is profile-dependent. See SPEC.md §3.2.1.",
-          "examples": ["lc/450.10.001", "ts/at/300.20", "selectielijst-2020/4.1.2"]
+          "examples": [
+            "lc/450.10.001",
+            "ts/at/300.20",
+            "selectielijst-2020/4.1.2"
+          ]
         },
         "prazo_conservacao": {
           "type": "object",
-          "required": ["valor", "unidade", "forma_contagem"],
+          "required": [
+            "valor",
+            "unidade",
+            "forma_contagem"
+          ],
           "properties": {
             "valor": {
               "type": "integer",
@@ -292,7 +450,11 @@
             },
             "unidade": {
               "type": "string",
-              "enum": ["dias", "meses", "anos"],
+              "enum": [
+                "dias",
+                "meses",
+                "anos"
+              ],
               "description": "Retention period unit."
             },
             "forma_contagem": {
@@ -312,10 +474,16 @@
             }
           },
           "if": {
-            "properties": { "forma_contagem": { "const": "outro" } }
+            "properties": {
+              "forma_contagem": {
+                "const": "outro"
+              }
+            }
           },
           "then": {
-            "required": ["forma_contagem_detalhe"]
+            "required": [
+              "forma_contagem_detalhe"
+            ]
           },
           "additionalProperties": false
         },
@@ -333,39 +501,69 @@
           "type": "string",
           "minLength": 1,
           "description": "Authority competent to decide the final disposition. Required if and only if destino_final is 'a_determinar'. See SPEC.md §3.4.1.",
-          "examples": ["Bundesarchiv", "Nationaal Archief"]
+          "examples": [
+            "Bundesarchiv",
+            "Nationaal Archief"
+          ]
         },
         "instrumento_ref": {
           "type": "string",
           "minLength": 1,
           "description": "Instrument and version used to resolve the retention period and final disposition at finalisation time. Syntax is profile-dependent. See SPEC.md §3.2.2.",
-          "examples": ["lc/lista-consolidada-dglab-2023-v3", "portaria/1253-A-2009", "selectielijst-gemeenten-2020"]
+          "examples": [
+            "lc/lista-consolidada-dglab-2023-v3",
+            "portaria/1253-A-2009",
+            "selectielijst-gemeenten-2020"
+          ]
         }
       },
       "if": {
-        "properties": { "destino_final": { "const": "a_determinar" } },
-        "required": ["destino_final"]
+        "properties": {
+          "destino_final": {
+            "const": "a_determinar"
+          }
+        },
+        "required": [
+          "destino_final"
+        ]
       },
       "then": {
-        "required": ["autoridade_avaliacao"]
+        "required": [
+          "autoridade_avaliacao"
+        ]
       },
       "else": {
-        "not": { "required": ["autoridade_avaliacao"] }
+        "not": {
+          "required": [
+            "autoridade_avaliacao"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "relacao": {
       "type": "object",
-      "required": ["tipo", "alvo"],
+      "required": [
+        "tipo",
+        "alvo"
+      ],
       "properties": {
         "tipo": {
           "type": "string",
           "oneOf": [
             {
               "enum": [
-                "substitui", "corrige", "complementa", "anula", "responde_a",
-                "emite_parecer_sobre", "decide_sobre", "executa", "anexa",
-                "deriva_de", "referencia"
+                "substitui",
+                "corrige",
+                "complementa",
+                "anula",
+                "responde_a",
+                "emite_parecer_sobre",
+                "decide_sobre",
+                "executa",
+                "anexa",
+                "deriva_de",
+                "referencia"
               ]
             },
             {
@@ -376,7 +574,10 @@
         },
         "alvo": {
           "type": "object",
-          "required": ["ndf_id", "payload_hash"],
+          "required": [
+            "ndf_id",
+            "payload_hash"
+          ],
           "properties": {
             "ndf_id": {
               "type": "string",
@@ -388,7 +589,9 @@
               "type": "string",
               "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
               "description": "payload_hash of the target document at the exact canonical content the relation was established over. Format '<alg>:<hex>' — algorithm-agnostic. Ensures the relation binds to specific immutable bytes, not merely to a logical identity.",
-              "examples": ["sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"]
+              "examples": [
+                "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
+              ]
             },
             "descricao": {
               "type": "string",
@@ -407,7 +610,10 @@
     },
     "participante": {
       "type": "object",
-      "required": ["participante_ref", "papel"],
+      "required": [
+        "participante_ref",
+        "papel"
+      ],
       "properties": {
         "participante_ref": {
           "type": "string",
@@ -417,14 +623,21 @@
         "papel": {
           "type": "string",
           "enum": [
-            "autor", "coautor", "revisor_humano",
-            "decisor", "representante", "responsavel_tecnico"
+            "autor",
+            "coautor",
+            "revisor_humano",
+            "decisor",
+            "representante",
+            "responsavel_tecnico"
           ],
           "description": "Role exercised by this natural person in producing this document. Independent of any electronic signature — a participant may be an author without signing, and a signatory may sign without being an author. Systems belong in proveniencia_sistema, AI in proveniencia_ia, and legal responsibility in imputacao."
         },
         "qualificacao": {
           "type": "object",
-          "required": ["tipo", "identificador"],
+          "required": [
+            "tipo",
+            "identificador"
+          ],
           "properties": {
             "tipo": {
               "type": "string",
@@ -435,7 +648,10 @@
               "type": "string",
               "minLength": 1,
               "description": "Professional body membership identifier. External reference, not resolved by the NDF.",
-              "examples": ["occ:12345", "oa:54321"]
+              "examples": [
+                "occ:12345",
+                "oa:54321"
+              ]
             }
           },
           "additionalProperties": false,
@@ -448,8 +664,14 @@
       "type": "object",
       "description": "Reference to an artefact kept outside the NDF, under its own access and retention policy. Not resolved by the NDF — same principle as participante_ref (§2.12.4) and classificacao_ref (§3.2.1).",
       "properties": {
-        "tipo": { "type": "string", "minLength": 1 },
-        "identificador": { "type": "string", "minLength": 1 },
+        "tipo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identificador": {
+          "type": "string",
+          "minLength": 1
+        },
         "hash": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$"
@@ -459,11 +681,18 @@
     },
     "proveniencia_sistema_entrada": {
       "type": "object",
-      "required": ["sistema", "gerado_em"],
+      "required": [
+        "sistema",
+        "gerado_em"
+      ],
       "properties": {
         "sistema": {
           "type": "object",
-          "required": ["nome", "identificador", "versao"],
+          "required": [
+            "nome",
+            "identificador",
+            "versao"
+          ],
           "properties": {
             "nome": {
               "type": "string",
@@ -474,13 +703,17 @@
               "type": "string",
               "minLength": 1,
               "description": "Stable institutional identifier of the system. External reference, not resolved by the NDF.",
-              "examples": ["at:sliq-irs"]
+              "examples": [
+                "at:sliq-irs"
+              ]
             },
             "versao": {
               "type": "string",
               "minLength": 1,
               "description": "System version at the time the content was produced. The version determines how the result was computed — it is the field that makes this block worth recording.",
-              "examples": ["2026.4.17"]
+              "examples": [
+                "2026.4.17"
+              ]
             }
           },
           "additionalProperties": false
@@ -489,7 +722,10 @@
           "type": "string",
           "minLength": 1,
           "description": "Optional. Component within the system responsible for this production step.",
-          "examples": ["motor-calculo", "emissor-notificacoes"]
+          "examples": [
+            "motor-calculo",
+            "emissor-notificacoes"
+          ]
         },
         "versao_componente": {
           "type": "string",
@@ -518,23 +754,33 @@
     },
     "imputacao_entrada": {
       "type": "object",
-      "required": ["imputado", "titulo"],
+      "required": [
+        "imputado",
+        "titulo"
+      ],
       "properties": {
         "imputado": {
           "type": "object",
-          "required": ["designacao"],
+          "required": [
+            "designacao"
+          ],
           "properties": {
             "designacao": {
               "type": "string",
               "minLength": 1,
               "description": "Designation of the body or person legally answerable for the document.",
-              "examples": ["Diretor de Serviços do IRS"]
+              "examples": [
+                "Diretor de Serviços do IRS"
+              ]
             },
             "ref": {
               "type": "string",
               "minLength": 1,
               "description": "Optional. Stable institutional identifier. External reference, not resolved by the NDF.",
-              "examples": ["at:dsirs", "nif:123456789"]
+              "examples": [
+                "at:dsirs",
+                "nif:123456789"
+              ]
             }
           },
           "additionalProperties": false
@@ -542,8 +788,12 @@
         "titulo": {
           "type": "string",
           "enum": [
-            "competencia_propria", "delegacao", "subdelegacao",
-            "declaracao_propria", "aceitacao_expressa", "efeito_legal"
+            "competencia_propria",
+            "delegacao",
+            "subdelegacao",
+            "declaracao_propria",
+            "aceitacao_expressa",
+            "efeito_legal"
           ],
           "description": "Title under which legal responsibility is held. Administrative-act regime: competencia_propria, delegacao, subdelegacao. Declarative regime: declaracao_propria, aceitacao_expressa, efeito_legal. See SPEC.md §2.15.2."
         },
@@ -554,13 +804,18 @@
               "type": "string",
               "minLength": 1,
               "description": "Legal basis in human-readable form.",
-              "examples": ["Despacho n.º 000/2026", "CIRS, art. 58.º-A"]
+              "examples": [
+                "Despacho n.º 000/2026",
+                "CIRS, art. 58.º-A"
+              ]
             },
             "publicacao_ref": {
               "type": "string",
               "minLength": 1,
               "description": "Official publication reference of the enabling act. Required for delegacao and subdelegacao — CPA art. 151.º/1/a) makes the mention of delegation mandatory.",
-              "examples": ["DR, 2.ª série, n.º 000, de 2026-01-15"]
+              "examples": [
+                "DR, 2.ª série, n.º 000, de 2026-01-15"
+              ]
             }
           },
           "additionalProperties": false
@@ -572,7 +827,9 @@
         },
         "autenticacao": {
           "type": "object",
-          "required": ["meio"],
+          "required": [
+            "meio"
+          ],
           "description": "Optional. Means by which this imputado was authenticated. Recorded per entry, not per document: where the law requires authentication of more than one party (e.g. a joint IRS declaration by both sujeitos passivos), each has its own entry and may authenticate by a different means. See SPEC.md §2.15.4.",
           "properties": {
             "meio": {
@@ -582,7 +839,11 @@
             },
             "nivel_garantia": {
               "type": "string",
-              "enum": ["baixo", "substancial", "elevado"],
+              "enum": [
+                "baixo",
+                "substancial",
+                "elevado"
+              ],
               "description": "Technical level of assurance of the authentication mechanism, in eIDAS terms. Optional — the producing system may not classify it. This does NOT grade the imputation: portal password, Chave Móvel Digital and Cartão de Cidadão are all personal, non-transferable credentials whose use is inherently the holder's responsibility, and the imputation is identical in all three cases. See SPEC.md §2.15.4."
             }
           },
@@ -592,29 +853,70 @@
       "allOf": [
         {
           "if": {
-            "required": ["titulo"],
-            "properties": { "titulo": { "enum": ["delegacao", "subdelegacao"] } }
+            "required": [
+              "titulo"
+            ],
+            "properties": {
+              "titulo": {
+                "enum": [
+                  "delegacao",
+                  "subdelegacao"
+                ]
+              }
+            }
           },
           "then": {
-            "required": ["fundamento"],
-            "properties": { "fundamento": { "required": ["publicacao_ref"] } }
+            "required": [
+              "fundamento"
+            ],
+            "properties": {
+              "fundamento": {
+                "required": [
+                  "publicacao_ref"
+                ]
+              }
+            }
           }
         },
         {
           "if": {
-            "required": ["titulo"],
-            "properties": { "titulo": { "const": "aceitacao_expressa" } }
+            "required": [
+              "titulo"
+            ],
+            "properties": {
+              "titulo": {
+                "const": "aceitacao_expressa"
+              }
+            }
           },
-          "then": { "required": ["em"] }
+          "then": {
+            "required": [
+              "em"
+            ]
+          }
         },
         {
           "if": {
-            "required": ["titulo"],
-            "properties": { "titulo": { "const": "efeito_legal" } }
+            "required": [
+              "titulo"
+            ],
+            "properties": {
+              "titulo": {
+                "const": "efeito_legal"
+              }
+            }
           },
           "then": {
-            "required": ["fundamento"],
-            "properties": { "fundamento": { "required": ["descricao"] } }
+            "required": [
+              "fundamento"
+            ],
+            "properties": {
+              "fundamento": {
+                "required": [
+                  "descricao"
+                ]
+              }
+            }
           }
         }
       ],
@@ -622,7 +924,9 @@
     },
     "proveniencia_ia": {
       "type": "object",
-      "required": ["utilizada"],
+      "required": [
+        "utilizada"
+      ],
       "properties": {
         "utilizada": {
           "type": "boolean",
@@ -630,27 +934,47 @@
         },
         "intervencoes": {
           "type": "array",
-          "items": { "$ref": "#/$defs/intervencao_ia" },
+          "items": {
+            "$ref": "#/$defs/intervencao_ia"
+          },
           "description": "Required and non-empty when utilizada is true; must be absent or empty when utilizada is false."
         }
       },
       "if": {
-        "properties": { "utilizada": { "const": false } }
+        "properties": {
+          "utilizada": {
+            "const": false
+          }
+        }
       },
       "then": {
-        "properties": { "intervencoes": { "maxItems": 0 } }
+        "properties": {
+          "intervencoes": {
+            "maxItems": 0
+          }
+        }
       },
       "else": {
-        "required": ["intervencoes"],
-        "properties": { "intervencoes": { "minItems": 1 } }
+        "required": [
+          "intervencoes"
+        ],
+        "properties": {
+          "intervencoes": {
+            "minItems": 1
+          }
+        }
       },
       "additionalProperties": false
     },
     "intervencao_ia": {
       "type": "object",
       "required": [
-        "intervencao_id", "finalidade", "sistema", "executada_em",
-        "resultado_incorporado", "revisao_humana"
+        "intervencao_id",
+        "finalidade",
+        "sistema",
+        "executada_em",
+        "resultado_incorporado",
+        "revisao_humana"
       ],
       "properties": {
         "intervencao_id": {
@@ -661,8 +985,13 @@
         "finalidade": {
           "type": "string",
           "enum": [
-            "apoio_redacao", "resumo", "classificacao", "pesquisa",
-            "traducao", "deteccao_erros", "outro"
+            "apoio_redacao",
+            "resumo",
+            "classificacao",
+            "pesquisa",
+            "traducao",
+            "deteccao_erros",
+            "outro"
           ]
         },
         "finalidade_detalhe": {
@@ -671,12 +1000,25 @@
         },
         "sistema": {
           "type": "object",
-          "required": ["nome", "fornecedor"],
+          "required": [
+            "nome",
+            "fornecedor"
+          ],
           "properties": {
-            "nome": { "type": "string", "minLength": 1 },
-            "fornecedor": { "type": "string", "minLength": 1 },
-            "modelo": { "type": "string" },
-            "versao": { "type": "string" }
+            "nome": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fornecedor": {
+              "type": "string",
+              "minLength": 1
+            },
+            "modelo": {
+              "type": "string"
+            },
+            "versao": {
+              "type": "string"
+            }
           },
           "additionalProperties": false
         },
@@ -686,20 +1028,33 @@
         },
         "resultado_incorporado": {
           "type": "string",
-          "enum": ["integralmente", "parcialmente", "nao_incorporado"]
+          "enum": [
+            "integralmente",
+            "parcialmente",
+            "nao_incorporado"
+          ]
         },
         "segmentos_afetados": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "Dot-path references into 'documento', when determinable (e.g. 'documento.fundamentacao')."
         },
         "revisao_humana": {
           "type": "object",
-          "required": ["estado"],
+          "required": [
+            "estado"
+          ],
           "properties": {
             "estado": {
               "type": "string",
-              "enum": ["pendente", "revisto_e_aprovado", "revisto_com_alteracoes", "rejeitado"],
+              "enum": [
+                "pendente",
+                "revisto_e_aprovado",
+                "revisto_com_alteracoes",
+                "rejeitado"
+              ],
               "description": "'pendente' makes the absence of review representable and visible, rather than omissible — required even when review has not yet occurred, so the Human-in-the-Loop principle has technical, not only declarative, weight."
             },
             "revisor_ref": {
@@ -715,12 +1070,19 @@
           "if": {
             "properties": {
               "estado": {
-                "enum": ["revisto_e_aprovado", "revisto_com_alteracoes", "rejeitado"]
+                "enum": [
+                  "revisto_e_aprovado",
+                  "revisto_com_alteracoes",
+                  "rejeitado"
+                ]
               }
             }
           },
           "then": {
-            "required": ["revisor_ref", "revisto_em"]
+            "required": [
+              "revisor_ref",
+              "revisto_em"
+            ]
           },
           "additionalProperties": false
         },
@@ -728,8 +1090,12 @@
           "type": "object",
           "description": "Reference to detailed evidence (full prompts, full responses) kept outside the NDF, under its own access/retention policy. Not required — full prompts/responses must never be mandatory inside the NDF-core.",
           "properties": {
-            "tipo": { "type": "string" },
-            "identificador": { "type": "string" },
+            "tipo": {
+              "type": "string"
+            },
+            "identificador": {
+              "type": "string"
+            },
             "hash": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$"
@@ -740,5 +1106,57 @@
       },
       "additionalProperties": false
     }
-  }
+  },
+  "allOf": [
+    {
+      "title": "Unidentifiable origin excludes an identified one",
+      "if": {
+        "required": [
+          "metadados"
+        ],
+        "properties": {
+          "metadados": {
+            "required": [
+              "origem_nao_identificavel"
+            ]
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "participantes"
+              ],
+              "properties": {
+                "participantes": {
+                  "contains": {
+                    "type": "object",
+                    "required": [
+                      "papel"
+                    ],
+                    "properties": {
+                      "papel": {
+                        "enum": [
+                          "autor",
+                          "coautor",
+                          "decisor"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "required": [
+                "proveniencia_sistema"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
 }

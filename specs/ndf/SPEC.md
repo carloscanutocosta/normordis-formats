@@ -281,6 +281,7 @@ conteúdo**, de um dos três modos seguintes:
 | Humana | `participantes` contém pelo menos uma entrada com `papel` em `autor`, `coautor` ou `decisor` |
 | De sistema | `proveniencia_sistema` presente e não vazio |
 | De IA | `proveniencia_ia.utilizada` é `true` |
+| **Não apurável** | `metadados.origem_nao_identificavel` presente, com `fundamento` (§2.7.6) |
 
 Um NDF que não declare nenhuma destas origens **DEVE** ser rejeitado
 (ver §9.1 e §9.2). A regra é verificável apenas por estrutura,
@@ -296,6 +297,15 @@ O invariante não obriga a inventar informação. Um documento produzido por um
 sistema sem qualquer intervenção humana declara `proveniencia_sistema` e
 nada mais; nenhum autor humano tem de ser fabricado para satisfazer a regra
 (ver §2.15.5, caso da declaração automática convertida).
+
+O quarto modo existe pela mesma razão. Há documentos que entram em custódia sem
+que a sua origem seja apurável — um documento em papel digitalizado sem menção
+de autor, uma denúncia anónima, um ficheiro recebido de sistema de terceiro sem
+identificação. Antes de a captura existir (§2.8.1), o caso não se colocava:
+todo o NDF nascia no sistema produtor e a origem era sempre conhecida. Recusar
+estes documentos ou fabricar-lhes um autor são as duas alternativas, e ambas
+são piores do que declarar, com fundamento, que a origem não é apurável. Ver
+§2.7.6 e [ADR-023](../../docs/architecture/ADR-023-origem-nao-apuravel.md).
 
 ### 2.3 `ndf_id`
 
@@ -681,6 +691,46 @@ o conteúdo. Os três coexistem e são independentes: uma liquidação automáti
 tem `entidade_produtora` "Autoridade Tributária e Aduaneira",
 `imputacao[].imputado` o órgão concreto com competência para o ato, e
 `proveniencia_sistema[].sistema` o motor de liquidação.
+
+#### 2.7.6 `origem_nao_identificavel`
+
+Bloco opcional que declara que a origem do conteúdo **não pôde ser apurada**. É
+o quarto modo do invariante de origem (§2.2.1).
+
+```json
+{
+  "metadados": {
+    "origem_nao_identificavel": {
+      "fundamento": "Documento em papel digitalizado, sem menção de autor nem de serviço emissor."
+    }
+  }
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `fundamento` | Sim | Razão pela qual a origem não é apurável. |
+
+`fundamento` é obrigatório e não tem valor por omissão. Sem ele, o bloco seria
+uma via de fuga ao invariante — bastaria declará-lo vazio para dispensar
+qualquer origem. Com ele, é uma afirmação que alguém assume, que entra nos
+`payload_bytes` e que a assinatura cobre.
+
+O bloco **NÃO DEVE** coexistir com uma declaração que identifique a origem:
+`participantes` com `papel` em `autor`, `coautor` ou `decisor`, ou
+`proveniencia_sistema` não vazio. Declarar autor e origem não apurável ao mesmo
+tempo é contradição, e o schema rejeita-a.
+
+**Pode** coexistir com `proveniencia_ia`: a intervenção de um sistema de IA num
+documento capturado é tipicamente assistência — classificação, extração,
+sumarização — e não produção do conteúdo. Nesse caso a origem do conteúdo
+continua por apurar, e as duas declarações são simultaneamente verdadeiras.
+
+Este bloco descreve o que **não** se sabe. Não substitui
+`metadados.entidade_produtora`, que continua obrigatório e identifica a entidade
+a que o documento é atribuído para efeitos arquivísticos, nem
+`entidade_responsavel`, que identifica quem o custodia (§2.7.2, §2.7.3, ADR-016).
+Ter entidade produtora conhecida e autor não apurável é situação corrente, não contradição.
 
 #### 2.7.4 `classificacao_seguranca`
 
@@ -1302,7 +1352,7 @@ sistema não *participa* na produção de um documento — **produz** o document
 
 | Papel | Significado |
 |---|---|
-| `autor` | Produziu materialmente o conteúdo canonicalizado. |
+| `autor` | Produziu materialmente o conteúdo do documento: o conteúdo estruturado que é canonicalizado, ou o componente binário que o constitui (§2.8.1). |
 | `coautor` | Produziu materialmente parte do conteúdo, em conjunto com o autor. |
 | `revisor_humano` | Reviu conteúdo produzido por outrem — pessoa, sistema ou IA. |
 | `decisor` | Praticou a decisão que constitui o conteúdo do documento (ex.: despacho). |
@@ -2655,6 +2705,7 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 20. **NDF-PROD-020 — NÃO DEVE** reescrever, recomprimir ou reserializar os bytes de um componente binário declarado em `documento`, nem alterá-los para os harmonizar com os campos descritivos; os componentes preservam-se tal como emitidos ou recebidos (§2.8.1, §2.8.2, §4.5.1).
 21. **NDF-PROD-021 — NÃO DEVE** incluir numa declaração de componente qualquer localização de armazenamento — URI, *bucket*, caminho dentro do pacote ou nome de adaptador (§2.8.1).
 22. **NDF-PROD-022 — NÃO DEVE** derivar `nivel_assinatura` de assinaturas contidas em componentes binários; o campo descreve a assinatura do NDF (§2.10, §4.5.1).
+23. **NDF-PROD-023 — NÃO DEVE** declarar `metadados.origem_nao_identificavel` em conjunto com `participantes` contendo `papel` em `autor`, `coautor` ou `decisor`, ou com `proveniencia_sistema` não vazio; e **DEVE** preencher `fundamento` com a razão concreta pela qual a origem não é apurável (§2.2.1, §2.7.6).
 
 ### 9.2 Leitor conforme
 
@@ -2683,6 +2734,7 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 21. **NDF-READ-021 — NÃO DEVE** apresentar a projeção do NDT de um documento com componentes binários como sendo o documento; o NDT desse documento descreve a captura, e o conteúdo do ato obtém-se resolvendo o componente (§2.8.1, §2.8.2).
 22. **NDF-READ-022 — NÃO DEVE** apresentar uma assinatura contida num componente como assinatura do NDF, nem inferir dela o `nivel_assinatura` (§4.5.1).
 23. **NDF-READ-023 — DEVE** resolver um componente declarado em `documento` pelo seu digest, e **NÃO DEVE** resolvê-lo pelo nome de origem declarado, que é descritivo (§2.8.1).
+24. **NDF-READ-024 — NÃO DEVE** interpretar `metadados.origem_nao_identificavel` como ausência de entidade produtora ou de responsável pela custódia, que continuam obrigatórios; o bloco declara apenas que a origem do conteúdo não é apurável (§2.7.6).
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 

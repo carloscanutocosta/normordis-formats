@@ -148,9 +148,29 @@ responsável. Não é alteração do NDF-core nem de `tipo_documento_ref`: nenhu
 documento já produzido é afetado, porque a declaração governa a **produção
 futura**, nunca a validade do que existe.
 
-A medida de progresso associada — proporção de documentos estruturados face a
-capturados, por tipo — é derivável de `metadados.tipo_documento_ref` e não
-carece de campo próprio. É informação operacional, fora do NDF (SPEC §3.6).
+### 3.2.6 Medida de progresso da transição
+
+A proporção de documentos produzidos por via estruturada face aos capturados,
+**por tipo**, é o indicador que informa duas decisões: onde investir a seguir no
+editor, e quando acionar o roquete de §3.2.3.
+
+Contrato do indicador:
+
+| | |
+|---|---|
+| **Universo** | documentos finalizados de uma entidade, num intervalo declarado |
+| **Numerador** | documentos cujo `metadados.tipo_documento_ref` **não** seja `documento-capturado@<versao>` |
+| **Denominador** | os anteriores, mais os capturados |
+| **Agrupamento** | por tipo. Nos capturados, o tipo de agrupamento é `documento.tipo_equivalente` quando declarado; sem ele, o documento conta para um agregado «sem tipo equivalente» |
+| **Fonte** | `metadados.tipo_documento_ref` e `documento.tipo_equivalente` — nenhum campo novo é necessário |
+
+É informação **derivada e operacional**, fora do NDF (SPEC §3.6): recalculável a
+partir do corpus, nunca armazenada nele. O registo fixa aqui o que se conta e a
+partir de quê; quem o calcula é o sistema que detém o corpus.
+
+O agregado «sem tipo equivalente» é deliberado. Um capturado que não consiga
+nomear o tipo nativo correspondente é sinal de que a tipologia não está
+modelada, o que é informação de roadmap tão útil quanto a proporção em si.
 
 ---
 

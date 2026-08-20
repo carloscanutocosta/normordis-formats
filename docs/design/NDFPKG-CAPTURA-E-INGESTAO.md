@@ -727,7 +727,10 @@ não a satisfaz — nem deve ser apresentada como se a satisfizesse.
 | Q4 | Limite prático de dimensão da materialização (scan extenso, gravação) | operação |
 | ~~Q5~~ | ~~Alargamento de SPEC §2.8~~ | **decidido 2026-08-20** — decisão de âmbito registada em `ROADMAP.md`; sem alteração ao NDF-core |
 | ~~Q6~~ | ~~Onde a regra de divergência se torna normativa~~ | **decidido 2026-08-20** — na §2.8 alargada, tarefa C1 (§3.9) |
-| **Q7** | **Quem olha a métrica estruturado/capturado, e com que periodicidade** | **responsável do projeto — único item do Bloco 0 por fechar** |
+| ~~Q7~~ | ~~Quem olha a métrica estruturado/capturado~~ | **fechada 2026-08-20** — não aplicável até à primeira instalação real; contrato do indicador fixado no registo §3.2.6, roquete de §3.2.3 mitiga o risco de fundo |
+| ~~Q8~~ | ~~Redação de `autor` em §2.12.2 face ao documento capturado~~ | **decidida 2026-08-20** — referente alargado ao componente; sem alteração de schema nem do invariante |
+| ~~Q9~~ | ~~Quarto modo de origem~~ | **decidida e executada 2026-08-20** — `metadados.origem_nao_identificavel` com `fundamento` obrigatório; ADR-023, decisão de âmbito no `ROADMAP.md` |
+| **Q10** | **`proveniencia_ia.utilizada: true` satisfaz o invariante de origem mesmo quando a IA apenas reviu ou classificou** | imprecisão anterior a este trabalho; registada, não corrigida |
 
 ## 11. Transferência entre entidades — âmbito adjacente
 

@@ -106,6 +106,29 @@ O NDF-core não é alterado: nenhum campo novo, nenhuma primitiva nova,
 ao resto, e esta decisão não constitui autorização genérica para alargar o
 core.
 
+**Segunda reabertura pontual de D5 (2026-08-20) — origem não apurável.** Ao
+contrário da decisão sobre §2.8 acima, esta **altera o schema do NDF-core**:
+acrescenta `metadados.origem_nao_identificavel` e um quarto ramo ao `anyOf` do
+invariante de origem (§2.2.1).
+
+O caso não existia antes da captura documental. Enquanto todo o NDF nascia no
+sistema produtor, a origem era sempre conhecida e os três modos bastavam. Com a
+captura, um documento pode entrar em custódia sem origem apurável — um
+digitalizado de 1987 sem menção de autor, uma denúncia anónima, um ficheiro de
+sistema de terceiro sem identificação. §2.2.1 obrigava, nesses casos, a rejeitar
+o documento ou a fabricar-lhe um autor, o que a própria cláusula proíbe.
+
+O teste da secção seguinte foi percorrido e dá seis respostas coerentes, com o
+passo 3 a resolver a colocação: entra em `metadados`, o bloco dos campos
+descritivos transversais, e **não** como primitiva de topo. Fundamentação
+completa em [ADR-023](docs/architecture/ADR-023-origem-nao-apuravel.md) e no
+Bloco F de
+[`docs/roadmap/PLANO-CAPTURA-NDFPKG.md`](docs/roadmap/PLANO-CAPTURA-NDFPKG.md).
+
+Adição opcional que não invalida nenhum documento existente; `ndf_version`
+mantém-se em `1.0.0` (ADR-007). Como as reaberturas anteriores, é pontual e
+fundamentada, e não constitui autorização genérica para alargar o core.
+
 ### Teste de admissão de novas primitivas no NDF-core (2026-08-15)
 
 D5 declara o congelamento de âmbito mas não definia **o que o quebra**. A

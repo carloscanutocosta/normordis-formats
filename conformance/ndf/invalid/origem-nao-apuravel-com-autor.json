@@ -1,0 +1,50 @@
+{
+  "_comment": "INVÁLIDO: origem_nao_identificavel declarada em conjunto com participante de papel 'autor'. Violação de NDF-PROD-023 (§2.7.6) — nomear o autor e declarar a origem não apurável é contradição.",
+  "_expected_error": "origem não apurável não coexiste com origem identificada",
+  "_expected_match": "should not be valid under",
+  "ndf_version": "1.0.0",
+  "ndf_id": "c7d8e9fa-0b1c-4d2e-9f3a-4b5c6d7e8f90",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "avancada",
+  "ndt_version_ref": "vermerk-generico@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "ext.example.vermerk@1.0.0",
+    "entidade_produtora": {
+      "designacao": "Stadtverwaltung Beispiel — Amt für Bauordnung"
+    },
+    "entidade_responsavel": "Stadtverwaltung Beispiel",
+    "assunto": "Vermerk zur Bauvoranfrage BV-2026-0417",
+    "numero_referencia": "VM/2026/0417",
+    "processo_ref": "BV-2026-0417",
+    "idioma": "de-DE",
+    "contem_dados_pessoais": false,
+    "origem_nao_identificavel": {
+      "fundamento": "Documento em papel digitalizado em 2026, sem menção de autor nem de serviço emissor."
+    }
+  },
+  "documento": {
+    "titel": "Vermerk zur Bauvoranfrage BV-2026-0417",
+    "datum": "2026-07-09",
+    "sachverhalt": "Prüfung der Bauvoranfrage auf Vereinbarkeit mit dem Bebauungsplan Nr. 214.",
+    "ergebnis": "Die Voranfrage ist genehmigungsfähig."
+  },
+  "avaliacao": {
+    "perfil": "generic",
+    "classificacao_ref": "aktenplan-2021/63-40-02",
+    "prazo_conservacao": {
+      "valor": 10,
+      "unidade": "anos",
+      "forma_contagem": "fim_ano_civil"
+    },
+    "destino_final": "a_determinar",
+    "autoridade_avaliacao": "Landesarchiv Beispiel",
+    "instrumento_ref": "vwv-aufbewahrung-aussonderung-2023"
+  },
+  "participantes": [
+    {
+      "papel": "autor",
+      "participante_ref": "user:100"
+    }
+  ]
+}
