@@ -127,12 +127,16 @@ Referência ODF: `text:note` (`text:note-class`, `text:note-citation`, `text:not
 
 Referência ODF: `text:reference-mark`, `text:reference-ref`.
 
+**Desenho fixado em [`NCRTF-IDENTIFICADORES-E-REFERENCIAS.md`](../design/NCRTF-IDENTIFICADORES-E-REFERENCIAS.md)**
+(2026-08-18), posterior a este plano: é essa a fonte do vocabulário e das
+regras abaixo, incluindo a decisão de que o `id` é conteúdo assinado.
+
 | | |
 |---|---|
-| **NCRTF** | campo `id` opcional em nós bloco (`heading`, `paragraph`, `list_item`) e novo nó inline `reference` com `ref`. Preferido a dois nós de marca — menos vocabulário novo e cobre o caso de uso, que é remeter para um artigo ou número |
-| **Regra** | toda a `reference.ref` resolve para um `id` declarado **no mesmo valor NCRTF**. Ponteiro intra-documento: não leva hash, ao contrário de `relacoes[]` |
+| **NCRTF** | campo `id` opcional em nós bloco elegíveis como alvo (`heading`, `paragraph`, `list_item`, `table`, `blockquote`) e novo nó inline `xref` com `target`. Preferido a dois nós de marca — menos vocabulário novo e cobre o caso de uso, que é remeter para um artigo ou número. O texto visível da remissão é escrito pelo produtor em `content`, como num `link`; o NCRTF não gera rótulos a partir de numeração resolvida em leitura (§3.2 do desenho) |
+| **Regra** | toda a `xref.target` resolve para um `id` declarado **no mesmo documento** (R7), e cada `id` é único no documento (R8). Sintaxe `^[a-z][a-z0-9-]{0,63}$`, sem normalização em leitura (§3.1). Ponteiro intra-documento: não leva hash, ao contrário de `relacoes[]`. Referências circulares são legítimas e não são erro (§3.4) |
 | **Ferramenta** | verificação nova em `tools/validate.py`, no verificador semântico NCRTF |
-| **Requisitos** | `NCRTF-PROD-009` (`id` único no valor), `NCRTF-PROD-010` (`ref` resolve), `NCRTF-READ-007` (rejeitar referência pendurada) |
+| **Requisitos** | `NCRTF-PROD-009` (sintaxe e unicidade de `id`, R8), `NCRTF-PROD-010` (`xref.target` resolve, R7), `NCRTF-READ-007` (rejeitar violação de R7 ou R8) |
 | **Vetores** | `valid/remissao-interna.json`, `invalid/remissao-pendurada.json`, `invalid/id-duplicado.json` |
 | **Esforço** | **M** |
 
