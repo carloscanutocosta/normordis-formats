@@ -107,7 +107,7 @@ entre formato e infraestrutura fica preservada.
 declaração em `documento`, presença física no inventário. Não é duplicação de
 responsabilidade (uma é documental e assinada, a outra é física e do pacote),
 mas exige um requisito de coerência entre as duas, sem o qual poderiam
-divergir. Esse requisito é `NDF-PKG-010`, com vetor negativo próprio.
+divergir. Esse requisito é `NDF-PKG-009`, com vetor negativo próprio.
 
 ## Referências
 

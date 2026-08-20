@@ -92,17 +92,18 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## NDT
 
-### `valid/` — devem ser aceites (5)
+### `valid/` — devem ser aceites (6)
 
 | Ficheiro | Descrição |
 |---|---|
 | `ndt/valid/blocos-tabela.json` | BlocoTabela com colunas de múltiplos formatos. Verifica BlocoTabela, ColunaDef, estilo_cabecalho e todos os FormatoDisplay usados em colunas. |
+| `ndt/valid/formato-data-hora.json` | Formato de display 'data_hora' em campo posicionado, elemento de fluxo e coluna de tabela. Verifica que o vocabulário de §4.3 o aceita nos três contextos; a reg… |
 | `ndt/valid/minimal.json` | NDT mínimo válido — apenas campos obrigatórios: ndt_version, schema_id, versao_ndt, paginas_def e sequencia. Verifica que o schema aceita um template sem grafic… |
 | `ndt/valid/recurso-embebido.json` | Recurso SVG embebido em base64 (modo: embebido). Verifica RecursoEmbebido e referencia_recurso em GraficoImagem. |
 | `ndt/valid/recurso-referenciado-por-hash.json` | Recurso SVG referenciado por hash SHA-256 (modo: referenciado_por_hash). Verifica RecursoReferenciadoPorHash com hash_sha256 e content_type. |
 | `ndt/valid/sequencia-overflow.json` | Sequência com página de continuação (repeticao: conforme_necessario). Verifica fonte_overflow, linhas_por_pagina e incluir_se em SequenciaEntrada. |
 
-### `invalid/` — devem ser rejeitados (14)
+### `invalid/` — devem ser rejeitados (15)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -113,6 +114,7 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndt/invalid/duplicate-page-id.json` | ids de pagina devem ser únicos |
 | `ndt/invalid/fluxo-e-blocos-na-mesma-pagina.json` | INVÁLIDO: pagina_def com fluxo e blocos preenchidos. Violação de NDT-PROD-008 (§5.2.1) — os dois modelos de conteúdo são mutuamente exclusivos. |
 | `ndt/invalid/fonte-nao-declarada.json` | INVÁLIDO: campo com família 'Arial', que não é base nem está declarada em recursos[]. Violação de NDT-PROD-017 (§5.8). |
+| `ndt/invalid/formato-display-desconhecido.json` | INVÁLIDO: formato de display fora do enum fechado de §4.3. 'data-hora' com hífen é o erro plausível depois de 'data_hora' entrar no vocabulário; o enum é fechad… |
 | `ndt/invalid/imagem-sem-alt.json` | INVÁLIDO: elemento imagem sem alt. Violação de NDT-PROD-019 (§8.2) — elementos decorativos declaram alt vazio; nenhum omite o campo. |
 | `ndt/invalid/linha-lateral-excede-largura-util.json` | INVÁLIDO: colunas de linha_lateral somam 200 mm numa A4 com margens de 15 mm (largura útil 180 mm). Violação de NDT-PROD-011 (§5.2.2). |
 | `ndt/invalid/missing-sequencia.json` | sequencia é obrigatória |
@@ -139,4 +141,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 85 casos.**
+**Total: 87 casos.**

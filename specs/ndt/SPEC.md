@@ -231,11 +231,36 @@ renderizador. Não é um tipo de dados com validação; é uma indicação visua
 | `"inteiro"` | Inteiro sem casas decimais |
 | `"monetario"` | Valor monetário com duas casas decimais e separador de milhar |
 | `"data"` | Data formatada (DD/MM/YYYY) |
+| `"data_hora"` | Instante formatado (DD/MM/YYYY HH:MM:SS + designação do desvio) |
 | `"booleano"` | `true`/`false` → símbolo visual (✓/✗) |
 | `"checkbox"` | Caixa de verificação marcada/desmarcada |
 | `"radio"` | Ponto de seleção ativo/inativo |
 
 Formatos numéricos aceitam o parâmetro opcional `"casas_decimais"` (inteiro). Predefinição: `2` para `"monetario"`, `0` para `"inteiro"`, variável para `"numero"`.
+
+#### 4.3.1 `"data_hora"` — renderização determinística
+
+Um instante difere de uma data: transporta desvio face ao UTC, e converter esse
+desvio destrói a reprodutibilidade. Dois renderizadores em máquinas com fusos
+diferentes produziriam páginas diferentes a partir do mesmo NDF — o que
+contraria o princípio de que a projeção é função do documento, não do ambiente
+que a produz.
+
+Um renderizador **NÃO DEVE** converter um valor de data e hora para o fuso local
+da máquina, do utilizador ou do serviço. **DEVE** renderizar a data e a hora
+**tal como declaradas no valor**, e apresentar o desvio:
+
+| Valor no NDF | Renderização |
+|---|---|
+| `2026-06-18T09:10:00Z` | `18/06/2026 09:10:00 UTC` |
+| `2026-06-18T10:10:00+01:00` | `18/06/2026 10:10:00 +01:00` |
+| `2026-06-18T09:10:00.472Z` | `18/06/2026 09:10:00 UTC` — fração de segundo é dado, não apresentação |
+
+Um valor que não seja um instante RFC 3339 válido renderiza tal qual, sem erro e
+sem aviso — mesma tolerância de `NDT-RENDER-007`.
+
+Esta regra vale para `campos[]`, `fluxo.elementos[]` e colunas de tabela, em
+qualquer perfil de saída.
 
 ---
 
@@ -1269,6 +1294,7 @@ golden que os sustentam estão em
 9. **NDT-RENDER-009 — DEVE**, no extravasamento de um `corpo` em `fluxo`, renderizar os elementos posteriores ao `corpo` na última página da sequência, imediatamente após o fim do corpo, e os anteriores apenas na primeira instância da `pagina_def` (§5.2.1).
 10. **NDT-RENDER-010 — DEVE** resolver `{{validation_code}}` a partir do envelope NDF, e distinguir os três espaços de tokens: `{{placeholder_ndt}}` (metadados do template), `{ndf:caminho}` (dados do NDF) e `{n}`/`{total}` (paginação) (§5.3.5, §5.6).
 11. **NDT-RENDER-011 — DEVE** resolver famílias tipográficas NCRTF pela tabela canónica de §5.8, dando precedência a fontes declaradas em `recursos[]` com o mesmo nome canónico.
+12. **NDT-RENDER-012 — NÃO DEVE** converter valores de data e hora para o fuso local ao renderizar `formato: "data_hora"`; renderiza a data e a hora tal como declaradas, com o desvio apresentado (§4).
 
 ### 9.4 Suite de conformidade
 

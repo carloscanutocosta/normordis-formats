@@ -32,12 +32,23 @@ O registo define o mecanismo de resolução de `tipo_documento_ref` — o campo 
 | `informacao-tecnica@1.0.0` | Informação técnica — nota interna fundamentada | [schemas/informacao-tecnica.schema.json](schemas/informacao-tecnica.schema.json) |
 | `parecer@1.0.0` | Parecer — apreciação fundamentada com sentido explícito, sobre outro documento | [schemas/parecer.schema.json](schemas/parecer.schema.json) |
 | `despacho@1.0.0` | Despacho — decisão ou instrução de serviço | [schemas/despacho.schema.json](schemas/despacho.schema.json) |
+| `documento-capturado@1.0.0` | Documento cujo conteúdo reside em componentes binários — emitido fora do editor estruturado ou recebido do exterior | [schemas/documento-capturado.schema.json](schemas/documento-capturado.schema.json) |
 
 `informacao-tecnica`, `parecer` e `despacho` formam, em conjunto com
 `NDF-core.relacoes` (SPEC.md §2.11), a cadeia documental
 Informação → Parecer → Despacho — três documentos NDF autónomos ligados por
 relações verificáveis, nunca um único documento com secções sucessivamente
 assinadas. Ver exemplo em `specs/ndf/examples/informacao-parecer-despacho/`.
+
+`documento-capturado` distingue-se dos restantes por não conter o corpo do ato:
+transporta a casca descritiva e os componentes binários que o constituem. É um
+NDF completo em tudo o resto — identidade, proveniência, imputação, avaliação,
+relações, integridade e custódia. Ver
+[ADR-020](../../docs/architecture/ADR-020-um-formato-duas-realidades.md).
+
+É **um** tipo genérico, e não uma família (`oficio-capturado`,
+`parecer-capturado`, …): o campo opcional `tipo_equivalente` transporta a
+correspondência com o tipo nativo sem duplicar o registo.
 
 Tipos específicos de cada entidade (AT, SS, Municípios, etc.) são definidos fora desta especificação base mas seguem o mesmo formato de schema.
 
@@ -115,7 +126,22 @@ Sem esta regra, a declaração seria um interruptor e o regime de transição
 converter-se-ia em permanente por inércia — que é o risco principal desta
 matéria, não a decisão inicial.
 
-### 3.2.4 Alteração
+### 3.2.4 Valores recomendados para os tipos canónicos
+
+| Tipo | `via_predefinida` | `captura_admissivel` | Nota |
+|---|---|---|---|
+| `oficio@1.0.0` | `estruturada` | `true` | Enquanto o editor não cobrir a tipologia |
+| `informacao-tecnica@1.0.0` | `estruturada` | `true` | idem |
+| `parecer@1.0.0` | `estruturada` | `true` | idem |
+| `despacho@1.0.0` | `estruturada` | `true` | idem |
+| `documento-capturado@1.0.0` | `capturada` | — | O campo não se aplica: o tipo **é** a via |
+
+`captura_admissivel: true` é aqui reconhecimento do estado presente, não
+recomendação permanente. Pelo roquete de §3.2.3, cada um destes valores passa a
+`false` quando o editor cobrir a tipologia, e não volta atrás sem justificação
+registada.
+
+### 3.2.5 Alteração
 
 Alterar qualquer dos dois campos é alteração do registo, com data e
 responsável. Não é alteração do NDF-core nem de `tipo_documento_ref`: nenhum

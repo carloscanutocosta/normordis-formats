@@ -1,0 +1,509 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "documento-capturado",
+  "versao_ndt": "1.0.0",
+  "titulo": "Auto de Captura Documental",
+  "estilos": {
+    "fonte_padrao": {
+      "familia": "Helvetica",
+      "tamanho": 10
+    },
+    "cor_texto": "#1A1A1A",
+    "cor_primaria": "#003366",
+    "espacamento_entre_paragrafos_mm": 3,
+    "identacao_lista_mm": 5,
+    "cabecalhos": [
+      {
+        "nivel": 1,
+        "fonte": {
+          "tamanho": 13,
+          "peso": "bold"
+        }
+      },
+      {
+        "nivel": 2,
+        "fonte": {
+          "tamanho": 11,
+          "peso": "bold"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": {
+      "topo": 20,
+      "fundo": 20,
+      "esq": 20,
+      "dir": 20
+    }
+  },
+  "paginas_def": [
+    {
+      "id": "captura_pag1",
+      "graficos": [
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "AUTO DE CAPTURA DOCUMENTAL",
+          "posicao": {
+            "x": 0,
+            "y": 0
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 14,
+            "peso": "bold",
+            "cor": "#003366"
+          },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Este auto descreve a captura de um documento cujo conteúdo reside em componentes binários. Não é o documento: é o registo da sua entrada em custódia.",
+          "posicao": {
+            "x": 0,
+            "y": 8
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "estilo": "italico",
+            "cor": "#666666"
+          },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "linha",
+          "de": {
+            "x": 0,
+            "y": 20
+          },
+          "para": {
+            "x": 170,
+            "y": 20
+          },
+          "espessura": 0.5,
+          "cor": "#003366",
+          "estilo": "solido"
+        },
+        {
+          "tipo": "codigo_barras",
+          "formato_barras": "qrcode",
+          "conteudo": "https://validar.normordis.pt/{{validation_code}}",
+          "posicao": {
+            "x": 148,
+            "y": 0
+          },
+          "largura": 22,
+          "altura": 22,
+          "nivel_correcao": "M"
+        }
+      ],
+      "campos": [
+        {
+          "referencia": "numero",
+          "posicao": {
+            "x": 0,
+            "y": 24
+          },
+          "largura": 80,
+          "altura": 6,
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 9
+          },
+          "alinhamento": "esquerda"
+        },
+        {
+          "referencia": "data",
+          "posicao": {
+            "x": 90,
+            "y": 24
+          },
+          "largura": 50,
+          "altura": 6,
+          "formato": "data",
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 9
+          },
+          "alinhamento": "esquerda"
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 34,
+        "elementos": [
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "1. IDENTIFICAÇÃO",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 11,
+              "peso": "bold",
+              "cor": "#003366"
+            }
+          },
+          {
+            "tipo": "campo",
+            "referencia": "assunto",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 10,
+              "peso": "bold"
+            }
+          },
+          {
+            "tipo": "campo",
+            "referencia": "destinatario.nome",
+            "incluir_se": "destinatario"
+          },
+          {
+            "tipo": "campo",
+            "referencia": "tipo_equivalente",
+            "incluir_se": "tipo_equivalente"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 4
+          },
+          {
+            "tipo": "separador",
+            "espessura": 0.2,
+            "cor": "#CCCCCC"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 3
+          },
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "2. ENTRADA EM CUSTÓDIA",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 11,
+              "peso": "bold",
+              "cor": "#003366"
+            }
+          },
+          {
+            "tipo": "campo",
+            "referencia": "proveniencia_submissao.canal",
+            "incluir_se": "proveniencia_submissao"
+          },
+          {
+            "tipo": "campo",
+            "referencia": "proveniencia_submissao.recebido_em",
+            "formato": "data_hora",
+            "incluir_se": "proveniencia_submissao"
+          },
+          {
+            "tipo": "campo",
+            "referencia": "proveniencia_submissao.protocolo",
+            "incluir_se": "proveniencia_submissao.protocolo"
+          },
+          {
+            "tipo": "campo",
+            "referencia": "proveniencia_submissao.autenticacao",
+            "incluir_se": "proveniencia_submissao.autenticacao"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 4
+          },
+          {
+            "tipo": "separador",
+            "espessura": 0.2,
+            "cor": "#CCCCCC"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 3
+          },
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "3. COMPONENTES — o hash de cada componente está coberto pela assinatura do NDF",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 11,
+              "peso": "bold",
+              "cor": "#003366"
+            }
+          },
+          {
+            "tipo": "tabela",
+            "referencia": "componentes",
+            "largura": 170,
+            "altura_linha": 5,
+            "repete_cabecalho": true,
+            "estilo_cabecalho": {
+              "fundo": "#E8EDF2",
+              "fonte": {
+                "familia": "Helvetica",
+                "tamanho": 8,
+                "peso": "bold"
+              }
+            },
+            "colunas": [
+              {
+                "id": "id",
+                "cabecalho": "Id",
+                "largura": 20,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "papel",
+                "cabecalho": "Papel",
+                "largura": 34,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "nome_original",
+                "cabecalho": "Nome de origem",
+                "largura": 36,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "media_type",
+                "cabecalho": "Tipo MIME",
+                "largura": 34,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "tamanho",
+                "cabecalho": "Bytes",
+                "largura": 16,
+                "alinhamento": "direita",
+                "formato": "numero"
+              },
+              {
+                "id": "sha256",
+                "cabecalho": "Digest",
+                "largura": 30,
+                "alinhamento": "esquerda"
+              }
+            ]
+          },
+          {
+            "tipo": "espaco",
+            "altura": 4
+          },
+          {
+            "tipo": "separador",
+            "espessura": 0.2,
+            "cor": "#CCCCCC"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 3
+          },
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "4. RECONSTITUIÇÃO",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 11,
+              "peso": "bold",
+              "cor": "#003366"
+            }
+          },
+          {
+            "tipo": "campo",
+            "referencia": "reconstituicao.estado",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 10,
+              "peso": "bold"
+            }
+          },
+          {
+            "tipo": "campo",
+            "referencia": "reconstituicao.fundamento",
+            "incluir_se": "reconstituicao.fundamento"
+          },
+          {
+            "tipo": "espaco",
+            "altura": 4
+          },
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "5. ASSINATURAS CONTIDAS NOS COMPONENTES",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 11,
+              "peso": "bold",
+              "cor": "#003366"
+            },
+            "incluir_se": "verificacao_assinaturas"
+          },
+          {
+            "tipo": "texto_fixo",
+            "conteudo": "Resultado apurado no momento da captura. Não é assinatura do NDF e não altera o seu nível de assinatura (SPEC NDF §4.5.1).",
+            "fonte": {
+              "familia": "Helvetica",
+              "tamanho": 8,
+              "estilo": "italico",
+              "cor": "#666666"
+            },
+            "incluir_se": "verificacao_assinaturas"
+          },
+          {
+            "tipo": "tabela",
+            "referencia": "verificacao_assinaturas",
+            "largura": 170,
+            "altura_linha": 5,
+            "repete_cabecalho": true,
+            "incluir_se": "verificacao_assinaturas",
+            "estilo_cabecalho": {
+              "fundo": "#E8EDF2",
+              "fonte": {
+                "familia": "Helvetica",
+                "tamanho": 8,
+                "peso": "bold"
+              }
+            },
+            "colunas": [
+              {
+                "id": "componente_id",
+                "cabecalho": "Componente",
+                "largura": 34,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "tipo",
+                "cabecalho": "Tipo",
+                "largura": 24,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "resultado",
+                "cabecalho": "Resultado",
+                "largura": 34,
+                "alinhamento": "esquerda"
+              },
+              {
+                "id": "verificado_em",
+                "cabecalho": "Verificado em",
+                "largura": 44,
+                "alinhamento": "esquerda",
+                "formato": "data_hora"
+              },
+              {
+                "id": "material_ref",
+                "cabecalho": "Evidência",
+                "largura": 34,
+                "alinhamento": "esquerda"
+              }
+            ]
+          }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": {
+            "x": 148,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Auto de captura — {ndf:ndf_id} — verificação: {ndf:validation_code}",
+          "posicao": {
+            "x": 0,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
+        }
+      ]
+    },
+    {
+      "id": "captura_pag_cont",
+      "graficos": [
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "AUTO DE CAPTURA DOCUMENTAL (continuação)",
+          "posicao": {
+            "x": 0,
+            "y": 0
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 10,
+            "peso": "bold",
+            "cor": "#003366"
+          },
+          "alinhamento": "esquerda"
+        },
+        {
+          "tipo": "linha",
+          "de": {
+            "x": 0,
+            "y": 8
+          },
+          "para": {
+            "x": 170,
+            "y": 8
+          },
+          "espessura": 0.3,
+          "cor": "#003366",
+          "estilo": "solido"
+        }
+      ],
+      "campos": [],
+      "fluxo": {
+        "y_inicio": 14,
+        "elementos": []
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": {
+            "x": 148,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
+        },
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "Auto de captura — {ndf:ndf_id} — verificação: {ndf:validation_code}",
+          "posicao": {
+            "x": 0,
+            "y": 281
+          },
+          "fonte": {
+            "familia": "Helvetica",
+            "tamanho": 8,
+            "cor": "#666666"
+          }
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    {
+      "pagina_def": "captura_pag1",
+      "repeticao": "unica"
+    },
+    {
+      "pagina_def": "captura_pag_cont",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "componentes"
+    }
+  ]
+}

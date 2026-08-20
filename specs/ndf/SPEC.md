@@ -696,9 +696,49 @@ dentro dos bytes assinados.
 
 Os valores dentro de `documento` e `metadados` seguem as regras gerais do JCS/JSON: strings (UTF-8), números, booleanos, `null`, objetos e arrays. Não são permitidos:
 
-- Tipos binários embutidos diretamente (anexos binários são referenciados por hash/identificador de blob, fora do NDF-core — fora de âmbito desta especificação, que cobre apenas documentos gerados internamente sem anexos binários opacos).
+- Tipos binários embutidos diretamente — nem base64, nem data URL, nem qualquer outra codificação de bytes opacos dentro de `documento` ou `metadados`.
 - Valores `NaN`, `Infinity`, `-Infinity` (não representáveis em JSON estrito).
 - Chaves duplicadas no mesmo objeto (proibido por JCS).
+
+#### 2.8.1 Componentes binários referenciados por hash
+
+A proibição anterior recai sobre **bytes embutidos**, não sobre a referência a
+eles. Um schema de tipo documental (§2.9) **PODE** declarar componentes binários
+por digest — identidade, papel, tipo MIME, dimensão e hash — mantendo os bytes
+fora do NDF-core.
+
+Isto é o que permite representar em NDF um documento cujo conteúdo não nasceu no
+editor estruturado: emitido noutra ferramenta e preservado, ou recebido do
+exterior. O tipo canónico para esse caso é `documento-capturado@<versao>`
+(`specs/registry/`); a decisão e o seu alcance constam de
+[ADR-020](../../docs/architecture/ADR-020-um-formato-duas-realidades.md).
+
+Um componente declarado por hash fica dentro dos `payload_bytes` e, portanto,
+coberto pela canonicalização e pela assinatura — é essa a razão de a declaração
+viver em `documento` e não no manifesto do pacote, que não é assinado
+([ADR-021](../../docs/architecture/ADR-021-componentes-nos-bytes-assinados.md),
+§8.3).
+
+Uma declaração de componente **NÃO DEVE** conter localização de armazenamento —
+URI, *bucket*, caminho dentro do pacote ou nome de adaptador. O digest é a
+identidade do componente e a chave da sua resolução; um leitor **NÃO DEVE**
+resolver um componente pelo seu nome de origem, que é descritivo. Num `.ndfpkg`,
+a correspondência faz-se com `manifest.inventario` (§8.1, `NDF-PKG-009`).
+
+#### 2.8.2 Divergência entre declaração e componente
+
+Num documento cujo conteúdo resida em componentes, os campos descritivos de
+`documento` e o conteúdo do componente são **asserções independentes**: nada
+impede que divirjam, ao contrário de um documento cujo conteúdo é estruturado
+na própria declaração.
+
+Em caso de divergência: **o componente é autoritativo quanto ao conteúdo do
+ato; o NDF é autoritativo quanto a identidade, custódia e classificação.**
+
+Nenhum dos dois corrige o outro. Um erro nos campos descritivos corrige-se por
+novo NDF com `relacoes[{tipo: "corrige"}]` (§2.11.2), nunca por alteração do
+documento finalizado (§2.1, §5.3). Um produtor **NÃO DEVE** alterar os bytes de
+um componente para os harmonizar com a declaração.
 
 ### 2.9 Tipologias de documento e extensibilidade de `documento`
 
@@ -1119,6 +1159,16 @@ ext.<entidade>.<tipo>
 | `tipo` | lowercase, `[a-z][a-z0-9_-]*` | `retificacao-oficiosa` |
 
 **Exemplo válido**: `"ext.at.retificacao-oficiosa"`.
+
+**Exemplo de uso corrente — instrução do procedimento.** O vocabulário base tem
+`anexa` (o alvo é anexado a este documento) e `responde_a` (este documento é
+resposta ao alvo), mas não tem valor para «o alvo instrui este procedimento»,
+que é o vínculo entre um requerimento recebido e a informação técnica que sobre
+ele se produz. Uma entidade que precise dele declara-o como
+`ext.<entidade>.instrui` — não é `anexa`, porque o requerimento não é anexo da
+informação, e não é `responde_a`, porque a informação não responde ao
+requerente. Ambos os documentos são NDF autónomos, ligados por relação
+verificável, e não secções do mesmo documento (ADR-003).
 
 Este mecanismo permite a uma entidade produtora declarar tipos de relação
 específicos do seu domínio administrativo sem esperar por uma nova versão
@@ -2423,10 +2473,27 @@ documento.ndfpkg (ZIP)
 ├── schemas/               — schemas necessários à validação autónoma do pacote
 │   ├── <tipo_id>.schema.json           — schema do tipo referenciado por tipo_documento_ref
 │   └── <perfil>.schema.json            — schema do perfil referenciado por avaliacao.perfil
-└── recursos/              — recursos visuais partilhados por NDT e NCRTF
-    ├── <sha256>.<ext>     — recursos NDT com modo referenciado_por_hash (nome = hash)
-    └── <nome>.<ext>       — imagens NCRTF referenciadas por image.ref (nome declarado no campo)
+├── recursos/              — recursos visuais partilhados por NDT e NCRTF
+│   ├── <sha256>.<ext>     — recursos NDT com modo referenciado_por_hash (nome = hash)
+│   └── <nome>.<ext>       — imagens NCRTF referenciadas por image.ref (nome declarado no campo)
+├── original/              — componentes com papel «original» (§2.8.1), bytes tal como emitidos ou recebidos
+├── representacoes/        — componentes derivados de um original para garantir fidelidade visual
+├── anexos/                — componentes de apoio sem identidade documental própria
+└── evidencias/            — material de validação de assinaturas contidas em componentes (§4.5.1)
 ```
+
+Os quatro últimos diretórios existem apenas quando o documento declarar
+componentes com os papéis correspondentes; um NDF cujo conteúdo seja
+estruturado não os tem.
+
+O nome de cada ficheiro dentro deles é livre — o diretório reflete o papel, e a
+correspondência com a declaração faz-se **pelo digest** e nunca pelo caminho
+(§2.8.1). Um pacote materializado de outra forma, com outros nomes de ficheiro,
+continua a corresponder ao mesmo NDF e à mesma assinatura.
+
+Todos os componentes declarados em `documento` integram a materialização; um
+`.ndfpkg` que omita qualquer um deles não é conforme (`NDF-PKG-009`). Não há
+categoria de componente documental omissível.
 
 O diretório `schemas/` torna o pacote autonomamente validável: um verificador
 independente valida `documento` contra o schema que veio no pacote, sem acesso
@@ -2504,6 +2571,9 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 17. **NDF-PROD-017 — DEVE**, quando `imputacao` estiver presente, incluir em cada elemento `imputado.designacao` e `titulo`, e satisfazer as condicionais do título: `fundamento.publicacao_ref` para `delegacao` e `subdelegacao`, `em` para `aceitacao_expressa`, `fundamento.descricao` para `efeito_legal` (§2.15.2).
 18. **NDF-PROD-018 — DEVE**, quando `metadados.tipo_documento_ref` usar uma extensão qualificada `ext.<entidade>.<tipo>@<versao>`, incluir o schema correspondente em `schemas/<tipo_id>.schema.json` no `.ndfpkg` (§2.9.5, §8.1).
 19. **NDF-PROD-019 — NÃO DEVE** declarar em `proveniencia_sistema` qualquer componente não determinístico; tais componentes pertencem a `proveniencia_ia` (§2.14.4).
+20. **NDF-PROD-020 — NÃO DEVE** reescrever, recomprimir ou reserializar os bytes de um componente binário declarado em `documento`, nem alterá-los para os harmonizar com os campos descritivos; os componentes preservam-se tal como emitidos ou recebidos (§2.8.1, §2.8.2, §4.5.1).
+21. **NDF-PROD-021 — NÃO DEVE** incluir numa declaração de componente qualquer localização de armazenamento — URI, *bucket*, caminho dentro do pacote ou nome de adaptador (§2.8.1).
+22. **NDF-PROD-022 — NÃO DEVE** derivar `nivel_assinatura` de assinaturas contidas em componentes binários; o campo descreve a assinatura do NDF (§2.10, §4.5.1).
 
 ### 9.2 Leitor conforme
 
@@ -2529,6 +2599,9 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 18. **NDF-READ-018 — DEVE**, quando não conseguir resolver o schema referenciado por `metadados.tipo_documento_ref`, rejeitar o documento **ou** tratar `documento` como opaco, sem declarar interpretação completa; e **NÃO DEVE**, em caso algum, declarar `documento` validado sem o ter validado (§2.9.5). Em contexto de pacote, a ausência do schema de um tipo de extensão é falta de conformidade do pacote — ver §9.3.
 19. **NDF-READ-019 — NÃO DEVE** interpretar a ausência de entradas em `participantes` como prova de ausência de intervenção de terceiros (§2.12.5).
 20. **NDF-READ-020 — NÃO DEVE** derivar de `imputacao[].autenticacao.nivel_garantia` qualquer gradação da imputação, presunção ilidível ou tratamento diferenciado do documento; o campo descreve o mecanismo de autenticação, não a força da imputação (§2.15.4).
+21. **NDF-READ-021 — NÃO DEVE** apresentar a projeção do NDT de um documento com componentes binários como sendo o documento; o NDT desse documento descreve a captura, e o conteúdo do ato obtém-se resolvendo o componente (§2.8.1, §2.8.2).
+22. **NDF-READ-022 — NÃO DEVE** apresentar uma assinatura contida num componente como assinatura do NDF, nem inferir dela o `nivel_assinatura` (§4.5.1).
+23. **NDF-READ-023 — DEVE** resolver um componente declarado em `documento` pelo seu digest, e **NÃO DEVE** resolvê-lo pelo nome de origem declarado, que é descritivo (§2.8.1).
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 
@@ -2542,6 +2615,7 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`.
 7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** ser resolúvel a partir do pacote em `schemas/<tipo_id>.schema.json` quando o tipo for uma extensão qualificada (§2.9.5); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver.
 8. **NDF-PKG-008** — O schema do perfil referenciado por `avaliacao.perfil` **DEVE** estar presente em `schemas/<perfil>.schema.json` (§3.2.3, §8.1), e o bloco `avaliacao` **DEVE** validar contra ele; um verificador **DEVE** resolvê-lo preferencialmente a partir do pacote.
+9. **NDF-PKG-009** — Cada componente declarado em `documento` nos termos de §2.8.1 **DEVE** ter, em `manifest.inventario`, uma entrada cujo `hash_sha256` coincida com o seu digest, e o ficheiro correspondente **DEVE** estar presente no pacote. Um pacote que declare um componente ausente do inventário, ou cujo digest não coincida com os bytes presentes, **NÃO É** conforme.
 
 ### 9.4 Suite de conformidade e test runner
 
