@@ -6,3 +6,6 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 build/
+
+# Ambiente virtual Python local (dependências de tools/requirements.txt)
+.venv/

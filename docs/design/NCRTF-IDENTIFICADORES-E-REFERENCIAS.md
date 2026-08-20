@@ -173,11 +173,16 @@ não proposto para decisão nesta ronda.
 Não normativos nesta fase — para revisão quando N2 avançar para redação de
 SPEC (Fase A, `ODF-ALIGNMENT-STUDY.md` §9).
 
+Os identificadores abaixo são os reservados para A2 em
+[`docs/roadmap/PLANO-NDT-NCRTF.md`](../roadmap/PLANO-NDT-NCRTF.md) §4. A SPEC
+do NCRTF vai hoje até `NCRTF-PROD-007` e `NCRTF-READ-005`; `NCRTF-PROD-008` e
+`NCRTF-READ-006` estão reservados para A1 (notas).
+
 | Candidato | Enunciado |
 |---|---|
-| `NCRTF-PROD-XXX` | Um produtor **DEVE** garantir que todo `id` presente respeita a sintaxe de §3.1 e é único no documento (R8). |
-| `NCRTF-PROD-XXX` | Um produtor **NÃO DEVE** incluir `xref` cujo `target` não resolva para um `id` existente no mesmo documento (R7). |
-| `NCRTF-READ-XXX` | Um leitor **DEVE** rejeitar um NCRTF que viole R7 ou R8. |
+| `NCRTF-PROD-009` | Um produtor **DEVE** garantir que todo `id` presente respeita a sintaxe de §3.1 e é único no documento (R8). |
+| `NCRTF-PROD-010` | Um produtor **NÃO DEVE** incluir `xref` cujo `target` não resolva para um `id` existente no mesmo documento (R7). |
+| `NCRTF-READ-007` | Um leitor **DEVE** rejeitar um NCRTF que viole R7 ou R8. |
 
 ## 7. Ligação ao plano faseado
 
