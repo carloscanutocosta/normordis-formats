@@ -27,14 +27,35 @@
   do NDT de um capturado como sendo o documento; não apresentar assinatura de
   componente como assinatura do NDF; resolver componentes por digest.
 - **`NDF-PKG-009`** — coerência entre `documento.componentes[].sha256` e
-  `manifest.inventario`. É a única junta verificável nova.
+  `manifest.inventario`, **fechada nos dois sentidos**: nenhum componente
+  declarado sem ficheiro, nenhum ficheiro em diretório de papel sem componente
+  declarado. É a única junta verificável nova.
+- Exemplo `specs/ndf/examples/captura-requerimento/` e vetores `PKG-NEG-010` a
+  `PKG-NEG-014`.
+- **`event_type: "capturado"`** no log de custódia — entrada dos componentes em
+  custódia, anterior à finalização. `details` recomenda `componentes`, `canal` e
+  `recebido_em`; a verificação periódica de fixidez usa `verificado` com
+  `componentes_verificados` (§2.4.2).
+- **§2.4.4 — evidência transferível e auditoria interna.** Classifica os eventos
+  e fixa a propriedade que torna a transferência parcial honesta: a omissão é
+  detetável por salto de `sequence` e ligação de hash que não fecha.
+- **`CUST-REQ-004`** — transferir eventos íntegros; não renumerar nem recompor a
+  cadeia para dissimular omissões.
+- Vetores `conformance/custody/captura-chain.json` e `omissao-recomposta.json`.
+
+### Alterado
+
+- **`CUST-REQ-003` e §2.4.3** — a eliminação abrange **também os componentes
+  binários**. Um documento cujo conteúdo resida em componentes não fica
+  eliminado pela destruição do NDF-core: o conteúdo do ato continuaria a existir
+  nos ficheiros preservados. Os digests dos componentes destruídos conservam-se
+  em `details`, provando o que existiu sem que os bytes subsistam.
 
 ### Notas
 
 `manifest.schema.json` não é alterado: o inventário do pacote já cobre a
 integridade física de qualquer ficheiro, e a declaração documental vive em
-`documento`. Os vetores negativos de `NDF-PKG-009` entram com o exemplo de
-captura (`docs/roadmap/PLANO-CAPTURA-NDFPKG.md`, Fase D).
+`documento`. Os vetores negativos de `NDF-PKG-009` acompanham o exemplo de captura.
 
 
 ## [Não publicado] — avaliação arquivística por perfil e separação custódia ↔ RGPD

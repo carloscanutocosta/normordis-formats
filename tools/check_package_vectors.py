@@ -14,6 +14,7 @@ from validate import validate_package_dir
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "specs/ndf/examples/ndfpkg-example"
+SOURCE_CAPTURA = ROOT / "specs/ndf/examples/captura-requerimento"
 
 
 def load(path: Path) -> dict:
@@ -46,6 +47,93 @@ def cases(root: Path):
     yield "PKG-NEG-007-envelope-sem-timestamps", lambda p: _remove_timestamps(p)
     yield "PKG-NEG-008-assinatura-sem-id", lambda p: _remove_assinatura_id(p)
     yield "PKG-NEG-009-ndt-referencia-pendurada", lambda p: _dangling_ndt_ref(p)
+
+
+def cases_captura(root: Path):
+    """Vetores próprios do documento capturado (§2.8.1, NDF-PKG-009)."""
+    yield "PKG-NEG-010-componente-ausente-do-pacote", lambda p: _componente_ausente(p)
+    yield "PKG-NEG-011-digest-divergente", lambda p: _digest_divergente(p)
+    yield "PKG-NEG-012-ficheiro-nao-declarado", lambda p: _ficheiro_nao_declarado(p)
+    yield "PKG-NEG-013-original-reescrito", lambda p: _original_reescrito(p)
+    yield "PKG-NEG-014-sem-estado-reconstituicao", lambda p: _sem_reconstituicao(p)
+
+
+def _caminho_componente(root: Path) -> Path:
+    return root / "original/requerimento.pdf"
+
+
+def _componente_ausente(root: Path) -> None:
+    """Componente declarado no NDF-core mas ausente do pacote materializado.
+
+    Remove-se também do inventário, para provar NDF-PKG-009 e não apenas a
+    regra genérica de ficheiro inventariado em falta.
+    """
+    alvo = _caminho_componente(root)
+    digest = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
+    alvo.unlink()
+    manifest_path = root / "manifest.json"
+    manifest = load(manifest_path)
+    manifest["inventario"] = [
+        i for i in manifest["inventario"] if i["hash_sha256"] != digest
+    ]
+    dump(manifest_path, manifest)
+
+
+def _digest_divergente(root: Path) -> None:
+    """Bytes do componente alterados; inventário atualizado, NDF-core não.
+
+    É o ataque que motivou ADR-021: sem NDF-PKG-009, o pacote passaria — a
+    assinatura cobre o NDF-core, e o manifesto não é assinado.
+    """
+    alvo = _caminho_componente(root)
+    alvo.write_bytes(alvo.read_bytes() + b"% adulterado\n")
+    update_inventory_hash(root, "original/requerimento.pdf")
+
+
+def _ficheiro_nao_declarado(root: Path) -> None:
+    """Ficheiro em original/ inventariado mas não declarado como componente."""
+    extra = root / "original/nao-declarado.pdf"
+    extra.write_bytes(b"%PDF-1.4\n% componente clandestino\n%%EOF\n")
+    manifest_path = root / "manifest.json"
+    manifest = load(manifest_path)
+    manifest["inventario"].append({
+        "ficheiro": "original/nao-declarado.pdf",
+        "hash_sha256": "sha256:" + hashlib.sha256(extra.read_bytes()).hexdigest(),
+    })
+    dump(manifest_path, manifest)
+
+
+def _original_reescrito(root: Path) -> None:
+    """Original reescrito e o NDF-core 'harmonizado' com os novos bytes.
+
+    Viola NDF-PROD-020: o digest passa a bater, mas payload_hash deixa de
+    corresponder aos bytes de ndf-core.json. Um original preservado não se
+    reescreve — reescrevê-lo obriga a um NDF novo.
+    """
+    alvo = _caminho_componente(root)
+    novos = alvo.read_bytes().replace(b"Requerimento", b"Reqverimento")
+    alvo.write_bytes(novos)
+    digest = "sha256:" + hashlib.sha256(novos).hexdigest()
+    core_path = root / "ndf-core.json"
+    core = load(core_path)
+    core["documento"]["componentes"][0]["sha256"] = digest
+    core["documento"]["componentes"][0]["tamanho"] = len(novos)
+    dump(core_path, core)
+    update_inventory_hash(root, "original/requerimento.pdf")
+    update_inventory_hash(root, "ndf-core.json")
+
+
+def _sem_reconstituicao(root: Path) -> None:
+    """Documento capturado sem estado de reconstituição declarado.
+
+    A ausência de estratégia tem de ser representável e visível (ADR-022);
+    omitir o bloco não é forma de a declarar.
+    """
+    core_path = root / "ndf-core.json"
+    core = load(core_path)
+    del core["documento"]["reconstituicao"]
+    dump(core_path, core)
+    update_inventory_hash(root, "ndf-core.json")
 
 
 def _dangling_ndt_ref(root: Path) -> None:
@@ -122,22 +210,24 @@ def _remove_assinatura_id(root: Path) -> None:
 
 
 def main() -> int:
-    if not validate_package_dir(SOURCE):
-        print("FAIL package baseline")
-        return 1
+    for origem, rotulo in ((SOURCE, "package"), (SOURCE_CAPTURA, "captura")):
+        if not validate_package_dir(origem):
+            print(f"FAIL {rotulo} baseline")
+            return 1
     failed = total = 0
     with tempfile.TemporaryDirectory(prefix="normordis-package-") as tmp:
         base = Path(tmp)
-        for name, mutate in cases(base):
-            total += 1
-            target = base / name
-            shutil.copytree(SOURCE, target)
-            mutate(target)
-            if validate_package_dir(target):
-                print(f"FAIL {name}: pacote inválido foi aceite")
-                failed += 1
-            else:
-                print(f"PASS {name}: rejeitado como esperado")
+        for origem, gerador in ((SOURCE, cases), (SOURCE_CAPTURA, cases_captura)):
+            for name, mutate in gerador(base):
+                total += 1
+                target = base / name
+                shutil.copytree(origem, target)
+                mutate(target)
+                if validate_package_dir(target):
+                    print(f"FAIL {name}: pacote inválido foi aceite")
+                    failed += 1
+                else:
+                    print(f"PASS {name}: rejeitado como esperado")
     print(f"PASS package vectors: {total - failed}/{total}" if not failed else f"FAIL package vectors: {failed}")
     return 1 if failed else 0
 

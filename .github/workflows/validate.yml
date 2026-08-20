@@ -60,6 +60,12 @@ jobs:
       - name: Custody chain — invalid (must reject)
         run: "! python3 tools/check_custody.py conformance/custody/invalid-chain.json"
 
+      - name: Custody chain — captura (must pass)
+        run: python3 tools/check_custody.py conformance/custody/captura-chain.json
+
+      - name: Custody chain — omissão recomposta (must reject)
+        run: "! python3 tools/check_custody.py conformance/custody/omissao-recomposta.json"
+
   conformance-js:
     name: JavaScript conformance (cross-language)
     runs-on: ubuntu-latest

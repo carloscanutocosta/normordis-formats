@@ -125,11 +125,13 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## CUSTODY
 
-### vetores diretos (2)
+### vetores diretos (4)
 
 | Ficheiro | Descrição |
 |---|---|
+| `custody/captura-chain.json` | — |
 | `custody/invalid-chain.json` | — |
+| `custody/omissao-recomposta.json` | — |
 | `custody/valid-chain.json` | — |
 
 ## JCS
@@ -141,4 +143,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 87 casos.**
+**Total: 89 casos.**
