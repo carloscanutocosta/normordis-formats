@@ -148,13 +148,29 @@ Sem estas, a Fase A não arranca.
 | **0.2** | Perfil PDF/A alvo fixado (`CAP-06`) | desenho §2.4.1 | ✅ 2026-08-20 |
 | **0.3** | Instrumento de governação no registo de tipos (`CAP-29`) | `specs/registry/SPEC.md` §3.2 | ✅ 2026-08-20 |
 | **0.4** | Colocação normativa da regra de divergência (`CAP-24`) | decidida: §2.8 alargada, tarefa C1 | ✅ 2026-08-20 |
-| **0.5** | **Dono e periodicidade da métrica estruturado/capturado** (`CAP-30`, Q7) | decisão do responsável | 🔎 **a verificar** |
+| **0.5** | Métrica estruturado/capturado (`CAP-30`, Q7) | contrato em `specs/registry/SPEC.md` §3.2.6 | ✅ 2026-08-20 — fechada como **não aplicável até à primeira instalação real** |
 
 **0.1 condiciona C1 — desbloqueado. 0.3 condiciona B2 — desbloqueado.**
 
-`0.5` não bloqueia a Fase A nem a Fase B: o mecanismo existe (registo §3.2.3,
-roquete), falta nomear quem o observa. Bloqueia a operação, não a
-implementação — mas fica em aberto, não fechado por omissão.
+**Resolução de 0.5 (2026-08-20).** A pergunta original — quem observa a métrica
+e com que cadência — tem resposta honesta e inútil num projeto de uma pessoa.
+Nomear um dono não cria vigilância. E hoje a métrica é **immensurável**: não há
+corpus, e uma métrica sem dados é teatro.
+
+Fechada por três razões, com o que era acionável feito:
+
+1. **O risco de fundo já está mitigado por desenho.** O roquete de §3.2.3 torna
+   a transição unidirecional — o deslize que se temia não depende de alguém se
+   lembrar de olhar.
+2. **O contrato do indicador está fixado** (registo §3.2.6): universo,
+   numerador, denominador, agrupamento e fonte. Do lado do formato é tudo o que
+   há a fazer; quem calcula é quem detém o corpus.
+3. **Gatilho de reabertura declarado**: a primeira instalação real com produção
+   documental.
+
+Sugestão registada para essa altura, não decidida agora: **métrica gerada, não
+revista** — como os índices deste repositório, para que «quem olha» seja
+«aparece no diff». Calendários decaem; diffs não.
 
 ## 5. Fase A — fundamentação normativa
 
@@ -335,7 +351,103 @@ reduzida ao contentor — que é P2.
 informação relevante e necessária que hoje **não pode** acompanhar uma
 transferência — logo é lacuna do formato, não da operação (desenho §11.2, L-T2).
 
-## 10. Trilha paralela
+## 10. Bloco F — origem não identificável (Q9)
+
+**Origem.** Destapado ao resolver Q8 (§8.1, D-A2). O invariante de origem de
+SPEC §2.2.1 aceita três modos: `participantes` com papel de autoria,
+`proveniencia_sistema`, ou `proveniencia_ia`. Nenhum cobre um documento cuja
+origem **não é identificável** — e a captura torna esse caso real pela primeira
+vez, porque antes dela todo o NDF nascia internamente e a origem era sempre
+conhecida.
+
+`metadados.entidade_produtora` existe e cobre o emissor externo (ADR-016), mas
+**não satisfaz o invariante**: não é nenhum dos três modos, e `participantes` é
+só para pessoas singulares.
+
+**Três casos reais sem saída** — a regra do ADR-015 exige nomeá-los:
+
+1. documento em papel digitalizado, de 1987, sem autor identificável;
+2. denúncia anónima, que é documento administrativo e tem de ser conservada;
+3. ficheiro recebido de sistema de terceiro sem identificação de origem.
+
+Nestes, §2.2.1 obriga a rejeitar — ou a inventar um autor, que a própria
+cláusula proíbe: «o invariante não obriga a inventar informação».
+
+### 10.1 Teste de admissão aplicado
+
+| # | Pergunta | Resposta |
+|---|---|---|
+| 1 | É informação documental? | **Sim, não excluída.** Quem produziu o documento pertence ao documento; a *ausência* de origem apurável é igualmente facto sobre o documento, não estado de procedimento |
+| 2 | Cabe em `documento`, via schema do tipo? | **Não.** O invariante é regra de nível core, imposta pelo `anyOf` do schema do NDF-core. Um schema de tipo não pode satisfazer um `anyOf` do core, e fazer o core depender de schemas de tipo seria inversão de camadas |
+| 3 | Cabe num bloco transversal existente? | **Sim — `metadados`.** `participantes` é só pessoas; `proveniencia_sistema` exige sistema identificável com nome, identificador e versão, cuja fabricação é exatamente o que §2.2.1 proíbe. `metadados` é o bloco dos campos descritivos transversais, e «a origem deste documento não é apurável, pela razão X» é facto descritivo transversal |
+| 4 | É variação jurisdicional? | Não |
+| 5 | Pode viver fora do NDF, referenciada por hash? | **Não.** O invariante impõe-se estruturalmente dentro do core; referência externa não o satisfaz |
+| 6 | Pode simplesmente não existir? | **Não.** Os três casos acima são reais e de conservação obrigatória |
+
+**Resultado: entra em `metadados`, não como primitiva de topo.** É o desfecho
+que o passo 3 procura — «estes blocos foram desenhados para absorver casos
+novos sem crescer o topo do core».
+
+### 10.2 Forma proposta
+
+```json
+{
+  "metadados": {
+    "origem_nao_identificavel": {
+      "fundamento": "Documento em papel digitalizado, sem menção de autor nem de serviço emissor."
+    }
+  }
+}
+```
+
+- O `anyOf` de §2.2.1 ganha uma quarta alternativa: presença de
+  `metadados.origem_nao_identificavel`.
+- `fundamento` é **obrigatório**. Sem ele, o campo seria via de fuga ao
+  invariante; com ele, é declaração que alguém assume e que a assinatura cobre.
+- Mantém o padrão já usado três vezes no formato para tornar a ausência
+  representável e visível: `revisao_humana.estado: "pendente"` (§2.13.3),
+  `destino_final: "a_determinar"` (§3.4.1) e `reconstituicao.estado: "ausente"`
+  (schema do tipo capturado). É também o que
+  [ADR-022](../architecture/ADR-022-dever-do-formato.md) exige — o formato deve
+  permitir representar o que é relevante, e «a origem não é apurável» é
+  informação relevante.
+
+### 10.3 Decisão e execução
+
+**Aprovado a 2026-08-20.** Registado como decisão de âmbito no
+[`ROADMAP.md`](../../ROADMAP.md) — segunda reabertura pontual de D5, e a
+primeira desta ronda que **altera o schema do NDF-core**. `ndf_version`
+mantém-se em `1.0.0` (ADR-007), por ser adição opcional que não invalida nenhum
+documento existente.
+
+| # | Tarefa | Produz | Estado |
+|---|---|---|---|
+| **F1** | Decisão de âmbito registada | `ROADMAP.md` | ✅ 2026-08-20 |
+| **F2** | Campo em `metadados`, quarto ramo do `anyOf`, exclusão mútua | `ndf-core.schema.json`, SPEC §2.2.1 e §2.7.6, [ADR-023](../architecture/ADR-023-origem-nao-apuravel.md) | ✅ 2026-08-20 |
+| **F3** | `NDF-PROD-023`, `NDF-READ-024` | SPEC §9.1, §9.2 | ✅ 2026-08-20 |
+| **F4** | Vetores | `conformance/ndf/` | ✅ 2026-08-20 |
+
+**Precisão acrescentada na execução — exclusão mútua.** A proposta de §10.2 não
+dizia o que sucede se `origem_nao_identificavel` coexistir com uma origem
+nomeada. Nomear o autor e declarar a origem não apurável é contradição, e o
+schema passa a rejeitá-la. Mas a exclusão **não** abrange `proveniencia_ia`: a
+intervenção de IA num documento capturado é tipicamente assistência —
+classificação, extração, sumarização — e não produção do conteúdo, pelo que as
+duas declarações podem ser simultaneamente verdadeiras.
+
+**Achado colateral (Q10).** Ao decidir esta fronteira, ficou visível que
+§2.2.1 trata `proveniencia_ia.utilizada: true` como origem suficiente do
+conteúdo, mesmo quando a IA apenas reviu ou classificou — o que §2.13.1 admite
+expressamente. É imprecisão anterior a este trabalho e independente dele. Fica
+registada, não corrigida aqui.
+
+### 10.4 Nota de método
+
+Ao contrário de tudo o resto deste plano, o Bloco F alterou o schema do core, e
+por isso passou por decisão expressa antes de execução — o mesmo regime da
+decisão de âmbito de 0.1 e da reabertura de 2026-08-13.
+
+## 11. Trilha paralela
 
 | # | Tarefa | Porquê | Esforço |
 |---|---|---|---|
@@ -343,7 +455,7 @@ transferência — logo é lacuna do formato, não da operação (desenho §11.2
 | **P2** | Documento de desenho do **conjunto de transferência** (L-T1 a L-T4) | Fecha `R13`, abre a conversa com a DGLAB (`R5`). Trabalho de mapeamento, não de invenção | G |
 | **P3** | Mover `HANDOFF-KERNEL-CORE-INGEST.md` para `normordis-kernel` | Impede que arquitetura de aplicação contamine a especificação | P |
 
-## 11. Sequência
+## 12. Sequência
 
 ```
 Bloco 0 ──► Fase A ──► Fase B ──► Fase C ──► Fase D
@@ -369,7 +481,7 @@ mais rápido até um utilizador institucional real (`R5`, gate 7). Não substitu
 `R8` para efeitos de abertura de PR-001, e não deve ser apresentada como se
 substituísse.
 
-## 12. Cobertura — nenhuma decisão sem destino
+## 13. Cobertura — nenhuma decisão sem destino
 
 | Decisão | Implementada em | Decisão | Implementada em |
 |---|---|---|---|
@@ -394,7 +506,7 @@ Sete decisões (`CAP-06`, `CAP-17`, `CAP-20`, `CAP-26` a `CAP-28`, `CAP-30`)
 executam-se no `normordis-kernel`; ficam aqui registadas para que a fronteira
 seja explícita e não se percam por não terem dono neste repositório.
 
-## 13. Riscos
+## 14. Riscos
 
 | Risco | Mitigação |
 |---|---|
@@ -407,10 +519,12 @@ seja explícita e não se percam por não terem dono neste repositório.
 | **Dimensão da materialização** com scan extenso ou gravação | Q4 em aberto; assumir no perfil de custódia, não no formato |
 | **A captura absorve o esforço** e o editor estruturado estagna | `CAP-30` mede-o; se a proporção não descer, o problema é de investimento, não de formato |
 
-## 14. O que este plano não faz
+## 15. O que este plano não faz
 
 - **Não altera o NDF-core.** A capacidade entra por tipo documental. A única
-  excepção é o alargamento de §2.8, decidido em 0.1 com registo próprio.
+  excepção executada é o alargamento de §2.8, decidido em 0.1 com registo
+  próprio. O Bloco F alteraria o schema do core e **está por decidir** (§10.3);
+  enquanto não for aprovado, esta afirmação mantém-se sem ressalva.
 - **Não implementa o core-ingest.** Pipeline, storage, filas e cliente vivem no
   `normordis-kernel` (P3).
 - **Não define o conjunto de transferência.** É trabalho adjacente com documento

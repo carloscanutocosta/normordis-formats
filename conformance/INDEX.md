@@ -6,7 +6,7 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## NDF
 
-### `valid/` — devem ser aceites (13)
+### `valid/` — devem ser aceites (14)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -19,12 +19,13 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/valid/modelo3-tributacao-conjunta.json` | Caso de teste: declaração em tributação conjunta. A lei exige autenticação de ambos os sujeitos passivos, logo imputacao tem duas entradas, cada uma com instant… |
 | `ndf/valid/oficio-com-ncrtf.json` | NDF-core válido com campo 'corpo' em NCRTF v2.0.0. Valida integração NDF+registry+NCRTF. |
 | `ndf/valid/oficio-qualificado.json` | Caso de teste: ofício com assinatura qualificada e dados pessoais. Todos os campos obrigatórios presentes. |
+| `ndf/valid/origem-nao-apuravel.json` | Origem não apurável: quarto modo do invariante de §2.2.1. Documento capturado sem autor identificável — o bloco metadados.origem_nao_identificavel satisfaz o in… |
 | `ndf/valid/parecer-com-relacoes-e-ia.json` | Caso de teste: parecer com relacoes[] (emite_parecer_sobre), participantes[] e proveniencia_ia (utilizada com revisão humana concluída). Cobre §2.11, §2.12, §2.… |
 | `ndf/valid/registo-interno-sem-assinatura.json` | Caso de teste: registo interno sem assinatura eletrónica (nivel_assinatura: nenhuma), com destino_final conservacao_permanente. Requer CAdES-B-LTA para integrid… |
 | `ndf/valid/relacao-extensao-qualificada.json` | Caso de teste: relacoes[0].tipo usa extensão qualificada 'ext.<entidade>.<tipo>' (§2.11.7), fora do vocabulário base fechado mas estruturalmente válida. |
 | `ndf/valid/versao-substituicao.json` | Caso de teste: NDF-core de um documento que SUBSTITUI um anterior, via relacoes[{tipo:'substitui'}] no core assinado (§6, ADR-011). O NDF-core em si tem estado=… |
 
-### `invalid/` — devem ser rejeitados (33)
+### `invalid/` — devem ser rejeitados (35)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -49,6 +50,8 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/invalid/ncrtf-marks-fora-de-ordem.json` | NDF estruturalmente válido, mas campo 'corpo' tem NCRTF com marks fora da ordem canónica (['italic','bold'] viola R1). Deve ser rejeitado pelo validador semânti… |
 | `ndf/invalid/ncrtf-subscript-superscript.json` | NDF estruturalmente válido, mas campo 'corpo' tem NCRTF com subscript e superscript no mesmo nó text. Viola §5.2 da spec NCRTF. |
 | `ndf/invalid/origem-apenas-revisor.json` | INVÁLIDO: participantes[] contém apenas revisor_humano e responsavel_tecnico. Violação: §2.2.1 — rever ou responder tecnicamente por um conteúdo não é produzi-l… |
+| `ndf/invalid/origem-nao-apuravel-com-autor.json` | INVÁLIDO: origem_nao_identificavel declarada em conjunto com participante de papel 'autor'. Violação de NDF-PROD-023 (§2.7.6) — nomear o autor e declarar a orig… |
+| `ndf/invalid/origem-nao-apuravel-sem-fundamento.json` | INVÁLIDO: origem_nao_identificavel sem fundamento. Violação de NDF-PROD-023 (§2.7.6) — sem razão declarada o bloco seria via de fuga ao invariante de origem. |
 | `ndf/invalid/participante-com-campo-tipo.json` | INVÁLIDO: usa o campo participantes[].tipo, removido. Violação: §2.12.2 e §2.12.7 — participantes é índice exclusivamente de pessoas singulares. |
 | `ndf/invalid/participante-papel-sistema-tecnico.json` | INVÁLIDO: usa o papel sistema_tecnico, removido do enum. Violação: §2.12.2 e §2.12.7 — um sistema não participa, produz; pertence a proveniencia_sistema (§2.14)… |
 | `ndf/invalid/protecao-dados-sem-dados-pessoais.json` | INVÁLIDO: bloco protecao_dados presente com contem_dados_pessoais false. Violação: §2.7.2, ADR-016 — a responsabilidade pelo tratamento RGPD só existe quando há… |
@@ -143,4 +146,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 89 casos.**
+**Total: 92 casos.**

@@ -43,8 +43,27 @@
   cadeia para dissimular omissões.
 - Vetores `conformance/custody/captura-chain.json` e `omissao-recomposta.json`.
 
+- **`metadados.origem_nao_identificavel`** com `fundamento` obrigatório —
+  quarto modo do invariante de origem (§2.2.1, §2.7.6). Único caso desta ronda
+  que **altera o schema do NDF-core**; decisão de âmbito registada em
+  `ROADMAP.md`, fundamentação em ADR-023. Não coexiste com `participantes` de
+  papel autoral nem com `proveniencia_sistema`; **pode** coexistir com
+  `proveniencia_ia`, por a intervenção de IA ser assistência e não produção.
+- **`NDF-PROD-023`** e **`NDF-READ-024`** — coerência do quarto modo, e não
+  confundir origem não apurável com ausência de entidade produtora ou de
+  responsável pela custódia.
+- Vetores `conformance/ndf/valid/origem-nao-apuravel.json`,
+  `invalid/origem-nao-apuravel-sem-fundamento.json` e
+  `invalid/origem-nao-apuravel-com-autor.json`.
+
 ### Alterado
 
+- **§2.12.2** — a definição de `autor` passa de «produziu materialmente o
+  conteúdo canonicalizado» para «o conteúdo do documento: o conteúdo estruturado
+  que é canonicalizado, ou o componente binário que o constitui». Precisão
+  exposta pela captura; sem alteração de schema nem do invariante.
+- **Mensagem do validador** para o invariante de origem, que enumerava três
+  modos e agora enumera quatro.
 - **`CUST-REQ-003` e §2.4.3** — a eliminação abrange **também os componentes
   binários**. Um documento cujo conteúdo resida em componentes não fica
   eliminado pela destruição do NDF-core: o conteúdo do ato continuaria a existir

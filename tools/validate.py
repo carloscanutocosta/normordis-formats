@@ -187,8 +187,8 @@ def fmt_schema_error(e) -> str:
         return (
             "NDF-core não declara nenhuma origem do conteúdo: é necessário "
             "participantes[] com papel 'autor', 'coautor' ou 'decisor', ou "
-            "proveniencia_sistema não vazio, ou proveniencia_ia.utilizada true "
-            "(§2.2.1)"
+            "proveniencia_sistema não vazio, ou proveniencia_ia.utilizada true, "
+            "ou metadados.origem_nao_identificavel com fundamento (§2.2.1)"
         )
     field = "/".join(str(p) for p in e.absolute_path)
 
