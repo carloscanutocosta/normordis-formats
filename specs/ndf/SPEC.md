@@ -2137,6 +2137,37 @@ A especificação do NDF não depende do dispositivo de assinatura. Quando CAdES
 CAdES-B-LTA válida sobre `payload_bytes`. Mecanismos possíveis incluem Cartão
 de Cidadão, HSM institucional, selo eletrónico e Chave Móvel Digital.
 
+### 4.5.1 Assinaturas contidas em componentes
+
+Um documento cujo conteúdo resida em componentes binários (§2.8) inclui, por
+vezes, binários que transportam assinaturas próprias, produzidas fora deste
+sistema — tipicamente PAdES sobre um PDF recebido de terceiro.
+
+`nivel_assinatura` (§2.10) descreve **a assinatura do NDF** e NÃO DEVE ser
+derivado de assinaturas contidas em componentes. Um NDF que preserve um PDF com
+assinatura qualificada de terceiro declara
+`nivel_assinatura: "nenhuma"`, com ou sem selo institucional — a declaração
+PODE ser essa sem que isso constitua defeito. Um leitor NÃO DEVE
+apresentar a assinatura de um componente como se fosse assinatura do NDF.
+
+Os bytes de um componente assinado **NÃO DEVEM** ser reescritos, recomprimidos
+ou reserializados em circunstância alguma — é o mesmo princípio já aplicado a
+`payload_bytes` em §5.3, e a sua violação destrói a assinatura que se pretendia
+preservar.
+
+Preservar os bytes não preserva a verificabilidade. Uma assinatura de terceiro
+torna-se inverificável quando os certificados expiram, salvo se a cadeia, os
+dados de revogação e o timestamp forem recolhidos e congelados no momento da
+captura. Esse material DEVE ser preservado como componente próprio quando a
+verificabilidade futura da assinatura contida for relevante.
+
+Uma assinatura PAdES produzida por este sistema sobre uma representação do
+documento é operação distinta da assinatura CAdES do envelope, sobre objeto
+distinto — ver SPEC NDT §8.1. Quando produzida, a ordem é normativa: assinar o
+PDF, calcular o hash do PDF **já assinado**, declarar esse hash no componente e
+só então finalizar o NDF. A ordem inversa produz um hash que não corresponde ao
+ficheiro distribuído.
+
 ### 4.6 `validation_code` — Código de verificação canónico
 
 #### 4.6.1 Propósito

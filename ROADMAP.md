@@ -80,6 +80,32 @@ resto: esta reabertura é pontual, fundamentada nos três ADR, e não constitui
 autorização genérica para alargar o NDF-core. `ndf_version` mantém-se em
 `1.0.0` (ADR-007).
 
+**Decisão de âmbito sobre SPEC §2.8 (2026-08-20).** A cláusula §2.8 exclui hoje,
+pela negativa, os anexos binários opacos: declara que a especificação «cobre
+apenas documentos gerados internamente sem anexos binários opacos». Admitir que
+um schema de tipo documental declare componentes binários **por hash** — e só
+por hash, nunca por bytes embutidos no core — remove essa exclusão.
+
+Registado como **decisão de âmbito**, e não como clarificação editorial, por
+conservadorismo: altera o que o formato admite. Mas é a categoria mais fraca
+das três — não acrescenta nenhuma primitiva ao NDF-core, ao contrário da
+reabertura de 2026-08-13.
+
+Na verdade, o teste da secção seguinte mostra que §2.8 está em contradição
+interna com ele próprio. Aplicado à declaração de componentes binários:
+(1) é informação documental — que binário constitui este documento pertence ao
+documento, não ao procedimento; (2) **cabe em `documento`, via schema do tipo**
+— e o teste manda parar aí, porque esse é o lugar. É exatamente o que se faz
+(`documento-capturado@1.0.0`, ver
+[`docs/roadmap/PLANO-CAPTURA-NDFPKG.md`](docs/roadmap/PLANO-CAPTURA-NDFPKG.md)).
+§2.8, tal como está, proíbe o schema de tipo de fazer aquilo que o passo 2 do
+teste lhe atribui.
+
+O NDF-core não é alterado: nenhum campo novo, nenhuma primitiva nova,
+`ndf_version` mantém-se em `1.0.0` (ADR-007). O congelamento mantém-se quanto
+ao resto, e esta decisão não constitui autorização genérica para alargar o
+core.
+
 ### Teste de admissão de novas primitivas no NDF-core (2026-08-15)
 
 D5 declara o congelamento de âmbito mas não definia **o que o quebra**. A

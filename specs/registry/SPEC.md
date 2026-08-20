@@ -69,6 +69,65 @@ mapeados mas ainda sem schema publicado (`fr-siaf`, `de-barch`, `nl-na`,
 
 ---
 
+## 3.2 Via de produção admissível por tipo
+
+Um documento pode nascer por duas vias: **estruturada** — editor que produz
+`documento` tipado, com NDT e NCRTF — ou **capturada** — binário emitido fora do
+sistema estruturado e preservado como componente
+(`documento-capturado@<versao>`). As duas produzem NDF completos e distinguem-se
+apenas no bloco `documento` e na função do NDT; ver
+[`docs/design/NDFPKG-CAPTURA-E-INGESTAO.md`](../../docs/design/NDFPKG-CAPTURA-E-INGESTAO.md) §3.
+
+Enquanto o editor estruturado não cobrir uma tipologia, a via capturada é o
+regime corrente dessa tipologia. À medida que passa a cobri-la, a tipologia
+transita. O registo dá o **lugar onde essa transição se declara**; não a decide.
+
+### 3.2.1 Declaração
+
+Cada entrada do registo PODE declarar:
+
+| Campo | Valores | Significado |
+|---|---|---|
+| `via_predefinida` | `estruturada` \| `capturada` | A via que o sistema propõe por omissão para este tipo |
+| `captura_admissivel` | `true` \| `false` | Se o tipo aceita `documento-capturado` como forma válida de o produzir |
+
+Na ausência de declaração, o tipo não impõe restrição — a decisão é inteiramente
+da entidade que o usa.
+
+### 3.2.2 Quem declara o quê
+
+O registo canónico define o **mecanismo** e PODE registar um valor recomendado.
+O valor em vigor num organismo é declarado por esse organismo. Isto decorre do
+princípio de que ao formato compete permitir que a informação relevante seja
+guardada, não impor a decisão de quem produz (SPEC NDF §1.1; ver
+[`ROADMAP.md`](../../ROADMAP.md), decisão de âmbito de 2026-08-20).
+
+Um organismo PODE apertar o valor recomendado — passar `captura_admissivel` de
+`true` a `false`. NÃO DEVERIA alargá-lo sem justificação registada.
+
+### 3.2.3 Roquete, não interruptor
+
+A transição é **unidirecional por desenho**. `captura_admissivel` move-se de
+`true` para `false` quando o editor passa a cobrir o tipo; voltar atrás exige
+justificação expressa e registada, com data e responsável.
+
+Sem esta regra, a declaração seria um interruptor e o regime de transição
+converter-se-ia em permanente por inércia — que é o risco principal desta
+matéria, não a decisão inicial.
+
+### 3.2.4 Alteração
+
+Alterar qualquer dos dois campos é alteração do registo, com data e
+responsável. Não é alteração do NDF-core nem de `tipo_documento_ref`: nenhum
+documento já produzido é afetado, porque a declaração governa a **produção
+futura**, nunca a validade do que existe.
+
+A medida de progresso associada — proporção de documentos estruturados face a
+capturados, por tipo — é derivável de `metadados.tipo_documento_ref` e não
+carece de campo próprio. É informação operacional, fora do NDF (SPEC §3.6).
+
+---
+
 ## 4. Resolução
 
 Um leitor NDF resolve `tipo_documento_ref` na seguinte ordem de precedência:
