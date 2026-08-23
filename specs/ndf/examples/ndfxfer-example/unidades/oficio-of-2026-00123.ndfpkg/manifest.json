@@ -1,0 +1,69 @@
+{
+  "ndfpkg_version": "1.0.0",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "ndf_version": "1.0.0",
+  "schema_id": "oficio-generico",
+  "estado": "ativo",
+  "nivel_assinatura": "qualificada",
+  "finalizado_em": "2026-06-18T10:30:00Z",
+  "payload_hash": "sha256:e9709f485152513827dfaea7f9e254ef7828695837909b8ae317c913f9930bab",
+  "validation_code": "NDF-MJHVTB2JYSNUG5MMFWMC",
+  "inventario": [
+    {
+      "ficheiro": "README.md",
+      "hash_sha256": "sha256:2d7b41ab6d43086a02c7a7e8dfd3f36d0584990f3e9d4c6c3e73ad8e30954184"
+    },
+    {
+      "ficheiro": "anexos/mapa-medicoes.txt",
+      "hash_sha256": "sha256:165830ce12904531cd539298f3ad8066d94fcf678755401ff78b28776edb97ef"
+    },
+    {
+      "ficheiro": "envelope.json",
+      "hash_sha256": "sha256:bf1e995fbc4df5eda9d853eebbd20537839708eb907f8865dfd91273c97d5fe4"
+    },
+    {
+      "ficheiro": "ndf-core.json",
+      "hash_sha256": "sha256:e9709f485152513827dfaea7f9e254ef7828695837909b8ae317c913f9930bab"
+    },
+    {
+      "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
+      "hash_sha256": "sha256:4c3c69dbdfe1f3f55444231610285e94e5fb08cca201ab135d7b7cdd055ed67c"
+    },
+    {
+      "ficheiro": "recursos/brasao-republica.svg",
+      "hash_sha256": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
+    },
+    {
+      "ficheiro": "schemas/custody-event.schema.json",
+      "hash_sha256": "sha256:60cf03f2a5eea589a9a88eeb66078ae948f842fb966f3be57d13726c5cc05985"
+    },
+    {
+      "ficheiro": "schemas/envelope.schema.json",
+      "hash_sha256": "sha256:d55c2dc452f6e0979a39cbf463715a4ce9ac6837e3b684d6c0f0606fb2dc82c9"
+    },
+    {
+      "ficheiro": "schemas/manifest.schema.json",
+      "hash_sha256": "sha256:2aca2688e2be95c254024b1832e1f01045c82c95da9ced39a54a32d734dc2c69"
+    },
+    {
+      "ficheiro": "schemas/ncrtf.schema.json",
+      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+    },
+    {
+      "ficheiro": "schemas/ndf-core.schema.json",
+      "hash_sha256": "sha256:dd1f1c831b55b44f4bfe8499ad7d23c22587bb8b69cccb55fe61c0ca81fd390a"
+    },
+    {
+      "ficheiro": "schemas/ndt.schema.json",
+      "hash_sha256": "sha256:840d4162ad616f1e43bce1ce80d2190ba247c79b656a63d7fe185e5f2d926af1"
+    },
+    {
+      "ficheiro": "schemas/oficio.schema.json",
+      "hash_sha256": "sha256:a2e913df59b289d3a484d2f5a2de3f6d948378c4646852fe73efa406157e58f3"
+    },
+    {
+      "ficheiro": "schemas/pt-dglab.schema.json",
+      "hash_sha256": "sha256:7c772ab34f1703834be42eb28f85ba749fc5df04b03086185bae0e865093f82a"
+    }
+  ]
+}

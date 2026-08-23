@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/registry/documento-capturado/1.0.0/schema.json",
+  "title": "Documento capturado v1.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'documento-capturado@1.0.0'. Documento cujo conteúdo reside em componentes binários — emitido fora do editor estruturado ou recebido do exterior. O NDF transporta identidade, metadados, proveniência, imputação, avaliação, relações e integridade sobre esses componentes. Ver ADR-020 e ADR-021.",
+  "type": "object",
+  "required": ["assunto", "data", "componentes", "reconstituicao"],
+  "additionalProperties": false,
+  "properties": {
+    "numero": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Número ou referência do documento, quando exista. Ausente é normal em documento recebido do exterior sem numeração própria.",
+      "examples": ["OF/2026/00123", "REQ 2026/4471"]
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do documento tal como o produtor o emitiu — não a data de captura, que é registada em proveniencia_submissao.recebido_em.",
+      "examples": ["2026-06-18"]
+    },
+    "assunto": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Assunto do documento. Afirmado na captura, não extraído do binário; sobre divergência entre esta declaração e o conteúdo do componente, ver SPEC.md §2.8.",
+      "examples": ["Requerimento de certidão de teor"]
+    },
+    "destinatario": {
+      "type": "object",
+      "required": ["nome"],
+      "additionalProperties": false,
+      "description": "Destinatário do documento, quando aplicável.",
+      "properties": {
+        "nome": { "type": "string", "minLength": 1 },
+        "cargo": { "type": "string" },
+        "entidade": { "type": "string" }
+      }
+    },
+    "referencias": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Referências a documentos ou processos anteriores.",
+      "examples": [["proc.º 123/2026"]]
+    },
+    "tipo_equivalente": {
+      "type": "string",
+      "pattern": "^(ext\\.[a-z0-9][a-z0-9-]*\\.)?[a-z0-9][a-z0-9-]*@[0-9]+(\\.[0-9]+)*$",
+      "description": "Tipo documental nativo que este documento teria se produzido no editor estruturado, quando determinável. Serve a medida de progresso da transição (registo SPEC §3.2.4); não altera a interpretação do documento.",
+      "examples": ["oficio@1.0.0", "ext.at.liquidacao-irs@2026.1"]
+    },
+    "componentes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Componentes binários que constituem este documento. O hash entra nos payload_bytes e fica coberto pela assinatura (ADR-021). Nenhuma entrada declara localização de armazenamento: a resolução faz-se por hash.",
+      "items": {
+        "type": "object",
+        "required": ["id", "papel", "media_type", "sha256", "tamanho"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "Identificador do componente, unívoco dentro deste documento."
+          },
+          "papel": {
+            "enum": ["original", "representacao_congelada", "anexo", "evidencia"],
+            "description": "original — bytes tal como emitidos ou recebidos, sempre preservados. representacao_congelada — derivada de um original para garantir fidelidade visual, nunca o substitui. anexo — componente de apoio sem identidade documental própria. evidencia — material de validação de assinatura contida, congelado na captura. Ver docs/interoperability/PREMIS-METS-MAPPING.md §3."
+          },
+          "derivado_de": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "id do componente de origem. Obrigatório quando papel é representacao_congelada: uma representação congelada é sempre derivação de um original identificável."
+          },
+          "media_type": {
+            "type": "string",
+            "pattern": "^[a-z]+/[a-zA-Z0-9.+_-]+$",
+            "description": "Tipo MIME determinado por inspeção do conteúdo, nunca inferido da extensão.",
+            "examples": ["application/pdf", "image/jpeg", "application/vnd.oasis.opendocument.text"]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+            "description": "Digest do componente no formato '<alg>:<hex>'. Valor normativo para NDF v1.x é sha256:<64 hex>. É a identidade do componente e a chave da sua resolução; DEVE constar de manifest.inventario num .ndfpkg (NDF-PKG-010)."
+          },
+          "tamanho": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Dimensão em bytes."
+          },
+          "nome_original": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Nome do ficheiro tal como emitido ou recebido. É descritivo — NÃO é caminho dentro do pacote, e um leitor não o DEVE usar para resolver o componente."
+          },
+          "validacao_formato": {
+            "type": "object",
+            "required": ["resultado"],
+            "additionalProperties": false,
+            "description": "Resultado da validação de formato no momento da captura. Registo, não juízo: um resultado nao_conforme não invalida o documento nem a captura (SPEC.md §2.8).",
+            "properties": {
+              "norma": {
+                "type": "string",
+                "description": "Norma de formato verificada.",
+                "examples": ["PDF/A", "PDF/UA"]
+              },
+              "parte": { "type": "string", "examples": ["1", "2", "3", "4"] },
+              "nivel": { "type": "string", "examples": ["a", "b", "u"] },
+              "resultado": {
+                "enum": ["conforme", "nao_conforme", "nao_validavel"],
+                "description": "nao_validavel cobre ficheiro cifrado, corrompido ou sem validador disponível."
+              },
+              "validador": {
+                "type": "object",
+                "required": ["nome", "versao"],
+                "additionalProperties": false,
+                "description": "Sem identificar o validador e a sua versão, um resultado registado hoje é ininterpretável a longo prazo.",
+                "properties": {
+                  "nome": { "type": "string", "minLength": 1 },
+                  "versao": { "type": "string", "minLength": 1 }
+                }
+              },
+              "verificado_em": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "papel": { "const": "representacao_congelada" } }, "required": ["papel"] },
+            "then": { "required": ["derivado_de"] }
+          },
+          {
+            "if": {
+              "properties": { "validacao_formato": { "properties": { "resultado": { "enum": ["conforme", "nao_conforme"] } }, "required": ["resultado"] } },
+              "required": ["validacao_formato"]
+            },
+            "then": { "properties": { "validacao_formato": { "required": ["resultado", "validador", "verificado_em"] } } }
+          }
+        ]
+      }
+    },
+    "reconstituicao": {
+      "type": "object",
+      "required": ["estado"],
+      "additionalProperties": false,
+      "description": "Estado da estratégia de reconstituição visual deste documento. A ausência de estratégia é representável e visível, nunca omitida (ADR-022).",
+      "properties": {
+        "estado": {
+          "enum": ["adequada", "adequada_com_deficiencia", "ausente"],
+          "description": "adequada — o formato preservado garante reconstituição fiel. adequada_com_deficiencia — garante-a com limitações conhecidas. ausente — não foi possível assegurar reconstituição fiel."
+        },
+        "fundamento": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Razão do estado declarado. Obrigatório quando o estado não for 'adequada'."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "estado": { "enum": ["adequada_com_deficiencia", "ausente"] } }, "required": ["estado"] },
+          "then": { "required": ["fundamento"] }
+        }
+      ]
+    },
+    "proveniencia_submissao": {
+      "type": "object",
+      "required": ["canal", "recebido_em"],
+      "additionalProperties": false,
+      "description": "Origem da entrada em custódia. Presente na via de receção externa; ausente quando o documento foi emitido pelo próprio serviço.",
+      "properties": {
+        "canal": {
+          "enum": ["e_balcao", "digitalizacao", "correio_eletronico", "transferencia_sistema", "presencial", "outro"],
+          "description": "Canal pelo qual o documento entrou em custódia."
+        },
+        "canal_detalhe": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Descrição do canal. Obrigatório quando canal for 'outro'."
+        },
+        "recebido_em": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Instante de entrada em custódia."
+        },
+        "protocolo": {
+          "type": "string",
+          "description": "Número de protocolo ou registo de entrada atribuído pela entidade."
+        },
+        "submissor_ref": {
+          "type": "string",
+          "description": "Referência opaca ao submissor, resolvida fora do NDF — mesmo padrão de participante_ref (SPEC.md §2.12.4)."
+        },
+        "autenticacao": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Meio de autenticação do submissor no momento da entrada. Enum aberto, partilhado com imputacao[].autenticacao.meio (SPEC.md §2.15.4): o mesmo conceito não deve ter dois vocabulários. Registar o meio observado não implica declarar quem produziu o conteúdo.",
+          "examples": [
+            "chave_movel_digital",
+            "cartao_cidadao",
+            "senha_acesso",
+            "certificado_qualificado",
+            "presencial"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "canal": { "const": "outro" } }, "required": ["canal"] },
+          "then": { "required": ["canal_detalhe"] }
+        }
+      ]
+    },
+    "verificacao_assinaturas": {
+      "type": "array",
+      "description": "Resultado da verificação de assinaturas contidas em componentes, no momento da captura (SPEC.md §4.5.1). Não altera nivel_assinatura do NDF.",
+      "items": {
+        "type": "object",
+        "required": ["componente_id", "tipo", "resultado", "verificado_em"],
+        "additionalProperties": false,
+        "properties": {
+          "componente_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "id do componente verificado."
+          },
+          "tipo": { "enum": ["PAdES", "CAdES", "XAdES", "outro"] },
+          "resultado": {
+            "enum": ["valida", "invalida", "nao_verificavel"],
+            "description": "Resultado no instante da captura. Não é promessa de verificabilidade futura — ver material_ref."
+          },
+          "verificado_em": { "type": "string", "format": "date-time" },
+          "material_ref": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "id do componente com papel 'evidencia' que preserva cadeia, revogação e timestamp desta assinatura. A sua ausência significa que a verificabilidade da assinatura contida caduca com os certificados."
+          }
+        }
+      }
+    }
+  }
+}
