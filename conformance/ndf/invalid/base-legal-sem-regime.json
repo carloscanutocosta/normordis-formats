@@ -1,0 +1,58 @@
+{
+  "_comment": "Caso de teste inválido: 'base_legal_conservacao' declara 'base' sem 'regime'. Uma base legal sem o regime a que pertence não tem significado determinado — o mesmo argumento que já obriga 'classificacao_seguranca' a ser um par (§2.7.4). Deve ser rejeitado.",
+  "ndf_version": "1.0.0",
+  "ndf_id": "8d51c760-2ea4-4b39-9f07-6b24c1ae3f85",
+  "estado": "ativo",
+  "payload_hash_alg": "sha256",
+  "nivel_assinatura": "avancada",
+  "ndt_version_ref": "vermerk-generico@1.0.0",
+  "metadados": {
+    "tipo_documento_ref": "ext.example.vermerk@1.0.0",
+    "entidade_produtora": {
+      "designacao": "Gemeindeverwaltung Beispiel — Bauamt"
+    },
+    "entidade_responsavel": "Gemeindeverwaltung Beispiel",
+    "assunto": "Vermerk zur Bauvoranfrage BV-2026-0417",
+    "numero_referencia": "VM/2026/0417",
+    "processo_ref": "BV-2026-0417",
+    "idioma": "de-CH",
+    "contem_dados_pessoais": true,
+    "protecao_dados": {
+      "categorias": [
+        "identificacao_civil",
+        "dados_processuais"
+      ],
+      "base_legal_conservacao": {
+        "base": "bearbeitung-oeffentliches-organ",
+        "fundamento_ref": "reglement-archivierung-2024"
+      },
+      "responsavel_tratamento": "Gemeindeverwaltung Beispiel"
+    }
+  },
+  "documento": {
+    "titel": "Vermerk zur Bauvoranfrage BV-2026-0417",
+    "datum": "2026-07-09",
+    "sachverhalt": "Prüfung der Bauvoranfrage auf Vereinbarkeit mit dem Bebauungsplan Nr. 214.",
+    "ergebnis": "Die Voranfrage ist genehmigungsfähig."
+  },
+  "participantes": [
+    {
+      "participante_ref": "urn:beispiel:personal:4417",
+      "papel": "autor"
+    }
+  ],
+  "avaliacao": {
+    "perfil": "generic",
+    "classificacao_ref": "aktenplan-2021/63-40-02",
+    "prazo_conservacao": {
+      "valor": 10,
+      "unidade": "anos",
+      "forma_contagem": "fim_ano_civil"
+    },
+    "destino_final": "a_determinar",
+    "autoridade_avaliacao": "Landesarchiv Beispiel",
+    "instrumento_ref": "vwv-aufbewahrung-aussonderung-2023"
+  },
+  "_expected_error": "base_legal_conservacao sem 'regime' (§1.4.1)",
+  "_expected_match": "'regime' is a required property"
+}

@@ -51,6 +51,20 @@ Ver [ADR-022](ADR-022-dever-do-formato.md).
 Decorre daqui que um `.ndfpkg` válido garante integridade, identidade e
 interpretabilidade — não legalidade, completude nem correção.
 
+O mesmo critério delimita o formato face ao **sistema de gestão documental**. Do
+modelo de referência OAIS (ISO 14721), o NDF adota o **modelo de informação** —
+conteúdo, proveniência, referência, fixidez, contexto, empacotamento e descrição
+—, porque descreve artefactos. Não adota o **modelo funcional** — *Ingest*,
+*Archival Storage*, *Data Management*, *Access*, *Administration*, *Preservation
+Planning* — nem as responsabilidades organizacionais que o acompanham: descrevem
+funções e políticas de um arquivo, que nenhum formato executa e que pertencem à
+aplicação e ao `core-ingest`, não a este repositório. Ver
+[ADR-024](ADR-024-fronteira-oais-modelo-de-informacao.md).
+
+Daqui não decorre alegação de conformidade com OAIS, PREMIS, METS ou eIDAS —
+reserva mantida em
+[`../interoperability/INTEROPERABILITY-LAYERS.md`](../interoperability/INTEROPERABILITY-LAYERS.md) §6.
+
 ## 2. Responsabilidades
 
 ### 2.1 NDF

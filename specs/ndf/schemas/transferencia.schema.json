@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/ndf/1.0.0/transferencia.schema.json",
+  "title": "Conjunto de transferência NORMORDIS v1.0.0",
+  "description": "Declaração de composição de um conjunto de transferência (.ndfxfer). Um .ndfpkg é um documento; este objeto é o conjunto, e existe para que o recetor possa saber se recebeu tudo. Declara composição, nunca estrutura intelectual — as relações documentais vivem em relacoes[] dentro de cada unidade, assinadas pelo produtor. Ver docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md.",
+  "type": "object",
+  "required": [
+    "ndfxfer_version",
+    "transferencia_id",
+    "criada_em",
+    "transmitente",
+    "destinatario",
+    "fundamento",
+    "unidades",
+    "referencias_externas",
+    "inventario"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ndfxfer_version": {
+      "const": "1.0.0",
+      "description": "Versão do formato de conjunto de transferência."
+    },
+    "transferencia_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Identificador único desta transferência (UUID v4). É a referência que o documento de aceitação usa para lhe responder."
+    },
+    "criada_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Instante de criação do conjunto (ISO 8601, UTC)."
+    },
+    "transmitente": {
+      "$ref": "#/$defs/entidade",
+      "description": "Entidade que detém a custódia e a transfere."
+    },
+    "destinatario": {
+      "$ref": "#/$defs/entidade",
+      "description": "Entidade a quem a custódia é oferecida. Declarar o destinatário não estabelece que ele aceitou: a aceitação é ato próprio dele, e artefacto próprio."
+    },
+    "fundamento": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Fundamento invocado pelo transmitente para a transferência. Declaração do transmitente; o NDF não aprecia se o fundamento é bastante."
+    },
+    "unidades": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Unidades documentais que compõem o conjunto, uma por .ndfpkg. O fecho vale nos dois sentidos: cada unidade declarada DEVE estar presente, e cada pacote presente DEVE estar declarado.",
+      "items": {
+        "type": "object",
+        "required": ["ndf_id", "payload_hash", "validation_code", "ficheiro"],
+        "additionalProperties": false,
+        "properties": {
+          "ndf_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "description": "Identidade lógica da unidade."
+          },
+          "payload_hash": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+            "description": "payload_hash do NDF-core da unidade. É o que prende a declaração à versão exata, do mesmo modo que relacoes[].alvo (SPEC.md §2.11). O digest do ficheiro .ndfpkg NÃO é usado: o pacote pode ser materializado de outra forma sem deixar de ser a mesma unidade documental (SPEC.md §8.1)."
+          },
+          "validation_code": {
+            "type": "string",
+            "pattern": "^NDF-[A-Z2-7]{20}$",
+            "description": "Código de validação da unidade, conferível por humano sem ferramenta."
+          },
+          "ficheiro": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Caminho da unidade dentro do contentor. Descritivo: a identidade da unidade é o par ndf_id + payload_hash, e um recetor resolve por eles, não pelo nome."
+          }
+        }
+      }
+    },
+    "referencias_externas": {
+      "type": "array",
+      "description": "Relações declaradas pelas unidades cujo alvo NÃO faz parte deste conjunto. É informação derivada — o recetor recomputa-a a partir das unidades que recebeu — e por isso verificável: o valor declarado DEVE coincidir com o recomputado, nem a mais nem a menos. Responde à pergunta que o conjunto existe para responder: este conjunto fecha sobre si mesmo? Array vazio significa que fecha. Ver ADR-024 e o desenho §3.4 (D-XFER-1).",
+      "items": {
+        "type": "object",
+        "required": ["declarada_por", "tipo", "alvo"],
+        "additionalProperties": false,
+        "properties": {
+          "declarada_por": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "description": "ndf_id da unidade deste conjunto que declara a relação."
+          },
+          "tipo": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tipo da relação, tal como declarado na unidade (SPEC.md §2.11.2)."
+          },
+          "alvo": {
+            "type": "object",
+            "required": ["ndf_id", "payload_hash"],
+            "additionalProperties": false,
+            "description": "Alvo da relação, ausente deste conjunto.",
+            "properties": {
+              "ndf_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "payload_hash": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "inventario": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Inventário físico dos ficheiros próprios do contentor — esta declaração, o selo e a evidência de custódia. NÃO cobre as unidades: essas são cobertas por unidades[].payload_hash, que as prende ao conteúdo documental em vez de a uma materialização concreta.",
+      "items": {
+        "type": "object",
+        "required": ["ficheiro", "hash_sha256"],
+        "additionalProperties": false,
+        "properties": {
+          "ficheiro": { "type": "string", "minLength": 1 },
+          "hash_sha256": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "entidade": {
+      "type": "object",
+      "required": ["designacao"],
+      "additionalProperties": false,
+      "properties": {
+        "designacao": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Designação oficial da entidade."
+        },
+        "identificadores": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Identificadores institucionais, na mesma forma de metadados.entidade_produtora.identificadores (SPEC.md §2.7.3, ADR-017).",
+          "items": {
+            "type": "object",
+            "required": ["sistema", "valor"],
+            "additionalProperties": false,
+            "properties": {
+              "sistema": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)+$",
+                "examples": ["pt-nif", "pt-dglab", "fr-siren"]
+              },
+              "valor": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

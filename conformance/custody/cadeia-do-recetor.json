@@ -1,0 +1,43 @@
+[
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "0c4f7a91-8b23-4d5e-a610-72f9b8c41d03",
+    "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+    "sequence": 0,
+    "event_type": "recebido",
+    "occurred_at": "2026-09-02T09:12:00Z",
+    "actor": {
+      "type": "entidade",
+      "id": "arquivo-distrital-exemplo",
+      "display_name": "Arquivo Distrital de Exemplo"
+    },
+    "details": {
+      "transferencia_ref": "b7c19e04-2a55-4f83-9d61-0e7a4c8f2135",
+      "transmitente": "Direção-Geral de Exemplo",
+      "payload_hash": "sha256:7c23a8685be13aece9b86abe0faa37357cee7e106508dc75b750d95eaecf3217",
+      "validation_code": "NDF-LEYFWRBLVXOA4QBXPYEC"
+    },
+    "previous_event_hash": null,
+    "event_hash": "sha256:06ad15ff57dc86b8d1d68ebdf0447284ce7c195342a6681a5fc9542375304df8"
+  },
+  {
+    "custody_event_version": "1.0.0",
+    "event_id": "5e8213b7-40cf-4a96-b2d1-9c07f3a5e814",
+    "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+    "sequence": 1,
+    "event_type": "verificado",
+    "occurred_at": "2026-09-02T09:14:30Z",
+    "actor": {
+      "type": "sistema",
+      "id": "sistema-arquivo-v1.4"
+    },
+    "details": {
+      "payload_hash": "sha256:7c23a8685be13aece9b86abe0faa37357cee7e106508dc75b750d95eaecf3217",
+      "componentes_verificados": [
+        "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053"
+      ]
+    },
+    "previous_event_hash": "sha256:06ad15ff57dc86b8d1d68ebdf0447284ce7c195342a6681a5fc9542375304df8",
+    "event_hash": "sha256:026a724978eea95fdeb024b88c0156b584b76be5e320d92f88ef39a199ae8a8e"
+  }
+]

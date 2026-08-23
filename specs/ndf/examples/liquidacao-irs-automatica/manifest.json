@@ -6,16 +6,20 @@
   "estado": "ativo",
   "nivel_assinatura": "nenhuma",
   "finalizado_em": "2026-07-31T03:15:30Z",
-  "payload_hash": "sha256:e3b5521afe8b6088366d05635d99b915c34561d0dfb34c2e3e3ac203764101af",
-  "validation_code": "NDF-2LRQEP752ZFWL5IYEVKC",
+  "payload_hash": "sha256:f03b038291da56a279d7026b0ce84c4bb8121ebd3410f5b3226d867098ec2357",
+  "validation_code": "NDF-DMJ42FMOYEC3WWA6SIXC",
   "inventario": [
     {
+      "ficheiro": "README.md",
+      "hash_sha256": "sha256:0eba7f479825546ed40ce3c8db7cf260483251dedb5577f0a7a21f3bc9a1a900"
+    },
+    {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:b0ff02530b606e8a2baeafd9df6151c2b792e69a6dc47532ecccdfef053ce131"
+      "hash_sha256": "sha256:8332ef7c726250e9ac1eb31bde08894b28ffda1dc64fea302fd66d9f5210480a"
     },
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:e3b5521afe8b6088366d05635d99b915c34561d0dfb34c2e3e3ac203764101af"
+      "hash_sha256": "sha256:f03b038291da56a279d7026b0ce84c4bb8121ebd3410f5b3226d867098ec2357"
     },
     {
       "ficheiro": "ndt/liquidacao-irs@2026.1.ndt.json",
@@ -27,7 +31,7 @@
     },
     {
       "ficheiro": "schemas/custody-event.schema.json",
-      "hash_sha256": "sha256:816a7656c545b3be04d28fdb0c724db840e871dd4e3c4c99341584a886d10861"
+      "hash_sha256": "sha256:60cf03f2a5eea589a9a88eeb66078ae948f842fb966f3be57d13726c5cc05985"
     },
     {
       "ficheiro": "schemas/envelope.schema.json",
@@ -47,11 +51,11 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:a9cda78fe45a98aeae47dda99eba4d2913255a0c43feab27086a42fff3951f4f"
+      "hash_sha256": "sha256:dd1f1c831b55b44f4bfe8499ad7d23c22587bb8b69cccb55fe61c0ca81fd390a"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",
-      "hash_sha256": "sha256:f262c3aa819230be7e966528839e6e9e59a6daf4275942a2db9d92969d0c08f3"
+      "hash_sha256": "sha256:840d4162ad616f1e43bce1ce80d2190ba247c79b656a63d7fe185e5f2d926af1"
     },
     {
       "ficheiro": "schemas/pt-dglab.schema.json",

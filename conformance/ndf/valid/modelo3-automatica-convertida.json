@@ -35,7 +35,10 @@
         "identificacao_fiscal",
         "dados_financeiros"
       ],
-      "base_legal_conservacao": "obrigacao_legal",
+      "base_legal_conservacao": {
+        "regime": "eu-gdpr",
+        "base": "art6-1-c"
+      },
       "responsavel_tratamento": "Autoridade Tributária e Aduaneira"
     }
   },

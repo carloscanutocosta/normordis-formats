@@ -1,0 +1,60 @@
+{
+  "evidencia_version": "1.0.0",
+  "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+  "extraida_em": "2026-08-23T10:12:00Z",
+  "politica_extracao": {
+    "id": "dge/politica-extracao-custodia-2026-v1",
+    "tipos": [
+      "capturado",
+      "recebido",
+      "finalizado",
+      "verificado",
+      "assinatura_renovada",
+      "selo_acrescentado",
+      "transferido",
+      "eliminado"
+    ]
+  },
+  "cadeia": {
+    "eventos_total": 2,
+    "ultimo_event_hash": "sha256:4efb2f3014fc247e968133bbccaba2ed4af33982aedbd7f52623ad038c0f5b69"
+  },
+  "eventos": [
+    {
+      "custody_event_version": "1.0.0",
+      "event_id": "123e4567-e89b-42d3-a456-426614174000",
+      "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+      "sequence": 0,
+      "event_type": "finalizado",
+      "occurred_at": "2026-06-22T10:00:00Z",
+      "actor": {
+        "type": "sistema",
+        "id": "normordis-test"
+      },
+      "details": {
+        "payload_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "previous_event_hash": null,
+      "event_hash": "sha256:0ce95955ad72f7659821cf2e67a0b906e25aee69873c1efd4d4366bd1e5eb279"
+    },
+    {
+      "custody_event_version": "1.0.0",
+      "event_id": "223e4567-e89b-42d3-a456-426614174001",
+      "ndf_id": "a1b2c3d4-e5f6-4789-abcd-ef0123456789",
+      "sequence": 1,
+      "event_type": "verificado",
+      "occurred_at": "2026-06-22T10:05:00Z",
+      "actor": {
+        "type": "sistema",
+        "id": "normordis-test"
+      },
+      "details": {},
+      "previous_event_hash": "sha256:0ce95955ad72f7659821cf2e67a0b906e25aee69873c1efd4d4366bd1e5eb279",
+      "event_hash": "sha256:4efb2f3014fc247e968133bbccaba2ed4af33982aedbd7f52623ad038c0f5b69"
+    }
+  ],
+  "omitidos": {
+    "contagem": 0,
+    "fundamento": "Nenhum evento retido: a cadeia não contém eventos fora da política de extração."
+  }
+}

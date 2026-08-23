@@ -36,7 +36,10 @@
         "identificacao_fiscal",
         "dados_processuais"
       ],
-      "base_legal_conservacao": "obrigacao_legal",
+      "base_legal_conservacao": {
+        "regime": "eu-gdpr",
+        "base": "art6-1-c"
+      },
       "responsavel_tratamento": "Direção-Geral de Exemplo"
     }
   },

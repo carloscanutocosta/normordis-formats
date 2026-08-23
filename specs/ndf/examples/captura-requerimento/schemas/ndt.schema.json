@@ -201,7 +201,7 @@
     },
     "GraficoImagem": {
       "type": "object",
-      "required": ["tipo", "referencia_recurso", "posicao", "largura", "altura"],
+      "required": ["tipo", "referencia_recurso", "posicao", "largura", "altura", "alt"],
       "additionalProperties": false,
       "properties": {
         "tipo": { "type": "string", "const": "imagem" },
@@ -296,7 +296,7 @@
     },
     "GraficoSvg": {
       "type": "object",
-      "required": ["tipo", "referencia_recurso", "posicao", "largura", "altura"],
+      "required": ["tipo", "referencia_recurso", "posicao", "largura", "altura", "alt"],
       "additionalProperties": false,
       "properties": {
         "tipo": { "type": "string", "const": "svg" },
@@ -305,7 +305,8 @@
         "referencia_recurso": { "type": "string" },
         "posicao": { "$ref": "#/$defs/Posicao" },
         "largura": { "type": "number" },
-        "altura": { "type": "number" }
+        "altura": { "type": "number" },
+        "alt": { "type": "string" }
       }
     },
     "GraficoTabelaVisual": {
@@ -344,7 +345,7 @@
     },
     "FormatoDisplay": {
       "type": "string",
-      "enum": ["texto", "numero", "inteiro", "monetario", "data", "booleano", "checkbox", "radio"]
+      "enum": ["texto", "numero", "inteiro", "monetario", "data", "data_hora", "booleano", "checkbox", "radio"]
     },
     "AlinhamentoTexto": {
       "type": "string",
@@ -354,6 +355,11 @@
       "type": "object",
       "required": ["referencia", "posicao", "largura", "altura"],
       "additionalProperties": false,
+      "if": {
+        "properties": { "formato": { "enum": ["checkbox", "radio"] } },
+        "required": ["formato"]
+      },
+      "then": { "required": ["rotulo_acessivel"] },
       "properties": {
         "referencia": { "type": "string" },
         "posicao": { "$ref": "#/$defs/Posicao" },
@@ -501,6 +507,11 @@
       "type": "object",
       "required": ["tipo", "referencia"],
       "additionalProperties": false,
+      "if": {
+        "properties": { "formato": { "enum": ["checkbox", "radio"] } },
+        "required": ["formato"]
+      },
+      "then": { "required": ["rotulo_acessivel"] },
       "properties": {
         "tipo": { "type": "string", "const": "campo" },
         "referencia": { "type": "string" },
@@ -514,7 +525,7 @@
     },
     "ElementoFluxoImagem": {
       "type": "object",
-      "required": ["tipo", "referencia_recurso", "largura", "altura"],
+      "required": ["tipo", "referencia_recurso", "largura", "altura", "alt"],
       "additionalProperties": false,
       "properties": {
         "tipo": { "type": "string", "const": "imagem" },
@@ -628,7 +639,14 @@
         "y_inicio": { "type": "number" },
         "elementos": {
           "type": "array",
-          "items": { "$ref": "#/$defs/ElementoFluxo" }
+          "items": { "$ref": "#/$defs/ElementoFluxo" },
+          "contains": {
+            "type": "object",
+            "properties": { "tipo": { "const": "corpo" } },
+            "required": ["tipo"]
+          },
+          "minContains": 0,
+          "maxContains": 1
         }
       }
     },
@@ -694,6 +712,12 @@
       "type": "object",
       "required": ["id"],
       "additionalProperties": false,
+      "not": {
+        "allOf": [
+          { "required": ["fluxo"], "properties": { "fluxo": { "type": "object" } } },
+          { "required": ["blocos"], "properties": { "blocos": { "minItems": 1 } } }
+        ]
+      },
       "properties": {
         "id": { "type": "string" },
         "formato": { "$ref": "#/$defs/FormatoFormato" },
@@ -726,6 +750,11 @@
       "type": "object",
       "required": ["pagina_def", "repeticao"],
       "additionalProperties": false,
+      "if": {
+        "properties": { "repeticao": { "const": "conforme_necessario" } },
+        "required": ["repeticao"]
+      },
+      "then": { "required": ["fonte_overflow"] },
       "properties": {
         "pagina_def": { "type": "string" },
         "repeticao": { "type": "string", "enum": ["unica", "por_linha", "conforme_necessario"] },

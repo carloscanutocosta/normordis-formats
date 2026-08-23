@@ -34,6 +34,7 @@
     "event_type": {
       "enum": [
         "capturado",
+        "recebido",
         "finalizado",
         "verificado",
         "exportado",

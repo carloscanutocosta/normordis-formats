@@ -13,6 +13,8 @@ Verifica:
   C3  referências §X.Y resolvem para secções existentes (por documento)
   C4  enums deliberadamente duplicados entre schemas mantêm-se idênticos
   C5  propriedades removidas não reaparecem em specs/ ou conformance/
+  C6  schemas embebidos nos pacotes de exemplo são idênticos ao canónico
+  C7  `componentes` é o mesmo vocabulário em todos os schemas de tipo
 """
 
 from __future__ import annotations
@@ -320,6 +322,85 @@ def c5_removed_properties(failures):
     return checked
 
 
+def c6_embedded_schema_copies(failures):
+    """Um pacote transporta os schemas para ser verificável sem rede.
+
+    Uma cópia que divirja do canónico declara o mesmo `$id` e valida coisas
+    diferentes: um verificador que resolva o schema a partir do pacote — que é o
+    que o pacote existe para permitir — obtém outro contrato. Foi assim que três
+    pacotes ficaram com um `ndf-core.schema.json` anterior a ADR-023, rejeitando
+    `origem_nao_identificavel` enquanto a SPEC o documentava.
+    """
+    canonicos = {
+        "ndf-core.schema.json": ROOT / "specs/ndf/schemas/ndf-core.schema.json",
+        "envelope.schema.json": ROOT / "specs/ndf/schemas/envelope.schema.json",
+        "manifest.schema.json": ROOT / "specs/ndf/schemas/manifest.schema.json",
+        "custody-event.schema.json": ROOT / "specs/ndf/schemas/custody-event.schema.json",
+        "ndt.schema.json": ROOT / "specs/ndt/schemas/ndt.schema.json",
+        "ncrtf.schema.json": ROOT / "specs/ncrtf/schemas/ncrtf.schema.json",
+    }
+    for pasta in sorted((ROOT / "specs/ndf/examples").glob("*/schemas")):
+        for copia in sorted(pasta.glob("*.json")):
+            canon = canonicos.get(copia.name)
+            if canon is None:
+                # schema de tipo ou de perfil: procura-se no registo
+                for base in ("specs/registry/schemas", "specs/registry/profiles"):
+                    alvo = ROOT / base / copia.name
+                    if alvo.is_file():
+                        canon = alvo
+                        break
+            if canon is None:
+                continue
+            if load(copia) != load(canon):
+                failures.append(
+                    f"C6 {copia.relative_to(ROOT)} diverge de "
+                    f"{canon.relative_to(ROOT)} — mesmo $id, contrato diferente"
+                )
+    return len(canonicos)
+
+
+def c7_componentes_vocabulary(failures):
+    """`componentes` é o mecanismo único de binários (SPEC §2.8.1).
+
+    Os schemas de tipo são autocontidos por desenho — um pacote transporta um e
+    tem de o validar sem rede —, pelo que a definição é necessariamente
+    duplicada. Duplicação sem guarda deriva: foi assim que `oficio` ficou com um
+    `anexos[]` próprio, com outros nomes de campo e sem `media_type`, que
+    `NDF-PKG-009` não reconhecia — um ofício não conseguia transportar os seus
+    anexos num pacote conforme.
+
+    Verifica-se a forma dos itens, não a cardinalidade: `documento-capturado`
+    exige pelo menos um componente, um tipo nativo não.
+    """
+    base = ROOT / "specs/registry/schemas/documento-capturado.schema.json"
+    if not base.is_file():
+        return 0
+    canonico = load(base)["properties"]["componentes"]["items"]
+    verificados = 0
+    for schema_path in sorted((ROOT / "specs/registry/schemas").glob("*.schema.json")):
+        if schema_path == base:
+            continue
+        comp = load(schema_path).get("properties", {}).get("componentes")
+        if comp is None:
+            # um tipo sem componentes é legítimo; o que não é legítimo é ter
+            # outro vocabulário para o mesmo fim
+            props = load(schema_path).get("properties", {})
+            for suspeito in ("anexos", "ficheiros", "documentos_anexos"):
+                if suspeito in props:
+                    failures.append(
+                        f"C7 {schema_path.relative_to(ROOT)} define `{suspeito}` — "
+                        f"o mecanismo de componentes binários é `componentes` (SPEC §2.8.1)"
+                    )
+            continue
+        verificados += 1
+        if comp.get("items") != canonico:
+            failures.append(
+                f"C7 {schema_path.relative_to(ROOT)}: `componentes.items` diverge da "
+                f"definição de {base.relative_to(ROOT)}"
+            )
+    return verificados
+
+
 def main() -> int:
     schemas = {n: load(p) for n, p in SCHEMAS.items()}
     failures: list[str] = []
@@ -329,6 +410,8 @@ def main() -> int:
     n3 = c3_section_refs(failures)
     n4 = c4_duplicated_enums(schemas, failures)
     n5 = c5_removed_properties(failures)
+    n6 = c6_embedded_schema_copies(failures)
+    n7 = c7_componentes_vocabulary(failures)
 
     if failures:
         for f in failures:
@@ -339,7 +422,8 @@ def main() -> int:
     print(
         f"PASS spec coherence: {n1} blocos JSON, {n2} campos de schema, "
         f"{n3} referências de secção, {n4} enums duplicados, "
-        f"{n5} propriedades removidas"
+        f"{n5} propriedades removidas, {n6} schemas verificados nas cópias, "
+        f"{n7} tipos com componentes"
     )
     return 0
 

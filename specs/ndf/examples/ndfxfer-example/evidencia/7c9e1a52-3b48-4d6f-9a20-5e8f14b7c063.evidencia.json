@@ -1,0 +1,91 @@
+{
+  "evidencia_version": "1.0.0",
+  "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+  "extraida_em": "2026-08-23T10:12:00Z",
+  "politica_extracao": {
+    "id": "dge/politica-extracao-custodia-2026-v1",
+    "tipos": [
+      "capturado",
+      "recebido",
+      "finalizado",
+      "verificado",
+      "assinatura_renovada",
+      "selo_acrescentado",
+      "transferido",
+      "eliminado"
+    ]
+  },
+  "cadeia": {
+    "eventos_total": 6,
+    "ultimo_event_hash": "sha256:6891479204ac60a94cba3e81c7869022cb92f3e10c0f510113ee666df9d4b02f"
+  },
+  "eventos": [
+    {
+      "custody_event_version": "1.0.0",
+      "event_id": "00000000-1111-4222-8333-444455556666",
+      "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+      "sequence": 0,
+      "event_type": "capturado",
+      "occurred_at": "2026-06-17T14:31:00Z",
+      "actor": {
+        "type": "sistema",
+        "id": "sistema-gd-dge-v3.2"
+      },
+      "details": {
+        "canal": "e_balcao",
+        "recebido_em": "2026-06-17T14:31:00Z"
+      },
+      "previous_event_hash": null,
+      "event_hash": "sha256:d936319fe6d09064f824ffd7bacc5b52e9152f9fc8fee9c6b25528364afc44f9"
+    },
+    {
+      "custody_event_version": "1.0.0",
+      "event_id": "00000001-1111-4222-8333-444455556666",
+      "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+      "sequence": 1,
+      "event_type": "finalizado",
+      "occurred_at": "2026-06-17T14:35:00Z",
+      "actor": {
+        "type": "sistema",
+        "id": "sistema-gd-dge-v3.2"
+      },
+      "previous_event_hash": "sha256:d936319fe6d09064f824ffd7bacc5b52e9152f9fc8fee9c6b25528364afc44f9",
+      "event_hash": "sha256:a84292a224454a993d4b1891c0e89c3c9fec7fac74068801712e56be03237568"
+    },
+    {
+      "custody_event_version": "1.0.0",
+      "event_id": "00000003-1111-4222-8333-444455556666",
+      "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+      "sequence": 3,
+      "event_type": "verificado",
+      "occurred_at": "2026-07-01T03:00:00Z",
+      "actor": {
+        "type": "sistema",
+        "id": "sistema-gd-dge-v3.2"
+      },
+      "previous_event_hash": "sha256:fae5323a1fbeeaefbe1257eefdd210b03df5b6e2202d527c19fff6545f1d7778",
+      "event_hash": "sha256:dac2ca6a6f7a165921a03347ed7ff45a935977357f5badedf51146393c4628bf"
+    },
+    {
+      "custody_event_version": "1.0.0",
+      "event_id": "00000005-1111-4222-8333-444455556666",
+      "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+      "sequence": 5,
+      "event_type": "transferido",
+      "occurred_at": "2026-08-23T10:10:00Z",
+      "actor": {
+        "type": "sistema",
+        "id": "sistema-gd-dge-v3.2"
+      },
+      "details": {
+        "destinatario": "Arquivo Distrital de Exemplo"
+      },
+      "previous_event_hash": "sha256:7af75d2274e896fb0958ab6b3ce0d752bf557454198daa2085cca8c1c00c2ea9",
+      "event_hash": "sha256:6891479204ac60a94cba3e81c7869022cb92f3e10c0f510113ee666df9d4b02f"
+    }
+  ],
+  "omitidos": {
+    "contagem": 2,
+    "fundamento": "Eventos de exportação, retidos por identificarem trabalhadores do serviço e o motivo interno de cada consulta."
+  }
+}

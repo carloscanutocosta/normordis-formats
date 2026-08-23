@@ -193,6 +193,11 @@ mecanismo genérico de extensão de metadados não é — e por isso não se faz
 }
 ```
 
+> **Nota posterior (2026-08-23):** o exemplo acima conserva a forma vigente à
+> data deste desenho. `base_legal_conservacao` passou entretanto de escalar a par
+> `{regime, base}`, pela mesma razão que levou `classificacao_seguranca` a fazê-lo
+> — ver SPEC §1.4.1 e a adenda de ADR-017. O restante do desenho mantém-se.
+
 ### 4.2 Regras
 
 - **`entidade_responsavel`** — obrigatório sempre. Entidade responsável pela
