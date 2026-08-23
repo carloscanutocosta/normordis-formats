@@ -1,0 +1,65 @@
+{
+  "ndfpkg_version": "1.0.0",
+  "ndf_id": "7c9e1a52-3b48-4d6f-9a20-5e8f14b7c063",
+  "ndf_version": "1.0.0",
+  "schema_id": "documento-capturado",
+  "estado": "ativo",
+  "nivel_assinatura": "nenhuma",
+  "finalizado_em": "2026-06-17T14:35:00Z",
+  "payload_hash": "sha256:7c23a8685be13aece9b86abe0faa37357cee7e106508dc75b750d95eaecf3217",
+  "validation_code": "NDF-LEYFWRBLVXOA4QBXPYEC",
+  "inventario": [
+    {
+      "ficheiro": "README.md",
+      "hash_sha256": "sha256:1811bac42ed15d4830b04d3d1c0b66bd8187f7922d2a5bb9d21ab050e3c45cb4"
+    },
+    {
+      "ficheiro": "envelope.json",
+      "hash_sha256": "sha256:aba6fbce067d32ab363797687d825f9cbd7746ac90667f98721803e138a0ef1d"
+    },
+    {
+      "ficheiro": "ndf-core.json",
+      "hash_sha256": "sha256:7c23a8685be13aece9b86abe0faa37357cee7e106508dc75b750d95eaecf3217"
+    },
+    {
+      "ficheiro": "ndt/documento-capturado@1.0.0.ndt.json",
+      "hash_sha256": "sha256:19d30d0679f79088b96108e3b6d0a4b9719d0dedcf6193d78e07968de099bdce"
+    },
+    {
+      "ficheiro": "original/requerimento.pdf",
+      "hash_sha256": "sha256:9741495bbc5aa8f2575339e28eb60663d1c480cfa3d4df41f20cb486cd88a053"
+    },
+    {
+      "ficheiro": "schemas/custody-event.schema.json",
+      "hash_sha256": "sha256:60cf03f2a5eea589a9a88eeb66078ae948f842fb966f3be57d13726c5cc05985"
+    },
+    {
+      "ficheiro": "schemas/documento-capturado.schema.json",
+      "hash_sha256": "sha256:a4ddb42ec48922644a4cb3c7d28857026c7c691c2bf7b598a169a5f5eb8bca9b"
+    },
+    {
+      "ficheiro": "schemas/envelope.schema.json",
+      "hash_sha256": "sha256:d55c2dc452f6e0979a39cbf463715a4ce9ac6837e3b684d6c0f0606fb2dc82c9"
+    },
+    {
+      "ficheiro": "schemas/manifest.schema.json",
+      "hash_sha256": "sha256:2aca2688e2be95c254024b1832e1f01045c82c95da9ced39a54a32d734dc2c69"
+    },
+    {
+      "ficheiro": "schemas/ncrtf.schema.json",
+      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+    },
+    {
+      "ficheiro": "schemas/ndf-core.schema.json",
+      "hash_sha256": "sha256:dd1f1c831b55b44f4bfe8499ad7d23c22587bb8b69cccb55fe61c0ca81fd390a"
+    },
+    {
+      "ficheiro": "schemas/ndt.schema.json",
+      "hash_sha256": "sha256:840d4162ad616f1e43bce1ce80d2190ba247c79b656a63d7fe185e5f2d926af1"
+    },
+    {
+      "ficheiro": "schemas/pt-dglab.schema.json",
+      "hash_sha256": "sha256:7c772ab34f1703834be42eb28f85ba749fc5df04b03086185bae0e865093f82a"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+Mapa de medicoes referente ao oficio OF/2026/00123.
+Item 1 ....... 120,00 EUR
+Item 2 ....... 340,50 EUR
+Total ........ 460,50 EUR
