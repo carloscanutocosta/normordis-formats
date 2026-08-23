@@ -1157,7 +1157,7 @@ contexto concretos e requer avaliação própria.
 | Estrutura lógica com tags (`/Document`, `/Sect`, `/P`, `/Table`, `/TH`, `/TD`, etc.) | O renderizador infere tags a partir dos `blocos[]` e `fluxo.elementos`; tabelas NDT geram `/Table` com `/THead` e `/TBody` |
 | Ordem de leitura (`/Order` na `StructTreeRoot`) | O renderizador gera a ordem a partir da sequência lógica: `graficos[]` (decorativos → marcados `Artifact`), depois `campos[]` e `blocos[]` por ordem de leitura natural |
 | Texto alternativo para imagens | `graficos[].imagem` e `graficos[].svg` aceitam campo `alt` (texto alternativo); obrigatório para conformidade UA |
-| Idioma do documento | Derivado de `NDF.metadados.idioma` (ex.: `"pt"`, conforme ISO 639-1 no NDF v1.0.0) |
+| Idioma do documento | Derivado de `NDF.metadados.idioma` — subconjunto BCP 47 `língua[-escrita][-região]` (NDF §2.7.2). Quando o NDF declara `metadados.idiomas_autenticos` (NDF §2.7.7), `idioma` identifica a versão apresentada e **não** uma língua principal; o renderizador emite `/Lang` para essa versão e marca as mudanças de língua no conteúdo |
 | Fontes embebidas | Todas as fontes usadas DEVEM estar em `recursos[]` ou ser fontes standard com `ToUnicode` |
 | Campos de formulário com legenda | `assinatura`, `grelha_digitos` e `campos[]` com `formato: "checkbox"/"radio"` geram campos AcroForm com `/TU` (tooltip legível) |
 

@@ -5,6 +5,26 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Duas lacunas fechadas antes do trabalho de renderização (2026-08-23)
+
+Ambas resultam da mesma pergunta — *o formato obriga alguém a declarar algo
+falso?* — que é o critério que já tinha produzido `origem_nao_identificavel` e a
+separação entre submeter e produzir.
+
+**NCRTF: células de tabela passam a conter conteúdo inline.** Eram strings
+simples, por decisão declarada. O problema não era funcionalidade em falta mas
+**perda silenciosa em ida-e-volta**: qualquer editor admite negrito ou uma
+ligação dentro de uma célula, e a serialização deitava-os fora sem aviso. É a
+alteração que desbloqueia um conversor de editor honesto. Ver
+[`specs/ncrtf/CHANGELOG.md`](specs/ncrtf/CHANGELOG.md).
+
+**NDF: `metadados.idiomas_autenticos`.** Fecha `L14`. `idioma` declarava uma
+língua «principal», o que é falso num documento cujas versões têm igual força
+jurídica — legislação da União, tratados, atos de Estados plurilingues. É a
+lacuna que a ambição europeia do projeto expunha mais diretamente. Ver
+[`specs/ndf/CHANGELOG.md`](specs/ndf/CHANGELOG.md).
+
+
 ### Conjunto de transferência — schemas, exemplo e vetores (2026-08-23)
 
 Executados os passos 2 a 4 da sequência do desenho. Nada disto é requisito de

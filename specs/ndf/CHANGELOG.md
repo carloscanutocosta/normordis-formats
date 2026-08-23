@@ -2,6 +2,27 @@
 
 ## Não publicado
 
+### Documentos multilingues (2026-08-23)
+
+- **acrescentado: `metadados.idiomas_autenticos`** e SPEC §2.7.7. Fecha `L14`.
+  `idioma` declarava uma língua «principal», o que é verdadeiro para a
+  generalidade dos documentos e falso para aqueles cujas versões têm **igual
+  força jurídica** — legislação da União, tratados, atos de Estados
+  plurilingues. Nesses, eleger uma principal afirma uma hierarquia que o regime
+  não estabelece: mesma família de falsidade forçada que levou a
+  `origem_nao_identificavel` (ADR-023) e a §2.8.1.1;
+- o bloco é **opcional** e `idioma` mantém-se obrigatório, pelo que nenhum
+  documento existente é invalidado (ADR-007). Quando presente, **DEVE** conter o
+  valor de `idioma` — regra cruzada verificada em `tools/validate.py`, por o JSON
+  Schema não conseguir exigir que um array contenha o valor de outro campo;
+- uma tradução **não** igualmente autêntica continua a ser outro documento,
+  ligado por `relacoes[]`. Declará-la aqui afirmaria uma autenticidade que o
+  produtor não tem — o mesmo teste de identidade que separa um anexo de um
+  documento autónomo (§2.8.1.3);
+- vetores `idiomas-igualmente-autenticos.json` e
+  `idiomas-autenticos-sem-principal.json`.
+
+
 ### Fronteiras da transferência decididas (2026-08-23)
 
 `D-XFER-1` a `D-XFER-3` de

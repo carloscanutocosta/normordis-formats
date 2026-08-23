@@ -47,11 +47,11 @@
     },
     {
       "ficheiro": "schemas/ncrtf.schema.json",
-      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+      "hash_sha256": "sha256:7b636931057fc040b24323fbfc5bef8566f976a9393dac8f72206f6fa06fcc9c"
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:dd1f1c831b55b44f4bfe8499ad7d23c22587bb8b69cccb55fe61c0ca81fd390a"
+      "hash_sha256": "sha256:be6e1346e80eb42be0c212760e2c3e7041da71e69e7a5b2aefcb7ba30db36b72"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",

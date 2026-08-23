@@ -113,18 +113,19 @@ radius de seis ficheiros para resolver algo já resolvido de outra forma.
 
 ### L13 — `base_legal_conservacao` pode confundir tratamento com conservação
 
-`metadados.protecao_dados.base_legal_conservacao` tem quatro valores
-(`obrigacao_legal`, `interesse_publico`, `consentimento`, `contrato`), das seis
-bases do Art. 6.º RGPD — faltam interesses vitais e interesse legítimo, este
-último relevante se o formato servir entidades privadas.
+**Metade resolvida em 2026-08-23.** O campo era um `enum` fechado de quatro
+valores (`obrigacao_legal`, `interesse_publico`, `consentimento`, `contrato`),
+das seis bases do Art. 6.º RGPD — faltavam interesses vitais e interesse
+legítimo. Essa parte era defeito de desenho, não questão jurídica: um enum
+fechado de bases de um só ordenamento dentro do NDF-core, incompleto mesmo nesse
+ordenamento. Passou a par `{regime, base}` (SPEC §1.4.1, adenda a ADR-017), e o
+formato deixou de enumerar bases legais de qualquer regime.
 
-Há ainda um ponto conceptual mais fino, levantado em revisão externa de
-2026-08-15: a **base jurídica do tratamento** e a **base jurídica da
-conservação** não são necessariamente a mesma. O nome do campo funde as duas.
-
-**Não resolvido deliberadamente.** É questão jurídica, não de desenho, e a
-resposta certa depende de leitura do RGPD que este projeto não tem competência
-para fazer sozinho. Matéria para o gate externo de revisão jurídica
+**Por resolver, e é a metade que era mesmo jurídica:** a **base jurídica do
+tratamento** e a **base jurídica da conservação** não são necessariamente a
+mesma, e o nome do campo continua a fundi-las. A resposta certa depende de
+leitura do RGPD que este projeto não tem competência para fazer sozinho. Matéria
+para o gate externo de revisão jurídica
 (`docs/normalization/READINESS.md`), não para decisão interna.
 
 ### L14 — documentos multilingues não têm representação explícita
@@ -138,10 +139,18 @@ instituições europeias e em Estados plurilingues. Declarar apenas a língua
 principal não impede nada — o conteúdo está em `documento` — mas limita a
 indexação.
 
-**Não resolvido por antecipação**, aplicando a regra do ADR-015: falta
-verificar, contra casos reais, se a declaração da segunda língua em metadados é
-necessária para reconstituir, verificar ou interpretar o documento, ou se é
-conveniência de indexação — que é responsabilidade do sistema de gestão.
+**Resolvido em 2026-08-23**, com a distinção que faltava: o caso decisivo não é
+indexação, é representação. Num documento cujas versões têm **igual força
+jurídica** — legislação da UE, tratados, atos de Estados plurilingues —, declarar
+uma língua principal afirma uma hierarquia que o regime aplicável não estabelece.
+É a mesma família de falsidade forçada que levou a `origem_nao_identificavel`
+(ADR-023) e a §2.8.1.1.
+
+`metadados.idiomas_autenticos` (SPEC §2.7.7) exprime-o. Opcional; `idioma`
+mantém-se e, quando o bloco existe, passa a identificar apenas a versão que este
+NDF apresenta primeiro. Uma tradução **não** igualmente autêntica continua a ser
+outro documento, ligado por `relacoes[]` — a alternativa de a declarar aqui
+afirmaria autenticidade que o produtor não tem.
 
 ---
 

@@ -287,6 +287,27 @@
             "zh-Hant"
           ]
         },
+        "idiomas_autenticos": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z]{4})?(-([A-Za-z]{2}|[0-9]{3}))?$"
+          },
+          "description": "Languages in which this document's text is equally authentic, in the same BCP 47 subset as 'idioma'. Optional, and only for documents whose versions have the same legal force — EU legislation, treaties, acts of plurilingual States. MUST include the value of 'idioma', which in that case identifies no more than the version this NDF presents first. A translation that is NOT equally authentic is a different document, related by relacoes[] — declaring it here would assert an authenticity the producer does not have. Absence means the question does not arise, not that the document is monolingual in law. See SPEC.md §2.7.7.",
+          "examples": [
+            [
+              "pt-PT",
+              "en-GB"
+            ],
+            [
+              "fr",
+              "nl",
+              "de"
+            ]
+          ]
+        },
         "classificacao_seguranca": {
           "type": "object",
           "required": [

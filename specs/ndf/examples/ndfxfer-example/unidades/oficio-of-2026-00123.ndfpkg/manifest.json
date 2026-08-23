@@ -6,8 +6,8 @@
   "estado": "ativo",
   "nivel_assinatura": "qualificada",
   "finalizado_em": "2026-06-18T10:30:00Z",
-  "payload_hash": "sha256:e9709f485152513827dfaea7f9e254ef7828695837909b8ae317c913f9930bab",
-  "validation_code": "NDF-MJHVTB2JYSNUG5MMFWMC",
+  "payload_hash": "sha256:223624028013a35e513d5907109402f740a72e86f75f302605597197b4d30a3a",
+  "validation_code": "NDF-4L64GNOHXKBEBOX7FTR3",
   "inventario": [
     {
       "ficheiro": "README.md",
@@ -19,11 +19,11 @@
     },
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:bf1e995fbc4df5eda9d853eebbd20537839708eb907f8865dfd91273c97d5fe4"
+      "hash_sha256": "sha256:2e5877a23672fa2d4549396c50393b6fb44b3a44c3fd491e7e87d7940a66b999"
     },
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:e9709f485152513827dfaea7f9e254ef7828695837909b8ae317c913f9930bab"
+      "hash_sha256": "sha256:223624028013a35e513d5907109402f740a72e86f75f302605597197b4d30a3a"
     },
     {
       "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
@@ -47,11 +47,11 @@
     },
     {
       "ficheiro": "schemas/ncrtf.schema.json",
-      "hash_sha256": "sha256:c521c341a4f6cd9f7ec304352f4208a819b8704b41997e8138235d26367a794f"
+      "hash_sha256": "sha256:7b636931057fc040b24323fbfc5bef8566f976a9393dac8f72206f6fa06fcc9c"
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:dd1f1c831b55b44f4bfe8499ad7d23c22587bb8b69cccb55fe61c0ca81fd390a"
+      "hash_sha256": "sha256:be6e1346e80eb42be0c212760e2c3e7041da71e69e7a5b2aefcb7ba30db36b72"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",

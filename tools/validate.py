@@ -365,6 +365,20 @@ def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
     avaliacao = doc.get("avaliacao", {})
     perfil = avaliacao.get("perfil", "")
 
+    # §2.7.7: 'idiomas_autenticos' declara as línguas em que o texto é
+    # igualmente autêntico. O JSON Schema não consegue exigir que a lista
+    # contenha o valor de outro campo, e sem essa regra a declaração seria
+    # incoerente: 'idioma' apontaria uma versão que a lista não reconhece.
+    autenticos = meta.get("idiomas_autenticos")
+    if isinstance(autenticos, list) and autenticos:
+        idioma = meta.get("idioma", "pt")
+        if idioma not in autenticos:
+            errors.append(
+                f"metadados.idiomas_autenticos não inclui 'idioma' ('{idioma}'): "
+                f"a versão que o NDF apresenta tem de constar das igualmente "
+                f"autênticas (§2.7.7)"
+            )
+
     # Perfil de avaliação: o schema do perfil restringe o bloco para a
     # jurisdição declarada (§3.2.3). Perfil não resolúvel em contexto de pacote
     # é erro — o pacote tem de o transportar (NDF-PKG-007).

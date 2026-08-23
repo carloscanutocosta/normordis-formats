@@ -1,5 +1,5 @@
 {
-  "_comment": "Caso de teste: tabela cujas células contêm marcas, ligação e quebra de linha. Até 2026-08-23 as células eram strings simples e nada disto era representável — um editor que permitisse negrito numa célula perdia-o em silêncio na serialização. Ver SPEC.md §4.5.",
+  "_comment": "Caso de teste inválido: nó de bloco dentro de uma célula de tabela. As células contêm conteúdo inline, como list_item — não blocos. Admitir parágrafos, listas ou tabelas aninhadas seria decisão por antecipação, sem caso real que a justifique (ADR-015). Deve ser rejeitado.",
   "ncrtf_version": "2.0.0",
   "content": [
     {
@@ -44,13 +44,11 @@
               "type": "table_cell",
               "content": [
                 {
-                  "type": "link",
-                  "href": "https://diariodarepublica.pt/",
-                  "target": "_blank",
+                  "type": "paragraph",
                   "content": [
                     {
                       "type": "text",
-                      "text": "DL n.º 4/2015"
+                      "text": "bloco"
                     }
                   ]
                 }
@@ -132,5 +130,7 @@
         }
       ]
     }
-  ]
+  ],
+  "_expected_error": "nó de bloco dentro de table_cell",
+  "_expected_match": "is not valid under any of the given schemas|table_cell"
 }

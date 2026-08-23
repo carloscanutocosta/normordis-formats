@@ -9,17 +9,57 @@
       "head": [
         {
           "cells": [
-            "Referência",
-            "Data",
-            "Estado"
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Referência"
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Data"
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Estado"
+                }
+              ]
+            }
           ]
         }
       ],
       "body": [
         {
           "cells": [
-            "REF/2026/001",
-            "2026-06-01"
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "REF/2026/001"
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "2026-06-01"
+                }
+              ]
+            }
           ]
         }
       ]
