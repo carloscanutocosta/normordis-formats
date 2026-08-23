@@ -1,5 +1,32 @@
 # NCRTF Changelog
 
+## [Não publicado]
+
+### Células de tabela passam a conter inline (2026-08-23)
+
+**Incompatível**, absorvido em 2.0.0 antes de publicação.
+
+`table_row.cells` era um array de strings, e a §4.5 declarava expressamente que
+«o conteúdo das células NÃO suporta formatação rich text». O efeito prático não
+é uma funcionalidade em falta: é **perda silenciosa em ida-e-volta**. Um editor
+— Lexical, ProseMirror, qualquer um — admite negrito, ligação ou quebra de linha
+dentro de uma célula por comportamento por omissão; a serialização deitava-os
+fora sem aviso. Um documento administrativo com uma tabela de diplomas e o
+respetivo estado é caso corrente, não caso limite.
+
+- `cells` passa a array de `table_cell`, nó com `content` de nós **inline** —
+  `text` com marcas, `link`, `hard_break`;
+- a forma segue `list_item` (§4.3), que é o precedente do próprio formato para
+  «contentor de conteúdo inline com etiqueta de tipo»;
+- **blocos continuam excluídos** das células: parágrafos, listas, imagens e
+  tabelas aninhadas não são admitidos. Admiti-los seria decisão por antecipação
+  (ADR-015) e multiplicaria a complexidade de qualquer renderizador de layout
+  fixo. Vetor negativo `celula-com-bloco.json`;
+- migradas as quatro instâncias existentes; o vetor
+  `tabela-com-cabecalhos.json` passa a exercitar marcas, ligação e quebra de
+  linha dentro de células.
+
+
 ## [2.0.0] — 2026-06-18
 
 ### Versão major — breaking changes

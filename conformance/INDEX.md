@@ -6,13 +6,14 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## NDF
 
-### `valid/` — devem ser aceites (16)
+### `valid/` — devem ser aceites (17)
 
 | Ficheiro | Descrição |
 |---|---|
 | `ndf/valid/aceitacao-custodia.json` | Caso de teste: documento de aceitação de custódia, produzido pela entidade RECETORA em resposta a um conjunto de transferência. Fecha L-T3: sem artefacto de ace… |
 | `ndf/valid/avaliacao-perfil-generico.json` | Caso de teste: documento produzido fora de Portugal, com avaliacao.perfil 'generic'. Cobre §3.2.3 (perfil sem sintaxe jurisdicional imposta) e §3.4.1 (destino_f… |
 | `ndf/valid/despacho-avancado.json` | Caso de teste: despacho com assinatura avançada (SEA). Sem dados pessoais. |
+| `ndf/valid/idiomas-igualmente-autenticos.json` | Caso de teste: documento cujas versões linguística têm igual força jurídica — o caso das instituições da União Europeia e dos Estados plurilingues. Cobre §2.7.7… |
 | `ndf/valid/liquidacao-automatica.json` | Caso de teste: liquidação gerada automaticamente, sem autor humano. Cobre §2.14 (cadeia de dois sistemas, ordem cronológica), §2.15 (imputação por delegação com… |
 | `ndf/valid/modelo3-automatica-convertida.json` | Caso de teste: declaração automática de rendimentos convertida sem confirmação (CIRS art. 58.º-A). Produzida por sistema, imputada ao sujeito passivo por efeito… |
 | `ndf/valid/modelo3-com-contabilista.json` | Caso de teste: declaração com intervenção de contabilista certificado, cuja qualidade profissional é condição de validade. Cobre §2.12.6 (qualificacao) e o pape… |
@@ -27,7 +28,7 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/valid/relacao-extensao-qualificada.json` | Caso de teste: relacoes[0].tipo usa extensão qualificada 'ext.<entidade>.<tipo>' (§2.11.7), fora do vocabulário base fechado mas estruturalmente válida. |
 | `ndf/valid/versao-substituicao.json` | Caso de teste: NDF-core de um documento que SUBSTITUI um anterior, via relacoes[{tipo:'substitui'}] no core assinado (§6, ADR-011). O NDF-core em si tem estado=… |
 
-### `invalid/` — devem ser rejeitados (37)
+### `invalid/` — devem ser rejeitados (38)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -38,6 +39,7 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/invalid/dados-pessoais-sem-base-legal.json` | INVÁLIDO: contem_dados_pessoais: true mas base_legal_conservacao ausente. Violação: §2.7.2, §1.6. |
 | `ndf/invalid/document-schema-mismatch.json` | INVÁLIDO: documento não cumpre o schema oficio@1.0.0. |
 | `ndf/invalid/idioma-locale-posix.json` | INVÁLIDO: idioma usa a forma de locale POSIX 'pt_PT' em vez da etiqueta BCP 47 'pt-PT'. Violação: §2.7.2 — o separador é hífen, não underscore. |
+| `ndf/invalid/idiomas-autenticos-sem-principal.json` | Caso de teste inválido: 'idiomas_autenticos' não inclui o valor de 'idioma'. A versão que o NDF apresenta tem de constar das igualmente autênticas, sob pena de … |
 | `ndf/invalid/imputacao-aceitacao-sem-data.json` | INVÁLIDO: imputação por aceitação expressa sem o instante 'em'. Violação: §2.15.2 — a aceitação é um ato datado. |
 | `ndf/invalid/imputacao-delegacao-sem-publicacao.json` | INVÁLIDO: imputação por delegação sem fundamento.publicacao_ref. Violação: §2.15.2 — a menção da delegação é obrigatória (CPA art. 151.º/1/a), e declarar delega… |
 | `ndf/invalid/imputacao-efeito-legal-sem-fundamento.json` | INVÁLIDO: imputação por efeito legal sem fundamento.descricao. Violação: §2.15.2 — sem o fundamento, a imputação por ficção legal fica sem base identificável. |
@@ -81,12 +83,13 @@ editado manualmente. A definição normativa de conformidade está em
 | `ncrtf/valid/lista-verificacao.json` | Lista de verificação (checklist) com dois itens: um assinalado e um por assinalar. Todos os list_item têm checked explícito. |
 | `ncrtf/valid/marcas-inline.json` | Valida todas as 7 marcas disponíveis em v2.0.0, na ordem canónica correcta. Subscrito e sobrescrito em nós separados (não coexistem). |
 | `ncrtf/valid/paragraph-simples.json` | Caso mínimo: dois parágrafos com texto simples, sem marcas. |
-| `ncrtf/valid/tabela-com-cabecalhos.json` | Tabela com linha de cabeçalho (head) e duas linhas de dados (body). Células são strings simples — v2.0.0. |
+| `ncrtf/valid/tabela-com-cabecalhos.json` | Caso de teste: tabela cujas células contêm marcas, ligação e quebra de linha. Até 2026-08-23 as células eram strings simples e nada disto era representável — um… |
 
-### `invalid/` — devem ser rejeitados (9)
+### `invalid/` — devem ser rejeitados (10)
 
 | Ficheiro | Descrição |
 |---|---|
+| `ncrtf/invalid/celula-com-bloco.json` | Caso de teste inválido: nó de bloco dentro de uma célula de tabela. As células contêm conteúdo inline, como list_item — não blocos. Admitir parágrafos, listas o… |
 | `ncrtf/invalid/checked-em-lista-bullet.json` | Inválido: campo 'checked' num list_item de lista não-checklist. 'checked' é exclusivo de list_type: 'checklist'. |
 | `ncrtf/invalid/checklist-sem-checked.json` | Inválido: lista de verificação com list_item sem campo 'checked'. Em checklist, todos os itens DEVEM ter 'checked' explicitamente (true ou false). |
 | `ncrtf/invalid/content-vazio.json` | Inválido: content vazio na raiz. Viola minItems:1 no schema. |
@@ -151,4 +154,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 97 casos.**
+**Total: 100 casos.**

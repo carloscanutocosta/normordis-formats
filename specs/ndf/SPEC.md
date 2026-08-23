@@ -706,6 +706,7 @@ Com dados pessoais, o mesmo bloco acresce `protecao_dados` (§1.4):
 | `numero_referencia` | Recomendado | string | Número de referência documental (ex.: `"OF/2026/00123"`). |
 | `processo_ref` | Opcional | string | Referência ao processo ou procedimento a que o documento pertence. |
 | `idioma` | Opcional | string | Idioma principal do documento, no subconjunto `língua[-escrita][-região]` das etiquetas BCP 47 (RFC 5646) — ex.: `"pt-PT"`, `"en-GB"`, `"zh-Hant"`. **Não** é a gramática BCP 47 completa: extlang, variants, extensions, private-use e grandfathered tags não são admitidos, por não terem uso documental estabelecido e por não serem exprimíveis de forma fiável em JSON Schema. Quando omitido, assume-se `"pt"`. |
+| `idiomas_autenticos` | Não | array | Línguas em que o texto é **igualmente autêntico**. Só para documentos cujas versões têm a mesma força jurídica. Ver §2.7.7. |
 | `classificacao_seguranca` | Recomendado | objeto | Classificação de segurança da informação, com o regime aplicável e o nível ordinal. Ver §2.7.4. A omissão significa **não declarada** — ver §2.7.4.2. |
 | `contem_dados_pessoais` | Sim | boolean | `true` se o documento contiver dados pessoais na acepção do RGPD. |
 | `protecao_dados` | Condicional | objeto | Obrigatório se `contem_dados_pessoais: true`; **PROIBIDO** caso contrário. Agrupa `categorias`, `base_legal_conservacao` e `responsavel_tratamento`. Ver §1.4. |
@@ -865,6 +866,47 @@ representar um nível não declarado como se tivesse sido declarado.
 **RECOMENDA-SE** declarar sempre o campo. Um produtor que conheça a
 sensibilidade do documento e a omita perde a única oportunidade de a fixar
 dentro dos bytes assinados.
+
+#### 2.7.7 Documentos multilingues (`idiomas_autenticos`)
+
+`idioma` declara **uma** língua, descrita como principal. Para a generalidade dos
+documentos isso basta e é verdadeiro. Não basta para o documento cujas versões
+linguísticas têm a **mesma força jurídica** — legislação da União Europeia,
+tratados, atos de Estados plurilingues —, onde dizer que uma das línguas é a
+principal é afirmar uma hierarquia que o regime aplicável não estabelece.
+
+O bloco opcional `idiomas_autenticos` exprime esse caso:
+
+```json
+{
+  "metadados": {
+    "idioma": "pt-PT",
+    "idiomas_autenticos": ["pt-PT", "en-GB"]
+  }
+}
+```
+
+`idiomas_autenticos` **DEVE** conter o valor de `idioma`. Quando o bloco está
+presente, `idioma` deixa de significar «a língua principal» e passa a identificar
+apenas **a versão que este NDF apresenta em primeiro lugar** — o que é facto sobre
+esta materialização, não sobre a hierarquia entre as versões.
+
+**Uma tradução que não seja igualmente autêntica NÃO DEVE ser declarada aqui.** É
+outro documento, com a sua própria identidade e o seu próprio autor, ligado por
+`relacoes[]` (§2.11) — do mesmo modo que um anexo com identidade documental
+própria não é um componente (§2.8.1.3). Declará-la em `idiomas_autenticos`
+afirmaria uma autenticidade que o produtor não tem, e é a mesma família de erro
+que declarar como autor quem apenas submeteu (§2.8.1.1).
+
+**A ausência do bloco significa que a questão não se coloca**, e não que o
+documento seja monolingue em direito — o mesmo critério de §2.7.4.2 para a
+classificação de segurança. Um leitor **NÃO DEVE** inferir do silêncio que existe
+uma única versão autêntica.
+
+**Onde vivem os textos.** Esta especificação declara o **facto** de haver mais do
+que uma versão autêntica; não determina se os vários textos vivem em `documento`,
+em componentes distintos ou em NDF relacionados. Essa é decisão do schema do tipo
+e do produtor, pela regra geral de §2.9.6.
 
 ### 2.8 Tipos de conteúdo permitidos
 

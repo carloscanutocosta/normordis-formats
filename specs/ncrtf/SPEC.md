@@ -53,7 +53,7 @@ O NCRTF (NORMORDIS Canonical Rich Text Format) é uma especificação de formato
 - Texto com formatação inline (negrito, itálico, sublinhado, riscado, código, subscrito, sobrescrito)
 - Parágrafos, títulos estruturados e citações em bloco
 - Listas ordenadas, não-ordenadas e de verificação (com suporte a aninhamento real)
-- Tabelas com cabeçalho opcional e células de texto simples
+- Tabelas com cabeçalho opcional e células com conteúdo inline
 - Imagens referenciadas por caminho dentro do `.ndfpkg`
 - Ligações hipertexto inline
 - Quebras de linha forçadas
@@ -106,7 +106,7 @@ Esta é uma versão **MAJOR** — documentos v1.0.0 NÃO são válidos contra es
 | Área | Alteração |
 |---|---|
 | Listas | `ordered_list`/`unordered_list` unificados em `list` com campo `list_type`; `items` renomeado para `content`; `list_item` passa a ser um nó explícito com `type: "list_item"` e conteúdo inline (não blocos) |
-| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body`; células passam a ser strings simples (não objetos com `content`) |
+| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body` |
 | Inline | Adicionados `link` e `hard_break`; `font_family` deixa de ser marca-objeto e passa a campo explícito nos nós `text` |
 | Marcas | Adicionadas `"code"` e `"strikethrough"`; ordem canónica actualizada |
 | Bloco | Adicionado `blockquote`; campos `alignment`, `indent`, `font_family` em `paragraph` e `heading` |
@@ -299,20 +299,38 @@ Em documentos administrativos, nível 1 RECOMENDA-SE reservado ao NDT (layout); 
 
 ### 4.5 `table`
 
-Tabelas representam dados tabulares com células de texto simples. O conteúdo das células NÃO suporta formatação rich text — é texto plano.
+Tabelas representam dados tabulares. Cada célula é um nó `table_cell` com
+**conteúdo inline** — texto com marcas, ligações e quebras de linha —, à imagem
+de `list_item` (§4.3).
 
 ```json
 {
   "type": "table",
   "head": [
-    { "cells": ["Referência", "Data", "Estado"] }
+    { "cells": [
+      { "type": "table_cell", "content": [{ "type": "text", "text": "Diploma" }] },
+      { "type": "table_cell", "content": [{ "type": "text", "text": "Estado" }] }
+    ] }
   ],
   "body": [
-    { "cells": ["REF/2026/001", "2026-06-01", "Concluído"] },
-    { "cells": ["REF/2026/002", "2026-06-15", "Em curso"] }
+    { "cells": [
+      { "type": "table_cell", "content": [
+        { "type": "link", "href": "https://exemplo.pt/dl-4-2015",
+          "content": [{ "type": "text", "text": "DL n.º 4/2015" }] }
+      ] },
+      { "type": "table_cell", "content": [
+        { "type": "text", "text": "Em vigor", "marks": ["bold"] }
+      ] }
+    ] }
   ]
 }
 ```
+
+**As células contêm inline, não blocos.** Parágrafos, listas, imagens e tabelas
+aninhadas **NÃO SÃO** admitidos numa célula. A fronteira é a mesma de
+`list_item`, e a razão é a de ADR-015: admitir blocos em células é decisão por
+antecipação, sem caso administrativo real que a exija, e multiplicaria a
+complexidade de qualquer renderizador de layout fixo.
 
 #### `table`
 
@@ -326,9 +344,23 @@ Tabelas representam dados tabulares com células de texto simples. O conteúdo d
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `cells` | array de string | Sim — mínimo 1 célula | Cada elemento é o texto de uma célula. |
+| `cells` | array de TableCell | Sim — mínimo 1 célula | Uma entrada por célula. |
 
 Todas as linhas de uma tabela DEVEM ter o mesmo número de células.
+
+#### `TableCell`
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `type` | `"table_cell"` | Sim | |
+| `content` | array de nós inline | Sim — mínimo 1 | `text`, `link` e `hard_break`, com as marcas de §6. |
+
+**Uma célula sem conteúdo não é representável, e é intencional.** `content` exige
+pelo menos um elemento e `text` exige texto não vazio (§5.1). Numa tabela em que
+todas as linhas têm o mesmo número de células, a célula que nada contém é ainda
+assim uma posição declarada: o produtor declara o que lá está — um traço, um
+`n.a.`, um zero —, em vez de deixar ao renderizador a decisão de como mostrar
+uma ausência.
 
 ### 4.6 `image`
 

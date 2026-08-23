@@ -4,228 +4,439 @@
   "title": "NCRTF 2.0.0",
   "description": "NORMORDIS Canonical Rich Text Format v2.0.0 — campo de texto estruturado assinável via JCS/RFC 8785.",
   "type": "object",
-  "required": ["ncrtf_version", "content"],
+  "required": [
+    "ncrtf_version",
+    "content"
+  ],
   "additionalProperties": false,
   "properties": {
-    "ncrtf_version": { "const": "2.0.0" },
+    "ncrtf_version": {
+      "const": "2.0.0"
+    },
     "content": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/block" }
+      "items": {
+        "$ref": "#/$defs/block"
+      }
     }
   },
   "$defs": {
     "block": {
       "oneOf": [
-        { "$ref": "#/$defs/paragraph" },
-        { "$ref": "#/$defs/heading" },
-        { "$ref": "#/$defs/list" },
-        { "$ref": "#/$defs/blockquote" },
-        { "$ref": "#/$defs/table" },
-        { "$ref": "#/$defs/image" }
+        {
+          "$ref": "#/$defs/paragraph"
+        },
+        {
+          "$ref": "#/$defs/heading"
+        },
+        {
+          "$ref": "#/$defs/list"
+        },
+        {
+          "$ref": "#/$defs/blockquote"
+        },
+        {
+          "$ref": "#/$defs/table"
+        },
+        {
+          "$ref": "#/$defs/image"
+        }
       ]
     },
     "inline": {
       "oneOf": [
-        { "$ref": "#/$defs/text" },
-        { "$ref": "#/$defs/link" },
-        { "$ref": "#/$defs/hard_break" }
+        {
+          "$ref": "#/$defs/text"
+        },
+        {
+          "$ref": "#/$defs/link"
+        },
+        {
+          "$ref": "#/$defs/hard_break"
+        }
       ]
     },
     "mark": {
       "type": "string",
-      "enum": ["bold", "code", "italic", "strikethrough", "subscript", "superscript", "underline"]
+      "enum": [
+        "bold",
+        "code",
+        "italic",
+        "strikethrough",
+        "subscript",
+        "superscript",
+        "underline"
+      ]
     },
     "font_family": {
       "type": "string",
-      "enum": ["LiberationMono", "LiberationSans", "LiberationSerif"]
+      "enum": [
+        "LiberationMono",
+        "LiberationSans",
+        "LiberationSerif"
+      ]
     },
     "alignment": {
       "type": "string",
-      "enum": ["center", "justify", "right"]
+      "enum": [
+        "center",
+        "justify",
+        "right"
+      ]
     },
     "paragraph": {
       "type": "object",
-      "required": ["type", "content"],
+      "required": [
+        "type",
+        "content"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "paragraph" },
+        "type": {
+          "const": "paragraph"
+        },
         "content": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/inline" }
+          "items": {
+            "$ref": "#/$defs/inline"
+          }
         },
-        "alignment": { "$ref": "#/$defs/alignment" },
-        "font_family": { "$ref": "#/$defs/font_family" },
-        "indent": { "type": "integer", "minimum": 1 }
+        "alignment": {
+          "$ref": "#/$defs/alignment"
+        },
+        "font_family": {
+          "$ref": "#/$defs/font_family"
+        },
+        "indent": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "heading": {
       "type": "object",
-      "required": ["type", "level", "content"],
+      "required": [
+        "type",
+        "level",
+        "content"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "heading" },
-        "level": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "type": {
+          "const": "heading"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
         "content": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/inline" }
+          "items": {
+            "$ref": "#/$defs/inline"
+          }
         },
-        "alignment": { "$ref": "#/$defs/alignment" },
-        "font_family": { "$ref": "#/$defs/font_family" }
+        "alignment": {
+          "$ref": "#/$defs/alignment"
+        },
+        "font_family": {
+          "$ref": "#/$defs/font_family"
+        }
       }
     },
     "list": {
       "type": "object",
-      "required": ["type", "list_type", "content"],
+      "required": [
+        "type",
+        "list_type",
+        "content"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "list" },
+        "type": {
+          "const": "list"
+        },
         "list_type": {
           "type": "string",
-          "enum": ["bullet", "checklist", "ordered"]
+          "enum": [
+            "bullet",
+            "checklist",
+            "ordered"
+          ]
         },
         "content": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/list_item" }
+          "items": {
+            "$ref": "#/$defs/list_item"
+          }
         },
-        "alignment": { "$ref": "#/$defs/alignment" }
+        "alignment": {
+          "$ref": "#/$defs/alignment"
+        }
       },
       "if": {
-        "properties": { "list_type": { "const": "checklist" } },
-        "required": ["list_type"]
+        "properties": {
+          "list_type": {
+            "const": "checklist"
+          }
+        },
+        "required": [
+          "list_type"
+        ]
       },
       "then": {
         "properties": {
-          "content": { "items": { "required": ["checked"] } }
+          "content": {
+            "items": {
+              "required": [
+                "checked"
+              ]
+            }
+          }
         }
       },
       "else": {
         "properties": {
-          "content": { "items": { "not": { "required": ["checked"] } } }
+          "content": {
+            "items": {
+              "not": {
+                "required": [
+                  "checked"
+                ]
+              }
+            }
+          }
         }
       }
     },
     "list_item": {
       "type": "object",
-      "required": ["type", "content"],
+      "required": [
+        "type",
+        "content"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "list_item" },
+        "type": {
+          "const": "list_item"
+        },
         "content": {
           "type": "array",
           "minItems": 1,
           "items": {
             "oneOf": [
-              { "$ref": "#/$defs/inline" },
-              { "$ref": "#/$defs/list" }
+              {
+                "$ref": "#/$defs/inline"
+              },
+              {
+                "$ref": "#/$defs/list"
+              }
             ]
           }
         },
-        "checked": { "type": "boolean" }
+        "checked": {
+          "type": "boolean"
+        }
       }
     },
     "blockquote": {
       "type": "object",
-      "required": ["type", "content"],
+      "required": [
+        "type",
+        "content"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "blockquote" },
+        "type": {
+          "const": "blockquote"
+        },
         "content": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/inline" }
+          "items": {
+            "$ref": "#/$defs/inline"
+          }
         },
-        "alignment": { "$ref": "#/$defs/alignment" },
-        "font_family": { "$ref": "#/$defs/font_family" }
+        "alignment": {
+          "$ref": "#/$defs/alignment"
+        },
+        "font_family": {
+          "$ref": "#/$defs/font_family"
+        }
       }
     },
     "table": {
       "type": "object",
-      "required": ["type", "body"],
+      "required": [
+        "type",
+        "body"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "table" },
+        "type": {
+          "const": "table"
+        },
         "body": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/table_row" }
+          "items": {
+            "$ref": "#/$defs/table_row"
+          }
         },
         "head": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/table_row" }
+          "items": {
+            "$ref": "#/$defs/table_row"
+          }
         }
       }
     },
     "table_row": {
       "type": "object",
-      "required": ["cells"],
+      "required": [
+        "cells"
+      ],
       "additionalProperties": false,
       "properties": {
         "cells": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string" }
+          "items": {
+            "$ref": "#/$defs/table_cell"
+          }
+        }
+      }
+    },
+    "table_cell": {
+      "type": "object",
+      "required": [
+        "type",
+        "content"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "table_cell"
+        },
+        "content": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/inline"
+          }
         }
       }
     },
     "image": {
       "type": "object",
-      "required": ["type", "ref", "alt"],
+      "required": [
+        "type",
+        "ref",
+        "alt"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "image" },
+        "type": {
+          "const": "image"
+        },
         "ref": {
           "type": "string",
           "minLength": 1,
           "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._/-]+$"
         },
-        "alt": { "type": "string" },
-        "caption": { "type": "string", "minLength": 1 },
-        "width_percent": { "type": "integer", "minimum": 25, "maximum": 100 }
+        "alt": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "string",
+          "minLength": 1
+        },
+        "width_percent": {
+          "type": "integer",
+          "minimum": 25,
+          "maximum": 100
+        }
       }
     },
     "text": {
       "type": "object",
-      "required": ["type", "text"],
+      "required": [
+        "type",
+        "text"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "text" },
-        "text": { "type": "string", "minLength": 1 },
+        "type": {
+          "const": "text"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
         "marks": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "$ref": "#/$defs/mark" }
+          "items": {
+            "$ref": "#/$defs/mark"
+          }
         },
-        "font_family": { "$ref": "#/$defs/font_family" }
+        "font_family": {
+          "$ref": "#/$defs/font_family"
+        }
       }
     },
     "link": {
       "type": "object",
-      "required": ["type", "href", "content"],
+      "required": [
+        "type",
+        "href",
+        "content"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "link" },
-        "href": { "type": "string", "minLength": 1 },
+        "type": {
+          "const": "link"
+        },
+        "href": {
+          "type": "string",
+          "minLength": 1
+        },
         "content": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/text" }
+          "items": {
+            "$ref": "#/$defs/text"
+          }
         },
-        "target": { "type": "string", "enum": ["_blank", "_self"] },
-        "title": { "type": "string", "minLength": 1 }
+        "target": {
+          "type": "string",
+          "enum": [
+            "_blank",
+            "_self"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "hard_break": {
       "type": "object",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "hard_break" }
+        "type": {
+          "const": "hard_break"
+        }
       }
     }
   }
