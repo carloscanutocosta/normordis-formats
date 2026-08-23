@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/registry/1.0.0/aceitacao-custodia.schema.json",
+  "title": "Aceitação de custódia v1.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'aceitacao-custodia@1.0.0'. Documento produzido pela entidade RECETORA em resposta a um conjunto de transferência, declarando por unidade se assume a custódia. É um ato documental como qualquer outro — tem autor, data, entidade responsável e valor probatório —, e por isso é NDF: ganha identidade, assinatura, avaliação e relações sem mecanismo novo. Ver docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md §5.",
+  "type": "object",
+  "required": ["transferencia_ref", "recebida_em", "decidida_em", "resultado"],
+  "additionalProperties": false,
+  "properties": {
+    "transferencia_ref": {
+      "type": "object",
+      "required": ["transferencia_id", "transmitente"],
+      "additionalProperties": false,
+      "description": "Conjunto de transferência a que este documento responde.",
+      "properties": {
+        "transferencia_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "transmitente": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Designação da entidade transmitente, tal como constava da declaração de transferência."
+        },
+        "declaracao_sha256": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+          "description": "Digest dos bytes canónicos de transferencia.json. Prende a aceitação à declaração exata que foi recebida, e não apenas ao seu identificador."
+        }
+      }
+    },
+    "recebida_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Instante em que o conjunto entrou na esfera do recetor."
+    },
+    "decidida_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Instante da decisão. Distinto de recebida_em: receber não é aceitar, e o intervalo entre os dois é frequentemente onde a verificação ocorre."
+    },
+    "resultado": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Decisão por unidade. Aceitação parcial é o caso normal, não a exceção: um recetor pode assumir a custódia de umas unidades e recusar outras. Os critérios de recusa são do recetor e não desta especificação (ADR-024).",
+      "items": {
+        "type": "object",
+        "required": ["ndf_id", "payload_hash", "decisao"],
+        "additionalProperties": false,
+        "properties": {
+          "ndf_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "payload_hash": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+            "description": "Versão exata cuja custódia é assumida ou recusada. Aceitar 'o documento' sem fixar o payload_hash deixaria por determinar o que foi aceite."
+          },
+          "decisao": {
+            "enum": ["aceite", "recusada"],
+            "description": "aceite — o recetor assume a custódia. recusada — não assume, e a custódia permanece no transmitente."
+          },
+          "fundamento": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Razão da decisão. Obrigatório quando a decisão é 'recusada': uma recusa sem fundamento não permite ao transmitente saber o que corrigir."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "decisao": { "const": "recusada" } },
+              "required": ["decisao"]
+            },
+            "then": { "required": ["fundamento"] }
+          }
+        ]
+      }
+    },
+    "observacoes": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Observações do recetor sobre a transferência no seu conjunto."
+    }
+  }
+}

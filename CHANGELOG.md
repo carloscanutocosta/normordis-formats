@@ -5,6 +5,112 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Conjunto de transferência — schemas, exemplo e vetores (2026-08-23)
+
+Executados os passos 2 a 4 da sequência do desenho. Nada disto é requisito de
+conformidade NDF nem entra na SPEC: é camada exterior ao documento, como o Perfil
+de Ciclo de Vida (ADR-010), e um produtor conforme pode nunca a usar.
+
+- **`specs/ndf/schemas/transferencia.schema.json`** — declaração de composição de
+  um `.ndfxfer`. Unidades identificadas por `ndf_id` **e** `payload_hash`;
+  `referencias_externas[]` declara as relações cujo alvo não está no conjunto,
+  e é **recomputável pelo recetor**, logo verificável nos dois sentidos
+  (D-XFER-1);
+- **`specs/ndf/schemas/evidencia-custodia.schema.json`** — extrato atestado da
+  cadeia, com política de extração declarada e `finalizado` obrigatório na
+  política (D-XFER-2). Não é uma cadeia com menos eventos: seria mutilá-la, o que
+  `CUST-REQ-004` proíbe;
+- **`specs/registry/schemas/aceitacao-custodia.schema.json`** — tipo documental
+  novo, produzido pela entidade **recetora**. Fecha L-T3. Aceitação parcial por
+  unidade, com fundamento obrigatório na recusa;
+- **`specs/ndf/examples/ndfxfer-example/`** — duas unidades, uma com extrato
+  integral e outra com extrato parcial. As unidades são geradas por
+  `tools/build_ndfxfer_example.py` e não versionadas: são cópias de pacotes já
+  sob revisão;
+- **`tools/check_transferencia.py`** e **`tools/check_transferencia_vectors.py`**
+  — validador e **11 vetores negativos**, no CI. Sem eles, «o conjunto está
+  completo» seria alegação e não propriedade;
+- **precisado ao implementar:** `inventario[]` **não** cobre as unidades. O
+  digest de um `.ndfpkg` é da materialização, não da unidade documental — o mesmo
+  documento rezipado tem outro digest e continua a ser a mesma unidade. As
+  unidades são cobertas por `payload_hash`, que as prende ao conteúdo assinado;
+- **alterado:** o ofício de `ndfpkg-example` passa a declarar `responde_a` o
+  ofício n.º 45/2026, que o seu próprio assunto já afirmava. Sem uma relação para
+  fora do conjunto, `referencias_externas[]` ficava por exercitar.
+
+**Não executado, deliberadamente:** o passo 5, verificação cláusula a cláusula
+contra OAIS/PREMIS/METS. Compete ao gate externo 3 — revisão arquivística — e
+`READINESS.md` é expresso em que revisão interna não fecha esses gates.
+
+
+### Fronteiras da transferência decididas (2026-08-23)
+
+As três fronteiras que o desenho do conjunto de transferência deixara em aberto
+estão decididas. Duas não custaram nada ao formato: o conjunto declara
+**referências pendentes** — recomputáveis pelo recetor, logo verificáveis — e
+não estrutura intelectual; a evidência de custódia declara uma **política de
+extração** uniforme em vez de uma seleção caso a caso, que era o vetor de abuso.
+
+A terceira acrescenta `event_type: "recebido"` ao schema de custódia — perfil
+opcional, não o NDF-core — e obrigou a escrever o que estava implícito: **as
+cadeias de custódia são por custodiante, não globais.** Ver
+[`specs/ndf/CHANGELOG.md`](specs/ndf/CHANGELOG.md).
+
+
+### Anexos, e o desenho do conjunto de transferência (2026-08-23)
+
+**Um documento nativo pode ter anexos — e agora transporta-os.** Verificou-se
+que não podia: `oficio` e `informacao-tecnica` declaravam anexos num vocabulário
+próprio que o fecho de pacote `NDF-PKG-009` não reconhecia, pelo que um ofício
+que transportasse o anexo era rejeitado e um que o omitisse era aceite.
+`componentes[]` passa a ser o mecanismo único de binários, disponível a qualquer
+tipo; ver [`ADR-025`](docs/architecture/ADR-025-componentes-mecanismo-unico.md) e
+SPEC §2.8.1.3, que fixa também o teste que separa um anexo sem identidade própria
+de um documento autónomo ligado por relação.
+
+**Conjunto de transferência.**
+[`NDF-CONJUNTO-DE-TRANSFERENCIA.md`](docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md)
+desenha L-T1 a L-T3 dentro da fronteira de `ADR-024`: o conjunto declarado e
+selado, a evidência de custódia como extrato atestado — nunca como cadeia
+mutilada, pela regra que L-T4 já fixara — e a aceitação como NDF produzido pelo
+recetor. Nada exige ao NDF-core; três pontos de decisão ficam explicitamente em
+aberto.
+
+**Mapeamento OAIS consolidado.**
+[`OAIS-MAPPING.md`](docs/interoperability/OAIS-MAPPING.md) reúne numa vista única
+o modelo de informação (o que o NDF adota), o modelo funcional (o que fica fora),
+a correspondência SIP/AIP/DIP, as fórmulas defensáveis em texto público e a lista
+do que continua por verificar cláusula a cláusula.
+
+
+### Fronteira formato ↔ direito material, e fronteira formato ↔ arquivo (2026-08-23)
+
+Duas rondas com o mesmo critério: o que o formato representa e o que decide.
+
+**Fronteira face ao direito material.** Correções em `specs/ndf/` onde o
+princípio de ADR-022 era ultrapassado — sobretudo em descrições de schema e
+exemplos, que são o que os implementadores copiam. `base_legal_conservacao` deixa
+de codificar o artigo 6.º do RGPD e passa a par `{regime, base}`; §2.15.4 mantém
+todas as regras mas deixa de as fundamentar em conclusões jurídicas; §2.10.1
+deixa de dar exemplos de tipos de ato; e o exemplo de captura deixa de declarar o
+submissor como autor. Detalhe em [`specs/ndf/CHANGELOG.md`](specs/ndf/CHANGELOG.md)
+e na adenda a `ADR-017`.
+
+**Fronteira face ao sistema de gestão documental.** Novo
+[`ADR-024`](docs/architecture/ADR-024-fronteira-oais-modelo-de-informacao.md):
+de OAIS, o NDF adota o **modelo de informação** e deixa fora o **modelo
+funcional** e as responsabilidades organizacionais. Fixa o critério antes de
+começar o desenho do conjunto de transferência (L-T1 a L-T3), que obriga a ir
+buscar material a OAIS e que sem critério degeneraria em replicar OAIS num
+repositório de formatos. Inclui as formulações defensáveis para texto público —
+o que não se afirma sobre conformidade OAIS e eIDAS, e a distinção entre perfil
+de preservação (B-LTA) e natureza jurídica da assinatura.
+
+**Ferramenta nova:** `tools/reseal_example_package.py`, para recalcular
+`payload_hash`, `validation_code` e inventário dos pacotes de exemplo sem
+trabalho manual de digests.
+
+
 ### Correções à ronda de neutralização jurisdicional (2026-08-15)
 
 Revisão externa da mesma ronda, no próprio dia. Três correções, uma delas a um

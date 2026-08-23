@@ -166,7 +166,7 @@ esse valor for `true`, o bloco `protecao_dados`:
     "contem_dados_pessoais": true,
     "protecao_dados": {
       "categorias": ["identificacao_fiscal", "rendimentos"],
-      "base_legal_conservacao": "obrigacao_legal",
+      "base_legal_conservacao": { "regime": "eu-gdpr", "base": "art6-1-c" },
       "responsavel_tratamento": "string (identificador da entidade)"
     }
   }
@@ -178,8 +178,42 @@ esse valor for `true`, o bloco `protecao_dados`:
 | `contem_dados_pessoais` | Sim | `true` \| `false` |
 | `protecao_dados` | Condicional | Obrigatório se `contem_dados_pessoais: true`; **PROIBIDO** caso contrário. |
 | `protecao_dados.categorias` | Sim, dentro do bloco | Pelo menos um valor. Enum aberto: `identificacao_fiscal`, `rendimentos`, `saude`, `dados_processuais`, `biometricos`, `outros`. |
-| `protecao_dados.base_legal_conservacao` | Sim, dentro do bloco | `obrigacao_legal` \| `interesse_publico` \| `consentimento` \| `contrato`. |
+| `protecao_dados.base_legal_conservacao` | Sim, dentro do bloco | Par `{regime, base}`, com `fundamento_ref` opcional. Ver §1.4.1. |
 | `protecao_dados.responsavel_tratamento` | Sim, dentro do bloco | Identificador da entidade responsável pelo tratamento (RGPD, Art.º 13.º–14.º). |
+
+#### 1.4.1 A base legal é declarada num regime, não escolhida de uma lista
+
+`base_legal_conservacao` é um par `{regime, base}`, no mesmo padrão de
+`classificacao_seguranca` (§2.7.4): o `regime` identifica o quadro de proteção
+de dados aplicável e fornece o vocabulário; a `base` é o identificador da base
+legal **dentro desse vocabulário**, tal como o produtor a determinou.
+
+```json
+{
+  "base_legal_conservacao": {
+    "regime": "eu-gdpr",
+    "base": "art6-1-c",
+    "fundamento_ref": "desp-int-2026-014"
+  }
+}
+```
+
+`fundamento_ref` é opcional e opaco ao NDF: refere o instrumento ou ato interno
+que sustenta a declaração, e é resolvido pelo sistema produtor.
+
+**Esta especificação NÃO ENUMERA as bases legais de nenhum regime.** Uma lista
+fechada teria dois defeitos, e o NDF teve os dois: ficaria presa a um
+ordenamento — o RGPD — num formato que se quer neutro quanto à jurisdição
+(ADR-017); e ficaria incompleta mesmo nesse ordenamento, por omitir bases
+efetivamente previstas. Um documento cuja conservação assentasse numa base não
+listada não tinha como a declarar, o que é lacuna do formato nos termos de
+ADR-022.
+
+Um leitor conforme **NÃO DEVE** interpretar `base` sem conhecer o `regime`, nem
+inferir um regime do silêncio ou do contexto. Se a base declarada é a correta, e
+se o tratamento que ela fundamenta é lícito, são questões de direito, decididas
+por quem tem competência para as decidir — o NDF regista a declaração e
+preserva-a intacta (§1.4, ADR-022).
 
 **Responsável pelo tratamento e custódia do registo são conceitos distintos.**
 A responsabilidade pelo tratamento na aceção do RGPD só existe quando há dados
@@ -421,10 +455,10 @@ externa não impede reescrita integral por um custodiante comprometido.
 | `event_id` | Sim | Identificador único do evento (UUID v4). |
 | `ndf_id` | Sim | Identificador do NDF a que o evento respeita. |
 | `sequence` | Sim | Posição na cadeia; `0` no primeiro evento, incrementa exatamente uma unidade. |
-| `event_type` | Sim | Enum fechado: `capturado`, `finalizado`, `verificado`, `exportado`, `estado_alterado`, `assinatura_renovada`, `selo_acrescentado`, `transferido`, `eliminado`. |
+| `event_type` | Sim | Enum fechado: `capturado`, `recebido`, `finalizado`, `verificado`, `exportado`, `estado_alterado`, `assinatura_renovada`, `selo_acrescentado`, `transferido`, `eliminado`. |
 | `occurred_at` | Sim | Data/hora do evento (ISO 8601, UTC). |
 | `actor` | Sim | Quem originou o evento: `type` (`sistema` \| `utilizador` \| `entidade`), `id`, e `display_name` opcional. |
-| `details` | Não | Objeto livre para a semântica específica do tipo de evento. Para `estado_alterado`, RECOMENDA-SE `estado_anterior`, `estado_novo`, `motivo` e `instrumento_legal`. Para `capturado`, RECOMENDA-SE `componentes` (lista de digests), `canal` e `recebido_em`. Para `verificado` sobre componentes, RECOMENDA-SE `componentes_verificados`. |
+| `details` | Não | Objeto livre para a semântica específica do tipo de evento. Para `estado_alterado`, RECOMENDA-SE `estado_anterior`, `estado_novo`, `motivo` e `instrumento_legal`. Para `capturado`, RECOMENDA-SE `componentes` (lista de digests), `canal` e `recebido_em`. Para `verificado` sobre componentes, RECOMENDA-SE `componentes_verificados`. Para `recebido`, RECOMENDA-SE `transferencia_ref`, `transmitente` e a referência ao documento de aceitação. |
 | `previous_event_hash` | Sim | `event_hash` do evento anterior; `null` no primeiro. |
 | `event_hash` | Sim | `SHA-256(JCS(evento sem a propriedade event_hash))`. |
 
@@ -434,6 +468,30 @@ finalização do NDF. O evento `capturado` regista esse momento — canal, insta
 e digests dos componentes recebidos — e é tipicamente o evento de `sequence` 0
 da cadeia, seguido de `finalizado`. Um documento cujo conteúdo seja estruturado
 não tem evento de captura.
+
+**Evento `recebido`**: um documento que entra em custódia **vindo de outra
+entidade** não é capturado nem finalizado por quem o recebe — já existe, com
+identidade, assinatura e história próprias. `recebido` regista esse momento e é
+o evento de `sequence` 0 da cadeia do custodiante recetor. Um recetor **NÃO
+DEVE** registar `capturado` para um documento que recebeu: seria declarar uma
+produção que não ocorreu, do mesmo modo que declarar como autor quem apenas
+submeteu (§2.8.1.1).
+
+**As cadeias de custódia são por custodiante, não globais.** Decorre do anterior
+e vale a pena ser explícito, porque um implementador que assuma o contrário
+desenha algo que não funciona. Cada custodiante mantém a **sua** cadeia para um
+dado `ndf_id`: a do recetor começa em `sequence` 0 com `previous_event_hash`
+`null`, e **não** continua a cadeia do transmitente. Não há, nem poderia haver,
+continuidade de hash entre custodiantes: o recetor não detém os eventos do
+transmitente, e encadeá-los sem os deter exigiria falsificá-los.
+
+O que liga as duas cadeias não é criptográfico, é documental: a evidência de
+custódia transferida pelo transmitente, e o documento de aceitação produzido pelo
+recetor. Um verificador que queira a história completa de um documento reúne as
+cadeias dos vários custodiantes por esses artefactos. Um leitor que tenha apenas
+uma cadeia tem a história **desse** custodiante, e **NÃO DEVE** apresentá-la como
+sendo a história do documento. Ver
+[`../../docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md`](../../docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md).
 
 A verificação periódica de fixidez dos componentes regista-se como `verificado`,
 com os digests em `details.componentes_verificados`. Um objeto sem histórico de
@@ -630,7 +688,7 @@ Com dados pessoais, o mesmo bloco acresce `protecao_dados` (§1.4):
     "contem_dados_pessoais": true,
     "protecao_dados": {
       "categorias": ["identificacao_fiscal", "dados_processuais"],
-      "base_legal_conservacao": "obrigacao_legal",
+      "base_legal_conservacao": { "regime": "eu-gdpr", "base": "art6-1-c" },
       "responsavel_tratamento": "Direção-Geral de Exemplo"
     }
   }
@@ -829,6 +887,13 @@ exterior. O tipo canónico para esse caso é `documento-capturado@<versao>`
 (`specs/registry/`); a decisão e o seu alcance constam de
 [ADR-020](../../docs/architecture/ADR-020-um-formato-duas-realidades.md).
 
+**A faculdade não é exclusiva desse tipo.** `componentes` é o mecanismo **único**
+de componentes binários no NDF, e qualquer schema de tipo **PODE** declará-lo —
+um documento nativo com anexos usa-o exatamente como um documento capturado usa
+para o seu original (§2.8.1.3). Um schema de tipo **NÃO DEVE** definir vocabulário
+próprio para o mesmo fim: dois vocabulários para binários significam duas regras
+de fecho de pacote, e apenas uma delas está verificada.
+
 Um componente declarado por hash fica dentro dos `payload_bytes` e, portanto,
 coberto pela canonicalização e pela assinatura — é essa a razão de a declaração
 viver em `documento` e não no manifesto do pacote, que não é assinado
@@ -850,6 +915,49 @@ componente tiver sido produzido por um sistema. A captura não dispensa declarar
 quem ou o que produziu o documento; apenas desloca o objeto dessa produção do
 texto para o componente.
 
+#### 2.8.1.1 Submeter não é produzir
+
+Um sistema de captura observa tipicamente **a entrada**, não a produção. Quem
+submeteu um ficheiro, por que canal e com que autenticação é facto declarável em
+`proveniencia_submissao`; quem escreveu o conteúdo é outro facto, que a
+submissão não estabelece. Um contabilista apresenta documento do cliente; um
+mandatário submete peça assinada pelo representado; um funcionário carrega
+documento produzido por terceiro.
+
+Um produtor **NÃO DEVE** declarar o submissor como `autor`, `coautor` ou
+`decisor` apenas por ele ter submetido o documento. A declaração de autoria
+exige que o produtor a estabeleça — pelo conteúdo do próprio componente, por
+assinatura contida, por procedimento, ou por outro fundamento que assuma. Não
+havendo esse fundamento, a origem não é apurável, e declara-se pelo quarto modo
+de §2.2.1 (`metadados.origem_nao_identificavel`, ADR-023) sem que isso apague o
+que se sabe sobre a submissão: os dois blocos são independentes e coexistem.
+
+Quando o que releva é a responsabilidade jurídica e não a autoria material, o
+bloco próprio é `imputacao` (§2.15), que regista o título invocado e o facto de
+autenticação que o fundamenta. É o eixo do direito, distinto por desenho do eixo
+dos factos (§2.15.1) — e é frequentemente o único dos dois que uma captura
+autoriza a preencher. Ver o exemplo em
+`specs/ndf/examples/captura-requerimento/`.
+
+#### 2.8.1.2 Função do NDT num documento capturado
+
+`ndt_version_ref` é obrigatório em todo o NDF (§2.6), mas o que ele designa num
+documento capturado **não** é o que designa num documento nativo, e a diferença
+é normativa.
+
+| | Documento nativo | Documento capturado |
+|---|---|---|
+| Reproduz o documento | o NDT, a partir de `documento` | o **componente**, tal como preservado |
+| O NDT reproduz | o ato | o **auto de captura** e os seus metadados |
+
+Num documento capturado, `ndt_version_ref` designa a representação documental da
+**captura** — identidade, componentes, proveniência da submissão, validações de
+formato, avaliação. **NÃO DEVE** ser interpretado como template capaz de
+reconstruir o componente original: o componente é o original, e nada o
+substitui (§2.8.2). Um leitor conforme **NÃO DEVE** aplicar o NDT ao bloco
+`documento` de um capturado esperando obter o ato, e **NÃO DEVE** apresentar a
+saída do NDT como sendo o documento recebido.
+
 #### 2.8.2 Divergência entre declaração e componente
 
 Num documento cujo conteúdo resida em componentes, os campos descritivos de
@@ -864,6 +972,71 @@ Nenhum dos dois corrige o outro. Um erro nos campos descritivos corrige-se por
 novo NDF com `relacoes[{tipo: "corrige"}]` (§2.11.2), nunca por alteração do
 documento finalizado (§2.1, §5.3). Um produtor **NÃO DEVE** alterar os bytes de
 um componente para os harmonizar com a declaração.
+
+#### 2.8.1.3 Anexos de um documento nativo
+
+Um ofício com um mapa de medições, uma informação com uma planta, um parecer com
+o extrato que o fundamenta — o documento é nativo, o anexo não é. É o caso
+corrente, e o NDF representa-o sem tipo especial e sem sair da via nativa: o ato
+vive nos campos estruturados do schema do tipo, e o anexo é um componente com
+`papel: "anexo"`.
+
+```json
+{
+  "documento": {
+    "numero": "OF/2026/00123",
+    "assunto": "Resposta ao pedido de informação",
+    "corpo": "...",
+    "componentes": [
+      {
+        "id": "mapa-medicoes",
+        "papel": "anexo",
+        "media_type": "text/plain",
+        "sha256": "sha256:165830ce12904531cd539298f3ad8066d94fcf678755401ff78b28776edb97ef",
+        "tamanho": 130,
+        "nome_original": "mapa-medicoes.txt"
+      }
+    ]
+  }
+}
+```
+
+Daqui decorrem, sem regra nova, as propriedades que interessam: o digest do anexo
+entra nos `payload_bytes` e fica **coberto pela assinatura** do documento
+(ADR-021); o anexo **viaja** no `.ndfpkg`, em `anexos/` (§8.1); e o fecho de
+`NDF-PKG-009` vale nos dois sentidos, pelo que um pacote a que falte um anexo
+declarado, ou que transporte um ficheiro não declarado, **NÃO É** conforme.
+
+##### O teste de identidade documental
+
+A pergunta a fazer perante cada anexo não é sobre o seu formato, mas sobre o que
+ele é:
+
+> **O anexo tem existência documental própria — autor, data, número, ciclo de
+> vida, avaliação ou autenticidade que não sejam os do documento que o
+> acompanha?**
+
+| Resposta | Como se representa |
+|---|---|
+| **Não** — material de apoio, sem vida própria | `componentes[]` com `papel: "anexo"`, dentro deste NDF |
+| **Sim** — é um documento, que por acaso segue outro | **NDF autónomo**, ligado por `relacoes[{ tipo: "anexa" }]` (§2.11) |
+
+O segundo caso não é um contorno do primeiro: é o que permite que o anexo tenha a
+sua própria avaliação arquivística, o seu prazo de conservação, a sua assinatura e
+o seu destino final — e que continue identificável quando o documento que o
+acompanhava for eliminado. A relação liga `ndf_id` **e** `payload_hash`, pelo que
+fica presa à versão exata do alvo (§2.11.3).
+
+Um produtor **NÃO DEVE** declarar como `componentes[]` um anexo que satisfaça o
+teste; e **NÃO DEVE** fragmentar em NDF autónomos material que não o satisfaça,
+o que produziria documentos sem conteúdo próprio apenas para transportar
+ficheiros.
+
+**Nota de âmbito.** Quais os anexos legalmente exigidos por um ato, e se estão
+todos presentes, não é matéria do formato — é o exemplo dado em
+[ADR-022](../../docs/architecture/ADR-022-dever-do-formato.md). O NDF garante que
+os anexos declarados existem, estão íntegros e viajam; não que sejam os certos
+nem que estejam completos.
 
 ### 2.9 Tipologias de documento e extensibilidade de `documento`
 
@@ -1131,11 +1304,18 @@ uma assinatura pessoal. Ver a arquitetura normativa comum em
 
 #### 2.10.1 Valores (enum fechado)
 
-| Valor | Nível eIDAS | Requisito de certificado | Passos obrigatórios no pipeline | Exemplos de atos |
-|---|---|---|---|---|
-| `"nenhuma"` | — | Nenhum | Passos 1–3 e 8 (canonicalização, hash, validation_code, persistência) | Registos internos sem efeito externo, logs de operação, tabelas de presença, minutas. |
-| `"avancada"` | SEA — Assinatura Eletrónica Avançada (eIDAS Art.º 26.º) | Certificado com identificação única do signatário; não obrigatoriamente qualificado | Passos 1–8 com CAdES-B-LTA | Ofícios, informações técnicas, pareceres, despachos de mero expediente, notificações de rotina. |
-| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS; equivalente legal à assinatura manuscrita | Passos 1–8 com CAdES-B-LTA | Contratos públicos, atos com efeito patrimonial significativo, decisões com impacto jurídico direto. |
+| Valor | Nível eIDAS | Requisito de certificado | Passos obrigatórios no pipeline |
+|---|---|---|---|
+| `"nenhuma"` | — | Nenhum | Passos 1–3 e 8 (canonicalização, hash, validation_code, persistência) |
+| `"avancada"` | SEA — Assinatura Eletrónica Avançada (eIDAS Art.º 26.º) | Certificado com identificação única do signatário; não obrigatoriamente qualificado | Passos 1–8 com CAdES-B-LTA |
+| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS | Passos 1–8 com CAdES-B-LTA |
+
+**Esta tabela não dá exemplos de tipos de ato, e a omissão é deliberada.** Uma
+coluna que associasse ofícios a `"avancada"` e contratos públicos a
+`"qualificada"` seria lida como classificação jurídica, e copiada como tal —
+apesar de §2.10.2 dizer o contrário duas linhas abaixo. A tabela fixa apenas o
+que se decide dentro do artefacto: que certificado cada valor exige e que passos
+do pipeline desencadeia. Que atos pertencem a cada classe é matéria de §2.10.2.
 
 #### 2.10.2 Responsabilidade de classificação
 
@@ -1790,13 +1970,16 @@ CPA manda mencionar.
 
 Uma parte substancial dos documentos entregues à Administração não tem
 assinatura eletrónica: é submetida através de um canal autenticado — Portal
-das Finanças, Segurança Social Direta e equivalentes. Nesses casos, o acesso
-autenticado desempenha a função que a assinatura manuscrita desempenhava no
-suporte em papel.
+das Finanças, Segurança Social Direta e equivalentes. O formato tem de
+conseguir representar esse caso sem o forçar ao vocabulário da assinatura
+eletrónica.
 
-O documento é **imputável ao titular das credenciais**. O bloco opcional
-`autenticacao`, em cada entrada de `imputacao`, regista o facto que fundamenta
-essa imputação:
+O produtor **PODE** declarar a imputação ao titular identificado pelo mecanismo
+de autenticação, quando essa conclusão resulte do regime jurídico e da política
+que lhe são aplicáveis. O bloco opcional `autenticacao`, em cada entrada de
+`imputacao`, regista o **facto observado** que o produtor invoca como fundamento
+dessa declaração; a conclusão jurídica em si é da entidade produtora, nos termos
+de §2.15.1:
 
 ```json
 {
@@ -1822,11 +2005,12 @@ essa imputação:
 | `meio` | Sim | Meio de autenticação. Enum aberto: `chave_movel_digital`, `cartao_cidadao`, `senha_acesso`, `certificado_qualificado`, `presencial`. |
 | `nivel_garantia` | Não | Nível de garantia, na terminologia eIDAS: `baixo`, `substancial`, `elevado`. Opcional — o sistema produtor poderá não o classificar. |
 
-O enum é aberto e **inclui deliberadamente o atendimento presencial**. A
-identificação de um contribuinte ao balcão e a autenticação num canal digital
-produzem o mesmo efeito jurídico; um vocabulário que só exprimisse meios
-digitais obrigaria a modelar o caso presencial por omissão, tornando-o
-indistinguível de um documento sem identificação nenhuma.
+O enum é aberto e **inclui deliberadamente o atendimento presencial**. Um
+vocabulário que só exprimisse meios digitais obrigaria a modelar o caso
+presencial por omissão, tornando-o indistinguível de um documento sem
+identificação nenhuma — e a identificação ao balcão é um facto observado como
+qualquer outro. Que efeito lhe corresponde é matéria do regime aplicável, não do
+vocabulário que o regista.
 
 **Por entrada, não por documento.** Quando a lei exige autenticação de mais do
 que um interessado — o caso da declaração de IRS em tributação conjunta, que
@@ -1837,12 +2021,13 @@ demonstra que a exigência legal foi satisfeita.
 
 **A imputação não é qualificável.** Esta especificação **NÃO DEFINE** nenhum
 mecanismo para exprimir grau de confiança, presunção ou reserva sobre uma
-imputação. Um documento submetido por meio autenticado é imputado ao titular
-das credenciais, sem gradação. Alegações de extravio ou uso indevido de
-credenciais dirimem-se pelas vias judiciais competentes, fora do formato: o
-NDF regista o facto que fundamenta a imputação e **não arbitra** sobre ele —
-mesmo limite de âmbito de §1.5. Um produtor **NÃO DEVE** introduzir campos
-próprios com essa finalidade.
+imputação: uma entrada de `imputacao` afirma-se ou omite-se, e não admite
+gradação. A razão é de âmbito, não de direito — graduar exigiria que o formato
+arbitrasse sobre a força de uma declaração alheia, que é precisamente o que não
+lhe compete (§1.5; ADR-022). Alegações de extravio ou uso indevido de
+credenciais dirimem-se pelas vias competentes, fora do formato: o NDF regista o
+facto invocado como fundamento e preserva-o intacto para essa apreciação. Um
+produtor **NÃO DEVE** introduzir campos próprios com essa finalidade.
 
 **`nivel_garantia` não gradua a imputação.** Este ponto merece regra própria,
 porque o campo tem aparência de qualificador e não o é. `nivel_garantia`
@@ -1850,12 +2035,13 @@ descreve o nível de garantia **técnico do mecanismo de autenticação**, na
 terminologia eIDAS, para efeitos de interoperabilidade e de caracterização do
 canal. NÃO descreve a força com que o documento é imputado.
 
-Senha do portal, Chave Móvel Digital e Cartão de Cidadão são credenciais
-pessoais e intransmissíveis, e o seu uso é inerentemente da responsabilidade
-do respetivo titular. A imputação é **idêntica** nos três casos. Um leitor
-conforme **NÃO DEVE** derivar de um `nivel_garantia` mais baixo uma imputação
-mais fraca, uma presunção ilidível, ou qualquer tratamento diferenciado do
-documento (ver §9.2).
+A regra que daqui decorre é semântica, não jurídica: um leitor conforme **NÃO
+DEVE** derivar de um `nivel_garantia` mais baixo uma imputação mais fraca, uma
+presunção ilidível, ou qualquer tratamento diferenciado do documento (ver
+§9.2) — porque o campo não exprime nada disso, e inferi-lo seria atribuir-lhe
+significado que a especificação não lhe dá. Se um regime aplicável associa
+consequências ao nível de garantia do meio utilizado, essa apreciação cabe a
+quem aplica o regime, sobre o facto que o NDF preservou.
 
 **A imputação é histórica, não revogável no documento.** A imputação registada
 num NDF afirma a quem o ato era imputado **no momento da finalização**. Uma

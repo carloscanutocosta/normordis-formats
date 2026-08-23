@@ -95,7 +95,10 @@ entidades ([`../design/NDFPKG-CAPTURA-E-INGESTAO.md`](../design/NDFPKG-CAPTURA-E
 | **L-T2** — a cadeia de custódia não acompanha o pacote | São os PREMIS **Events**, que num AIP viajam com o objeto. Hoje não viajam |
 | **L-T3** — transferir custódia é um ato sem artefacto de aceitação | OAIS modela-o na função *Ingest*, com confirmação ao produtor |
 
-Nenhuma destas exige inventar mecanismo: exige adotar o que já existe.
+Nenhuma destas exige inventar mecanismo: exige adotar o que já existe — e as
+três passam o teste de [ADR-024](../architecture/ADR-024-fronteira-oais-modelo-de-informacao.md),
+por serem artefactos e não funções de arquivo. O que desse vocabulário **não**
+entra no NDF está delimitado no mesmo ADR.
 
 ## 6. Trabalho de confirmação pendente
 

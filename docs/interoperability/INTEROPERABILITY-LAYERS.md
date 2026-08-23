@@ -125,6 +125,14 @@ formato — o que é compatível com o congelamento de âmbito decidido em D5.
 5. Os elementos necessários a esse mapeamento já existem no NDF; falta o
    mapeamento e a evidência, não especificação nova.
 
+### 5.1 Quanto de OAIS entra no NDF
+
+A pergunta de §3 tem, desde 2026-08-23, uma fronteira decidida: o NDF adota o
+**modelo de informação** de OAIS e deixa fora o **modelo funcional** e as
+responsabilidades organizacionais. O critério, as consequências para as lacunas
+de transferência L-T1 a L-T4 e as formulações defensáveis em texto público estão
+em [ADR-024](../architecture/ADR-024-fronteira-oais-modelo-de-informacao.md).
+
 ---
 
 ## 6. Não-objetivos

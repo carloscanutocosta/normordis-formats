@@ -35,10 +35,10 @@
       "id": "core-ingest"
     },
     "details": {
-      "payload_hash": "sha256:625d0b2281879bf460fc9611c77a5a3b070c010fc43ae6ff33a47184bfe28f96"
+      "payload_hash": "sha256:7c23a8685be13aece9b86abe0faa37357cee7e106508dc75b750d95eaecf3217"
     },
     "previous_event_hash": "sha256:17259d703de3f065120ab5857c8c41dd7117c05f7b131a394db43d264319522d",
-    "event_hash": "sha256:9f567b76a623153b93746e703c2ca42bef1e15a888c181b03e32f335e5b1b667"
+    "event_hash": "sha256:3bb2028394a2fefdc02187397def390a65190927e189a8bc89b682efc71332d6"
   },
   {
     "custody_event_version": "1.0.0",
@@ -60,8 +60,8 @@
         }
       ]
     },
-    "previous_event_hash": "sha256:9f567b76a623153b93746e703c2ca42bef1e15a888c181b03e32f335e5b1b667",
-    "event_hash": "sha256:f4df1015cd7b20a7cca63cbe8dd297a336f281cf0db9ad3fe3c2ad6ff977a215"
+    "previous_event_hash": "sha256:3bb2028394a2fefdc02187397def390a65190927e189a8bc89b682efc71332d6",
+    "event_hash": "sha256:e550eeaefb2f6a87013019e0ebdd3b066081dcf3938a80d7cac2aa0b7eb89dfe"
   },
   {
     "custody_event_version": "1.0.0",
@@ -75,8 +75,8 @@
       "id": "user:456"
     },
     "details": {
-      "payload_hash": "sha256:625d0b2281879bf460fc9611c77a5a3b070c010fc43ae6ff33a47184bfe28f96",
-      "validation_code": "NDF-EBZLMKB3X7VALVMRMBJX",
+      "payload_hash": "sha256:7c23a8685be13aece9b86abe0faa37357cee7e106508dc75b750d95eaecf3217",
+      "validation_code": "NDF-LEYFWRBLVXOA4QBXPYEC",
       "motivo_eliminacao": "Destino final: eliminação. PCA de 5 anos decorrido.",
       "instrumento_ref": "lc/lista-consolidada-dglab-2023-v3",
       "autorizado_por": "user:123",
@@ -87,7 +87,7 @@
         }
       ]
     },
-    "previous_event_hash": "sha256:f4df1015cd7b20a7cca63cbe8dd297a336f281cf0db9ad3fe3c2ad6ff977a215",
-    "event_hash": "sha256:c6a21406e25c171a75a69f5280f7fc44e02a94674341738f3222e59fc13949a4"
+    "previous_event_hash": "sha256:e550eeaefb2f6a87013019e0ebdd3b066081dcf3938a80d7cac2aa0b7eb89dfe",
+    "event_hash": "sha256:bd6575f8e07fe24a65e86b452f191ca540a7a60cce1036bd6e9c9efac44a3e3c"
   }
 ]

@@ -29,6 +29,14 @@ jobs:
       - name: Package negative vectors
         run: python3 tools/check_package_vectors.py
 
+      - name: Conjunto de transferência — exemplo (must pass)
+        run: |
+          python3 tools/build_ndfxfer_example.py
+          python3 tools/check_transferencia.py specs/ndf/examples/ndfxfer-example
+
+      - name: Conjunto de transferência — vetores negativos
+        run: python3 tools/check_transferencia_vectors.py
+
       - name: NDT semantic corpus
         run: python3 tools/check_ndt_semantic_corpus.py
 
@@ -62,6 +70,9 @@ jobs:
 
       - name: Custody chain — captura (must pass)
         run: python3 tools/check_custody.py conformance/custody/captura-chain.json
+
+      - name: Custody chain — cadeia do recetor (must pass)
+        run: python3 tools/check_custody.py conformance/custody/cadeia-do-recetor.json
 
       - name: Custody chain — omissão recomposta (must reject)
         run: "! python3 tools/check_custody.py conformance/custody/omissao-recomposta.json"

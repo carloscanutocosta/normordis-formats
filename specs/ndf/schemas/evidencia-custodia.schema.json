@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://normordis.pt/specs/ndf/1.0.0/evidencia-custodia.schema.json",
+  "title": "Evidência de custódia transferível v1.0.0",
+  "description": "Extrato atestado da cadeia de custódia de uma unidade, para acompanhar uma transferência. NÃO É uma cadeia: é objeto novo, selado pelo transmitente, que declara o que transferiu e o que reteve. Transferir a cadeia com menos eventos seria mutilá-la, o que CUST-REQ-004 proíbe e conformance/custody/omissao-recomposta.json demonstra ser detetável — a divulgação parcial resolve-se por objeto novo, nunca por mutilação (L-T4). Ver docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md §4.",
+  "type": "object",
+  "required": [
+    "evidencia_version",
+    "ndf_id",
+    "extraida_em",
+    "politica_extracao",
+    "cadeia",
+    "eventos",
+    "omitidos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "evidencia_version": {
+      "const": "1.0.0"
+    },
+    "ndf_id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "Unidade a que esta evidência respeita."
+    },
+    "extraida_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Instante da extração. A evidência descreve a cadeia nesse momento, e não depois."
+    },
+    "politica_extracao": {
+      "type": "object",
+      "required": ["id", "tipos"],
+      "additionalProperties": false,
+      "description": "Política de extração aplicada. Declara-se uma política, não uma seleção caso a caso: a mesma política vale para toda a transferência, o que torna a omissão auditável por comparação entre unidades em vez de depender do fundamento escrito para cada documento. Ver o desenho §4.4 (D-XFER-2).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identificador da política, resolúvel pela entidade transmitente. Opaco a esta especificação.",
+          "examples": ["dge/politica-extracao-custodia-2026-v1"]
+        },
+        "tipos": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Tipos de evento que a política transfere. DEVE incluir 'finalizado': sem ele o extrato não estabelece quando o documento se tornou imutável, e deixa de ser evidência de custódia para ser uma lista de acontecimentos. Que outros tipos uma entidade transfere é política dessa entidade (ADR-024).",
+          "items": {
+            "enum": [
+              "capturado",
+              "recebido",
+              "finalizado",
+              "verificado",
+              "exportado",
+              "estado_alterado",
+              "assinatura_renovada",
+              "selo_acrescentado",
+              "transferido",
+              "eliminado"
+            ]
+          },
+          "contains": { "const": "finalizado" }
+        }
+      }
+    },
+    "cadeia": {
+      "type": "object",
+      "required": ["eventos_total", "ultimo_event_hash"],
+      "additionalProperties": false,
+      "description": "Estado da cadeia completa no momento da extração. Estes dois valores são afirmação do transmitente, coberta pelo selo: um recetor não os pode provar sem confiar nele — limitação declarada, não escondida (desenho §4.3).",
+      "properties": {
+        "eventos_total": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Número total de eventos na cadeia. Permite ao recetor confirmar que eventos[] + omitidos.contagem fecha."
+        },
+        "ultimo_event_hash": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+          "description": "event_hash do último evento da cadeia completa. Fixa o estado da cadeia no instante da extração; uma extração posterior que declare outro valor revela que a cadeia cresceu."
+        }
+      }
+    },
+    "eventos": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Eventos transferidos, íntegros e não editados (CUST-REQ-004), por ordem crescente de sequence. Cada um valida contra custody-event.schema.json e o seu event_hash recomputa a partir do próprio conteúdo. As sequências podem ter saltos — é isso que torna a omissão visível em vez de dissimulada.",
+      "items": { "type": "object" }
+    },
+    "omitidos": {
+      "type": "object",
+      "required": ["contagem", "fundamento"],
+      "additionalProperties": false,
+      "description": "O que não foi transferido. Declarado, nunca silencioso.",
+      "properties": {
+        "contagem": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Número de eventos retidos. Zero é válido e significa cadeia integralmente transferida."
+        },
+        "fundamento": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Razão da retenção. Obrigatório mesmo com contagem zero, caso em que declara que nada foi retido — a mesma razão pela qual 'contem_dados_pessoais' se mantém obrigatório quando é false (SPEC.md §1.4)."
+        }
+      }
+    }
+  }
+}

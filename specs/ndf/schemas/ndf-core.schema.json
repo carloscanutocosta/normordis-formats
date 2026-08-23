@@ -54,7 +54,7 @@
         "avancada",
         "qualificada"
       ],
-      "description": "Minimum electronic signature level required by the legal nature of the act. See SPEC.md §2.10."
+      "description": "Electronic-signature level that the producing system determined to be applicable to this document, under the legal regime and internal policy governing it. It is a declaration by the producer, not a determination by the format: NDF does not define which acts require which level. It conditions the finalisation pipeline and the certificate the envelope must carry. See SPEC.md §2.10 and §2.10.2."
     },
     "ndt_version_ref": {
       "type": "string",
@@ -341,14 +341,35 @@
               "description": "Categories of personal data. Open enum: 'identificacao_fiscal', 'rendimentos', 'saude', 'dados_processuais', 'biometricos', 'outros'."
             },
             "base_legal_conservacao": {
-              "type": "string",
-              "enum": [
-                "obrigacao_legal",
-                "interesse_publico",
-                "consentimento",
-                "contrato"
+              "type": "object",
+              "required": [
+                "regime",
+                "base"
               ],
-              "description": "Legal basis for conservation under GDPR Art. 6."
+              "additionalProperties": false,
+              "properties": {
+                "regime": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$",
+                  "description": "Data-protection regime whose vocabulary 'base' belongs to. Open enum; the meaning of a regime comes from the registry, not from this pattern.",
+                  "examples": [
+                    "eu-gdpr",
+                    "uk-gdpr",
+                    "ch-fadp"
+                  ]
+                },
+                "base": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Identifier of the legal basis within the declared regime, in that regime's own vocabulary (e.g. 'art6-1-c' under eu-gdpr). Deliberately not an enum: NDF does not enumerate the lawful bases of any regime, and an enum would be both jurisdiction-bound and incomplete."
+                },
+                "fundamento_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Optional reference to the instrument or internal act that grounds the declared basis. Opaque to NDF, resolved by the producing system."
+                }
+              },
+              "description": "Legal basis for retaining the personal data, as determined and declared by the producer. A {regime, base} pair, on the same pattern as classificacao_seguranca: the regime supplies the vocabulary, and NDF assesses neither the vocabulary nor whether the declared basis is the correct one. See SPEC.md §1.4, ADR-017 and ADR-022."
             },
             "responsavel_tratamento": {
               "type": "string",
@@ -835,7 +856,7 @@
             "meio": {
               "type": "string",
               "minLength": 1,
-              "description": "Authentication means. Open enum: 'chave_movel_digital', 'cartao_cidadao', 'senha_acesso', 'certificado_qualificado', 'presencial'. In-person identification is deliberately included: it has the same legal effect as authenticated digital access, and a digital-only vocabulary would force the in-person case to be modelled by omission."
+              "description": "Authentication means observed by the producing system. Open enum: 'chave_movel_digital', 'cartao_cidadao', 'senha_acesso', 'certificado_qualificado', 'presencial'. In-person identification is deliberately included: a digital-only vocabulary would force the in-person case to be modelled by omission, making it indistinguishable from a document with no identification at all. What legal effect a given means carries is a matter for the applicable regime, not for this vocabulary. See SPEC.md §2.15.4."
             },
             "nivel_garantia": {
               "type": "string",
@@ -844,7 +865,7 @@
                 "substancial",
                 "elevado"
               ],
-              "description": "Technical level of assurance of the authentication mechanism, in eIDAS terms. Optional — the producing system may not classify it. This does NOT grade the imputation: portal password, Chave Móvel Digital and Cartão de Cidadão are all personal, non-transferable credentials whose use is inherently the holder's responsibility, and the imputation is identical in all three cases. See SPEC.md §2.15.4."
+              "description": "Technical level of assurance of the authentication mechanism, in eIDAS terms. Optional — the producing system may not classify it. It does NOT grade the imputation, because the field does not express gradation: a conforming reader must not derive a weaker imputation, a rebuttable presumption, or any differentiated handling from a lower value. Where an applicable regime attaches consequences to the level of assurance, that assessment is made by whoever applies the regime, on the fact NDF preserved. See SPEC.md §2.15.4."
             }
           },
           "additionalProperties": false

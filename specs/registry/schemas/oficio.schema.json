@@ -72,29 +72,184 @@
       "additionalProperties": false,
       "description": "Corpo do ofício em NCRTF. A validação estrutural completa é feita também contra o schema NCRTF declarado."
     },
-    "anexos": {
+    "componentes": {
       "type": "array",
+      "description": "Componentes binários associados a este documento — tipicamente anexos (papel 'anexo'). O conteúdo do ato vive nos campos estruturados deste schema; os componentes são material que o acompanha e que não nasceu no editor estruturado. O hash entra nos payload_bytes e fica coberto pela assinatura (ADR-021). Nenhuma entrada declara localização de armazenamento: a resolução faz-se por hash. Um anexo com identidade documental própria NÃO DEVE ser declarado aqui — é NDF autónomo, ligado por relacoes[] (SPEC.md §2.8.1.3).",
       "items": {
         "type": "object",
-        "required": ["descricao", "hash_sha256"],
+        "required": [
+          "id",
+          "papel",
+          "media_type",
+          "sha256",
+          "tamanho"
+        ],
+        "additionalProperties": false,
         "properties": {
-          "descricao": {
+          "id": {
             "type": "string",
-            "description": "Descrição do anexo."
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "Identificador do componente, unívoco dentro deste documento."
           },
-          "hash_sha256": {
+          "papel": {
+            "enum": [
+              "original",
+              "representacao_congelada",
+              "anexo",
+              "evidencia"
+            ],
+            "description": "original — bytes tal como emitidos ou recebidos, sempre preservados. representacao_congelada — derivada de um original para garantir fidelidade visual, nunca o substitui. anexo — componente de apoio sem identidade documental própria. evidencia — material de validação de assinatura contida, congelado na captura. Ver docs/interoperability/PREMIS-METS-MAPPING.md §3."
+          },
+          "derivado_de": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "id do componente de origem. Obrigatório quando papel é representacao_congelada: uma representação congelada é sempre derivação de um original identificável."
+          },
+          "media_type": {
+            "type": "string",
+            "pattern": "^[a-z]+/[a-zA-Z0-9.+_-]+$",
+            "description": "Tipo MIME determinado por inspeção do conteúdo, nunca inferido da extensão.",
+            "examples": [
+              "application/pdf",
+              "image/jpeg",
+              "application/vnd.oasis.opendocument.text"
+            ]
+          },
+          "sha256": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
-            "description": "SHA-256 digest do ficheiro de anexo (formato 'sha256:<hex>'). O ficheiro é externo ao NDF-core."
+            "description": "Digest do componente no formato '<alg>:<hex>'. Valor normativo para NDF v1.x é sha256:<64 hex>. É a identidade do componente e a chave da sua resolução; DEVE constar de manifest.inventario num .ndfpkg (NDF-PKG-010)."
           },
-          "nome_ficheiro": {
+          "tamanho": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Dimensão em bytes."
+          },
+          "nome_original": {
             "type": "string",
-            "description": "Nome original do ficheiro de anexo."
+            "minLength": 1,
+            "description": "Nome do ficheiro tal como emitido ou recebido. É descritivo — NÃO é caminho dentro do pacote, e um leitor não o DEVE usar para resolver o componente."
+          },
+          "validacao_formato": {
+            "type": "object",
+            "required": [
+              "resultado"
+            ],
+            "additionalProperties": false,
+            "description": "Resultado da validação de formato no momento da captura. Registo, não juízo: um resultado nao_conforme não invalida o documento nem a captura (SPEC.md §2.8).",
+            "properties": {
+              "norma": {
+                "type": "string",
+                "description": "Norma de formato verificada.",
+                "examples": [
+                  "PDF/A",
+                  "PDF/UA"
+                ]
+              },
+              "parte": {
+                "type": "string",
+                "examples": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ]
+              },
+              "nivel": {
+                "type": "string",
+                "examples": [
+                  "a",
+                  "b",
+                  "u"
+                ]
+              },
+              "resultado": {
+                "enum": [
+                  "conforme",
+                  "nao_conforme",
+                  "nao_validavel"
+                ],
+                "description": "nao_validavel cobre ficheiro cifrado, corrompido ou sem validador disponível."
+              },
+              "validador": {
+                "type": "object",
+                "required": [
+                  "nome",
+                  "versao"
+                ],
+                "additionalProperties": false,
+                "description": "Sem identificar o validador e a sua versão, um resultado registado hoje é ininterpretável a longo prazo.",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "versao": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "verificado_em": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
           }
         },
-        "additionalProperties": false
-      },
-      "description": "Lista de anexos referenciados por hash. Os ficheiros são externos ao NDF-core."
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "papel": {
+                  "const": "representacao_congelada"
+                }
+              },
+              "required": [
+                "papel"
+              ]
+            },
+            "then": {
+              "required": [
+                "derivado_de"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "validacao_formato": {
+                  "properties": {
+                    "resultado": {
+                      "enum": [
+                        "conforme",
+                        "nao_conforme"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "resultado"
+                  ]
+                }
+              },
+              "required": [
+                "validacao_formato"
+              ]
+            },
+            "then": {
+              "properties": {
+                "validacao_formato": {
+                  "required": [
+                    "resultado",
+                    "validador",
+                    "verificado_em"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
     },
     "signatario": {
       "type": "object",

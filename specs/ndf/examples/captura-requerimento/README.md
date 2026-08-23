@@ -34,9 +34,26 @@ contribuinte não se exigem formalidades de formato além da autenticação no
 portal — a deficiência é propriedade do que chegou, nunca fundamento de recusa
 da submissão.
 
-**O invariante de origem aplica-se.** `participantes` declara o submissor como
-`autor`: a captura não dispensa declarar quem produziu o documento, apenas
-desloca o objeto dessa produção do texto para o componente (§2.2.1, §2.8.1).
+**Submeter não é produzir, e o exemplo separa as duas coisas.** O sistema
+observou uma submissão autenticada no e-balcão; não observou quem escreveu o
+PDF. Declarar o submissor como `autor` seria afirmar um facto que a captura não
+estabelece — e §2.2.1 proíbe expressamente satisfazer o invariante de origem com
+informação inventada. O pacote declara, por isso, três coisas distintas:
+
+| O que se sabe | Onde se declara |
+|---|---|
+| Quem submeteu, por que canal, com que autenticação e a que horas | `documento.proveniencia_submissao` |
+| Que a autoria material não é apurável, e porquê | `metadados.origem_nao_identificavel` (§2.2.1, ADR-023) |
+| Quem responde juridicamente pelo documento, e a que título | `imputacao`, com o facto de autenticação que o produtor invoca (§2.15.4) |
+
+Um sistema que disponha de prova independente da autoria material declara-a em
+`participantes` e omite `origem_nao_identificavel` — os dois são mutuamente
+exclusivos. O que não é admissível é derivar um do outro.
+
+**`tipo_equivalente` está ausente.** O campo é opcional e declara-se «quando
+determinável»: não há tipo nativo registado que corresponda a um requerimento de
+cidadão, e preencher o campo com o tipo mais próximo produziria uma medida de
+transição falsa (registo, §3.2.4).
 
 **`nivel_assinatura` é `"nenhuma"`.** É o nível de assinatura **do NDF**. Um
 requerimento sem assinatura eletrónica própria não deixa de ser custodiável, e

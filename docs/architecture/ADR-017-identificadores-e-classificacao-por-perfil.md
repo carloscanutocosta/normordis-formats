@@ -147,6 +147,44 @@ publicação, ao abrigo de ADR-007 e do estado nível 1 — Draft. Migrados 31
 `entidade_produtora` e 35 `classificacao_seguranca` em casos de conformidade e
 exemplos.
 
+## Adenda (2026-08-23) — `base_legal_conservacao`
+
+O mesmo defeito subsistia num terceiro campo, que a ronda de 2026-08-15 não
+alcançou porque vive em `protecao_dados` e não nos dois blocos revistos.
+
+`metadados.protecao_dados.base_legal_conservacao` era um `enum` fechado de
+quatro valores — `obrigacao_legal`, `interesse_publico`, `consentimento`,
+`contrato` — descritos no schema como «legal basis for conservation under GDPR
+Art. 6». Dois defeitos, e o segundo é o que decide:
+
+1. **Vocabulário de um ordenamento dentro do core.** O RGPD não é o regime de
+   proteção de dados de todas as jurisdições em que o NDF pode ser usado, e o
+   argumento é literalmente o de `classificacao_seguranca`: regimes divergem em
+   etiquetas, número de bases e critérios.
+2. **Incompleto mesmo dentro do RGPD.** O artigo 6.º prevê seis fundamentos de
+   licitude; o `enum` listava quatro. Um documento cuja conservação assentasse
+   num dos restantes não tinha como o declarar — logo, lacuna do formato nos
+   termos de [ADR-022](ADR-022-dever-do-formato.md), não escolha de desenho.
+
+O campo passa a par `{regime, base}`, com `fundamento_ref` opcional, na forma
+exata de `classificacao_seguranca`: o regime fornece o vocabulário, e o NDF não
+enumera as bases de nenhum ordenamento nem aprecia se a base declarada é a
+correta. Ver SPEC §1.4.1.
+
+**Diferença face a `classificacao_seguranca`, e é deliberada:** aquele campo
+manteve um `nivel` ordinal neutro, para que um leitor que desconheça o regime
+possa ainda assim ordenar dois documentos por sensibilidade. Aqui não existe
+eixo equivalente — bases legais não são ordenáveis nem comparáveis entre
+regimes —, pelo que `base` é uma string opaca ao formato. Inventar uma
+taxonomia neutra de fundamentos de licitude seria produzir direito comparado
+dentro de um schema.
+
+**Compatibilidade**: incompatível, absorvida em 1.0.0 antes de qualquer
+publicação, pelo mesmo fundamento da decisão principal. Migradas 21 ocorrências
+em exemplos e casos de conformidade, todas `obrigacao_legal` →
+`{ "regime": "eu-gdpr", "base": "art6-1-c" }`. Acrescentados um caso positivo
+com regime não-RGPD e um caso negativo de `base` sem `regime`.
+
 ## Referências
 
 - SPEC.md §2.7.1, §2.7.2, §2.7.3, §2.7.4, §2.7.4.1, §1.5

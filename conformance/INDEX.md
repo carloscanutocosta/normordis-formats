@@ -6,10 +6,11 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## NDF
 
-### `valid/` — devem ser aceites (14)
+### `valid/` — devem ser aceites (16)
 
 | Ficheiro | Descrição |
 |---|---|
+| `ndf/valid/aceitacao-custodia.json` | Caso de teste: documento de aceitação de custódia, produzido pela entidade RECETORA em resposta a um conjunto de transferência. Fecha L-T3: sem artefacto de ace… |
 | `ndf/valid/avaliacao-perfil-generico.json` | Caso de teste: documento produzido fora de Portugal, com avaliacao.perfil 'generic'. Cobre §3.2.3 (perfil sem sintaxe jurisdicional imposta) e §3.4.1 (destino_f… |
 | `ndf/valid/despacho-avancado.json` | Caso de teste: despacho com assinatura avançada (SEA). Sem dados pessoais. |
 | `ndf/valid/liquidacao-automatica.json` | Caso de teste: liquidação gerada automaticamente, sem autor humano. Cobre §2.14 (cadeia de dois sistemas, ordem cronológica), §2.15 (imputação por delegação com… |
@@ -21,16 +22,19 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/valid/oficio-qualificado.json` | Caso de teste: ofício com assinatura qualificada e dados pessoais. Todos os campos obrigatórios presentes. |
 | `ndf/valid/origem-nao-apuravel.json` | Origem não apurável: quarto modo do invariante de §2.2.1. Documento capturado sem autor identificável — o bloco metadados.origem_nao_identificavel satisfaz o in… |
 | `ndf/valid/parecer-com-relacoes-e-ia.json` | Caso de teste: parecer com relacoes[] (emite_parecer_sobre), participantes[] e proveniencia_ia (utilizada com revisão humana concluída). Cobre §2.11, §2.12, §2.… |
+| `ndf/valid/protecao-dados-regime-nao-eu.json` | Caso de teste: base legal de conservação declarada num regime que não é o RGPD. Cobre §1.4.1 — 'base_legal_conservacao' é um par {regime, base} e o NDF não enum… |
 | `ndf/valid/registo-interno-sem-assinatura.json` | Caso de teste: registo interno sem assinatura eletrónica (nivel_assinatura: nenhuma), com destino_final conservacao_permanente. Requer CAdES-B-LTA para integrid… |
 | `ndf/valid/relacao-extensao-qualificada.json` | Caso de teste: relacoes[0].tipo usa extensão qualificada 'ext.<entidade>.<tipo>' (§2.11.7), fora do vocabulário base fechado mas estruturalmente válida. |
 | `ndf/valid/versao-substituicao.json` | Caso de teste: NDF-core de um documento que SUBSTITUI um anterior, via relacoes[{tipo:'substitui'}] no core assinado (§6, ADR-011). O NDF-core em si tem estado=… |
 
-### `invalid/` — devem ser rejeitados (35)
+### `invalid/` — devem ser rejeitados (37)
 
 | Ficheiro | Descrição |
 |---|---|
+| `ndf/invalid/aceitacao-recusa-sem-fundamento.json` | Caso de teste inválido: recusa de custódia sem fundamento. Uma recusa sem razão escrita não permite ao transmitente saber o que corrigir, e deixa a custódia num… |
 | `ndf/invalid/avaliacao-a-determinar-sem-autoridade.json` | INVÁLIDO: destino_final 'a_determinar' sem autoridade_avaliacao. Violação: §3.4.1 — diferir a decisão exige identificar quem a toma. |
 | `ndf/invalid/avaliacao-sem-perfil.json` | INVÁLIDO: bloco avaliacao sem perfil. Violação: §3.2 — sem perfil não é determinável o sistema arquivístico que dá sentido a classificacao_ref e instrumento_ref… |
+| `ndf/invalid/base-legal-sem-regime.json` | Caso de teste inválido: 'base_legal_conservacao' declara 'base' sem 'regime'. Uma base legal sem o regime a que pertence não tem significado determinado — o mes… |
 | `ndf/invalid/dados-pessoais-sem-base-legal.json` | INVÁLIDO: contem_dados_pessoais: true mas base_legal_conservacao ausente. Violação: §2.7.2, §1.6. |
 | `ndf/invalid/document-schema-mismatch.json` | INVÁLIDO: documento não cumpre o schema oficio@1.0.0. |
 | `ndf/invalid/idioma-locale-posix.json` | INVÁLIDO: idioma usa a forma de locale POSIX 'pt_PT' em vez da etiqueta BCP 47 'pt-PT'. Violação: §2.7.2 — o separador é hífen, não underscore. |
@@ -128,10 +132,11 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## CUSTODY
 
-### vetores diretos (4)
+### vetores diretos (5)
 
 | Ficheiro | Descrição |
 |---|---|
+| `custody/cadeia-do-recetor.json` | — |
 | `custody/captura-chain.json` | — |
 | `custody/invalid-chain.json` | — |
 | `custody/omissao-recomposta.json` | — |
@@ -146,4 +151,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 92 casos.**
+**Total: 97 casos.**

@@ -452,7 +452,7 @@ decisão de âmbito de 0.1 e da reabertura de 2026-08-13.
 | # | Tarefa | Porquê | Esforço |
 |---|---|---|---|
 | **P1** | Doutrina de projeto sobre **o que o NORMORDIS diz quando algo passa** — nunca «válido» sem dizer o que foi verificado | Três manifestações do mesmo risco: `validation_code`, rótulo igual para duas realidades, formulário a verde (desenho §7.4.3) | M |
-| **P2** | Documento de desenho do **conjunto de transferência** (L-T1 a L-T4) | Fecha `R13`, abre a conversa com a DGLAB (`R5`). Trabalho de mapeamento, não de invenção | G |
+| **P2** | Documento de desenho do **conjunto de transferência** (L-T1 a L-T4) | Fecha `R13`, abre a conversa com a DGLAB (`R5`). Trabalho de mapeamento, não de invenção | ✅ 2026-08-23 — [`NDF-CONJUNTO-DE-TRANSFERENCIA.md`](../design/NDF-CONJUNTO-DE-TRANSFERENCIA.md); restam `D-XFER-1` a `D-XFER-3` |
 | **P3** | Mover `HANDOFF-KERNEL-CORE-INGEST.md` para `normordis-kernel` | Impede que arquitetura de aplicação contamine a especificação | P |
 
 ## 12. Sequência

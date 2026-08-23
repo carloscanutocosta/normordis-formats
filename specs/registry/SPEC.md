@@ -29,6 +29,7 @@ O registo define o mecanismo de resolução de `tipo_documento_ref` — o campo 
 | `tipo_documento_ref` | Descrição | Schema |
 |---|---|---|
 | `oficio@1.0.0` | Ofício — comunicação formal externa | [schemas/oficio.schema.json](schemas/oficio.schema.json) |
+| `aceitacao-custodia@1.0.0` | Aceitação de custódia — resposta do recetor a um conjunto de transferência | [schemas/aceitacao-custodia.schema.json](schemas/aceitacao-custodia.schema.json) |
 | `informacao-tecnica@1.0.0` | Informação técnica — nota interna fundamentada | [schemas/informacao-tecnica.schema.json](schemas/informacao-tecnica.schema.json) |
 | `parecer@1.0.0` | Parecer — apreciação fundamentada com sentido explícito, sobre outro documento | [schemas/parecer.schema.json](schemas/parecer.schema.json) |
 | `despacho@1.0.0` | Despacho — decisão ou instrução de serviço | [schemas/despacho.schema.json](schemas/despacho.schema.json) |
@@ -49,6 +50,13 @@ relações, integridade e custódia. Ver
 É **um** tipo genérico, e não uma família (`oficio-capturado`,
 `parecer-capturado`, …): o campo opcional `tipo_equivalente` transporta a
 correspondência com o tipo nativo sem duplicar o registo.
+
+`aceitacao-custodia` é o único tipo do registo que documenta um ato sobre
+**outros** documentos em vez de sobre um assunto próprio. Existe porque transferir
+custódia é ato bilateral: sem artefacto produzido pelo recetor, «enviado de forma
+segura» é propriedade do transporte e não da custódia. Sendo NDF, a aceitação
+ganha identidade, assinatura, avaliação e relações tipadas sem mecanismo novo —
+ver [`../../docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md`](../../docs/design/NDF-CONJUNTO-DE-TRANSFERENCIA.md) §5.
 
 Tipos específicos de cada entidade (AT, SS, Municípios, etc.) são definidos fora desta especificação base mas seguem o mesmo formato de schema.
 

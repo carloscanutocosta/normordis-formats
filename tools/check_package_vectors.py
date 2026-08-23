@@ -47,6 +47,8 @@ def cases(root: Path):
     yield "PKG-NEG-007-envelope-sem-timestamps", lambda p: _remove_timestamps(p)
     yield "PKG-NEG-008-assinatura-sem-id", lambda p: _remove_assinatura_id(p)
     yield "PKG-NEG-009-ndt-referencia-pendurada", lambda p: _dangling_ndt_ref(p)
+    yield "PKG-NEG-015-anexo-nativo-ausente", lambda p: _anexo_nativo_ausente(p)
+    yield "PKG-NEG-016-anexo-nativo-nao-declarado", lambda p: _anexo_nativo_nao_declarado(p)
 
 
 def cases_captura(root: Path):
@@ -207,6 +209,42 @@ def _remove_assinatura_id(root: Path) -> None:
         assinatura.pop("assinatura_id", None)
     dump(path, envelope)
     update_inventory_hash(root, relative)
+
+
+def _anexo_nativo_ausente(root: Path) -> None:
+    """Anexo de documento nativo declarado no NDF-core mas ausente do pacote.
+
+    Mesma regra de NDF-PKG-009 aplicada à via nativa: um ofício que declara um
+    anexo e não o transporta chega incompleto ao destinatário. Antes de §2.8.1.3
+    este caso passava, porque o vocabulário `anexos[]` do schema do ofício não
+    era reconhecido pelo fecho de pacote.
+    """
+    alvo = root / "anexos/mapa-medicoes.txt"
+    digest = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
+    alvo.unlink()
+    manifest_path = root / "manifest.json"
+    manifest = load(manifest_path)
+    manifest["inventario"] = [
+        i for i in manifest["inventario"] if i["hash_sha256"] != digest
+    ]
+    dump(manifest_path, manifest)
+
+
+def _anexo_nativo_nao_declarado(root: Path) -> None:
+    """Ficheiro em anexos/ inventariado mas não declarado como componente.
+
+    Sentido inverso do fecho: estar inventariado garante integridade, não
+    estatuto documental — a assinatura não cobre o que não foi declarado.
+    """
+    extra = root / "anexos/clandestino.txt"
+    extra.write_bytes(b"anexo que ninguem declarou\n")
+    manifest_path = root / "manifest.json"
+    manifest = load(manifest_path)
+    manifest["inventario"].append({
+        "ficheiro": "anexos/clandestino.txt",
+        "hash_sha256": "sha256:" + hashlib.sha256(extra.read_bytes()).hexdigest(),
+    })
+    dump(manifest_path, manifest)
 
 
 def main() -> int:

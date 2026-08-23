@@ -191,8 +191,15 @@
         },
         "autenticacao": {
           "type": "string",
-          "description": "Meio de autenticação do submissor no momento da entrada.",
-          "examples": ["chave-movel-digital", "cartao-de-cidadao", "credenciais-portal"]
+          "minLength": 1,
+          "description": "Meio de autenticação do submissor no momento da entrada. Enum aberto, partilhado com imputacao[].autenticacao.meio (SPEC.md §2.15.4): o mesmo conceito não deve ter dois vocabulários. Registar o meio observado não implica declarar quem produziu o conteúdo.",
+          "examples": [
+            "chave_movel_digital",
+            "cartao_cidadao",
+            "senha_acesso",
+            "certificado_qualificado",
+            "presencial"
+          ]
         }
       },
       "allOf": [

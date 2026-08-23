@@ -801,6 +801,13 @@ provavelmente mais, agora, do que mais detalhe de captura: são o que torna a
 visão demonstrável, o que fecha `R13` e o que abre a conversa com a DGLAB
 (`R5`). Merecem documento de desenho próprio.
 
+> **Executado (2026-08-23):** [`NDF-CONJUNTO-DE-TRANSFERENCIA.md`](NDF-CONJUNTO-DE-TRANSFERENCIA.md)
+> desenha L-T1 a L-T3 dentro da fronteira de
+> [ADR-024](../architecture/ADR-024-fronteira-oais-modelo-de-informacao.md), e
+> deixa três pontos de decisão (`D-XFER-1` a `D-XFER-3`) por fechar. L-T4
+> confirma-se como comportamento correto, e a sua regra passa a governar o
+> desenho da evidência de custódia.
+
 ## 12. Referências
 
 - `specs/ndf/SPEC.md` §2.8, §2.9, §2.11, §2.13, §3.6, §4.1, §5.2, §8
