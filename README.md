@@ -98,40 +98,6 @@ NCRTF — conteúdo de texto estruturado
 - [Política de utilização de IA generativa](AI_USAGE.md)
 - [Checklist de publicação pública](docs/PUBLICATION-CHECKLIST.md)
 
-## Backup 3-2-1
-
-Em Linux, `scripts/bash/backup/full-repo-backup.sh` cria um snapshot completo do
-repositório, incluindo o histórico Git e trabalho ainda não commitado. Por
-omissão, guarda os 5 snapshots mais recentes no SSD em
-`/mnt/normordis-backup/backups/repos/normordis-formats`. O destino pode ser
-substituído com `--dest-dir` ou com a variável `NORMORDIS_BACKUP_DIR`.
-
-Segredos locais (`.env*`, chaves e certificados privados), caches e artefactos
-reconstruíveis são excluídos. O restauro pode ser ensaiado numa pasta temporária:
-
-O snapshot percorre o filesystem e não aplica as regras do `.gitignore`.
-Ficheiros locais que devem ser preservados, como `CLAUDE.md`, `AGENTS.md`,
-`.claude/` e configurações equivalentes, são incluídos mesmo quando ignorados
-pelo Git, desde que não correspondam às exclusões de segurança anteriores.
-
-```bash
-scripts/bash/backup/full-repo-restore.sh --list
-scripts/bash/backup/full-repo-restore.sh --restore-dir /tmp/normordis-formats-restore
-```
-
-`scripts/bash/backup/sync-google-drive.sh` cria a terceira cópia em
-`gdrive:backups/projetos/normordis-formats` através de `rclone`, verifica a cópia
-e mantém os 5 snapshots mais recentes. Numa execução real, a pasta remota é
-criada automaticamente caso ainda não exista. Antes do primeiro envio:
-
-```bash
-scripts/bash/backup/sync-google-drive.sh --dry-run
-```
-
-No servidor NORMORDIS, os templates em `scripts/systemd/` executam diariamente
-o backup local e, após sucesso, a cópia Google Drive. O log fica em
-`/srv/normordis/logs/backups/normordis-formats-backup.log`.
-
 ## Licenciamento
 
 O texto das especificações, schemas e exemplos é disponibilizado nos termos de
