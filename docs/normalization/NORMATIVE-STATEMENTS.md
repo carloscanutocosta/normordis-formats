@@ -212,45 +212,45 @@ permanecem definidos no texto normativo.
 | NCRTF | 3.1 | `specs/ncrtf/SPEC.md:154` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `ncrtf_version` \| string \| Sim \| Versão da especificação NCRTF. DEVE ser `"2.0.0"` para documentos conformes a esta versão. \| |
 | NCRTF | 3.1 | `specs/ncrtf/SPEC.md:155` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `content` \| array de Bloco \| Sim \| Sequência de nós bloco. DEVE ter pelo menos 1 elemento. \| |
 | NCRTF | 3.1 | `specs/ncrtf/SPEC.md:157` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Campos adicionais NÃO DEVEM estar presentes na raiz (`additionalProperties: false`). |
-| NCRTF | 4.2 | `specs/ncrtf/SPEC.md:232` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Em documentos administrativos, nível 1 RECOMENDA-SE reservado ao NDT (layout); conteúdo editorial DEVE começar em `level: 2`. |
-| NCRTF | 4.3 | `specs/ncrtf/SPEC.md:280` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | **Listas de verificação** (`list_type: "checklist"`): cada `list_item` DEVE ter o campo `checked` (explicitamente `true` ou `false`). |
-| NCRTF | 4.3 | `specs/ncrtf/SPEC.md:282` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | **Listas aninhadas**: um `list_item.content` PODE conter um ou mais nós `list` adicionais para criar hierarquia. A lista aninhada aparece após os inlines do item pai. |
-| NCRTF | 4.5 | `specs/ncrtf/SPEC.md:349` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Todas as linhas de uma tabela DEVEM ter o mesmo número de células. |
-| NCRTF | 4.6 | `specs/ncrtf/SPEC.md:385` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | `image` é um nó folha — NÃO TEM `content`. Imagens NÃO DEVEM ser codificadas em base64 dentro do valor NCRTF (ver §10.1). |
-| NCRTF | 5.1 | `specs/ncrtf/SPEC.md:404` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `text` \| string \| Sim — mínimo 1 caracter \| Conteúdo textual. NÃO DEVE ser string vazia. \| |
-| NCRTF | 5.1 | `specs/ncrtf/SPEC.md:405` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `marks` \| array de Mark \| OPCIONAL \| Formatação aplicada. Se presente, DEVE ter pelo menos 1 elemento e DEVE estar em ordem canónica (§6). \| |
-| NCRTF | 6.1 | `specs/ncrtf/SPEC.md:452` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `"subscript"` \| Subscrito (ex: H₂O) \| NÃO DEVE coexistir com `"superscript"` no mesmo nó. \| |
-| NCRTF | 6.1 | `specs/ncrtf/SPEC.md:453` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `"superscript"` \| Sobrescrito (ex: m²) \| NÃO DEVE coexistir com `"subscript"` no mesmo nó. \| |
-| NCRTF | 6.2 | `specs/ncrtf/SPEC.md:458` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Para garantir canonicalização determinística (§8), o array `marks` **DEVE** estar ordenado alfabeticamente: |
-| NCRTF | 6.2 | `specs/ncrtf/SPEC.md:464` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Implementações produtoras DEVEM ordenar as marcas antes de serializar. Leitores DEVEM rejeitar documentos com `marks` fora desta ordem. |
-| NCRTF | 8.1 | `specs/ncrtf/SPEC.md:490` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Todo o valor NCRTF **DEVE** ser canonicalizado via JCS antes de ser incorporado no `payload_bytes` do NDF-core. JCS garante: |
-| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:501` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R1** \| `marks` DEVE estar em ordem canónica (§6.2). \| |
-| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:502` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R2** \| Nós `text` contíguos com marcas idênticas E `font_family` idêntico DEVEM ser fundidos num único nó. \| |
-| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:503` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R3** \| Campos com valor igual ao default NÃO DEVEM estar presentes: `alignment` quando `"left"`, `indent` quando `0`. \| |
-| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:504` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R4** \| Arrays vazios NÃO DEVEM estar presentes — omitir o campo em vez de `[]`. Nota: `checked: false` em checklist é semanticamente relevante e NÃO DEVE ser omitido. \| |
-| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:505` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R5** \| `text` NÃO DEVE ser string vazia. \| |
-| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:506` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R6** \| `"subscript"` e `"superscript"` NÃO DEVEM coexistir no mesmo nó `text`. \| |
-| NCRTF | 8.3 | `specs/ncrtf/SPEC.md:510` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Um produtor conforme **DEVE** verificar, após serializar para JSON, que: |
-| NCRTF | 10.1 | `specs/ncrtf/SPEC.md:637` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | O caminho DEVE: |
-| NCRTF | 10.1 | `specs/ncrtf/SPEC.md:643` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Imagens NÃO DEVEM ser embutidas como base64 no valor NCRTF. O valor `src` com data URL é um artefacto interno de editores; NÃO DEVE aparecer num NDF-core finalizado. |
-| NCRTF | 10.2 | `specs/ncrtf/SPEC.md:653` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| PNG \| `.png` \| RECOMENDADO para gráficos e diagramas \| |
-| NCRTF | 10.2 | `specs/ncrtf/SPEC.md:654` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| SVG \| `.svg` \| RECOMENDADO para conteúdo vetorial; renderizadores DEVEM sanitizar SVG \| |
-| NCRTF | 10.2 | `specs/ncrtf/SPEC.md:655` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| JPEG \| `.jpg` / `.jpeg` \| RECOMENDADO para fotografias \| |
-| NCRTF | 11.2 | `specs/ncrtf/SPEC.md:687` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | O schema NCRTF é fechado. Um leitor conforme DEVE rejeitar tipos de nó |
-| NCRTF | 11.2 | `specs/ncrtf/SPEC.md:688` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | desconhecidos. Uma versão MINOR **PODE** acrescentar um nó opcional, mas o documento |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:710` | principal | `NCRTF-PROD-001` | 1. **NCRTF-PROD-001 — DEVE** gerar valores NCRTF que validam contra `specs/ncrtf/schemas/ncrtf.schema.json`. |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:711` | principal | `NCRTF-PROD-002` | 2. **NCRTF-PROD-002 — DEVE** aplicar todas as regras de canonicalização R1–R6 (§8.2). |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:712` | principal | `NCRTF-PROD-003` | 3. **NCRTF-PROD-003 — DEVE** verificar que `JCS(parse(serialize(ncrtf))) == serialize(ncrtf)` antes de incorporar o valor num NDF-core. |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:713` | principal | `NCRTF-PROD-004` | 4. **NCRTF-PROD-004 — NÃO DEVE** incluir nós `image` com `ref` que não existam no `manifest.inventario` do `.ndfpkg`. |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:714` | principal | `NCRTF-PROD-005` | 5. **NCRTF-PROD-005 — NÃO DEVE** incluir `src` com data URL num NDF-core finalizado — apenas `ref`. |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:715` | principal | `NCRTF-PROD-006` | 6. **NCRTF-PROD-006 — DEVE** ordenar `marks` conforme §6.2. |
-| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:716` | principal | `NCRTF-PROD-007` | 7. **NCRTF-PROD-007 — DEVE** fundir nós `text` contíguos com marcas e `font_family` idênticos (R2). |
-| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:722` | principal | `NCRTF-READ-001` | 1. **NCRTF-READ-001 — DEVE** rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. |
-| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:723` | principal | `NCRTF-READ-002` | 2. **NCRTF-READ-002 — DEVE** rejeitar documentos com `marks` fora da ordem canónica (R1). |
-| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:724` | principal | `NCRTF-READ-003` | 3. **NCRTF-READ-003 — DEVE** rejeitar nós de tipo desconhecido. |
-| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:725` | principal | `NCRTF-READ-004` | 4. **NCRTF-READ-004 — DEVE** rejeitar versões NCRTF que não suporte explicitamente. |
-| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:726` | principal | `NCRTF-READ-005` | 5. **NCRTF-READ-005 — DEVE** resolver referências `image.ref` dentro do `.ndfpkg` corrente. |
-| NCRTF | 12.3 | `specs/ncrtf/SPEC.md:730` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | A suite de testes encontra-se em `conformance/ncrtf/`. Implementações conformes DEVEM passar todos os casos válidos sem erros e rejeitar todos os casos inválidos com erro. |
+| NCRTF | 4.2 | `specs/ncrtf/SPEC.md:233` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Em documentos administrativos, nível 1 RECOMENDA-SE reservado ao NDT (layout); conteúdo editorial DEVE começar em `level: 2`. |
+| NCRTF | 4.3 | `specs/ncrtf/SPEC.md:281` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | **Listas de verificação** (`list_type: "checklist"`): cada `list_item` DEVE ter o campo `checked` (explicitamente `true` ou `false`). |
+| NCRTF | 4.3 | `specs/ncrtf/SPEC.md:283` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | **Listas aninhadas**: um `list_item.content` PODE conter um ou mais nós `list` adicionais para criar hierarquia. A lista aninhada aparece após os inlines do item pai. |
+| NCRTF | 4.5 | `specs/ncrtf/SPEC.md:350` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Todas as linhas de uma tabela DEVEM ter o mesmo número de células. |
+| NCRTF | 4.6 | `specs/ncrtf/SPEC.md:386` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | `image` é um nó folha — NÃO TEM `content`. Imagens NÃO DEVEM ser codificadas em base64 dentro do valor NCRTF (ver §10.1). |
+| NCRTF | 5.1 | `specs/ncrtf/SPEC.md:405` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `text` \| string \| Sim — mínimo 1 caracter \| Conteúdo textual. NÃO DEVE ser string vazia. \| |
+| NCRTF | 5.1 | `specs/ncrtf/SPEC.md:406` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `marks` \| array de Mark \| OPCIONAL \| Formatação aplicada. Se presente, DEVE ter pelo menos 1 elemento e DEVE estar em ordem canónica (§6). \| |
+| NCRTF | 6.1 | `specs/ncrtf/SPEC.md:453` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `"subscript"` \| Subscrito (ex: H₂O) \| NÃO DEVE coexistir com `"superscript"` no mesmo nó. \| |
+| NCRTF | 6.1 | `specs/ncrtf/SPEC.md:454` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| `"superscript"` \| Sobrescrito (ex: m²) \| NÃO DEVE coexistir com `"subscript"` no mesmo nó. \| |
+| NCRTF | 6.2 | `specs/ncrtf/SPEC.md:459` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Para garantir canonicalização determinística (§8), o array `marks` **DEVE** estar ordenado alfabeticamente: |
+| NCRTF | 6.2 | `specs/ncrtf/SPEC.md:465` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Implementações produtoras DEVEM ordenar as marcas antes de serializar. Leitores DEVEM rejeitar documentos com `marks` fora desta ordem. |
+| NCRTF | 8.1 | `specs/ncrtf/SPEC.md:491` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Todo o valor NCRTF **DEVE** ser canonicalizado via JCS antes de ser incorporado no `payload_bytes` do NDF-core. JCS garante: |
+| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:502` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R1** \| `marks` DEVE estar em ordem canónica (§6.2). \| |
+| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:503` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R2** \| Nós `text` contíguos com marcas idênticas E `font_family` idêntico DEVEM ser fundidos num único nó. \| |
+| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:504` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R3** \| Campos com valor igual ao default NÃO DEVEM estar presentes: `alignment` quando `"left"`, `indent` quando `0`. \| |
+| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:505` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R4** \| Arrays vazios NÃO DEVEM estar presentes — omitir o campo em vez de `[]`. Nota: `checked: false` em checklist é semanticamente relevante e NÃO DEVE ser omitido. \| |
+| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:506` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R5** \| `text` NÃO DEVE ser string vazia. \| |
+| NCRTF | 8.2 | `specs/ncrtf/SPEC.md:507` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **R6** \| `"subscript"` e `"superscript"` NÃO DEVEM coexistir no mesmo nó `text`. \| |
+| NCRTF | 8.3 | `specs/ncrtf/SPEC.md:511` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Um produtor conforme **DEVE** verificar, após serializar para JSON, que: |
+| NCRTF | 10.1 | `specs/ncrtf/SPEC.md:648` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | O caminho DEVE: |
+| NCRTF | 10.1 | `specs/ncrtf/SPEC.md:654` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | Imagens NÃO DEVEM ser embutidas como base64 no valor NCRTF. O valor `src` com data URL é um artefacto interno de editores; NÃO DEVE aparecer num NDF-core finalizado. |
+| NCRTF | 10.2 | `specs/ncrtf/SPEC.md:664` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| PNG \| `.png` \| RECOMENDADO para gráficos e diagramas \| |
+| NCRTF | 10.2 | `specs/ncrtf/SPEC.md:665` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| SVG \| `.svg` \| RECOMENDADO para conteúdo vetorial; renderizadores DEVEM sanitizar SVG \| |
+| NCRTF | 10.2 | `specs/ncrtf/SPEC.md:666` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| JPEG \| `.jpg` / `.jpeg` \| RECOMENDADO para fotografias \| |
+| NCRTF | 11.2 | `specs/ncrtf/SPEC.md:698` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | O schema NCRTF é fechado. Um leitor conforme DEVE rejeitar tipos de nó |
+| NCRTF | 11.2 | `specs/ncrtf/SPEC.md:699` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | desconhecidos. Uma versão MINOR **PODE** acrescentar um nó opcional, mas o documento |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:720` | principal | `NCRTF-PROD-001` | 1. **NCRTF-PROD-001 — DEVE** gerar valores NCRTF que validam contra `specs/ncrtf/schemas/ncrtf.schema.json`. |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:721` | principal | `NCRTF-PROD-002` | 2. **NCRTF-PROD-002 — DEVE** aplicar todas as regras de canonicalização R1–R6 (§8.2). |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:722` | principal | `NCRTF-PROD-003` | 3. **NCRTF-PROD-003 — DEVE** verificar que `JCS(parse(serialize(ncrtf))) == serialize(ncrtf)` antes de incorporar o valor num NDF-core. |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:723` | principal | `NCRTF-PROD-004` | 4. **NCRTF-PROD-004 — NÃO DEVE** incluir nós `image` com `ref` que não existam no `manifest.inventario` do `.ndfpkg`. |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:724` | principal | `NCRTF-PROD-005` | 5. **NCRTF-PROD-005 — NÃO DEVE** incluir `src` com data URL num NDF-core finalizado — apenas `ref`. |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:725` | principal | `NCRTF-PROD-006` | 6. **NCRTF-PROD-006 — DEVE** ordenar `marks` conforme §6.2. |
+| NCRTF | 12.1 | `specs/ncrtf/SPEC.md:726` | principal | `NCRTF-PROD-007` | 7. **NCRTF-PROD-007 — DEVE** fundir nós `text` contíguos com marcas e `font_family` idênticos (R2). |
+| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:732` | principal | `NCRTF-READ-001` | 1. **NCRTF-READ-001 — DEVE** rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. |
+| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:733` | principal | `NCRTF-READ-002` | 2. **NCRTF-READ-002 — DEVE** rejeitar documentos com `marks` fora da ordem canónica (R1). |
+| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:734` | principal | `NCRTF-READ-003` | 3. **NCRTF-READ-003 — DEVE** rejeitar nós de tipo desconhecido. |
+| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:735` | principal | `NCRTF-READ-004` | 4. **NCRTF-READ-004 — DEVE** rejeitar versões NCRTF que não suporte explicitamente. |
+| NCRTF | 12.2 | `specs/ncrtf/SPEC.md:736` | principal | `NCRTF-READ-005` | 5. **NCRTF-READ-005 — DEVE** resolver referências `image.ref` dentro do `.ndfpkg` corrente. |
+| NCRTF | 12.3 | `specs/ncrtf/SPEC.md:740` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | A suite de testes encontra-se em `conformance/ncrtf/`. Implementações conformes DEVEM passar todos os casos válidos sem erros e rejeitar todos os casos inválidos com erro. |
 | NDT | preâmbulo | `specs/ndt/SPEC.md:20` | subordinado | `avaliação editorial` | A língua normativa é o português europeu. As palavras **DEVE**, **NÃO DEVE**, |
 | NDT | preâmbulo | `specs/ndt/SPEC.md:21` | subordinado | `avaliação editorial` | **RECOMENDA-SE**, **NÃO SE RECOMENDA** e **PODE** seguem o BCP 14 (RFC 2119 e |
 | NDT | 1.1 | `specs/ndt/SPEC.md:75` | subordinado | `NDT-PROD-003; NDT-RENDER-005,007` | **PODE** ser deduplicado por hash. O `.ndfpkg` portátil DEVE incorporar a versão |

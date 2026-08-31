@@ -10,18 +10,18 @@ um índice de rastreabilidade.
 | `CUST-REQ-002` | `specs/ndf/SPEC.md:3041` | CUST-REQ-002 — DEVE usar armazenamento append-only ou WORM para payload_bytes, envelope e log de custódia. | schema custody-event + `tools/check_custody.py` + `conformance/custody/` — Perfil de Ciclo de Vida NORMORDIS, opcional (não requisito de conformidade NDF) |
 | `CUST-REQ-003` | `specs/ndf/SPEC.md:3042` | CUST-REQ-003 — DEVE registar o evento terminal de eliminação (§2.4.3) antes de destruir payload_bytes e todos os componentes binários declarados em documento (§2.8.1) de um documento elegível para eliminação, conservando validation_code, payload_hash e os digests dos componentes destruídos em details. | schema custody-event + `tools/check_custody.py` + `conformance/custody/` — Perfil de Ciclo de Vida NORMORDIS, opcional (não requisito de conformidade NDF) |
 | `CUST-REQ-004` | `specs/ndf/SPEC.md:3043` | CUST-REQ-004 — DEVE, ao transferir evidência de custódia para outra entidade, transferir eventos íntegros e não editados, e NÃO DEVE reescrever, renumerar ou recompor a cadeia para ocultar as omissões (§2.4.4). | schema custody-event + `tools/check_custody.py` + `conformance/custody/` — Perfil de Ciclo de Vida NORMORDIS, opcional (não requisito de conformidade NDF) |
-| `NCRTF-PROD-001` | `specs/ncrtf/SPEC.md:710` | NCRTF-PROD-001 — DEVE gerar valores NCRTF que validam contra specs/ncrtf/schemas/ncrtf.schema.json. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-002` | `specs/ncrtf/SPEC.md:711` | NCRTF-PROD-002 — DEVE aplicar todas as regras de canonicalização R1–R6 (§8.2). | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-003` | `specs/ncrtf/SPEC.md:712` | NCRTF-PROD-003 — DEVE verificar que JCS(parse(serialize(ncrtf))) == serialize(ncrtf) antes de incorporar o valor num NDF-core. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-004` | `specs/ncrtf/SPEC.md:713` | NCRTF-PROD-004 — NÃO DEVE incluir nós image com ref que não existam no manifest.inventario do .ndfpkg. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-005` | `specs/ncrtf/SPEC.md:714` | NCRTF-PROD-005 — NÃO DEVE incluir src com data URL num NDF-core finalizado — apenas ref. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-006` | `specs/ncrtf/SPEC.md:715` | NCRTF-PROD-006 — DEVE ordenar marks conforme §6.2. | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-PROD-007` | `specs/ncrtf/SPEC.md:716` | NCRTF-PROD-007 — DEVE fundir nós text contíguos com marcas e font_family idênticos (R2). | schema NCRTF + vetores válidos + regras R1–R6 |
-| `NCRTF-READ-001` | `specs/ncrtf/SPEC.md:722` | NCRTF-READ-001 — DEVE rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-002` | `specs/ncrtf/SPEC.md:723` | NCRTF-READ-002 — DEVE rejeitar documentos com marks fora da ordem canónica (R1). | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-003` | `specs/ncrtf/SPEC.md:724` | NCRTF-READ-003 — DEVE rejeitar nós de tipo desconhecido. | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-004` | `specs/ncrtf/SPEC.md:725` | NCRTF-READ-004 — DEVE rejeitar versões NCRTF que não suporte explicitamente. | vetores NCRTF válidos e inválidos |
-| `NCRTF-READ-005` | `specs/ncrtf/SPEC.md:726` | NCRTF-READ-005 — DEVE resolver referências image.ref dentro do .ndfpkg corrente. | vetores NCRTF válidos e inválidos |
+| `NCRTF-PROD-001` | `specs/ncrtf/SPEC.md:720` | NCRTF-PROD-001 — DEVE gerar valores NCRTF que validam contra specs/ncrtf/schemas/ncrtf.schema.json. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-002` | `specs/ncrtf/SPEC.md:721` | NCRTF-PROD-002 — DEVE aplicar todas as regras de canonicalização R1–R6 (§8.2). | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-003` | `specs/ncrtf/SPEC.md:722` | NCRTF-PROD-003 — DEVE verificar que JCS(parse(serialize(ncrtf))) == serialize(ncrtf) antes de incorporar o valor num NDF-core. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-004` | `specs/ncrtf/SPEC.md:723` | NCRTF-PROD-004 — NÃO DEVE incluir nós image com ref que não existam no manifest.inventario do .ndfpkg. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-005` | `specs/ncrtf/SPEC.md:724` | NCRTF-PROD-005 — NÃO DEVE incluir src com data URL num NDF-core finalizado — apenas ref. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-006` | `specs/ncrtf/SPEC.md:725` | NCRTF-PROD-006 — DEVE ordenar marks conforme §6.2. | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-PROD-007` | `specs/ncrtf/SPEC.md:726` | NCRTF-PROD-007 — DEVE fundir nós text contíguos com marcas e font_family idênticos (R2). | schema NCRTF + vetores válidos + regras R1–R6 |
+| `NCRTF-READ-001` | `specs/ncrtf/SPEC.md:732` | NCRTF-READ-001 — DEVE rejeitar qualquer valor NCRTF que não valide contra o schema desta versão. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-002` | `specs/ncrtf/SPEC.md:733` | NCRTF-READ-002 — DEVE rejeitar documentos com marks fora da ordem canónica (R1). | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-003` | `specs/ncrtf/SPEC.md:734` | NCRTF-READ-003 — DEVE rejeitar nós de tipo desconhecido. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-004` | `specs/ncrtf/SPEC.md:735` | NCRTF-READ-004 — DEVE rejeitar versões NCRTF que não suporte explicitamente. | vetores NCRTF válidos e inválidos |
+| `NCRTF-READ-005` | `specs/ncrtf/SPEC.md:736` | NCRTF-READ-005 — DEVE resolver referências image.ref dentro do .ndfpkg corrente. | vetores NCRTF válidos e inválidos |
 | `NDF-PKG-001` | `specs/ndf/SPEC.md:2971` | NDF-PKG-001 — DEVE ser um arquivo ZIP válido. | verificador de pacote + exemplo `.ndfpkg` |
 | `NDF-PKG-002` | `specs/ndf/SPEC.md:2972` | NDF-PKG-002 — DEVE conter manifest.json, ndf-core.json e envelope.json na raiz do arquivo. | verificador de pacote + exemplo `.ndfpkg` |
 | `NDF-PKG-003` | `specs/ndf/SPEC.md:2973` | NDF-PKG-003 — manifest.json DEVE incluir inventário com hash_sha256 de cada ficheiro e os campos obrigatórios definidos em §8.2. | verificador de pacote + exemplo `.ndfpkg` |
