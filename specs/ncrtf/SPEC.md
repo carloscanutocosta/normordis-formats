@@ -106,7 +106,7 @@ Esta é uma versão **MAJOR** — documentos v1.0.0 NÃO são válidos contra es
 | Área | Alteração |
 |---|---|
 | Listas | `ordered_list`/`unordered_list` unificados em `list` com campo `list_type`; `items` renomeado para `content`; `list_item` passa a ser um nó explícito com `type: "list_item"` e conteúdo inline (não blocos) |
-| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body` |
+| Tabelas | `rows`/`cells` com `header: true` substituído por `head`/`body`; `cells` passa de array de strings a array de `table_cell` com conteúdo inline (§4.5) |
 | Inline | Adicionados `link` e `hard_break`; `font_family` deixa de ser marca-objeto e passa a campo explícito nos nós `text` |
 | Marcas | Adicionadas `"code"` e `"strikethrough"`; ordem canónica actualizada |
 | Bloco | Adicionado `blockquote`; campos `alignment`, `indent`, `font_family` em `paragraph` e `heading` |
@@ -171,7 +171,8 @@ Documento
     │                  checked? (checklist apenas)
     ├── blockquote    → content: Inline[]
     ├── table         → head?: TableRow[], body: TableRow[]
-    │     TableRow  → cells: string[]
+    │     TableRow  → cells: TableCell[]
+    │     TableCell → content: Inline[]
     └── image         (nó folha)
           ref, alt, caption?, width_percent?
 
@@ -588,9 +589,19 @@ renderiza-o segundo as regras de layout do NDT.
         },
         {
           "type": "table",
-          "head": [ { "cells": ["Data", "Diligência", "Estado"] } ],
+          "head": [
+            { "cells": [
+              { "type": "table_cell", "content": [{ "type": "text", "text": "Data" }] },
+              { "type": "table_cell", "content": [{ "type": "text", "text": "Diligência" }] },
+              { "type": "table_cell", "content": [{ "type": "text", "text": "Estado" }] }
+            ] }
+          ],
           "body": [
-            { "cells": ["2026-06-01", "Notificação ao interessado", "Concluída"] }
+            { "cells": [
+              { "type": "table_cell", "content": [{ "type": "text", "text": "2026-06-01" }] },
+              { "type": "table_cell", "content": [{ "type": "text", "text": "Notificação ao interessado" }] },
+              { "type": "table_cell", "content": [{ "type": "text", "text": "Concluída" }] }
+            ] }
           ]
         },
         {
@@ -697,7 +708,6 @@ leitor nunca ignora silenciosamente conteúdo assinado que não compreende.
 | `horizontal_rule` | Bloco | Separador de secções |
 | `caption` em `image` | Campo de bloco | Já definido; aguarda suporte no editor |
 | `start` em `list` | Campo | Numeração inicial diferente de 1 |
-| Rich text em células de tabela | Estrutura | Células como array de Inline em vez de string |
 
 ---
 
