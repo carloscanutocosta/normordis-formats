@@ -1,7 +1,7 @@
 # Política de Utilização de IA Generativa
 
 **Estado:** política em vigor, aplicável a todo o ecossistema NORMORDIS.
-**Em vigor desde:** 2026-08-31 <!-- CONFIRMAR: ver §10 -->
+**Em vigor desde:** 2026-08-31
 **Responsável pelo projeto:** Carlos Canuto Costa
 **Última revisão:** 2026-08-31
 
@@ -29,9 +29,10 @@ qualquer decisão de financiamento.
 | `normordis-formats` | Especificações, schemas, vetores de conformidade | CC0-1.0 | Marginal — ver §4 |
 | `normordis-kernel` | Implementação | EUPL-1.2 | Geração de código sob revisão |
 | `normordis-go` | Implementação | EUPL-1.2 | Geração de código sob revisão |
-| `normordis-pdf` | Implementação | *(por fixar)* | Geração de código sob revisão |
-| `normordis-cloud-sync` | Implementação | EUPL-1.2 | Restrições adicionais — ver §7 |
+| `normordis-pdf` | Implementação | EUPL-1.2 declarada no manifesto — ver §6 | Geração de código sob revisão |
 | `core-ui` | Implementação | EUPL-1.2 | Geração de código sob revisão |
+| `normordis-viewer` | Implementação — **ainda não existe** | EUPL-1.2 prevista | Esta política aplica-se integralmente desde a criação do repositório |
+| `normordis-cloud-sync` | Implementação | EUPL-1.2 | **Fora do âmbito do trabalho de candidatura em curso.** A política aplica-se se e quando o trabalho for retomado |
 
 Este ficheiro é a versão canónica. Os repositórios de implementação remetem
 para aqui em vez de manterem cópias divergentes.
@@ -101,8 +102,21 @@ titularidade seja duvidosa não é adequado a dedicação CC0. Por essa razão, 
 texto normativo e os vetores de conformidade deste repositório são de autoria
 humana (§4), e não se aplica CC0 a blocos substanciais de texto gerado.
 
-**Pendente:** `normordis-pdf` não tem ficheiro de licença. Deve ser fixado
-antes de qualquer submissão que o inclua como entregável.
+**Pendências conhecidas, a fixar antes de qualquer submissão que inclua
+`normordis-pdf` como entregável:**
+
+1. O manifesto declara `license = "EUPL-1.2"`, mas o repositório não contém o
+   texto da licença. A EUPL obriga a que cada cópia distribuída seja
+   acompanhada de uma cópia da licença.
+2. O repositório redistribui as famílias Liberation e Libertinus. As tabelas
+   `name` dos ficheiros declaram SIL Open Font License 1.1, mas não acompanha
+   o texto da OFL nem o aviso de copyright, como a licença exige. As fontes
+   não estão excluídas do pacote publicado, pelo que a omissão já afeta as
+   versões distribuídas.
+
+Nenhuma destas pendências resulta de uso de IA. Constam aqui porque esta
+secção é o registo de licenciamento do projeto e a política exige que o
+licenciamento de material de terceiros seja verificado, não presumido.
 
 ## 7. Regras de revisão e aceitação de código assistido
 
@@ -122,10 +136,12 @@ Critérios de rejeição — o output é descartado ou reescrito quando:
 - contém lógica criptográfica, de assinatura ou de cadeia de custódia que o
   revisor não consiga verificar linha a linha contra a norma aplicável.
 
-**Restrição reforçada — `normordis-cloud-sync`.** Código de autenticação,
-gestão de credenciais, OAuth, armazenamento de segredos e controlo de acesso
-não é aceite a partir de geração assistida sem revisão linha a linha e teste
-específico. Não se aplica aqui a prática de aceitar boilerplate por analogia.
+**Restrição reforçada — código de segurança, em qualquer repositório.** Código
+de autenticação, gestão de credenciais, OAuth, armazenamento de segredos e
+controlo de acesso não é aceite a partir de geração assistida sem revisão linha
+a linha e teste específico. Não se aplica aqui a prática de aceitar boilerplate
+por analogia. A regra é geral e não uma exceção de um repositório: aplica-se
+onde quer que este tipo de código venha a existir.
 
 **Restrição absoluta.** Nenhum segredo, credencial, chave privada ou conteúdo
 de `secrets/` é fornecido a ferramentas de IA, em nenhuma circunstância.
