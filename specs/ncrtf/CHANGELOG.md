@@ -47,7 +47,7 @@ respetivo estado é caso corrente, não caso limite.
 
 **Alterações estruturais**:
 - Listas unificadas: `ordered_list`/`unordered_list` → `list` com `list_type: "ordered"|"bullet"|"checklist"`; `items` → `content`; `list_item` passa a nó explícito com `type: "list_item"` e conteúdo inline (não blocos)
-- Tabelas simplificadas: `rows`/`cells` com `header: true`/`content` → `head`/`body` com `cells: string[]`; células são texto simples (não rich text)
+- Tabelas simplificadas: `rows`/`cells` com `header: true`/`content` → `head`/`body` com `cells: string[]`; células são texto simples (não rich text) — alterado desde então, ver [Não publicado]
 - Ordem canónica das marcas actualizada: `bold`, `code`, `italic`, `strikethrough`, `subscript`, `superscript`, `underline`
 - R2 atualizado: contiguidade exige marcas E `font_family` idênticos
 
