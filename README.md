@@ -94,6 +94,9 @@ NCRTF — conteúdo de texto estruturado
 - [Plano do gate CAdES](docs/normalization/CADES-GATE-PLAN.md)
 - [Percurso de normalização](NORMALIZATION.md)
 - [Contribuição](CONTRIBUTING.md)
+- [Segurança](SECURITY.md)
+- [Política de utilização de IA generativa](AI_USAGE.md)
+- [Checklist de publicação pública](docs/PUBLICATION-CHECKLIST.md)
 
 ## Backup 3-2-1
 

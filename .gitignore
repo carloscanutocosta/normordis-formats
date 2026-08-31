@@ -7,5 +7,42 @@ __pycache__/
 *.py[cod]
 build/
 
+# Segredos e material criptográfico local — nunca devem ser publicados.
+# Use ficheiros `.example` sem valores reais para documentar configuração.
+.env
+.env.*
+!.env.example
+!.env.*.example
+secrets/
+private/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Exceção: as fixtures de conformidade CAdES publicam âncoras de confiança e
+# cadeias de certificados — material público por desenho. O README dessas
+# fixtures proíbe chaves privadas e certificados de produção. Sem esta exceção,
+# `trust/anchor.pem` (ver conformance/cades/manifests/manifest.template.json)
+# seria silenciosamente ignorado e o gate CAdES deixaria de ser reproduzível a
+# partir de um clone limpo.
+!conformance/**/*.pem
+!conformance/**/*.crt
+!conformance/**/*.cer
+
+id_rsa
+id_ed25519
+credentials.json
+service-account*.json
+
+# Configuração local de ferramentas e relatórios de segurança
+.codex/
+.agents/
+.pytest_cache/
+.coverage
+coverage.xml
+
 # Ambiente virtual Python local (dependências de tools/requirements.txt)
 .venv/
