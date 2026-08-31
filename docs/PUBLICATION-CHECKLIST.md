@@ -22,12 +22,25 @@ alterações não revistas. Execute-a antes de alterar a visibilidade no GitHub.
 
 - [ ] Em **Settings → General**, alterar a visibilidade para **Public** apenas
   depois da revisão anterior.
-- [ ] Em **Settings → Branches**, proteger `main`: exigir pull request, uma
-  aprovação, *dismiss stale approvals*, conversas resolvidas e os checks
+- [ ] Em **Settings → Branches**, proteger `main`: exigir pull request,
+  *dismiss stale approvals*, conversas resolvidas e os checks
   `Python conformance`, `JavaScript conformance (cross-language)` e `JSON
   well-formedness`.
+- [ ] Manter **0 aprovações exigidas** enquanto existir um único maintainer. O
+  GitHub não permite aprovar o próprio pull request: exigir uma aprovação com
+  um só maintainer torna `main` inalterável assim que a regra for aplicada aos
+  administradores. Subir para uma aprovação quando existir um segundo revisor
+  — que é o que `GOVERNANCE.md` exige para alterações normativas.
+- [ ] Confirmar que cada check obrigatório corresponde ao `name:` exato de um
+  job existente. Um check obrigatório que nunca reporta bloqueia o merge de
+  forma permanente e silenciosa.
 - [ ] Não permitir force pushes nem eliminações de `main`; aplicar a regra aos
-  administradores.
+  administradores **depois** de confirmar que o fluxo de pull request funciona.
+- [ ] Em **Settings → General → Pull Requests**, desativar *Allow squash
+  merging*. O squash colapsa os commits num só e reescreve a autoria,
+  destruindo o registo de proveniência de IA definido em
+  [`ai-provenance.md`](ai-provenance.md) — o `main`, que é o que um avaliador
+  externo lê, ficaria sem esse rasto. Usar merge commit ou rebase.
 - [ ] Em **Settings → Actions → General**, definir *Workflow permissions* como
   **Read repository contents permission** e não permitir que Actions crie ou
   aprove pull requests.
