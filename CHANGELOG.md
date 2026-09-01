@@ -5,6 +5,23 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### NDF: fronteira formato ↔ sistema de gestão documental (2026-09-01)
+
+Nova §4.7 na SPEC NDF, aditiva e sem alteração de schema: cifra em trânsito e
+em repouso é responsabilidade do provedor de armazenamento, não do formato
+(sem envelope cifrado normativo, sem algoritmo imposto, sem gestão de chaves
+assumida), e documentos classificados tratam-se por topologia do sistema de
+custódia — custódia isolada, TSA local (§4.2.1), verificação não exposta —,
+nunca por modelação no formato. O serviço de verificação pública (§4.6.4)
+passa a estar expressamente excluído como comportamento por omissão para
+documentos classificados. Acresce a §4.7.3 (informativa) com os pontos de
+decisão de uma topologia classificada, e a clarificação do âmbito de «emitido
+para o exterior» em §4.6.5 — espelhada na SPEC NDT (§5.3.5, §5.3.7), onde o
+URL do QR passa a ser expressamente decisão do custodiante. Ver
+[`specs/ndf/CHANGELOG.md`](specs/ndf/CHANGELOG.md) e
+[`specs/ndt/CHANGELOG.md`](specs/ndt/CHANGELOG.md).
+
+
 ### Duas lacunas fechadas antes do trabalho de renderização (2026-08-23)
 
 Ambas resultam da mesma pergunta — *o formato obriga alguém a declarar algo
