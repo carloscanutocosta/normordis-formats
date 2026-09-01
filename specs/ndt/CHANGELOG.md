@@ -12,6 +12,18 @@
 
 ## Não publicado
 
+### Documentos classificados — URL de verificação (2026-09-01)
+
+- **acrescentado: nota em §5.3.7** — o URL do exemplo do QR é ilustrativo; o
+  serviço de resolução é escolhido pelo sistema custodiante (NDF §4.6.4). Um
+  NDT destinado a documentos classificados NÃO DEVE assumir por omissão o URL
+  de um serviço público de verificação (NDF §4.7.2) — o endereço, ou a própria
+  presença do elemento, é decisão explícita do custodiante;
+- **alterado: §5.3.5** — a frase sobre emissão para o exterior remete para o
+  âmbito clarificado em NDF §4.6.5 (transferência entre custodiantes não é
+  emissão para o exterior). Acompanha a nova §4.7 da SPEC NDF; sem alteração
+  de schema nem de requisitos de renderização.
+
 ### Acrescentado
 
 - **`formato: "data_hora"`** no vocabulário de formatos de display (§4.3). O

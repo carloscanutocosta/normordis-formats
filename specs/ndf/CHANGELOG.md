@@ -2,6 +2,41 @@
 
 ## Não publicado
 
+### Fronteira formato ↔ sistema de gestão documental (2026-09-01)
+
+- **acrescentado: §4.7 — fronteira de responsabilidade entre o formato e o
+  sistema de gestão documental.** Clarificação normativa aditiva; **nenhuma
+  alteração de schema** e nenhum documento existente é invalidado. Consolida
+  como princípio arquitetural o que §1.5 e §2.7.4 já estabeleciam em pontos
+  dispersos:
+- **§4.7.1** — cifra em trânsito (TLS/mTLS) e em repouso (disco, tablespace,
+  campo) é responsabilidade do provedor de armazenamento, não do formato: a
+  especificação não define envelope cifrado normativo, não impõe algoritmo nem
+  assume gestão de chaves, e nenhum campo do NDF-core ou do envelope depende da
+  cifra aplicada pelo custodiante. Nota informativa fixa a ordem assinar →
+  cifrar no armazenamento → decifrar → verificar, por a assinatura
+  CAdES-B-LTA, os timestamps e o `validation_code` operarem sobre o conteúdo
+  canónico em claro;
+- **§4.7.2** — documentos classificados tratam-se por **topologia do sistema**
+  (custódia isolada, TSA local acreditada — §4.2.1 —, verificação não exposta,
+  controlo de acesso), não por modelação no formato:
+  `classificacao_seguranca` continua metadado declarativo comum e não existe
+  «modo classificado» do NDF. Um serviço de verificação pública (§4.6.4) NÃO
+  DEVE ser assumido como aplicável a documentos classificados — a exposição
+  DEVE ser decisão explícita do custodiante, nunca default herdado;
+- **§4.7.3 (informativa)** — pontos de decisão de uma topologia classificada
+  (rede/isolamento, TSA, verificação, representação visual, divulgação
+  parcial, acesso e chaves), com remissões para as secções que os governam e
+  para o guia informativo. Não acrescenta requisitos de conformidade;
+- **acrescentado: §4.6.5 — âmbito de «emitido para o exterior».** A
+  transferência de custódia entre custodiantes (§2.4.2, `recebido`) não é
+  emissão para o exterior — circula o pacote verificável, não a representação
+  impressa. Em classificados, o URL do QR é escolhido pelo custodiante e PODE
+  resolver para serviço interno. Fecha a tensão criada por §4.7.2 com a
+  obrigatoriedade das duas representações; clarificação espelhada na SPEC NDT
+  (§5.3.5 e §5.3.7).
+
+
 ### Documentos multilingues (2026-08-23)
 
 - **acrescentado: `metadados.idiomas_autenticos`** e SPEC §2.7.7. Fecha `L14`.
