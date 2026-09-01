@@ -78,7 +78,11 @@ o NDF não serializa em PROV-O nem depende dele para validação.
 ## Confidencialidade e controlo de acesso (fora de âmbito do NDF)
 
 **Decisão registada, com raciocínio, para não se perder em revisões
-futuras.** Ver `LACUNAS.md` L2 para o historial completo da análise.
+futuras.** Ver `LACUNAS.md` L2 para o historial completo da análise. A
+fronteira de responsabilidade está fixada normativamente na SPEC NDF §4.7; os
+pontos de decisão de uma topologia classificada (rede, TSA, verificação,
+representação visual) constam da §4.7.3, que remete para esta secção no que
+respeita a acesso, chaves e auditoria.
 
 O NDF não define nenhum mecanismo de cifra, controlo de acesso ou gestão de
 credenciação. `metadados.classificacao_seguranca` (§2.7.4) é o único sinal

@@ -513,7 +513,7 @@ Texto estático não proveniente do NDF — títulos, legendas, texto do impress
 - **Metadados NDT** (resolvidos a partir do cabeçalho do NDT): `{{schema_id}}`, `{{versao_ndt}}`, `{{titulo}}`, `{{emissor}}`
 - **Valores de envelope** (resolvidos pelo renderizador a partir do envelope NDF no momento da renderização): `{{validation_code}}`
 
-`{{validation_code}}` é o código de verificação canónico do NDF (ver NDF especificação §4.6). Não é um dado do NDF-core nem um metadado do NDT — é computado durante a finalização e fornecido ao renderizador pelo envelope. Deve ser usado no elemento `codigo_barras` e/ou em `texto_fixo` de mobília para emissão de documentos para o exterior.
+`{{validation_code}}` é o código de verificação canónico do NDF (ver NDF especificação §4.6). Não é um dado do NDF-core nem um metadado do NDT — é computado durante a finalização e fornecido ao renderizador pelo envelope. Deve ser usado no elemento `codigo_barras` e/ou em `texto_fixo` de mobília para emissão de documentos para o exterior (âmbito de «emitido para o exterior» clarificado na especificação NDF, §4.6.5; documentos classificados, NDF §4.7.2).
 
 #### 5.3.6 `assinatura`
 
@@ -578,6 +578,13 @@ Em ODF, `assinatura` é renderizada como linha de assinatura com campo de formul
   "nivel_correcao": "M"
 }
 ```
+
+O URL do exemplo é ilustrativo: o serviço de resolução para onde o QR aponta é
+escolhido pelo sistema custodiante (NDF §4.6.4), não pelo formato nem pelo
+template. Em documentos classificados aplica-se NDF §4.7.2 — um NDT destinado
+a esses documentos NÃO DEVE assumir por omissão o URL de um serviço público de
+verificação; o endereço a codificar, ou a própria presença do elemento, é
+decisão explícita do custodiante.
 
 `nivel_correcao` (só QR): `"L"` | `"M"` | `"Q"` | `"H"`.
 

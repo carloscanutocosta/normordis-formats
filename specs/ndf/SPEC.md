@@ -2650,6 +2650,19 @@ https://validar.normordis.pt/NDF-A3F7K-2MXPQ-R9ZTN-W8VJX
 
 O NDT referencia o `validation_code` através do placeholder `{{validation_code}}` no elemento `codigo_barras` (e em qualquer `texto_fixo` ou `mobilia[]` que o necessite). Este placeholder é resolvido pelo renderizador a partir do envelope — não é um dado do NDF-core nem um metadado do NDT, mas um valor computado no momento da finalização. Ambas as representações são obrigatórias em documentos emitidos para o exterior — a forma texto para leitura humana e o QR code para leitura por dispositivo.
 
+**Âmbito de «emitido para o exterior».** Um documento é emitido para o
+exterior quando a sua representação visual se destina a circular fora do
+domínio de custódia do emissor — cidadãos, empresas ou entidades sem relação
+de custódia sobre o registo. A transferência de custódia entre custodiantes
+(§2.4.2, evento `recebido`) **não** é emissão para o exterior: o que aí
+circula é o pacote verificável, não a representação impressa, e a
+obrigatoriedade das duas representações não se lhe aplica. Em documentos
+classificados aplica-se §4.7.2: o URL codificado no QR é escolhido pelo
+custodiante — o portal público é exemplo, não requisito (§4.6.4) — e PODE
+resolver para um serviço interno ao domínio de custódia; a decisão de expor
+qualquer serviço de resolução pertence ao sistema custodiante, nunca ao
+formato nem ao template.
+
 #### 4.6.6 Posição no pipeline de finalização
 
 O `validation_code` é calculado **após** a canonicalização e o cálculo do `payload_hash`, sendo adicionado ao envelope antes da assinatura CAdES-B:
@@ -2663,6 +2676,94 @@ O `validation_code` é calculado **após** a canonicalização e o cálculo do `
 ```
 
 O `validation_code` não faz parte do NDF-core canonicalizado — evita a referência circular (o código depende do hash do conteúdo; se fosse conteúdo, alteraria o hash). Fica no envelope como campo operacional, par do `payload_hash`.
+
+### 4.7 Fronteira de responsabilidade: formato vs. sistema de gestão documental
+
+Esta secção fixa como princípio arquitetural o que §1.5 e §2.7.4 estabelecem em
+pontos dispersos: as garantias do NDF terminam na integridade, na autenticidade
+e na declaração fiel do conteúdo e dos seus metadados. Proteger os bytes e
+controlar quem lhes acede é responsabilidade do sistema de gestão documental
+que implementa o formato — nunca do formato. Quem avalie esta especificação
+para contextos sensíveis NÃO DEVE presumir que ela resolve segurança de
+armazenamento, de transporte ou de acesso; esta secção delimita expressamente o
+que o formato não faz.
+
+#### 4.7.1 Cifra em trânsito e em repouso
+
+A cifra de dados em trânsito (TLS/mTLS entre sistemas) e em repouso (disco,
+tablespace, campo de base de dados) **não é responsabilidade do formato NDF nem
+desta especificação**. Fica inteiramente a cargo do provedor de armazenamento
+ou de base de dados de cada implementação, como parte da sua política de
+custódia (§1.5).
+
+Em consequência:
+
+- esta especificação **não define envelope cifrado normativo**, não impõe
+  algoritmo de cifra e não assume nenhum esquema de gestão de chaves;
+- o NDF é opaco a essa camada: nenhum campo do NDF-core nem do envelope
+  declara, referencia ou depende da cifra aplicada pelo sistema de custódia;
+- um NDF lido e verificado é idêntico, byte a byte, quer o sistema que o
+  guarda cifre de forma agressiva (HSM, cifra por linha, rotação curta de
+  chaves) quer não cifre de todo. A escolha é invisível ao formato — e é isso
+  que mantém o formato desacoplado da política de segurança de cada
+  implementador.
+
+**Nota de implementação (informativa).** A assinatura CAdES-B-LTA, os
+timestamps e o `validation_code` operam sobre o conteúdo canónico **em claro**
+(§5.2). A ordem correta é sempre a mesma: assinar primeiro, cifrar na camada
+de armazenamento **depois** da finalização, decifrar antes de verificar —
+nunca ao contrário. Cifrar antes de
+assinar tornaria a verificação de integridade impossível sem decifrar primeiro
+e acoplaria a prova de longa duração a material de chaves cuja rotação ou perda
+destruiria a verificabilidade que o envelope existe para garantir.
+
+#### 4.7.2 Documentos classificados
+
+O NDF trata a classificação de segurança como metadado declarativo comum do
+NDF-core — `metadados.classificacao_seguranca` (§2.7.4) — sem modelação
+especial no formato. Não existe, nem é necessário, um «modo classificado» do
+NDF: o mesmo NDF-core, o mesmo pipeline de finalização e o mesmo envelope
+aplicam-se a qualquer nível declarado.
+
+Tratar documentos classificados **não é uma questão de formato: é uma questão
+de topologia do sistema de gestão documental**. Custódia isolada ou air-gapped,
+TSA local acreditada em vez de pública (já previsto em §4.2.1), existência ou
+ausência de serviço de verificação exposto ao exterior, e controlo de acesso
+ficam inteiramente ao critério de cada implementação e do regime jurídico a que
+está sujeita. A especificação garante apenas que o mesmo NDF, lido e
+verificado, é idêntico em qualquer destas topologias.
+
+Em particular, um serviço de verificação pública (§4.6.4) NÃO DEVE ser assumido
+como aplicável a documentos classificados. Resolver um `validation_code` num
+serviço exposto revela a existência do documento, o custodiante e metadados
+temporais — informação que, num regime de classificação, é frequentemente ela
+própria protegida. A inclusão de um
+documento em qualquer serviço de verificação DEVE ser decisão explícita do
+sistema custodiante face ao nível declarado, e NÃO DEVE ser comportamento por
+omissão herdado da configuração aplicada a documentos não classificados.
+
+#### 4.7.3 Orientações para topologias classificadas (informativa)
+
+Um custodiante de documentos classificados constrói a sua topologia sobre o
+mesmo NDF de qualquer outro custodiante. Os pontos de decisão que esta
+especificação deixa deliberadamente em aberto — e que uma implementação para
+contextos classificados tem de responder explicitamente — são, no mínimo:
+
+| Ponto de decisão | Referência |
+|---|---|
+| **Rede e isolamento** — a instância opera em rede segregada ou air-gapped? Existe sincronização com sistemas externos, e com que fronteira? | §1.5 |
+| **Timestamping** — TSA pública qualificada ou TSA local acreditada, com a cadeia de confiança incluída em `validation_material`? | §4.2.1 |
+| **Verificação** — existe serviço de resolução de `validation_code`? Acessível a quem, e a partir de onde? | §4.6.4, §4.7.2 |
+| **Representação visual** — o QR/URL embebido na renderização resolve para que serviço? O elemento existe sequer nos templates usados? | §4.6.5 |
+| **Divulgação parcial** — versões expurgadas para níveis de credenciação inferiores tratadas como representações derivadas, assinadas à parte, nunca como alteração ao NDF-core | §2.1 |
+| **Acesso, chaves e auditoria** — autenticação, autorização face a `classificacao_seguranca`, isolamento e escrow de chaves, registo de acessos | guia informativo |
+
+Estas orientações não acrescentam requisitos de conformidade: um produtor e
+um leitor conformes são-no nos mesmos termos em qualquer topologia (§9). O
+detalhe de autenticação, autorização e gestão de chaves a longo prazo consta
+de
+[`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`](../../docs/normalization/NDF-INFORMATIVE-GUIDANCE.md)
+(«Confidencialidade e controlo de acesso»).
 
 ---
 
