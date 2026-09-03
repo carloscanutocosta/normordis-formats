@@ -341,7 +341,9 @@ objetivos:
 | **Estado corrente do ciclo de vida** | Base de dados operacional e `manifest.estado`; o `estado` do core é o do momento da finalização |
 | **Data de elegibilidade para destino final** | Derivada e recalculável, fora do core |
 | **Log de acessos, prompts de IA, traces, SBOM, configuração operacional** | Sistemas próprios, ligados por referência com hash |
-| **Cifra ou controlo de acesso** | Sistema de custódia — o NDF sinaliza sensibilidade, não a impõe |
+| **Cifra ou controlo de acesso** | Sistema de custódia — o NDF sinaliza sensibilidade, não a impõe (SPEC NDF §4.7) |
+| **Envelope cifrado normativo, algoritmo de cifra, gestão de chaves** | Provedor de armazenamento ou base de dados do custodiante — nenhum campo do NDF-core ou do envelope depende da cifra aplicada (SPEC NDF §4.7.1) |
+| **Um «modo classificado»** | Não existe nem é necessário: documentos classificados tratam-se por topologia do sistema de custódia, com o mesmo NDF-core, pipeline e envelope (SPEC NDF §4.7.2) |
 | **Mecanismo de workflow — quórum, sequência de aprovação, estado processual** | GED/GCA do produtor |
 | **`NaN`, `Infinity`, chaves duplicadas** | Proibidos por JSON estrito e por JCS |
 
@@ -512,6 +514,11 @@ Limites que devem ser lidos com precisão:
 - Cifra não é, isoladamente, controlo de acesso: protege contra furto de
   suporte e interceção, não garante que só quem tem direito legal consegue
   decifrar.
+- **Não existe «modo classificado» do NDF.** O mesmo NDF-core, o mesmo pipeline
+  de finalização e o mesmo envelope aplicam-se a qualquer nível declarado.
+  Tratar documentos classificados é uma questão de **topologia do sistema de
+  gestão documental** — custódia isolada ou *air-gapped*, TSA local acreditada,
+  verificação não exposta —, nunca de modelação no formato (SPEC NDF §4.7.2).
 
 #### `protecao_dados`
 
@@ -1493,7 +1500,68 @@ código depende do hash do conteúdo; se fosse conteúdo, alteraria o hash).
 dispositivo. Ambas são obrigatórias em documentos emitidos para o exterior. No
 NDT, resolve-se pelo placeholder `{{validation_code}}`.
 
-### 4.9 Exemplo de envelope
+**Âmbito de «emitido para o exterior»** (SPEC NDF §4.6.5): um documento é
+emitido para o exterior quando a sua representação visual se destina a circular
+**fora do domínio de custódia** do emissor — cidadãos, empresas ou entidades sem
+relação de custódia sobre o registo. A transferência de custódia entre
+custodiantes **não** é emissão para o exterior: o que aí circula é o pacote
+verificável, não a representação impressa, e a obrigatoriedade das duas
+representações não se lhe aplica. O URL codificado no QR é escolhido pelo
+custodiante — o portal público é exemplo, não requisito — e pode resolver para
+um serviço interno ao domínio de custódia.
+
+### 4.9 Fronteira de responsabilidade: formato vs. sistema de gestão documental
+
+A SPEC NDF §4.7 fixa como princípio arquitetural o que §1.5 deste manual
+resume: **as garantias do NDF terminam na integridade, na autenticidade e na
+declaração fiel do conteúdo e dos seus metadados**. Proteger os bytes e
+controlar quem lhes acede é responsabilidade do sistema de gestão documental —
+nunca do formato. Quem avalie as especificações para contextos sensíveis não
+deve presumir que resolvem segurança de armazenamento, de transporte ou de
+acesso.
+
+**Cifra em trânsito e em repouso** (SPEC NDF §4.7.1):
+
+- a especificação **não define envelope cifrado normativo**, não impõe
+  algoritmo de cifra e não assume nenhum esquema de gestão de chaves;
+- o NDF é **opaco** a essa camada: nenhum campo do core ou do envelope declara,
+  referencia ou depende da cifra aplicada pelo custodiante;
+- um NDF lido e verificado é idêntico, byte a byte, quer o sistema cifre de
+  forma agressiva quer não cifre de todo — é isso que mantém o formato
+  desacoplado da política de segurança de cada implementador;
+- a ordem correta é sempre a mesma: **assinar primeiro, cifrar na camada de
+  armazenamento depois da finalização, decifrar antes de verificar** — nunca ao
+  contrário. A assinatura CAdES-B-LTA, os timestamps e o `validation_code`
+  operam sobre o conteúdo canónico **em claro**; cifrar antes de assinar
+  acoplaria a prova de longa duração a material de chaves cuja rotação ou perda
+  destruiria a verificabilidade.
+
+**Documentos classificados** (SPEC NDF §4.7.2): tratam-se por topologia, não
+por formato. Em particular, um serviço de verificação pública **não deve** ser
+assumido como aplicável: resolver um `validation_code` num serviço exposto
+revela a existência do documento, o custodiante e metadados temporais —
+informação que, num regime de classificação, é frequentemente ela própria
+protegida. A inclusão de um documento em qualquer serviço de verificação deve
+ser decisão explícita do custodiante face ao nível declarado, nunca
+comportamento por omissão.
+
+**Pontos de decisão de uma topologia classificada** (SPEC NDF §4.7.3,
+informativa) — o que uma implementação para contextos classificados tem de
+responder explicitamente:
+
+| Ponto de decisão | Referência na SPEC NDF |
+|---|---|
+| Rede e isolamento — rede segregada ou *air-gapped*? Sincronização com que fronteira? | §1.5 |
+| Timestamping — TSA pública qualificada ou TSA local acreditada, com a cadeia em `validation_material`? | §4.2.1 |
+| Verificação — existe serviço de resolução de `validation_code`? Acessível a quem? | §4.6.4, §4.7.2 |
+| Representação visual — o QR/URL resolve para que serviço? O elemento existe sequer nos templates? | §4.6.5 |
+| Divulgação parcial — versões expurgadas são representações derivadas, assinadas à parte, nunca alteração ao core | §2.1 |
+| Acesso, chaves e auditoria — autenticação, autorização face a `classificacao_seguranca`, *escrow*, registo de acessos | guia informativo |
+
+Estas orientações **não acrescentam requisitos de conformidade**: um produtor e
+um leitor conformes são-no nos mesmos termos em qualquer topologia.
+
+### 4.10 Exemplo de envelope
 
 ```json
 {
@@ -1882,6 +1950,14 @@ assinatura CAdES do NDF e o PDF gerado:
 | `visual_apenas` | Placeholder visual sem AcroForm. A assinatura vive no envelope NDF |
 | `hibrido` (predefinição) | Cria campo AcroForm que suporta uma operação PAdES independente |
 | `ndf_attachment` | Sem AcroForm; o CAdES é embutido como anexo PDF/A-3 (`ndf-signature.p7s`) |
+
+**O URL de um `codigo_barras` é decisão do custodiante.** O endereço
+`https://validar.normordis.pt/…` que aparece nos exemplos é ilustrativo — o
+serviço de resolução para onde o QR aponta é escolhido pelo sistema
+custodiante, não pelo formato nem pelo template (SPEC NDT §5.3.7). Um NDT
+destinado a documentos classificados **não deve** assumir por omissão o URL de
+um serviço público de verificação; o endereço a codificar, ou a própria
+presença do elemento, é decisão explícita do custodiante (SPEC NDF §4.7.2).
 
 #### Layout de fluxo
 
@@ -2877,6 +2953,11 @@ desconhecidos e não públicos.
 
 **Disponibilidade.** Indisponibilidade produz `unavailable`, **nunca**
 `invalid`. Pacotes assinados ou selados permanecem verificáveis offline.
+
+**Documentos classificados.** A inclusão de um documento num serviço de
+verificação deve ser decisão explícita do custodiante face ao nível de
+classificação declarado — nunca comportamento por omissão herdado da
+configuração aplicada a documentos não classificados (SPEC NDF §4.7.2).
 
 ---
 
