@@ -95,6 +95,7 @@ NCRTF — conteúdo de texto estruturado
 - [Percurso de normalização](NORMALIZATION.md)
 - [Contribuição](CONTRIBUTING.md)
 - [Segurança](SECURITY.md)
+- [Reporting regulatório (Cyber Resilience Act)](CRA_REPORTING.md)
 - [Política de utilização de IA generativa](AI_USAGE.md)
 - [Checklist de publicação pública](docs/PUBLICATION-CHECKLIST.md)
 
