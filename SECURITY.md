@@ -32,6 +32,12 @@ Não publique detalhes antes de existir uma correção, mitigação ou decisão
 documentada. Problemas que afetem uma versão publicada são registados no
 changelog e, quando aplicável, recebem um identificador de advisory GitHub.
 
+Se a vulnerabilidade estiver a ser **ativamente explorada**, ou constituir um
+incidente grave de segurança, aplica-se adicionalmente o procedimento de
+notificação regulatória em [`CRA_REPORTING.md`](CRA_REPORTING.md) (Cyber
+Resilience Act, Artigo 14), com prazos de 24h/72h/14 dias para o CSIRT
+nacional e a ENISA.
+
 ## Regras para contribuidores
 
 Nunca inclua tokens, palavras-passe, chaves privadas, certificados privados,
