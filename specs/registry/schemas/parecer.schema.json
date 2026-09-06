@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://normordis.pt/specs/registry/parecer/1.0.0/schema.json",
-  "title": "Parecer v1.0.0",
-  "description": "Schema do campo 'documento' para tipo_documento_ref: 'parecer@1.0.0'. Parecer técnico ou jurídico — apreciação fundamentada, com sentido explícito, emitida sobre outro documento. Distinto de 'informacao-tecnica': um parecer tem sentido classificado (favorável/desfavorável) e, tipicamente, fundamentação jurídica explícita; uma informação técnica não exige nenhum dos dois. A relação com o(s) documento(s) apreciado(s) é expressa por NDF-core.relacoes (tipo 'emite_parecer_sobre'), não por um campo próprio deste schema.",
+  "$id": "https://normordis.pt/specs/registry/parecer/2.0.0/schema.json",
+  "title": "Parecer v2.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'parecer@2.0.0'. Parecer técnico ou jurídico — apreciação fundamentada, com sentido explícito, emitida sobre outro documento. Distinto de 'informacao-tecnica': um parecer tem sentido classificado (favorável/desfavorável) e, tipicamente, fundamentação jurídica explícita; uma informação técnica não exige nenhum dos dois. A relação com o(s) documento(s) apreciado(s) é expressa por NDF-core.relacoes (tipo 'emite_parecer_sobre'), não por um campo próprio deste schema. v2.0.0: 'corpo' passa de string simples a NCRTF (NDT ROADMAP T4) — alteração incompatível.",
   "type": "object",
   "required": ["numero", "data", "autor", "sentido", "corpo"],
   "additionalProperties": false,
@@ -39,9 +39,14 @@
       "description": "Classificação do sentido do parecer. Distingue este tipo de documento de uma informação técnica genérica."
     },
     "corpo": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Corpo do parecer — apreciação e fundamentação. String simples, consistente com informacao-tecnica.corpo (a harmonização NCRTF vs. string simples entre tipos do registo é dívida técnica pré-existente, fora do âmbito desta adição)."
+      "type": "object",
+      "required": ["ncrtf_version", "content"],
+      "properties": {
+        "ncrtf_version": { "const": "2.0.0" },
+        "content": { "type": "array", "minItems": 1 }
+      },
+      "additionalProperties": false,
+      "description": "Corpo do parecer em NCRTF — apreciação e fundamentação. Alinha com oficio.corpo e informacao-tecnica.corpo (fecha a dívida técnica registada em LACUNAS.md e no ROADMAP NDT, item T4). A validação estrutural completa é feita também contra o schema NCRTF declarado."
     },
     "conclusao": {
       "type": "string",

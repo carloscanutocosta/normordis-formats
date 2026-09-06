@@ -9,7 +9,7 @@
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "parecer@1.0.0",
   "metadados": {
-    "tipo_documento_ref": "parecer@1.0.0",
+    "tipo_documento_ref": "parecer@2.0.0",
     "entidade_produtora": {
       "designacao": "Direção-Geral de Exemplo"
     },
@@ -24,7 +24,20 @@
       "cargo": "Jurista"
     },
     "sentido": "favoravel",
-    "corpo": "Texto do parecer."
+    "corpo": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Texto do parecer."
+            }
+          ]
+        }
+      ]
+    }
   },
   "proveniencia_ia": {
     "utilizada": true,

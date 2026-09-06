@@ -2,6 +2,20 @@
 
 ## Não publicado
 
+### `tools/validate.py`: coerência de `payload_hash` entre `sobre[]` e `relacoes[]` (2026-09-06)
+
+- **acrescentado: `check_ndf_advisories` compara também `payload_hash`** para
+  cada `ndf_id` comum entre `documento.sobre[]` e `relacoes[]`, não só o
+  conjunto de `ndf_id`. Fecha **L5** por completo (`LACUNAS.md`) — a
+  verificação existente desde 2026-08-08 comparava apenas os conjuntos de
+  `ndf_id`, e dois campos podiam apontar para o mesmo `ndf_id` com hashes
+  diferentes sem qualquer aviso. Descoberto ao migrar `corpo`/`texto` do
+  registo para NCRTF (ver `specs/ndt/CHANGELOG.md`, T4): o próprio exemplo
+  `specs/ndf/examples/informacao-parecer-despacho/03-despacho/` tinha essa
+  divergência, com o `README.md` a afirmar coerência que os dados não tinham.
+  Ambos foram corrigidos. Sem alteração de schema — verificação semântica
+  aditiva, não bloqueante (aviso, não erro).
+
 ### Fronteira formato ↔ sistema de gestão documental (2026-09-01)
 
 - **acrescentado: §4.7 — fronteira de responsabilidade entre o formato e o

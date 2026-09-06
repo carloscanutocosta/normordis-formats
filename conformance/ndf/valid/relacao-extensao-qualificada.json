@@ -7,7 +7,7 @@
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "despacho-generico@1.0.0",
   "metadados": {
-    "tipo_documento_ref": "despacho@1.0.0",
+    "tipo_documento_ref": "despacho@2.0.0",
     "entidade_produtora": {
       "designacao": "Autoridade Tributária e Aduaneira",
       "identificadores": [
@@ -29,7 +29,20 @@
   "documento": {
     "numero": "AT/2026/00321",
     "data": "2026-06-20",
-    "texto": "Retificação oficiosa nos termos do artigo aplicável do CIRS.",
+    "texto": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Retificação oficiosa nos termos do artigo aplicável do CIRS."
+            }
+          ]
+        }
+      ]
+    },
     "tipo_despacho": "outro",
     "decisor": {
       "nome": "Carla Nunes",

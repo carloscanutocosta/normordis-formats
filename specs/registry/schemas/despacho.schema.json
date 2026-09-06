@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://normordis.pt/specs/registry/despacho/1.0.0/schema.json",
-  "title": "Despacho v1.0.0",
-  "description": "Schema do campo 'documento' para tipo_documento_ref: 'despacho@1.0.0'. Despacho administrativo — decisão, instrução ou concordância sobre documento(s) sujeito(s).",
+  "$id": "https://normordis.pt/specs/registry/despacho/2.0.0/schema.json",
+  "title": "Despacho v2.0.0",
+  "description": "Schema do campo 'documento' para tipo_documento_ref: 'despacho@2.0.0'. Despacho administrativo — decisão, instrução ou concordância sobre documento(s) sujeito(s). v2.0.0: 'texto' passa de string simples a NCRTF (NDT ROADMAP T4) — alteração incompatível.",
   "type": "object",
   "required": ["numero", "data", "texto"],
   "additionalProperties": false,
@@ -44,9 +44,14 @@
       "description": "Documentos sobre os quais o despacho recai, identificados por ndf_id. Pode ser vazio para despachos de iniciativa própria. Campo de conveniência de leitura específico deste tipo de documento; NDF-core.relacoes (SPEC.md §2.11) é o mecanismo genérico e a fonte de verdade criptograficamente verificável — quando ambos estiverem presentes, DEVEM referenciar o mesmo conjunto de ndf_id."
     },
     "texto": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Texto do despacho — decisão, instrução ou concordância."
+      "type": "object",
+      "required": ["ncrtf_version", "content"],
+      "properties": {
+        "ncrtf_version": { "const": "2.0.0" },
+        "content": { "type": "array", "minItems": 1 }
+      },
+      "additionalProperties": false,
+      "description": "Texto do despacho em NCRTF — decisão, instrução ou concordância. Alinha com oficio.corpo, informacao-tecnica.corpo e parecer.corpo (NDT ROADMAP T4). A validação estrutural completa é feita também contra o schema NCRTF declarado."
     },
     "tipo_despacho": {
       "type": "string",

@@ -7,7 +7,7 @@
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "parecer@1.0.0",
   "metadados": {
-    "tipo_documento_ref": "parecer@1.0.0",
+    "tipo_documento_ref": "parecer@2.0.0",
     "entidade_produtora": {
       "designacao": "Direção-Geral de Exemplo",
       "identificadores": [
@@ -35,7 +35,20 @@
       "unidade_organica": "Gabinete Jurídico"
     },
     "sentido": "favoravel",
-    "corpo": "Aprecia-se favoravelmente a proposta constante da Informação Técnica IT/2026/00045.",
+    "corpo": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Aprecia-se favoravelmente a proposta constante da Informação Técnica IT/2026/00045."
+            }
+          ]
+        }
+      ]
+    },
     "conclusao": "Parecer favorável, sem reservas.",
     "fundamentacao_juridica": [
       "Lei n.º 58/2019",
