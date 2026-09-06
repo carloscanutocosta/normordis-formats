@@ -192,7 +192,7 @@ tabela, problema de layout distinto e sem caso de uso documentado.
 
 ---
 
-### T6. Arrays de valores escalares sem primitiva de renderização
+### T6. Arrays de valores escalares sem primitiva de renderização — IMPLEMENTADO (2026-09-06)
 
 **Problema**, também identificado ao construir o exemplo de `parecer`:
 `parecer.fundamentacao_juridica` é um array de **strings simples** (ex.:
@@ -205,7 +205,7 @@ numerada) ligada a dados. O exemplo `parecer.ndt.json` deixa
 `fundamentacao_juridica` por renderizar por esta razão — é o próprio limite
 do formato, não uma omissão do exemplo.
 
-**Solução proposta**: um novo elemento `lista`, na mesma dupla colocação de
+**Solução implementada** (SPEC §5.5.4): um novo elemento `lista`, na mesma dupla colocação de
 `tabela` — `blocos[]` (absoluto, com `posicao`) e `fluxo.elementos` (sem
 `posicao`) — para um array NDF de escalares, tal como `tabela` já serve o
 array de objetos.
@@ -247,10 +247,16 @@ Decisões de desenho, por esta ordem de importância:
    `repeticao: "conforme_necessario"` com `fonte_overflow` a apontar para o
    array. Não é caso novo, é o mecanismo que já existe para arrays.
 
-**Depende de**: nada bloqueante — pode avançar antes ou depois da Fase A do
-NCRTF; só o comportamento fino de `"numerado"` melhora quando A3 chegar.
+**Depende de**: nada bloqueante — `estilo: "numerado"` usa por agora `1.`,
+`2.`, `3.` fixo; o comportamento fino melhora quando A3 (Fase A do NCRTF)
+chegar, sem alteração ao schema desta cláusula.
 
-**Esforço**: **M**.
+`parecer.ndt.json` usa `lista` para `fundamentacao_juridica` (fluxo, entre o
+corpo e a conclusão). Vetor de conformidade em
+`conformance/ndt/valid/bloco-lista.json`, cobrindo `blocos[]` absoluto e
+`fluxo.elementos`.
+
+**Esforço**: **M** — realizado.
 
 ---
 

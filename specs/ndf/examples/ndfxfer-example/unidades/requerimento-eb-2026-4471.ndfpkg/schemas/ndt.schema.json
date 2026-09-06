@@ -455,12 +455,30 @@
         "incluir_se": { "type": ["string", "null"] }
       }
     },
+    "BlocoLista": {
+      "type": "object",
+      "required": ["tipo", "referencia", "posicao", "largura"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "lista" },
+        "referencia": { "type": "string" },
+        "posicao": { "$ref": "#/$defs/Posicao" },
+        "largura": { "type": "number" },
+        "formato": { "$ref": "#/$defs/FormatoDisplay" },
+        "estilo": { "type": "string", "enum": ["bullet", "numerado"] },
+        "marcador": { "type": "string" },
+        "espacamento_entre_itens_mm": { "type": "number" },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
     "Bloco": {
       "oneOf": [
         { "$ref": "#/$defs/BlocoTabela" },
         { "$ref": "#/$defs/BlocoCorpo" },
         { "$ref": "#/$defs/BlocoCabecalho" },
-        { "$ref": "#/$defs/BlocoRodape" }
+        { "$ref": "#/$defs/BlocoRodape" },
+        { "$ref": "#/$defs/BlocoLista" }
       ]
     },
     "FluxoTabelaSemPosicao": {
@@ -574,6 +592,21 @@
         "incluir_se": { "type": ["string", "null"] }
       }
     },
+    "ElementoFluxoLista": {
+      "type": "object",
+      "required": ["tipo", "referencia"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "const": "lista" },
+        "referencia": { "type": "string" },
+        "formato": { "$ref": "#/$defs/FormatoDisplay" },
+        "estilo": { "type": "string", "enum": ["bullet", "numerado"] },
+        "marcador": { "type": "string" },
+        "espacamento_entre_itens_mm": { "type": "number" },
+        "fonte": { "$ref": "#/$defs/Fonte" },
+        "incluir_se": { "type": ["string", "null"] }
+      }
+    },
     "ElementoFluxoQuebraPagina": {
       "type": "object",
       "required": ["tipo"],
@@ -590,7 +623,8 @@
         { "$ref": "#/$defs/ElementoFluxoImagem" },
         { "$ref": "#/$defs/ElementoFluxoEspaco" },
         { "$ref": "#/$defs/ElementoFluxoSeparador" },
-        { "$ref": "#/$defs/ElementoFluxoAssinatura" }
+        { "$ref": "#/$defs/ElementoFluxoAssinatura" },
+        { "$ref": "#/$defs/ElementoFluxoLista" }
       ]
     },
     "LateralColuna": {
@@ -629,7 +663,8 @@
         { "$ref": "#/$defs/ElementoFluxoSeparador" },
         { "$ref": "#/$defs/ElementoFluxoAssinatura" },
         { "$ref": "#/$defs/ElementoFluxoLinhaLateral" },
-        { "$ref": "#/$defs/ElementoFluxoQuebraPagina" }
+        { "$ref": "#/$defs/ElementoFluxoQuebraPagina" },
+        { "$ref": "#/$defs/ElementoFluxoLista" }
       ]
     },
     "Fluxo": {
