@@ -12,6 +12,27 @@
 
 ## Não publicado
 
+### Novo elemento `lista` para arrays NDF de escalares (2026-09-06)
+
+- **acrescentado: `lista`** em `blocos[]` (absoluto) e `fluxo.elementos`
+  (SPEC §5.5.4) — renderiza um array NDF de **valores escalares** (não
+  objetos) como lista bullet ou numerada. `tabela` (§5.5.1) exige itens
+  objeto porque `colunas[].id` referencia uma propriedade; um item escalar
+  não tem propriedade nenhuma a mapear, daí o elemento novo em vez de
+  estender `tabela`. Cobre `parecer.fundamentacao_juridica` (array de
+  strings), que ficava sem forma de renderização (ROADMAP T6).
+- Campos: `referencia` (obrigatório), `posicao`/`largura` (obrigatórios em
+  `blocos[]`, omitidos em `fluxo`), `formato` (§4.3, default `"texto"`),
+  `estilo` (`"bullet"` \| `"numerado"`, default `"bullet"`), `marcador`
+  (default `"•"`), `espacamento_entre_itens_mm`, `fonte`. Sem
+  `min_linhas_visivel` — sem caso de uso para linhas em branco numa lista de
+  fundamentação. `estilo: "numerado"` usa `1.`/`2.`/`3.` fixo até
+  `estilos.listas[]` (Fase A do NCRTF, item A3) estar definido.
+- `parecer.ndt.json` atualizado para usar `lista` em
+  `fundamentacao_juridica`. Vetor de conformidade novo:
+  `conformance/ndt/valid/bloco-lista.json`.
+- Alteração aditiva — sem impacto em templates existentes.
+
 ### Registo: `corpo`/`texto` de `informacao-tecnica`, `parecer` e `despacho` passam a NCRTF (2026-09-06)
 
 - **Não é alteração ao NDT-core** — é um schema do registo

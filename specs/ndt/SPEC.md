@@ -372,6 +372,7 @@ O objeto `fluxo` declara uma **região de fluxo vertical** dentro da `pagina_def
 | `assinatura` | Campo de assinatura (§5.3.6). Sem `posicao` — posicionado em fluxo. |
 | `linha_lateral` | Agrupa dois ou mais elementos lado a lado numa mesma linha horizontal. Ver §5.2.2. |
 | `quebra_pagina` | Força início de nova página. O renderizador termina a instância actual da `pagina_def` e avança para a seguinte entrada em `sequencia[]`. Sem campos adicionais. |
+| `lista` | Array NDF de valores escalares como lista (§5.5.4). Sem `posicao` — posicionada automaticamente. |
 
 Todos os elementos de `fluxo.elementos` aceitam `"incluir_se"` (ver §5.4) para renderização condicional.
 
@@ -834,6 +835,56 @@ Blocos de cabeçalho ou rodapé de documento (não de página — para mobília 
 ```
 
 `referencia` aponta para o path NDF com os dados do cabeçalho. A disposição visual interna é definida pelos `campos[]` e `graficos[]` da mesma `pagina_def`.
+
+#### 5.5.4 `lista`
+
+Renderiza um array NDF de **valores escalares** (não objetos) como lista.
+Distingue-se de `tabela` (§5.5.1) precisamente por isso: um item de `tabela`
+tem propriedades que `colunas[].id` referencia; um item de `lista` é o
+próprio valor — não há nada a mapear por coluna. Cobre casos como
+`parecer.fundamentacao_juridica` (array de strings), que `tabela` não
+consegue exprimir.
+
+```json
+{
+  "tipo": "lista",
+  "referencia": "fundamentacao_juridica",
+  "posicao": { "x": 15, "y": 220 },
+  "largura": 180,
+  "formato": "texto",
+  "estilo": "bullet",
+  "marcador": "—",
+  "espacamento_entre_itens_mm": 1.5
+}
+```
+
+Em `fluxo.elementos`, omite `posicao` e `largura` (posicionamento automático), como `tabela`.
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `referencia` | Sim | Caminho NDF do array de valores escalares. |
+| `posicao` | Sim (em `blocos[]`; omitido em `fluxo`) | Coordenadas de origem (mm). |
+| `largura` | Sim (em `blocos[]`; omitido em `fluxo`) | Largura da lista (mm). |
+| `formato` | Não | Formato de apresentação por item (§4.3). Predefinição: `"texto"`. |
+| `estilo` | Não | `"bullet"` \| `"numerado"`. Predefinição: `"bullet"`. |
+| `marcador` | Não | Carácter do marcador quando `estilo: "bullet"`. Predefinição: `"•"`. Sem efeito em `"numerado"`. |
+| `espacamento_entre_itens_mm` | Não | Espaço vertical entre itens (mm). |
+| `fonte` | Não | Ver §5.8. Herda de `estilos.fonte_padrao` se omitido. |
+| `incluir_se` | Não | Caminho NDF de booleano (ver §5.4). |
+
+`estilo: "numerado"` usa por defeito `1.`, `2.`, `3.` — o formato de
+numeração por nível (`a`, `i`, `I`, prefixo/sufixo) fica para quando
+`estilos.listas[]` for definido em NCRTF/NDT (ver ROADMAP.md, Fase A, item
+A3); até lá, `lista` do NDT não referencia esse bloco.
+
+Um array sem itens no NDF renderiza como lista vazia — sem erro, sem aviso
+(mesma tolerância de `NDT-RENDER-007`). Ao contrário de `tabela`, `lista` não
+tem `min_linhas_visivel`: não há caso de uso documentado de forçar linhas
+vazias numa lista de fundamentação ou de referências.
+
+Overflow segue o mecanismo já existente para arrays em `sequencia[]`
+(§5.7, `repeticao: "conforme_necessario"` com `fonte_overflow` a apontar
+para o mesmo caminho).
 
 ### 5.6 Mobília de página (`mobilia[]`)
 
@@ -1354,6 +1405,7 @@ extraídos de implementações independentes, ainda pendentes — ver
 | `{ndf:caminho}` | Sintaxe de interpolação de dados NDF em `texto_fixo` de `mobilia[]`; distinto de `{{placeholder_ndt}}` e de `{n}/{total}` |
 | `quebra_pagina` | Elemento de `fluxo.elementos` que força início de nova página na `sequencia[]` |
 | `tabela` (bloco) | Array NDF renderizado como tabela de linhas e colunas com layout definido no NDT |
+| `lista` (bloco) | Array NDF de valores escalares renderizado como lista (bullet ou numerada); distinto de `tabela`, que exige itens objeto |
 | `min_linhas_visivel` | Número mínimo de linhas a renderizar; o renderizador completa com linhas em branco |
 | `fluxo` | Região de layout vertical sequencial numa `pagina_def`; para documentos com corpo de extensão variável |
 | `corpo` | Bloco de texto NCRTF com fluxo, referenciado por caminho NDF |

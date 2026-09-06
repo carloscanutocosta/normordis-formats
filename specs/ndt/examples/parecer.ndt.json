@@ -87,6 +87,18 @@
             "referencia": "corpo"
           },
           { "tipo": "espaco", "altura": 6 },
+          { "tipo": "texto_fixo", "conteudo": "Fundamentação jurídica:", "fonte": { "tamanho": 10, "peso": "bold" } },
+          { "tipo": "espaco", "altura": 1 },
+          {
+            "tipo": "lista",
+            "referencia": "fundamentacao_juridica",
+            "formato": "texto",
+            "estilo": "bullet",
+            "marcador": "—",
+            "espacamento_entre_itens_mm": 1.5,
+            "fonte": { "tamanho": 10 }
+          },
+          { "tipo": "espaco", "altura": 6 },
           { "tipo": "texto_fixo", "conteudo": "Conclusão:", "fonte": { "tamanho": 10, "peso": "bold" } },
           { "tipo": "campo", "referencia": "conclusao", "fonte": { "tamanho": 10 } },
           { "tipo": "espaco", "altura": 6 },

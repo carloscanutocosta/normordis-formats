@@ -1,0 +1,42 @@
+{
+  "_comment": "BlocoLista (absoluto) e lista em fluxo.elementos, com array de escalares — ROADMAP T6, 2026-09-06. Verifica que 'lista' aceita formato/estilo/marcador/espacamento_entre_itens_mm/fonte em ambos os contextos, e que não exige 'colunas' (distinção face a tabela).",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-bloco-lista",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "blocos": [
+        {
+          "tipo": "lista",
+          "referencia": "fundamentacao_juridica",
+          "posicao": { "x": 15, "y": 20 },
+          "largura": 180,
+          "formato": "texto",
+          "estilo": "bullet",
+          "marcador": "—",
+          "espacamento_entre_itens_mm": 1.5,
+          "fonte": { "tamanho": 10 }
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "fluxo": {
+        "y_inicio": 20,
+        "elementos": [
+          { "tipo": "texto_fixo", "conteudo": "Notas:", "fonte": { "tamanho": 10, "peso": "bold" } },
+          {
+            "tipo": "lista",
+            "referencia": "notas",
+            "estilo": "numerado"
+          }
+        ]
+      }
+    }
+  ],
+  "sequencia": [
+    { "pagina_def": "p1", "repeticao": "unica" },
+    { "pagina_def": "p2", "repeticao": "unica" }
+  ]
+}
