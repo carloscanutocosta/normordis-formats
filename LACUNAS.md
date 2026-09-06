@@ -82,15 +82,25 @@ enum fechado, uma extensão qualificada `ext.<entidade>.<tipo>` — alteração
 aditiva ao schema, documentada em SPEC.md §2.11.7, justificada em
 `docs/architecture/ADR-008-extensao-qualificada-relacoes.md`.
 
-### L5 — `despacho.sobre[]` vs `relacoes[]`: coerência só recomendada, nunca imposta
+### L5 — `despacho.sobre[]` vs `relacoes[]`: coerência só recomendada, nunca imposta — RESOLVIDO
 
 Nenhuma validação impede que os dois campos divirjam quando ambos
 presentes. É uma questão de integridade interna do documento — dentro de
 âmbito.
 
-**Recomendação**: adicionar verificação semântica em `tools/validate.py`
-(fora do JSON Schema, que não pode comparar dois campos de proveniências
-distintas facilmente) que sinalize divergência como aviso, se não erro.
+**Parcialmente resolvido (2026-08-08)**: `tools/validate.py` passou a
+sinalizar como aviso quando `documento.sobre[]` e `relacoes[]` referenciam
+conjuntos diferentes de `ndf_id`.
+
+**Resolvido por completo (2026-09-06)**: essa verificação comparava só o
+**conjunto de `ndf_id`**, não o `payload_hash` de cada um — dois campos podiam
+apontar para o mesmo `ndf_id` com hashes diferentes sem qualquer aviso.
+Descoberto durante a migração `corpo`/`texto` → NCRTF (ROADMAP NDT T4): o
+próprio exemplo `specs/ndf/examples/informacao-parecer-despacho/03-despacho/`
+tinha exatamente esta divergência, com o `README.md` a afirmar coerência que
+os dados não tinham. `check_ndf_advisories` agora compara também o
+`payload_hash` por `ndf_id` comum entre os dois campos, e o exemplo foi
+corrigido.
 
 ### L6 — `ndf_id` sem espaço de nomes por entidade produtora — RESOLVIDO
 

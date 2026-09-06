@@ -527,6 +527,27 @@ def check_ndf_advisories(doc: dict, pkg_root: Path | None = None) -> list[str]:
                 "diferentes de ndf_id — RECOMENDA-SE coerência (§2.11.4): "
                 + "; ".join(detalhe)
             )
+        # O mesmo ndf_id em ambos pode ainda transportar payload_hash
+        # divergente — o conjunto de ids coincidir não implica que apontem
+        # para o mesmo conteúdo apreciado. Comparação separada por essa razão:
+        # um exemplo real do próprio repositório tinha ids coincidentes com
+        # hashes divergentes sem que nada o assinalasse (2026-09-06).
+        hash_sobre = {
+            item.get("ndf_id"): item.get("payload_hash")
+            for item in sobre if isinstance(item, dict) and item.get("ndf_id")
+        }
+        hash_relacoes = {
+            rel.get("alvo", {}).get("ndf_id"): rel.get("alvo", {}).get("payload_hash")
+            for rel in relacoes if isinstance(rel, dict) and rel.get("alvo", {}).get("ndf_id")
+        }
+        for ndf_id in sorted(set(hash_sobre) & set(hash_relacoes)):
+            hs, hr = hash_sobre[ndf_id], hash_relacoes[ndf_id]
+            if hs and hr and hs != hr:
+                advisories.append(
+                    f"documento.sobre[] e relacoes[] referenciam o mesmo ndf_id "
+                    f"'{ndf_id}' com payload_hash diferente ({hs} vs {hr}) — "
+                    "RECOMENDA-SE coerência (§2.11.4)"
+                )
 
     # §2.14.4 — a fronteira entre proveniencia_sistema (determinístico) e
     # proveniencia_ia não é mecanicamente decidível: nenhum campo declara se um

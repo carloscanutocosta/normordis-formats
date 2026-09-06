@@ -30,9 +30,9 @@ O registo define o mecanismo de resolução de `tipo_documento_ref` — o campo 
 |---|---|---|
 | `oficio@1.0.0` | Ofício — comunicação formal externa | [schemas/oficio.schema.json](schemas/oficio.schema.json) |
 | `aceitacao-custodia@1.0.0` | Aceitação de custódia — resposta do recetor a um conjunto de transferência | [schemas/aceitacao-custodia.schema.json](schemas/aceitacao-custodia.schema.json) |
-| `informacao-tecnica@1.0.0` | Informação técnica — nota interna fundamentada | [schemas/informacao-tecnica.schema.json](schemas/informacao-tecnica.schema.json) |
-| `parecer@1.0.0` | Parecer — apreciação fundamentada com sentido explícito, sobre outro documento | [schemas/parecer.schema.json](schemas/parecer.schema.json) |
-| `despacho@1.0.0` | Despacho — decisão ou instrução de serviço | [schemas/despacho.schema.json](schemas/despacho.schema.json) |
+| `informacao-tecnica@2.0.0` | Informação técnica — nota interna fundamentada | [schemas/informacao-tecnica.schema.json](schemas/informacao-tecnica.schema.json) |
+| `parecer@2.0.0` | Parecer — apreciação fundamentada com sentido explícito, sobre outro documento | [schemas/parecer.schema.json](schemas/parecer.schema.json) |
+| `despacho@2.0.0` | Despacho — decisão ou instrução de serviço | [schemas/despacho.schema.json](schemas/despacho.schema.json) |
 | `documento-capturado@1.0.0` | Documento cujo conteúdo reside em componentes binários — emitido fora do editor estruturado ou recebido do exterior | [schemas/documento-capturado.schema.json](schemas/documento-capturado.schema.json) |
 
 `informacao-tecnica`, `parecer` e `despacho` formam, em conjunto com
@@ -139,9 +139,9 @@ matéria, não a decisão inicial.
 | Tipo | `via_predefinida` | `captura_admissivel` | Nota |
 |---|---|---|---|
 | `oficio@1.0.0` | `estruturada` | `true` | Enquanto o editor não cobrir a tipologia |
-| `informacao-tecnica@1.0.0` | `estruturada` | `true` | idem |
-| `parecer@1.0.0` | `estruturada` | `true` | idem |
-| `despacho@1.0.0` | `estruturada` | `true` | idem |
+| `informacao-tecnica@2.0.0` | `estruturada` | `true` | idem |
+| `parecer@2.0.0` | `estruturada` | `true` | idem |
+| `despacho@2.0.0` | `estruturada` | `true` | idem |
 | `documento-capturado@1.0.0` | `capturada` | — | O campo não se aplica: o tipo **é** a via |
 
 `captura_admissivel: true` é aqui reconhecimento do estado presente, não

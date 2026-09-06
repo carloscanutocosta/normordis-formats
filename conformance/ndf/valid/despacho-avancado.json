@@ -7,7 +7,7 @@
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "despacho-generico@1.0.0",
   "metadados": {
-    "tipo_documento_ref": "despacho@1.0.0",
+    "tipo_documento_ref": "despacho@2.0.0",
     "entidade_produtora": {
       "designacao": "Unidade Orgânica de Gestão Documental",
       "identificadores": [
@@ -35,7 +35,20 @@
         "descricao": "Informação Técnica IT/2026/00045 — Análise de conformidade"
       }
     ],
-    "texto": "Concordo com o teor da Informação Técnica IT/2026/00045. Proceda-se em conformidade.",
+    "texto": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Concordo com o teor da Informação Técnica IT/2026/00045. Proceda-se em conformidade."
+            }
+          ]
+        }
+      ]
+    },
     "tipo_despacho": "concordancia",
     "decisor": {
       "nome": "Ana Ferreira",

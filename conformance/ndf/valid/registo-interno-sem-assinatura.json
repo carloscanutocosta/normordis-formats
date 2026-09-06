@@ -7,7 +7,7 @@
   "nivel_assinatura": "nenhuma",
   "ndt_version_ref": "registo-interno@1.0.0",
   "metadados": {
-    "tipo_documento_ref": "informacao-tecnica@1.0.0",
+    "tipo_documento_ref": "informacao-tecnica@2.0.0",
     "entidade_produtora": {
       "designacao": "Sistema de Gestão Documental NORMORDIS",
       "identificadores": [
@@ -31,7 +31,20 @@
     "data": "2026-06-18",
     "dirigido_a": "Arquivo Histórico",
     "assunto": "Deliberação da reunião de Conselho de Direcção de 2026-06-18",
-    "corpo": "Deliberações aprovadas na reunião de Conselho de Direcção realizada em 18 de junho de 2026..."
+    "corpo": {
+      "ncrtf_version": "2.0.0",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Deliberações aprovadas na reunião de Conselho de Direcção realizada em 18 de junho de 2026..."
+            }
+          ]
+        }
+      ]
+    }
   },
   "participantes": [
     {

@@ -5,6 +5,29 @@ formato mantém também o seu histórico em `specs/<formato>/CHANGELOG.md`.
 
 ## [Não publicado]
 
+### Registo: `corpo`/`texto` de informação/parecer/despacho passam a NCRTF; NDT ganha rotação de campos (2026-09-06)
+
+Trabalho originado pela criação dos primeiros exemplos NDT de
+`informacao-tecnica`, `parecer` e `despacho`
+(`specs/ndt/examples/`), que expôs três lacunas reais (ROADMAP NDT T4–T6).
+Duas foram fechadas nesta ronda:
+
+- **T4 — `corpo`/`texto` para NCRTF** nos três schemas do registo (v2.0.0,
+  incompatível). Fecha a dívida técnica já assinalada no próprio schema do
+  `parecer`. Ao propagar a alteração ao exemplo assinado
+  `specs/ndf/examples/informacao-parecer-despacho/`, foi encontrada e
+  corrigida uma divergência pré-existente entre `sobre[].payload_hash` e
+  `relacoes[].alvo.payload_hash` para o mesmo `ndf_id` — e fechada a lacuna no
+  próprio verificador que deveria tê-la apanhado (**L5**, ver
+  `specs/ndf/CHANGELOG.md`). Ver `specs/ndt/CHANGELOG.md`.
+- **T5 — `rotacao` em `campos[]`/`campo_ndf`** (NDT, aditivo): um valor de
+  dados posicionado pode agora ser impresso rodado — antes só elementos
+  gráficos estáticos ou dígito-a-dígito/código de barras o suportavam. Ver
+  `specs/ndt/CHANGELOG.md`.
+
+T6 (lista de valores escalares ligada a dados, sem primitiva hoje) fica
+registada no ROADMAP, sem implementação nesta ronda.
+
 ### NDF: fronteira formato ↔ sistema de gestão documental (2026-09-01)
 
 Nova §4.7 na SPEC NDF, aditiva e sem alteração de schema: cifra em trânsito e
