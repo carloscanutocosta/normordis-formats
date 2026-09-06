@@ -55,7 +55,7 @@
     },
     {
       "ficheiro": "schemas/ndt.schema.json",
-      "hash_sha256": "sha256:840d4162ad616f1e43bce1ce80d2190ba247c79b656a63d7fe185e5f2d926af1"
+      "hash_sha256": "sha256:a22133bb5fd9d02701583e418a12ebc6ccd7fb7561cc568f0254c14a0e099bbc"
     },
     {
       "ficheiro": "schemas/oficio.schema.json",
