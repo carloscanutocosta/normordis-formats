@@ -12,6 +12,42 @@
 
 ## Não publicado
 
+### Registo: `corpo`/`texto` de `informacao-tecnica`, `parecer` e `despacho` passam a NCRTF (2026-09-06)
+
+- **Não é alteração ao NDT-core** — é um schema do registo
+  (`specs/registry/schemas/`), mas fecha ROADMAP T4 e afeta diretamente os
+  exemplos NDT destes três tipos, por isso regista-se aqui também.
+- `informacao-tecnica.corpo`, `parecer.corpo` e `despacho.texto` passam de
+  string simples a NCRTF (`{ncrtf_version, content}`), alinhando com
+  `oficio.corpo`. `informacao-tecnica.conclusao`/`.proposta_despacho` e
+  `parecer.conclusao`/`.condicoes` **mantêm-se string** — são sínteses curtas
+  por desenho (§ da respetiva descrição), e migrá-los também colidiria com a
+  regra de um único elemento `corpo` por `fluxo` (`NDT-PROD-009`).
+  Escopo reduzido de seis para três campos face à proposta inicial do
+  ROADMAP, por esta razão.
+- Alteração **incompatível** (campo obrigatório muda de tipo) — os três
+  schemas do registo sobem para v2.0.0 (`informacao-tecnica@2.0.0`,
+  `parecer@2.0.0`, `despacho@2.0.0`). `ndt_version_ref` (identidade do
+  template) é independente e não muda.
+- Exemplos atualizados: `specs/ndt/examples/{informacao-tecnica,parecer,despacho}.ndt.json`
+  passam o elemento de fluxo de `corpo`/`texto` de `tipo: "campo"` para
+  `tipo: "corpo"` (NCRTF); os campos síntese que continuam string mantêm
+  `tipo: "campo"`. O exemplo real assinado
+  `specs/ndf/examples/informacao-parecer-despacho/` foi recanonicalizado e os
+  seus `payload_hash` recalculados — ver `specs/ndf/CHANGELOG.md`, que
+  também regista a correção de L5 encontrada nesse processo.
+
+### Rotação de valores NDF em `campos[]` e `campo_ndf` (2026-09-06)
+
+- **acrescentado: `rotacao` em `Campo` (§5.4) e `MobiliaCampoNdf` (§5.6)** —
+  campo opcional, mesma convenção de `graficos[]` (§5.3): graus no sentido
+  horário, predefinição `0`. Antes desta alteração, um valor de dados
+  (`campos[]`) não podia ser impresso rodado — só elementos gráficos estáticos
+  (`texto_fixo`, `imagem`, etc.) ou valores dígito-a-dígito/codificados
+  (`grelha_digitos`, `codigo_barras`) o suportavam. Cobre margens de arquivo
+  lateral, carimbos de registo e campos na lombada de formulários (ROADMAP
+  T5). Alteração aditiva — sem impacto em templates existentes.
+
 ### Documentos classificados — URL de verificação (2026-09-01)
 
 - **acrescentado: nota em §5.3.7** — o URL do exemplo do QR é ilustrativo; o

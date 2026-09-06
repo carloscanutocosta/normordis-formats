@@ -108,6 +108,152 @@ O estudo completo — incluindo as lacunas do próprio NDT face ao ODF, as decis
 
 ---
 
+### T4. `corpo`/`texto` de `informacao-tecnica`, `parecer` e `despacho` não é NCRTF — IMPLEMENTADO (2026-09-06)
+
+**Problema**, identificado ao construir os primeiros exemplos destes três tipos
+(`specs/ndt/examples/informacao-tecnica.ndt.json`, `parecer.ndt.json`,
+`despacho.ndt.json`): a SPEC (§9.1) lista precisamente estes três tipos —
+a par de ofício e diploma legal — como exemplos do perfil **"Texto corrido"**,
+cujos requisitos críticos incluem `NDT-PROD-008`/`009` (exclusividade
+`fluxo`/`blocos[]`, corpo único por fluxo) e `NDT-RENDER-009` (extravasamento
+do `corpo`). Mas `informacao-tecnica.corpo`, `informacao-tecnica.conclusao`,
+`informacao-tecnica.proposta_despacho`, `parecer.corpo`/`conclusao`/`condicoes`
+e `despacho.texto` são todos **strings simples** nos schemas do registo
+(`specs/registry/schemas/`) — não valores NCRTF. O schema do `parecer` já
+regista isto como "dívida técnica pré-existente".
+
+**Consequência prática**: o elemento `tipo: "corpo"` (§5.2.1, §5.5.2) exige
+explicitamente um valor NCRTF — não pode ser usado para estes três tipos. Os
+exemplos criados recorrem a `tipo: "campo"` (§5.4) como única alternativa
+viável, o que expõe duas lacunas que só aparecem com um valor de texto longo:
+
+1. `campo` em `fluxo.elementos` não tem, ao contrário de `texto_fixo`
+   (§5.2.1: *"faz wrapping automático na largura disponível"*), nenhuma
+   garantia documentada de *word-wrap* multi-linha para um valor NDF longo.
+2. `sequencia[].repeticao: "conforme_necessario"` (§5.7) só define
+   extravasamento para um array (`itens`) ou para "conteúdo NCRTF por
+   colocar" — nunca para uma string escalar. Um `despacho.texto` ou
+   `parecer.corpo` que não caiba numa página cai em comportamento não
+   definido pela SPEC.
+
+**Solução implementada** — com um ajuste de âmbito face à proposta inicial:
+migrados apenas os três campos de **corpo principal** —
+`informacao-tecnica.corpo`, `parecer.corpo`, `despacho.texto` — para o mesmo
+objeto NCRTF já usado por `oficio.corpo`. `informacao-tecnica.conclusao`/
+`.proposta_despacho` e `parecer.conclusao`/`.condicoes` **mantiveram-se
+string**: são sínteses curtas por desenho, sem caso de uso para rich text, e
+migrá-los colidiria com `NDT-PROD-009` (um único elemento `corpo` por
+`fluxo`) — um `fluxo` com dois ou três campos NCRTF independentes não tem hoje
+forma de os intercalar. Resolve as duas lacunas de wrapping/extravasamento
+para o campo que de facto precisa delas, sem reabrir essa outra questão sem
+necessidade real.
+
+Alteração **incompatível** nos três schemas do registo (campo obrigatório
+muda de tipo) — sobem para v2.0.0 (`informacao-tecnica@2.0.0`,
+`parecer@2.0.0`, `despacho@2.0.0`), SemVer MAJOR por `VERSIONING.md`.
+`ndt_version_ref` (identidade do template NDT) é independente e não é
+afetado. O exemplo assinado
+`specs/ndf/examples/informacao-parecer-despacho/` foi recanonicalizado com os
+novos `payload_hash`; no processo foi encontrada e corrigida uma divergência
+pré-existente entre `sobre[]` e `relacoes[]` nesse mesmo exemplo, e fechada a
+lacuna do verificador que deveria tê-la apanhado (L5, ver
+`specs/ndf/CHANGELOG.md`).
+
+**Esforço**: **P** por schema — realizado. Ver `specs/ndt/CHANGELOG.md` e
+`specs/ndf/CHANGELOG.md` (2026-09-06).
+
+---
+
+### T5. Rotação de valores NDF em `campos[]` (texto vertical em impressos) — IMPLEMENTADO (2026-09-06)
+
+**Problema**: `rotacao` está definido em **todos** os elementos de
+`graficos[]` (`linha`, `rectangulo`, `imagem`, `texto_fixo`, `grelha_digitos`,
+`codigo_barras`, `poligono`, `elipse`, `svg`, `tabela_visual` — confirmado
+contra `specs/ndt/schemas/ndt.schema.json`), mas **não** em `Campo` (§5.4),
+nem em `ColunaTabela`, nem em `MobiliaCampoNdf` (§5.6). Um valor estático pode
+ser impresso a qualquer ângulo; um valor **vindo do NDF** só pode hoje, se
+precisar de rotação, se for dígito-a-dígito (`grelha_digitos`) ou codificado
+(`codigo_barras`) — ambos em `graficos[]`. Um campo de texto simples com um
+valor de dados (referência de arquivo na margem lateral de um impresso,
+carimbo de registo lido de baixo para cima, código de lote na lombada de um
+formulário) não tem forma de ser rodado.
+
+**Casos de uso**: margens de arquivo lateral em processos físicos
+digitalizados, carimbos de registo cadastral, formulários com campos na
+lombada ou no verso.
+
+**Solução implementada**: `rotacao` (opcional, `number`, default `0`)
+acrescentado a `Campo` (§5.4) e a `MobiliaCampoNdf` (§5.6) — alteração
+aditiva, sem impacto em templates existentes. `ColunaTabela` fica de fora
+deliberadamente: rodar uma célula exigiria rodar a própria estrutura da
+tabela, problema de layout distinto e sem caso de uso documentado.
+
+**Esforço**: **P**. Ver CHANGELOG (2026-09-06).
+
+---
+
+### T6. Arrays de valores escalares sem primitiva de renderização
+
+**Problema**, também identificado ao construir o exemplo de `parecer`:
+`parecer.fundamentacao_juridica` é um array de **strings simples** (ex.:
+`"CPA, Art.º 61.º"`), não de objetos. `blocos[].tabela` e a `tabela` de
+`fluxo.elementos` (§5.5.1, §5.2.1) só sabem iterar um array de **objetos**,
+porque `colunas[].id` referencia sempre "propriedade do item NDF" — um item
+escalar não tem propriedade nenhuma a referenciar. Não há, hoje, primitiva
+NDT para apresentar um array de valores simples como lista (bullet ou
+numerada) ligada a dados. O exemplo `parecer.ndt.json` deixa
+`fundamentacao_juridica` por renderizar por esta razão — é o próprio limite
+do formato, não uma omissão do exemplo.
+
+**Solução proposta**: um novo elemento `lista`, na mesma dupla colocação de
+`tabela` — `blocos[]` (absoluto, com `posicao`) e `fluxo.elementos` (sem
+`posicao`) — para um array NDF de escalares, tal como `tabela` já serve o
+array de objetos.
+
+```json
+{
+  "tipo": "lista",
+  "referencia": "fundamentacao_juridica",
+  "formato": "texto",
+  "estilo": "bullet",
+  "marcador": "—",
+  "espacamento_entre_itens_mm": 1.5
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `referencia` | Sim | Caminho NDF do array de escalares. |
+| `posicao`, `largura` | Cond. | Como em `tabela` — obrigatórios em `blocos[]`, omitidos em `fluxo.elementos`. |
+| `formato` | Não | Formato de apresentação por item (§4.3). Predefinição `"texto"`. |
+| `estilo` | Não | `"bullet"` \| `"numerado"`. Predefinição `"bullet"`. |
+| `marcador` | Não | Carácter do marcador quando `estilo: "bullet"`. Predefinição `"•"`. Sem efeito em `"numerado"`. |
+| `espacamento_entre_itens_mm` | Não | Espaço vertical entre itens. |
+
+Decisões de desenho, por esta ordem de importância:
+
+1. **Sem `colunas[]`** — a diferença estrutural que justifica um elemento
+   novo em vez de estender `tabela`: um item escalar não tem propriedades
+   a mapear.
+2. **Um só nível.** Ao contrário de `list`/`list_item` do NCRTF (conteúdo
+   editado à mão, aninhamento genuíno), aqui o array vem do NDF —
+   `fundamentacao_juridica` é sempre plano. Aninhamento fica por fazer até
+   haver um array de arrays real (teste de admissão, ADR-015).
+3. **`estilo: "numerado"` sem parâmetro de formato próprio** — reutiliza,
+   quando existir, `estilos.listas[]` da Fase A do NCRTF (T3/A3 acima) em
+   vez de inventar um segundo vocabulário de numeração no mesmo documento.
+   Até A3 estar implementado, `"numerado"` usa `1.`, `2.`, `3.` fixo.
+4. **Overflow como `tabela`**: participa em `sequencia[]` do mesmo modo —
+   `repeticao: "conforme_necessario"` com `fonte_overflow` a apontar para o
+   array. Não é caso novo, é o mecanismo que já existe para arrays.
+
+**Depende de**: nada bloqueante — pode avançar antes ou depois da Fase A do
+NCRTF; só o comportamento fino de `"numerado"` melhora quando A3 chegar.
+
+**Esforço**: **M**.
+
+---
+
 ## Fora de âmbito (por design)
 
 Os seguintes padrões foram analisados e excluídos deliberadamente:
@@ -120,3 +266,4 @@ Os seguintes padrões foram analisados e excluídos deliberadamente:
 | Hiperligações em `campos[]` | NCRTF no `corpo` cobre links; campos posicionados raramente são hiperligáveis em documentos oficiais |
 | Estilos condicionais por valor (ex.: vermelho se negativo) | Lógica de apresentação baseada em dados = lógica de negócio; responsabilidade da aplicação de domínio |
 | Numeração automática de linhas de tabela | A aplicação de domínio inclui o número no NDF; o renderizador não computa valores |
+| Camada de formulário unificada (dados + layout + cálculo + scripts) ao estilo XFA (Adobe) | Historicamente resolveu o mesmo problema dos impressos legais (§9.1, perfil "Impresso"), mas era proprietária, mal suportada fora do Acrobat/LiveCycle, e **removida do próprio PDF na norma ISO 32000-2 (PDF 2.0)**. O acoplamento dados+layout+cálculo num único ficheiro é exatamente o que o NDT evita ao separar NDT (layout) de NDF (dados) e deixar cálculo à aplicação de domínio (§1, ponto 1). Registado aqui como precedente de cautela, não como candidato |

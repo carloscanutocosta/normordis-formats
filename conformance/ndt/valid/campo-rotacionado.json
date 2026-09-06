@@ -1,0 +1,33 @@
+{
+  "_comment": "'rotacao' em Campo (campos[] absoluto) e em MobiliaCampoNdf. Verifica que ambos aceitam o campo opcional (ROADMAP T5, 2026-09-06) com a mesma convenção de graficos[] (§5.3) — graus no sentido horário.",
+  "ndt_version": "2.0.0",
+  "schema_id": "teste-campo-rotacionado",
+  "versao_ndt": "1.0.0",
+  "paginas_def": [
+    {
+      "id": "p1",
+      "campos": [
+        {
+          "referencia": "arquivo.referencia_lateral",
+          "posicao": { "x": 5, "y": 250 },
+          "largura": 80,
+          "altura": 6,
+          "rotacao": 90,
+          "fonte": { "familia": "Helvetica", "tamanho": 7 }
+        }
+      ],
+      "mobilia": [
+        {
+          "tipo": "campo_ndf",
+          "referencia": "arquivo.codigo_lombada",
+          "posicao": { "x": 202, "y": 250 },
+          "largura": 40,
+          "altura": 5,
+          "rotacao": 270,
+          "fonte": { "familia": "Helvetica", "tamanho": 6 }
+        }
+      ]
+    }
+  ],
+  "sequencia": [{ "pagina_def": "p1", "repeticao": "unica" }]
+}
