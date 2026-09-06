@@ -98,8 +98,9 @@ especificação entra o quê.
 |---|---|---|---|
 | **0.1** | Verter o critério de camadas para decisão arquitetural | `ADR-018-criterio-de-colocacao-por-camada.md` + cláusula em `ARCHITECTURE.md` | P |
 | **0.2** | Fixar a fronteira de estilo: papel semântico no NCRTF, apresentação no NDT; estilos nomeados e planos, um nível de herança. **Decide O1, O2 e O3** da cláusula 2.2 | `ADR-019-fronteira-de-estilo.md` | M |
-| **0.3** | Confirmar o vocabulário ODF cláusula a cláusula contra ODF 1.3 Parte 3 / ISO 26300 — em especial `text:reference-format`, não confirmado | nota de verificação em `ODF-ALIGNMENT-STUDY.md` §10.5 | P |
-| **0.4** | Registar a relação com o ODF em propriedade intelectual e referências normativas | `IPR-DECLARATIONS.md`, `NORMATIVE-REFERENCES.md` | P |
+| **0.3** | Confirmar o vocabulário ODF cláusula a cláusula contra ODF 1.3 Parte 3 / ISO 26300 — em especial `text:reference-format`, não confirmado. Confirmar também, cláusula a cláusula, o vocabulário Akoma Ntoso/LegalDocML citado na adenda de 2026-09-06 (`ODF-ALIGNMENT-STUDY.md` §1, §5 N8/N9) — fonte para as divisões hierárquicas do articulado (N9), ainda sem fase atribuída | nota de verificação em `ODF-ALIGNMENT-STUDY.md` §10.5/§10.7 | P |
+| **0.4** | Registar a relação com o ODF, e com Akoma Ntoso/LegalDocML e LexML, em propriedade intelectual e referências normativas | `IPR-DECLARATIONS.md`, `NORMATIVE-REFERENCES.md` | P |
+| **0.5** *(adenda 2026-09-06)* | Decidir se N9 (divisões hierárquicas do articulado — `heading` limitado a nível 1–3 vs. seis níveis típicos de uma Lei) entra na Fase A a par de N1–N3, ou fica para uma fase própria | decisão registada em `ODF-ALIGNMENT-STUDY.md` §9 | P |
 
 **0.2 condiciona o desenho de toda a Fase A**: mesmo que os estilos nomeados só
 cheguem na Fase C, a Fase A não deve introduzir mecanismos que os impeçam.

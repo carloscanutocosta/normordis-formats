@@ -32,6 +32,26 @@ carrega estado de edição, estado da aplicação e mecanismos de autoria que
 colidem frontalmente com a imutabilidade do NDF. A cláusula 4 fixa o critério
 de triagem.
 
+**Adenda (2026-09-06) — limite do ODF como única referência para o
+articulado.** O ODF é a referência certa para notas, formatação e estilo
+(N1, N4–N6) porque resolve um problema genérico de documento de escritório.
+Mas "Lei com articulado" não é um problema genérico — é o problema
+específico que a família **Akoma Ntoso / LegalDocML** (norma técnica da
+OASIS LegalDocML TC, com uma revisão — AKN 3.1 — em revisão pública desde
+julho de 2026) já resolve com vocabulário dedicado: `<part>`, `<title>`,
+`<chapter>`, `<section>`, `<article>`, `<paragraph>`, `<point>` como nós
+tipados, cada um com `num` e `heading` decompostos e um identificador de
+elemento (`eId`) estável e citável. O **LexML Brasil** é uma adaptação da
+mesma família à técnica legislativa lusófona (caput do artigo, Esquema
+Rígido/Flexível), e é a referência mais próxima na língua. Isto é
+particularmente relevante para o item **N8** abaixo — "marcar que este
+parágrafo é o Artigo 5.º, n.º 2" é exatamente o que o `eId` do Akoma Ntoso já
+resolve — e para uma lacuna que este estudo, focado no ODF, não tinha
+identificado como tal: ver **N9** (§5). Não se propõe adotar Akoma Ntoso
+inteiro — seria trocar o vocabulário pequeno e auditável que a cláusula 7.2
+defende por um vocabulário para todo o universo parlamentar mundial. Propõe-se
+consultá-lo, a par do ODF, apenas para o desenho de N9.
+
 ## 2. Mapeamento de camadas
 
 O ODF separa em ficheiros o que o NORMORDIS separa em formatos. A
@@ -108,6 +128,7 @@ inline. A verificação T3 (roadmap NDT) está registada em `specs/ndt/ROADMAP.m
 | **N1** | Notas de rodapé e de fim | `text:note` com `text:note-class` (`footnote`/`endnote`), `text:note-citation`, `text:note-body` | Exige articulação com o NDT — ver A2 |
 | **N2** | Referências cruzadas internas | `text:reference-mark`, `text:reference-mark-start`/`-end`, `text:reference-ref` | Sem isto, uma remissão é texto morto e o NDF não é mais processável que um PDF |
 | **N3** | Listas com numeração por nível | `text:list-level-style-number` (`style:num-format`, `text:start-value`, `text:display-levels`) | O *estilo* de numeração pertence ao NDT — ver A1 |
+| **N9** *(adenda 2026-09-06)* | Divisões hierárquicas do articulado (Parte/Título/Capítulo/Secção/Subsecção/Artigo) além do `heading` genérico | Sem equivalente direto no ODF — o vocabulário certo é o de **Akoma Ntoso/LegalDocML** (`<part>`, `<title>`, `<chapter>`, `<section>`, `<article>`, cada um com `num`+`heading` decompostos), não o ODF | `heading` (§4.2 NCRTF) está limitado a `level: 1–3`. Uma Lei portuguesa pode ter seis níveis de divisão antes do próprio artigo (Parte→Título→Capítulo→Secção→Subsecção→Artigo). Resolver N1–N3 (Fase A) não resolve N9 — "um diploma legal não cabe no formato" continua verdadeiro sem isto. Relaciona-se com N8: um `heading` de nível genérico não distingue "isto é um Capítulo" de "isto é um Artigo", o que N8 precisaria para o `eId` ter sentido |
 
 ### Prioridade 2 — qualidade editorial
 
@@ -122,7 +143,7 @@ inline. A verificação T3 (roadmap NDT) está registada em `specs/ndt/ROADMAP.m
 | Ref | Questão | Vocabulário ODF | Porque não é imediata |
 |---|---|---|---|
 | **N7** | Idioma por fragmento | `fo:language`, `fo:country` em `style:text-properties` | Resolveria a lacuna **L14** do NDF (documentos multilingues) no sítio certo: o idioma de um trecho é propriedade do texto, não do documento. Decisão conjunta NDF+NCRTF |
-| **N8** | Metadados semânticos no conteúdo | ODF 1.2+ *In Content Metadata (RDFa)*, `text:meta`, `xhtml:about`/`xhtml:property` | Permitiria marcar "este parágrafo é o Artigo 5.º, n.º 2" e tornar o articulado processável por máquina. **Mas** pode pertencer ao `documento` do NDF, não ao NCRTF — é uma decisão de fronteira, não uma adição. Relaciona-se com o vocabulário de papéis de 7.1: o papel diz o que um bloco **é**; o metadado semântico dá-lhe **identidade** referenciável |
+| **N8** | Metadados semânticos no conteúdo | ODF 1.2+ *In Content Metadata (RDFa)*, `text:meta`, `xhtml:about`/`xhtml:property`; **ou**, mais diretamente, o `eId` de Akoma Ntoso/LegalDocML (ver adenda §1 e N9) | Permitiria marcar "este parágrafo é o Artigo 5.º, n.º 2" e tornar o articulado processável por máquina. **Mas** pode pertencer ao `documento` do NDF, não ao NCRTF — é uma decisão de fronteira, não uma adição. Relaciona-se com o vocabulário de papéis de 7.1: o papel diz o que um bloco **é**; o metadado semântico dá-lhe **identidade** referenciável. O Akoma Ntoso já resolveu este problema exato para texto legislativo — antes de desenhar de raiz, consultá-lo evita reinventar |
 
 ## 6. Avaliação do NDT
 
@@ -294,6 +315,11 @@ N6. Fecha o ponto 4.
 T4+A3 (estilos nomeados), T6 (colunas — exige reabrir a exclusão do roadmap),
 N7+A4 (idioma), N8 (metadados semânticos), T8.
 
+**N9** *(adenda 2026-09-06)* ainda não está alocado a nenhuma fase — foi
+identificado depois deste plano ter sido fechado. Candidato natural à Fase A,
+por ser bloqueador tão direto do cenário de referência quanto N1–N3; decisão
+formal fica para o Bloco 0 do `PLANO-NDT-NCRTF.md`.
+
 **Precedência:** A1, A2 e A4 são pré-requisitos de redação da Fase A. A3 é
 pré-requisito da Fase C e condiciona T4.
 
@@ -327,13 +353,26 @@ pré-requisito da Fase C e condiciona T4.
 6. **Propriedade intelectual.** Inspirar-se no vocabulário conceptual do ODF não
    levanta problema; reproduzir texto normativo levanta. A relação com o ODF
    deve ficar registada em `docs/normalization/IPR-DECLARATIONS.md` e nas
-   referências normativas antes da publicação.
+   referências normativas antes da publicação. **A mesma cautela aplica-se a
+   Akoma Ntoso/LegalDocML e LexML** (adenda 2026-09-06) — inspirar-se no
+   modelo de divisões e no `eId` não levanta problema; a IPR-DECLARATIONS.md
+   deve cobrir também esta fonte antes de qualquer redação normativa que a
+   invoque.
+7. **Verificação normativa pendente (Akoma Ntoso/LexML).** Os elementos
+   citados na adenda de 2026-09-06 (`<part>`, `<title>`, `<chapter>`,
+   `<section>`, `<article>`, `<paragraph>`, `<point>`, `eId`) foram
+   confirmados apenas por pesquisa geral, não cláusula a cláusula contra o
+   texto da norma OASIS — mesmo nível de confirmação pendente que o ponto 5
+   já regista para o ODF. Fazer antes de qualquer redação normativa que os
+   invoque.
 
 ## 11. Fontes consultadas
 
 - [OASIS ODF 1.3 — Parte 3: OpenDocument Schema](https://docs.oasis-open.org/office/OpenDocument/v1.3/OpenDocument-v1.3-part3-schema.html)
 - [OASIS ODF 1.3 — Parte 2: Packages](https://docs.oasis-open.org/office/OpenDocument/v1.3/OpenDocument-v1.3-part2-packages.html)
 - [OASIS ODF 1.2 — Parte 1 (metadados e RDFa)](https://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2-part1.pdf)
+- *(adenda 2026-09-06)* [OASIS LegalDocML TC — Akoma Ntoso](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=legaldocml) — norma dedicada a texto parlamentar, legislativo e judicial; AKN 3.1 em revisão pública desde julho de 2026
+- *(adenda 2026-09-06)* [LexML Brasil — Parte 3: XML Schema](https://projeto.lexml.gov.br/documentacao/Parte-3-XML-Schema.pdf) — adaptação do Akoma Ntoso e do Norme in Rete à técnica legislativa lusófona
 - [Library of Congress — OpenDocument Format (ODF) Family, OASIS e ISO/IEC 26300](https://www.loc.gov/preservation/digital/formats/fdd/fdd000247.shtml)
 - [ODF Toolkit — `TextListLevelStyleNumberElement`](https://odftoolkit.org/api/odfdom/org/odftoolkit/odfdom/dom/element/text/TextListLevelStyleNumberElement.html)
 - [ODF Toolkit — `StyleParagraphPropertiesElement`](https://odftoolkit.org/api/odfdom/org/odftoolkit/odfdom/dom/element/style/StyleParagraphPropertiesElement.html)
