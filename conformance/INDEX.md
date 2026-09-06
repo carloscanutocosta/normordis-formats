@@ -102,11 +102,13 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## NDT
 
-### `valid/` — devem ser aceites (6)
+### `valid/` — devem ser aceites (8)
 
 | Ficheiro | Descrição |
 |---|---|
+| `ndt/valid/bloco-lista.json` | BlocoLista (absoluto) e lista em fluxo.elementos, com array de escalares — ROADMAP T6, 2026-09-06. Verifica que 'lista' aceita formato/estilo/marcador/espacamen… |
 | `ndt/valid/blocos-tabela.json` | BlocoTabela com colunas de múltiplos formatos. Verifica BlocoTabela, ColunaDef, estilo_cabecalho e todos os FormatoDisplay usados em colunas. |
+| `ndt/valid/campo-rotacionado.json` | 'rotacao' em Campo (campos[] absoluto) e em MobiliaCampoNdf. Verifica que ambos aceitam o campo opcional (ROADMAP T5, 2026-09-06) com a mesma convenção de grafi… |
 | `ndt/valid/formato-data-hora.json` | Formato de display 'data_hora' em campo posicionado, elemento de fluxo e coluna de tabela. Verifica que o vocabulário de §4.3 o aceita nos três contextos; a reg… |
 | `ndt/valid/minimal.json` | NDT mínimo válido — apenas campos obrigatórios: ndt_version, schema_id, versao_ndt, paginas_def e sequencia. Verifica que o schema aceita um template sem grafic… |
 | `ndt/valid/recurso-embebido.json` | Recurso SVG embebido em base64 (modo: embebido). Verifica RecursoEmbebido e referencia_recurso em GraficoImagem. |
@@ -154,4 +156,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 100 casos.**
+**Total: 102 casos.**
