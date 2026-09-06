@@ -2,6 +2,43 @@
 
 ## Não publicado
 
+### `tools/validate.py`: três correções da revisão automática do PR #8 (2026-09-06)
+
+Um bot de revisão (`chatgpt-codex-connector`) apanhou três problemas reais na
+ronda anterior deste changelog (migração `corpo`/`texto` para NCRTF e a
+verificação de coerência `sobre[]`/`relacoes[]` que a acompanhou):
+
+- **Manifestos desatualizados.** Ao atualizar `specs/ndt/schemas/ndt.schema.json`
+  (T5, T6 do ROADMAP NDT), as cópias embutidas em `specs/ndf/examples/*/schemas/`
+  ficaram sincronizadas, mas os `manifest.json` dos pacotes continuavam a
+  declarar o hash antigo — `python3 tools/validate.py --package ...` (o que
+  `.github/workflows/validate.yml` corre) falhava com "hash incorrecto".
+  Corrigidos os 5 manifestos afetados; `specs/ndf/examples/ndfxfer-example/unidades/`
+  regenerado via `tools/build_ndfxfer_example.py` em vez de editado à mão, por
+  ser conteúdo derivado.
+- **Resolução de tipo ignora a versão pedida.** `_resolve_tipo_schema` resolve
+  um tipo do registo só pelo nome — `specs/registry/schemas/<tipo>.schema.json`
+  é um único ficheiro, sem versões concorrentes. Depois de `despacho`/`parecer`/
+  `informacao-tecnica` subirem para v2.0.0 (ver entrada anterior), um documento
+  hipotético que ainda declarasse `@1.0.0` seria validado em silêncio contra o
+  schema v2.0.0 — aceitando conteúdo v2 mal rotulado como v1, ou rejeitando
+  conteúdo v1 legítimo sem dizer porquê. `check_ndf_semantic` passa a comparar
+  a versão pedida em `tipo_documento_ref` com a versão declarada no `$id` do
+  schema resolvido do registo, e a rejeitar com erro claro quando divergem.
+  Não resolve o problema de fundo — o registo não suporta várias versões em
+  simultâneo — só evita validar em silêncio contra o schema errado; resolução
+  completa por versão fica para decisão de arquitetura própria.
+- **Divergência de hash perdida quando há entradas repetidas.** A verificação
+  de coerência `sobre[]`/`relacoes[]` acrescentada na ronda anterior guardava
+  `{ndf_id: payload_hash}` num dicionário simples — se `relacoes[]` tivesse
+  duas entradas para o mesmo `ndf_id` com hashes diferentes, só a última
+  sobrevivia na comparação, escondendo exactamente o tipo de divergência que a
+  verificação existe para apanhar. Passa a colecionar todos os hashes por
+  `ndf_id` (um `set`) e a assinalar sempre que há mais do que um.
+
+Sem alteração de schema em nenhum dos três. Suite completa, pacotes e
+conjunto de transferência: verdes.
+
 ### `tools/validate.py`: coerência de `payload_hash` entre `sobre[]` e `relacoes[]` (2026-09-06)
 
 - **acrescentado: `check_ndf_advisories` compara também `payload_hash`** para

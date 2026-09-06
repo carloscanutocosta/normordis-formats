@@ -209,6 +209,26 @@ def fmt_schema_error(e) -> str:
     return e.message + (f" (campo: {field})" if field else "")
 
 
+_VERSAO_SEGMENTO_RE = re.compile(r"^\d+(?:\.\d+)*$")
+
+
+def _versao_do_schema_id(schema: dict) -> str | None:
+    """Extrai a versão declarada no `$id` de um schema do registo.
+
+    Duas convenções coexistem em specs/registry/schemas/:
+    '.../<id>/<versao>/schema.json' (maioria) e '.../<versao>/<id>.schema.json'
+    (aceitacao-custodia). Em ambas, a versão é o único segmento do caminho que
+    é puramente numérico com pontos — o nome do tipo nunca o é.
+    """
+    id_ = schema.get("$id") if isinstance(schema, dict) else None
+    if not isinstance(id_, str):
+        return None
+    for seg in id_.split("/"):
+        if _VERSAO_SEGMENTO_RE.fullmatch(seg):
+            return seg
+    return None
+
+
 def _resolve_tipo_schema(tipo_id: str, pkg_root: Path | None):
     """Resolve o schema do tipo documental, preferindo o que viaja no pacote.
 
@@ -424,6 +444,26 @@ def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
     tipo_ref = meta.get("tipo_documento_ref", "")
     tipo_id = tipo_ref.rsplit("@", 1)[0] if "@" in tipo_ref else ""
     tipo_schema, origem = _resolve_tipo_schema(tipo_id, pkg_root) if tipo_id else (None, None)
+    if tipo_schema is not None and origem == "registo":
+        # O registo guarda um único ficheiro por tipo — resolve por tipo_id,
+        # ignorando a versão pedida (§2.9.2 não impõe correspondência exacta
+        # de versão na resolução). Sem esta verificação, um documento antigo
+        # (ex.: 'despacho@1.0.0') seria validado em silêncio contra o schema
+        # actual ('despacho@2.0.0'), rejeitando conteúdo v1 legítimo ou
+        # aceitando conteúdo v2 mal rotulado como v1. Achado da revisão do
+        # PR #8 (2026-09-06); resolução completa por versão fica para decisão
+        # de arquitetura própria — isto é o mínimo que evita validar em
+        # silêncio contra o schema errado.
+        versao_pedida = tipo_ref.rsplit("@", 1)[1] if "@" in tipo_ref else None
+        versao_schema = _versao_do_schema_id(tipo_schema)
+        if versao_pedida and versao_schema and versao_pedida != versao_schema:
+            errors.append(
+                f"metadados.tipo_documento_ref '{tipo_ref}' pede a versão "
+                f"'{versao_pedida}', mas specs/registry/schemas/{tipo_id}.schema.json "
+                f"declara '{versao_schema}' — o registo mantém um único schema "
+                "por tipo; um documento de versão diferente não pode ser "
+                "validado contra ele (§2.9.2)"
+            )
     if tipo_schema is not None:
         for e in Draft202012Validator(tipo_schema, format_checker=FormatChecker()).iter_errors(documento):
             field = "/".join(str(p) for p in e.absolute_path)
@@ -532,21 +572,27 @@ def check_ndf_advisories(doc: dict, pkg_root: Path | None = None) -> list[str]:
         # para o mesmo conteúdo apreciado. Comparação separada por essa razão:
         # um exemplo real do próprio repositório tinha ids coincidentes com
         # hashes divergentes sem que nada o assinalasse (2026-09-06).
-        hash_sobre = {
-            item.get("ndf_id"): item.get("payload_hash")
-            for item in sobre if isinstance(item, dict) and item.get("ndf_id")
-        }
-        hash_relacoes = {
-            rel.get("alvo", {}).get("ndf_id"): rel.get("alvo", {}).get("payload_hash")
-            for rel in relacoes if isinstance(rel, dict) and rel.get("alvo", {}).get("ndf_id")
-        }
-        for ndf_id in sorted(set(hash_sobre) & set(hash_relacoes)):
-            hs, hr = hash_sobre[ndf_id], hash_relacoes[ndf_id]
-            if hs and hr and hs != hr:
+        # Colecciona TODOS os hashes por ndf_id (não só o último) — o schema
+        # não proíbe duas entradas de sobre[] ou duas relações para o mesmo
+        # ndf_id, e um dicionário simples {ndf_id: hash} perderia uma
+        # divergência anterior sempre que a última entrada coincidisse com o
+        # outro campo (achado da revisão do PR #8, 2026-09-06).
+        hash_sobre: dict[str, set[str]] = {}
+        for item in sobre:
+            if isinstance(item, dict) and item.get("ndf_id") and item.get("payload_hash"):
+                hash_sobre.setdefault(item["ndf_id"], set()).add(item["payload_hash"])
+        hash_relacoes: dict[str, set[str]] = {}
+        for rel in relacoes:
+            alvo = rel.get("alvo") if isinstance(rel, dict) else None
+            if isinstance(alvo, dict) and alvo.get("ndf_id") and alvo.get("payload_hash"):
+                hash_relacoes.setdefault(alvo["ndf_id"], set()).add(alvo["payload_hash"])
+        for ndf_id in sorted(set(hash_sobre) | set(hash_relacoes)):
+            hashes = hash_sobre.get(ndf_id, set()) | hash_relacoes.get(ndf_id, set())
+            if len(hashes) > 1:
                 advisories.append(
-                    f"documento.sobre[] e relacoes[] referenciam o mesmo ndf_id "
-                    f"'{ndf_id}' com payload_hash diferente ({hs} vs {hr}) — "
-                    "RECOMENDA-SE coerência (§2.11.4)"
+                    f"documento.sobre[] e/ou relacoes[] referenciam o ndf_id "
+                    f"'{ndf_id}' com payload_hash divergentes "
+                    f"({', '.join(sorted(hashes))}) — RECOMENDA-SE coerência (§2.11.4)"
                 )
 
     # §2.14.4 — a fronteira entre proveniencia_sistema (determinístico) e
