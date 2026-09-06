@@ -1,0 +1,196 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "informacao-tecnica",
+  "versao_ndt": "2.0.0",
+  "titulo": "Informação Técnica",
+  "estilos": {
+    "fonte_padrao": { "familia": "Times", "tamanho": 11 },
+    "cor_texto": "#1A1A1A",
+    "cor_primaria": "#003366",
+    "espacamento_entre_paragrafos_mm": 4,
+    "identacao_lista_mm": 6
+  },
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": { "topo": 25, "fundo": 20, "esq": 20, "dir": 20 }
+  },
+  "paginas_def": [
+    {
+      "id": "informacao_pag1",
+      "graficos": [
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "INFORMAÇÃO",
+          "posicao": { "x": 0, "y": 0 },
+          "fonte": { "familia": "Helvetica", "tamanho": 14, "peso": "bold", "cor": "#003366" }
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 20 },
+          "para": { "x": 170, "y": 20 },
+          "espessura": 0.4,
+          "cor": "#003366",
+          "estilo": "solido"
+        }
+      ],
+      "campos": [
+        {
+          "referencia": "autor.unidade_organica",
+          "posicao": { "x": 0, "y": 9 },
+          "largura": 100,
+          "altura": 6,
+          "fonte": { "familia": "Helvetica", "tamanho": 9, "estilo": "italico" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "referencia": "numero",
+          "posicao": { "x": 110, "y": 2 },
+          "largura": 60,
+          "altura": 6,
+          "fonte": { "familia": "Helvetica", "tamanho": 9, "peso": "bold" },
+          "alinhamento": "direita"
+        },
+        {
+          "referencia": "data",
+          "posicao": { "x": 110, "y": 9 },
+          "largura": 60,
+          "altura": 6,
+          "formato": "data",
+          "fonte": { "familia": "Helvetica", "tamanho": 9 },
+          "alinhamento": "direita"
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 28,
+        "elementos": [
+          {
+            "tipo": "linha_lateral",
+            "elementos": [
+              {
+                "largura": 30,
+                "conteudo": [
+                  { "tipo": "texto_fixo", "conteudo": "Exmo(a). Senhor(a):", "fonte": { "tamanho": 10, "peso": "bold" } }
+                ]
+              },
+              {
+                "largura": 140,
+                "conteudo": [
+                  { "tipo": "campo", "referencia": "dirigido_a", "fonte": { "tamanho": 10 } }
+                ]
+              }
+            ]
+          },
+          { "tipo": "espaco", "altura": 4 },
+          {
+            "tipo": "linha_lateral",
+            "elementos": [
+              {
+                "largura": 30,
+                "conteudo": [
+                  { "tipo": "texto_fixo", "conteudo": "Assunto:", "fonte": { "tamanho": 10, "peso": "bold" } }
+                ]
+              },
+              {
+                "largura": 140,
+                "conteudo": [
+                  { "tipo": "campo", "referencia": "assunto", "fonte": { "tamanho": 10, "peso": "bold" } }
+                ]
+              }
+            ]
+          },
+          { "tipo": "espaco", "altura": 8 },
+          {
+            "tipo": "corpo",
+            "referencia": "corpo"
+          },
+          { "tipo": "espaco", "altura": 6 },
+          { "tipo": "texto_fixo", "conteudo": "Conclusão:", "fonte": { "tamanho": 10, "peso": "bold" } },
+          { "tipo": "campo", "referencia": "conclusao", "fonte": { "tamanho": 10 } },
+          { "tipo": "espaco", "altura": 6 },
+          { "tipo": "separador", "espessura": 0.2, "cor": "#999999" },
+          { "tipo": "texto_fixo", "conteudo": "Proposta de despacho:", "fonte": { "tamanho": 10, "peso": "bold", "estilo": "italico" } },
+          { "tipo": "campo", "referencia": "proposta_despacho", "fonte": { "tamanho": 10, "estilo": "italico" } },
+          { "tipo": "espaco", "altura": 16 },
+          {
+            "tipo": "assinatura",
+            "id": "sig_autor",
+            "rotulo": "O Técnico",
+            "largura": 80,
+            "altura": 22,
+            "modo": "hibrido"
+          },
+          { "tipo": "campo", "referencia": "autor.nome", "fonte": { "familia": "Times", "tamanho": 10, "peso": "bold" } },
+          { "tipo": "campo", "referencia": "autor.cargo", "fonte": { "familia": "Times", "tamanho": 9 } },
+          { "tipo": "texto_fixo", "conteudo": "Por delegação de competências:", "fonte": { "tamanho": 8, "cor": "#666666" } },
+          { "tipo": "campo", "referencia": "autor.delegacao_ref", "fonte": { "tamanho": 8, "estilo": "italico", "cor": "#666666" } }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": { "x": 145, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        },
+        {
+          "tipo": "campo_ndf",
+          "referencia": "numero",
+          "posicao": { "x": 0, "y": 281 },
+          "largura": 100,
+          "altura": 5,
+          "alinhamento": "esquerda",
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        }
+      ]
+    },
+    {
+      "id": "informacao_pag_cont",
+      "graficos": [
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 8 },
+          "para": { "x": 170, "y": 8 },
+          "espessura": 0.3,
+          "cor": "#003366",
+          "estilo": "solido"
+        }
+      ],
+      "campos": [],
+      "fluxo": {
+        "y_inicio": 14,
+        "elementos": [
+          {
+            "tipo": "corpo",
+            "referencia": "corpo"
+          }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": { "x": 145, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        },
+        {
+          "tipo": "campo_ndf",
+          "referencia": "numero",
+          "posicao": { "x": 0, "y": 281 },
+          "largura": 100,
+          "altura": 5,
+          "alinhamento": "esquerda",
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    { "pagina_def": "informacao_pag1", "repeticao": "unica" },
+    {
+      "pagina_def": "informacao_pag_cont",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "corpo"
+    }
+  ]
+}

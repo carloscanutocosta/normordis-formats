@@ -365,6 +365,7 @@
         "posicao": { "$ref": "#/$defs/Posicao" },
         "largura": { "type": "number" },
         "altura": { "type": "number" },
+        "rotacao": { "type": "number" },
         "formato": { "$ref": "#/$defs/FormatoDisplay" },
         "casas_decimais": { "type": "integer", "minimum": 0 },
         "fonte": { "$ref": "#/$defs/Fonte" },
@@ -684,6 +685,7 @@
         "posicao": { "$ref": "#/$defs/Posicao" },
         "largura": { "type": "number" },
         "altura": { "type": "number" },
+        "rotacao": { "type": "number" },
         "alinhamento": { "$ref": "#/$defs/AlinhamentoTexto" },
         "fonte": { "$ref": "#/$defs/Fonte" }
       }

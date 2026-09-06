@@ -1,0 +1,196 @@
+{
+  "ndt_version": "2.0.0",
+  "schema_id": "despacho",
+  "versao_ndt": "2.0.0",
+  "titulo": "Despacho",
+  "estilos": {
+    "fonte_padrao": { "familia": "Times", "tamanho": 11 },
+    "cor_texto": "#1A1A1A",
+    "cor_primaria": "#003366",
+    "espacamento_entre_paragrafos_mm": 4,
+    "identacao_lista_mm": 6
+  },
+  "layout": {
+    "formato": "A4",
+    "orientacao": "portrait",
+    "margens": { "topo": 25, "fundo": 20, "esq": 20, "dir": 20 }
+  },
+  "paginas_def": [
+    {
+      "id": "despacho_pag1",
+      "graficos": [
+        {
+          "tipo": "texto_fixo",
+          "conteudo": "DESPACHO",
+          "posicao": { "x": 0, "y": 0 },
+          "fonte": { "familia": "Helvetica", "tamanho": 14, "peso": "bold", "cor": "#003366" }
+        },
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 20 },
+          "para": { "x": 170, "y": 20 },
+          "espessura": 0.4,
+          "cor": "#003366",
+          "estilo": "solido"
+        }
+      ],
+      "campos": [
+        {
+          "referencia": "tipo_despacho",
+          "posicao": { "x": 0, "y": 9 },
+          "largura": 100,
+          "altura": 6,
+          "fonte": { "familia": "Helvetica", "tamanho": 9, "estilo": "italico" },
+          "alinhamento": "esquerda"
+        },
+        {
+          "referencia": "numero",
+          "posicao": { "x": 110, "y": 2 },
+          "largura": 60,
+          "altura": 6,
+          "fonte": { "familia": "Helvetica", "tamanho": 9, "peso": "bold" },
+          "alinhamento": "direita"
+        },
+        {
+          "referencia": "data",
+          "posicao": { "x": 110, "y": 9 },
+          "largura": 60,
+          "altura": 6,
+          "formato": "data",
+          "fonte": { "familia": "Helvetica", "tamanho": 9 },
+          "alinhamento": "direita"
+        }
+      ],
+      "fluxo": {
+        "y_inicio": 28,
+        "elementos": [
+          { "tipo": "texto_fixo", "conteudo": "Sobre:", "fonte": { "tamanho": 10, "peso": "bold" } },
+          { "tipo": "espaco", "altura": 2 },
+          {
+            "tipo": "tabela",
+            "referencia": "sobre",
+            "largura": 170,
+            "altura_linha": 6,
+            "min_linhas_visivel": 1,
+            "repete_cabecalho": true,
+            "estilo_cabecalho": {
+              "fundo": "#EEEEEE",
+              "fonte": { "tamanho": 8, "peso": "bold" }
+            },
+            "colunas": [
+              { "id": "descricao", "cabecalho": "Documento", "largura": 130, "alinhamento": "esquerda", "formato": "texto" },
+              { "id": "ndf_id", "cabecalho": "Identificador", "largura": 40, "alinhamento": "esquerda", "formato": "texto" }
+            ]
+          },
+          { "tipo": "espaco", "altura": 8 },
+          {
+            "tipo": "corpo",
+            "referencia": "texto"
+          },
+          { "tipo": "espaco", "altura": 6 },
+          {
+            "tipo": "linha_lateral",
+            "elementos": [
+              {
+                "largura": 40,
+                "conteudo": [
+                  { "tipo": "texto_fixo", "conteudo": "Prazo de cumprimento:", "fonte": { "tamanho": 9, "peso": "bold" } }
+                ]
+              },
+              {
+                "largura": 60,
+                "conteudo": [
+                  { "tipo": "campo", "referencia": "prazo_cumprimento.data_limite", "formato": "data", "fonte": { "tamanho": 9 } }
+                ]
+              },
+              {
+                "largura": 70,
+                "conteudo": [
+                  { "tipo": "campo", "referencia": "prazo_cumprimento.descricao", "fonte": { "tamanho": 9 } }
+                ]
+              }
+            ]
+          },
+          { "tipo": "espaco", "altura": 16 },
+          {
+            "tipo": "assinatura",
+            "id": "sig_decisor",
+            "rotulo": "O Decisor",
+            "largura": 80,
+            "altura": 22,
+            "modo": "hibrido"
+          },
+          { "tipo": "campo", "referencia": "decisor.nome", "fonte": { "familia": "Times", "tamanho": 10, "peso": "bold" } },
+          { "tipo": "campo", "referencia": "decisor.cargo", "fonte": { "familia": "Times", "tamanho": 9 } },
+          { "tipo": "texto_fixo", "conteudo": "Por delegação de competências:", "fonte": { "tamanho": 8, "cor": "#666666" } },
+          { "tipo": "campo", "referencia": "decisor.delegacao_ref", "fonte": { "tamanho": 8, "estilo": "italico", "cor": "#666666" } }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": { "x": 145, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        },
+        {
+          "tipo": "campo_ndf",
+          "referencia": "numero",
+          "posicao": { "x": 0, "y": 281 },
+          "largura": 100,
+          "altura": 5,
+          "alinhamento": "esquerda",
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        }
+      ]
+    },
+    {
+      "id": "despacho_pag_cont",
+      "graficos": [
+        {
+          "tipo": "linha",
+          "de": { "x": 0, "y": 8 },
+          "para": { "x": 170, "y": 8 },
+          "espessura": 0.3,
+          "cor": "#003366",
+          "estilo": "solido"
+        }
+      ],
+      "campos": [],
+      "fluxo": {
+        "y_inicio": 14,
+        "elementos": [
+          {
+            "tipo": "corpo",
+            "referencia": "texto"
+          }
+        ]
+      },
+      "mobilia": [
+        {
+          "tipo": "numero_pagina",
+          "formato": "Pág. {n}/{total}",
+          "posicao": { "x": 145, "y": 281 },
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        },
+        {
+          "tipo": "campo_ndf",
+          "referencia": "numero",
+          "posicao": { "x": 0, "y": 281 },
+          "largura": 100,
+          "altura": 5,
+          "alinhamento": "esquerda",
+          "fonte": { "familia": "Helvetica", "tamanho": 8, "cor": "#666666" }
+        }
+      ]
+    }
+  ],
+  "sequencia": [
+    { "pagina_def": "despacho_pag1", "repeticao": "unica" },
+    {
+      "pagina_def": "despacho_pag_cont",
+      "repeticao": "conforme_necessario",
+      "fonte_overflow": "texto"
+    }
+  ]
+}

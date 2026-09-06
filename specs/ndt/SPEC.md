@@ -713,6 +713,7 @@ Valores NDF escalares a coordenadas absolutas. Cada entrada em `campos[]` é um 
 | `posicao` | Sim | Coordenadas de origem da caixa (mm). |
 | `largura` | Sim | Largura da caixa (mm). |
 | `altura` | Sim | Altura da caixa (mm). |
+| `rotacao` | Não | Rotação em graus no sentido horário (mesma convenção de `graficos[]`, §5.3). Predefinição: `0`. A caixa (`largura`×`altura`) roda em torno de `posicao`; texto vertical ou invertido resulta de `90`/`270`/`180`. |
 | `formato` | Não | Formato de apresentação (§4.3). Predefinição: `"texto"`. |
 | `casas_decimais` | Não | Para `"monetario"` e `"numero"`. |
 | `fonte` | Não | Ver §5.8. Herda de `estilos.fonte_padrao` se omitido. |
