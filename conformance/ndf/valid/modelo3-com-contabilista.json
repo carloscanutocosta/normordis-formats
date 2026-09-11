@@ -16,6 +16,11 @@
       "papel": "schema_perfil",
       "ref": "pt-dglab",
       "hash_sha256": "sha256:769c5363ac54fc4b20680b1c3dbf0f8a140a7fc9abab0bb1db2c4f0ffb0af6db"
+    },
+    {
+      "papel": "schema_tipo",
+      "ref": "modelo3-irs@2026",
+      "hash_sha256": "sha256:f7057479453ca2b3416f6821dccf994cbafeb9b6db9afc1037701fe0e9c27b8a"
     }
   ],
   "metadados": {

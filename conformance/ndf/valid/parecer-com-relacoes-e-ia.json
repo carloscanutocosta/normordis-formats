@@ -16,6 +16,11 @@
       "papel": "schema_perfil",
       "ref": "pt-dglab",
       "hash_sha256": "sha256:769c5363ac54fc4b20680b1c3dbf0f8a140a7fc9abab0bb1db2c4f0ffb0af6db"
+    },
+    {
+      "papel": "schema_tipo",
+      "ref": "parecer@2.0.0",
+      "hash_sha256": "sha256:96d4514f0c3c402608611a218674ba2b6a5ef98bf15afa96146ac21359e7542b"
     }
   ],
   "metadados": {

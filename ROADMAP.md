@@ -485,7 +485,12 @@ concluídos (D8).
 **Critério de conclusão**: cada garantia pública aponta para um requisito e
 uma evidência; onde falta evidência, isso fica dito junto da afirmação.
 
-### P0.2 — Ligação criptográfica NDF↔NDT (`R16`) — ✅ concluído (2026-09-11)
+### P0.2 — Ligação criptográfica NDF↔NDT (`R16`, `R23`, `R24`) — ✅ concluído (2026-09-11)
+
+Duas rondas. A primeira (commit `3985001`) fechou o ataque ao NDT mas deixou
+duas dependências sem a mesma proteção e uma promessa da SPEC por cumprir —
+achados de revisão adversarial ao próprio commit, verificados de forma
+independente antes de corrigir. A segunda ronda fecha os três.
 
 - [x] Registado em **[ADR-026](docs/architecture/ADR-026-dependencias-interpretacao-autenticadas.md)**:
       campo `dependencias_interpretacao` inline no NDF-core (não manifesto
@@ -493,37 +498,46 @@ uma evidência; onde falta evidência, isso fica dito junto da afirmação.
       separado do inventário físico do `.ndfpkg`. Terceira reabertura
       pontual de D5
 - [x] Bytes brutos (não JCS) do ficheiro materializado — mesma convenção
-      de `manifest.inventario` e `documento.componentes[].sha256`
-- [x] Cadeia de referências fechada por `papel`/`ref`, nunca por caminho:
-      `"ndt"` (sempre), `"schema_tipo"` (extensão qualificada,
-      NDF-PROD-018), `"schema_perfil"` (avaliação, sempre obrigatório em
-      `schemas/`). Recursos do NDT (fontes, imagens) ficam cobertos
-      transitivamente — já vinculados por hash dentro do próprio NDT
-      (`recursos[].hash_sha256`); verificação física desse vínculo
-      registada como `R23`, ainda em aberto
+      de `manifest.inventario` e `documento.componentes[].sha256`.
+      `hash_sha256` apertado para `^sha256:[0-9a-f]{64}$` (aceitava
+      qualquer algoritmo/comprimento na primeira ronda)
+- [x] Cadeia de referências: `"ndt"` (sempre), `"schema_tipo"` (**sempre**,
+      canónico ou extensão qualificada — revisto na segunda ronda; a
+      condição inicial só cobria extensão qualificada e deixava
+      `schemas/oficio.schema.json` substituível, `R24`), `"schema_perfil"`
+      (avaliação, sempre obrigatório em `schemas/`). Resolução por
+      **caminho fixo** (`ndt/<ref>.ndt.json`, `schemas/<tipo ou
+      perfil>.schema.json`) — a promessa de resolução por `ref`/hash da
+      primeira ronda foi retirada, não implementada (decisão registada em
+      ADR-026 §"Correções"). Recursos do NDT (fontes, imagens), vinculados
+      por hash dentro do próprio NDT (`recursos[].hash_sha256`), passam a
+      ter a verificação física que faltava (`R23`) — resolvidos por nome =
+      hash (§8.1), não pelo `id` declarado
 - [x] `specs/ndf/schemas/ndf-core.schema.json` (+ 3 cópias embutidas),
       `specs/ndf/SPEC.md` §1.2/§2.2/§2.6.2/§8.1/§8.3/§9.1–9.3,
       `specs/ndt/SPEC.md` §1.1, `tools/validate.py` (produtor semântico +
-      leitor de pacote, `NDF-PROD-024/025`, `NDF-PKG-010`, `NDF-READ-025`),
-      26 fixtures de `conformance/ndf/` e os 3 pacotes de exemplo base
-      (+ `ndfxfer-example`, derivado)
+      leitor de pacote, `NDF-PROD-024/025`, `NDF-PKG-007/010/011`,
+      `NDF-READ-025/026`), 26 fixtures de `conformance/ndf/`, os 3 pacotes
+      de exemplo base (+ `ndfxfer-example`, derivado) e os dois recursos
+      renomeados para a convenção nome = hash que já deviam seguir
 - [x] Documentos antigos: sem instâncias externas a migrar (nível 1 —
       Draft), não há distinção retroativa a preservar
 - [x] Vetores de teste em `tools/check_package_vectors.py`:
 
   | Caso | Resultado exigido | Estado |
   |---|---|---|
-  | Alterar texto fixo do NDT, recalcular só o inventário físico (o ataque reproduzido na avaliação) | rejeitar | ✅ `PKG-NEG-017` |
-  | Trocar o schema mantendo o identificador | rejeitar | ✅ `PKG-NEG-018` |
+  | Alterar texto fixo do NDT, recalcular só o inventário físico (o ataque original) | rejeitar | ✅ `PKG-NEG-017` |
+  | Trocar o schema do **perfil** mantendo o identificador | rejeitar | ✅ `PKG-NEG-018` |
   | Omitir uma dependência do manifesto | rejeitar | ✅ `PKG-NEG-019` |
-  | Substituir uma fonte ou imagem referenciada | rejeitar | pendente — `R23` |
-  | Reorganizar legitimamente os caminhos do pacote, mesmos componentes | continuar válido | por desenho (resolução por `ref`, não caminho); sem vetor positivo dedicado |
+  | Trocar o schema de um tipo **canónico** (não extensão) mantendo o identificador | rejeitar | ✅ `PKG-NEG-020` |
+  | Substituir uma fonte ou imagem referenciada pelo NDT | rejeitar | ✅ `PKG-NEG-021` |
+  | Reorganizar os caminhos do pacote, mesmos componentes | — | retirado; resolução é por caminho fixo, não é mais uma promessa a testar |
 
-**Critério de conclusão**: cumprido — o ataque reproduzido na avaliação
-(`PKG-NEG-017`) deixa de passar no validador. Verificado:
-`tools/validate.py` 103/103, `check_spec_coherence` PASS,
-`check_package_vectors` 19/19 (16 + 3 novos), `check_profile_patterns` PASS,
-`audit_normative` 107 IDs / 315 declarações.
+**Critério de conclusão**: cumprido, incluindo as duas lacunas e a
+divergência de contrato encontradas na revisão adversarial ao próprio
+commit. Verificado: `tools/validate.py` 103/103, `check_spec_coherence`
+PASS, `check_package_vectors` 21/21, `check_profile_patterns` PASS,
+`audit_normative` 109 IDs / 317 declarações.
 
 ### P0.3 — Validador honesto sobre o que verificou (`R17`, `R18`)
 
