@@ -427,16 +427,23 @@ O passo 1 é caminho crítico até à abertura do debate; os passos 2 e 3 não s
 
 ---
 
-## Fase 1E — Integridade da cadeia de confiança e resposta à avaliação externa (2026-09-11)
+## Fase 1E — Integridade da cadeia de confiança e resposta à revisão adversarial de 2026-09-11
 
-Origem: avaliação técnica e jurídica externa ao commit `a9d72f8`, com achados
-registados em
+Origem: revisão adversarial assistida por IA, com testes locais reproduzidos,
+ao commit `a9d72f8`, com achados registados em
 [`docs/reports/READINESS-ASSESSMENT.md`](docs/reports/READINESS-ASSESSMENT.md)
-§5.6 (`R16`–`R22`). Ao contrário das fases anteriores, esta não nasce de
-auto-revisão do mantenedor — é a primeira resposta estruturada a um
-avaliador independente (ver D8), pelo que o critério de conclusão de cada
-item é mais estrito: tem de sobreviver a nova tentativa de falsificação, não
-apenas passar a suite existente.
+§5.6 (`R16`–`R22`). **Não é revisão externa independente** — não houve
+revisor humano especializado em criptografia, direito ou arquivística a
+validar estes achados; ver a nota de método em READINESS-ASSESSMENT.md §5.6,
+que inclui erros de remissão jurídica da própria primeira ronda de correção
+(CRA e eIDAS), corrigidos só depois de verificação contra o texto legal.
+Ainda assim, é a primeira resposta estruturada a achados que não nasceram de
+auto-revisão do mantenedor (ver D8) — os achados técnicos falsificáveis
+(`R16`–`R19`) foram reproduzidos localmente, pelo que o critério de conclusão
+desses itens é mais estrito: tem de sobreviver a nova tentativa de
+falsificação, não apenas passar a suite existente. Os achados jurídicos
+(`R20`–`R22`) têm as citações corrigidas, mas continuam a precisar de
+revisão profissional externa antes de fechar qualquer gate — ver P2.1.
 
 **Objetivo único**: tornar demonstrável, por terceiros, o percurso
 NDF → assinatura → pacote → validação → representação, sem depender de
@@ -478,34 +485,45 @@ concluídos (D8).
 **Critério de conclusão**: cada garantia pública aponta para um requisito e
 uma evidência; onde falta evidência, isso fica dito junto da afirmação.
 
-### P0.2 — Ligação criptográfica NDF↔NDT (`R16`)
+### P0.2 — Ligação criptográfica NDF↔NDT (`R16`) — ✅ concluído (2026-09-11)
 
-- [ ] Registar decisão em **ADR-026**: manifesto de dependências de
-      interpretação, com digest coberto pela assinatura do NDF-core,
-      separado do inventário físico do `.ndfpkg`
-- [ ] Definir os bytes sujeitos a hash e a canonicalização do manifesto
-      (JCS/RFC 8785, mesmo padrão do NDF-core)
-- [ ] Fechar a cadeia de referências — NDT exato, schemas específicos,
-      recursos (fontes, imagens) necessários à renderização — sem
-      referências circulares ao envelope nem a provas acrescentadas depois
-      da assinatura
-- [ ] Atualizar `ndf-core.schema.json`, produtor, leitor
-      (`tools/validate.py`) e exemplos
-- [ ] Preservar a distinção entre documentos antigos (sem a garantia) e
-      novos (com ela) — sem invalidar retroativamente
-- [ ] Vetores de teste obrigatórios em `conformance/`:
+- [x] Registado em **[ADR-026](docs/architecture/ADR-026-dependencias-interpretacao-autenticadas.md)**:
+      campo `dependencias_interpretacao` inline no NDF-core (não manifesto
+      à parte — precedente de ADR-021), com hash coberto pela assinatura,
+      separado do inventário físico do `.ndfpkg`. Terceira reabertura
+      pontual de D5
+- [x] Bytes brutos (não JCS) do ficheiro materializado — mesma convenção
+      de `manifest.inventario` e `documento.componentes[].sha256`
+- [x] Cadeia de referências fechada por `papel`/`ref`, nunca por caminho:
+      `"ndt"` (sempre), `"schema_tipo"` (extensão qualificada,
+      NDF-PROD-018), `"schema_perfil"` (avaliação, sempre obrigatório em
+      `schemas/`). Recursos do NDT (fontes, imagens) ficam cobertos
+      transitivamente — já vinculados por hash dentro do próprio NDT
+      (`recursos[].hash_sha256`); verificação física desse vínculo
+      registada como `R23`, ainda em aberto
+- [x] `specs/ndf/schemas/ndf-core.schema.json` (+ 3 cópias embutidas),
+      `specs/ndf/SPEC.md` §1.2/§2.2/§2.6.2/§8.1/§8.3/§9.1–9.3,
+      `specs/ndt/SPEC.md` §1.1, `tools/validate.py` (produtor semântico +
+      leitor de pacote, `NDF-PROD-024/025`, `NDF-PKG-010`, `NDF-READ-025`),
+      26 fixtures de `conformance/ndf/` e os 3 pacotes de exemplo base
+      (+ `ndfxfer-example`, derivado)
+- [x] Documentos antigos: sem instâncias externas a migrar (nível 1 —
+      Draft), não há distinção retroativa a preservar
+- [x] Vetores de teste em `tools/check_package_vectors.py`:
 
-  | Caso | Resultado exigido |
-  |---|---|
-  | Alterar texto fixo do NDT, recalcular só o inventário físico (o ataque reproduzido na avaliação) | rejeitar |
-  | Trocar o schema mantendo o identificador | rejeitar |
-  | Substituir uma fonte ou imagem referenciada | rejeitar |
-  | Omitir uma dependência do manifesto | rejeitar |
-  | Reorganizar legitimamente os caminhos do pacote, mesmos componentes | continuar válido |
+  | Caso | Resultado exigido | Estado |
+  |---|---|---|
+  | Alterar texto fixo do NDT, recalcular só o inventário físico (o ataque reproduzido na avaliação) | rejeitar | ✅ `PKG-NEG-017` |
+  | Trocar o schema mantendo o identificador | rejeitar | ✅ `PKG-NEG-018` |
+  | Omitir uma dependência do manifesto | rejeitar | ✅ `PKG-NEG-019` |
+  | Substituir uma fonte ou imagem referenciada | rejeitar | pendente — `R23` |
+  | Reorganizar legitimamente os caminhos do pacote, mesmos componentes | continuar válido | por desenho (resolução por `ref`, não caminho); sem vetor positivo dedicado |
 
-**Critério de conclusão**: o ataque reproduzido na avaliação deixa de passar
-no validador, sem depender de conhecimento informal do repositório
-original.
+**Critério de conclusão**: cumprido — o ataque reproduzido na avaliação
+(`PKG-NEG-017`) deixa de passar no validador. Verificado:
+`tools/validate.py` 103/103, `check_spec_coherence` PASS,
+`check_package_vectors` 19/19 (16 + 3 novos), `check_profile_patterns` PASS,
+`audit_normative` 107 IDs / 315 declarações.
 
 ### P0.3 — Validador honesto sobre o que verificou (`R17`, `R18`)
 
@@ -535,35 +553,48 @@ assinatura verificável nunca aparece como integralmente validado.
 
 ### P0.4 — Correções jurídicas pontuais (`R20`, `R21`, `R22`)
 
-- [ ] `CRA_REPORTING.md`: corrigir a citação para art. 14.º, **n.º 8**;
+- [x] `CRA_REPORTING.md`: corrigir a citação para art. 14.º, **n.º 8**;
       remover a formulação que liga o aviso a utilizadores à sequência
       "após notificação à autoridade" — o n.º 8 liga-o ao conhecimento do
       evento
-- [ ] `CRA_REPORTING.md`: rever a justificação inicial de sujeição ao
-      CRA — "vocação institucional" não é, por si, critério suficiente;
-      separar especificação, software distribuído, atividade comercial e
-      papel de cada interveniente
-- [ ] Secção RGPD do NDF (`specs/ndf/SPEC.md`): substituir "resolvido" por
-      formulação que distinga mecanismos suportados pelo formato de
-      decisões que cabem ao responsável pelo tratamento — sem tentar
-      resolver a tensão dentro do NDF-core
-- [ ] Tabela de `nivel_assinatura` (`specs/ndf/SPEC.md` §2.10.1):
-      acrescentar nota normativa de que `qualificada` exige também
-      dispositivo qualificado de criação (eIDAS art. 26.º/32.º), e que a
-      validação efetiva desse requisito é apurada pelo verificador, não
-      pela declaração JSON
+- [x] `CRA_REPORTING.md`: rever a justificação inicial de sujeição ao
+      CRA. **Duas rondas**: a primeira substituiu "vocação institucional"
+      por uma citação errada (art. 2.º, n.º 4 — equipamento marítimo,
+      Diretiva 2014/90/UE); corrigida para se apoiar no art. 2.º n.º 1 +
+      art. 3.º ponto 22 ("disponibilização no mercado") + considerandos
+      15/18/19, sem fixar um número de exceção isolado
+- [x] Secção RGPD do NDF (`specs/ndf/SPEC.md` §1.4): substituído
+      "resolvido" por "enquadrado", distinguindo mecanismos suportados
+      pelo formato de decisões que cabem ao responsável pelo tratamento —
+      sem tentar resolver a tensão dentro do NDF-core. `LACUNAS.md` L13
+      continua aberto, sem data
+- [x] Tabela de `nivel_assinatura` (`specs/ndf/SPEC.md` §2.10.1):
+      acrescentada nota normativa de que `qualificada` exige também
+      dispositivo qualificado de criação. **Duas rondas**: a primeira
+      citou eIDAS art. 26.º (assinatura avançada, não o dispositivo);
+      corrigida para Art.º 3.º ponto 12 (definição), Art.º 29.º + Anexo
+      II (requisitos do dispositivo) e Art.º 32.º, n.º 1, alínea f)
+      (confirmação na validação)
 
-**Critério de conclusão**: as três referências legais citam corretamente o
-texto aplicável, e nenhuma afirmação de especificação promove uma
-declaração do produtor a conclusão jurídica.
+**Critério de conclusão**: as referências legais citam corretamente o texto
+aplicável, e nenhuma afirmação de especificação promove uma declaração do
+produtor a conclusão jurídica. **Cumprido para as citações**; a adequação
+jurídica de fundo (se esta é a leitura correta para o caso concreto do
+NORMORDIS) continua sem revisão profissional externa — ver P2.1 e a nota de
+método em READINESS-ASSESSMENT.md §5.6.
 
 ### P0.5 — Correções editoriais pontuais (`R19`)
 
-- [ ] Corrigir a regex de `classificacao_ref` em
-      `specs/registry/profiles/pt-dglab.schema.json` ou o exemplo
-      `ts/at/300.20` — a decidir por quem souber se a regra ou o exemplo é
-      que está errado
-- [ ] Corrigir contagem de vetores negativos de pacote em
+- [x] Corrigir a regex de `classificacao_ref`/`instrumento_ref` em
+      `specs/registry/profiles/pt-dglab.schema.json` (e nas 5 cópias
+      embutidas). **Duas rondas**: a primeira (`[^/]+` → `.+`) ficou
+      permissiva demais — aceitava `"ts/"`, `"ts//"`, `"ts/at/"` e
+      espaços; corrigida para regex por segmentos
+      (`^[a-z][a-z0-9-]*/[A-Za-z0-9][A-Za-z0-9.-]*(?:/[A-Za-z0-9][A-Za-z0-9.-]*)*$`).
+      Guardrail novo, `tools/check_profile_patterns.py`, testa
+      `examples[]` contra `pattern` e fixa os casos negativos que já
+      escaparam duas vezes
+- [x] Corrigir contagem de vetores negativos de pacote em
       `docs/normalization/READINESS.md` (8 → 16)
 - [ ] Reexecutar `tools/check_spec_coherence.py` e a suite completa depois
       das correções

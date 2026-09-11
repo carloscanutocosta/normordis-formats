@@ -367,10 +367,11 @@ Estado: `aberto`, `em curso`, `fechado por decisão`, `resolvido`.
 | R16 | O `ndt_version_ref` assinado identifica o NDT por **nome e versão**, não pelos seus bytes — o hash do NDT só existe no manifesto do `.ndfpkg`, fora dos bytes cobertos pela assinatura do NDF-core (SPEC.md §1.1). Reproduzido: substituir texto fixo do NDT mantendo nome/versão e recalculando apenas o hash do manifesto é aceite pelo validador, com os mesmos bytes de NDF-core e envelope. Corrige a leitura de §4.2.1, que tratava "versão exata do template" como equivalente a bytes vinculados | Alto — bloqueador de confiança na reconstituição documental; é a junta que falta para que "o que se assina" e "o que se vê" sejam a mesma coisa | **aberto** — ver 5.6; ADR-026 a escrever |
 | R17 | `rfc8785` é dependência opcional em `tools/validate.py` (import em `try/except`, `rfc8785 = None` em falha); se ausente, a verificação de bytes canónicos JCS é omitida sem qualquer sinal no resultado. Reproduzido simulando a ausência da biblioteca | Alto — uma verificação obrigatória pode desaparecer silenciosamente sem que o `PASS` o assinale | **aberto** — ver 5.6 |
 | R18 | O `PASS` global do validador não distingue estrutura, canonicalização, integridade de componentes, autenticação de dependências, assinatura/confiança e representação; o pacote de exemplo (`envelope.json`) recebe `PASS` com assinaturas, certificados e timestamps *placeholder*, sem sinalização de que não são reais | Médio-alto — um `PASS` sem camadas é fácil de ler como mais do que verifica | **aberto** — ver 5.6 |
-| R19 | `specs/registry/profiles/pt-dglab.schema.json`: o exemplo `ts/at/300.20` de `classificacao_ref` não passa na própria regex (`^[a-z][a-z0-9-]*/[^/]+$` exige uma única barra; o exemplo tem duas). Confirmado por teste do regex | Baixo — defeito editorial isolado, mas junta-se a outros sinais de deriva entre exemplos e schemas (ver 5.5, 5.6) | **aberto** |
-| R20 | `CRA_REPORTING.md` atribui o aviso a utilizadores afetados ao art. 14.º, n.º 4; o correto é o **n.º 8**. O texto também liga esse aviso à notificação prévia à autoridade como condição sequencial; o n.º 8 liga a obrigação ao momento em que o fabricante toma conhecimento do evento, não a essa sequência. Confirmado contra o texto do Regulamento (UE) 2024/2847 | Médio — erro de citação jurídica num documento apresentado como leitura operacional do CRA | **aberto** — ver 5.6 |
-| R21 | A SPEC do NDF apresenta a tensão entre imutabilidade e apagamento (RGPD) como "resolvida" por conservação legal, pseudonimização e eliminação no termo do prazo — formulação excessiva: pseudonimização não retira automaticamente os dados do âmbito do RGPD, e as exceções ao apagamento não autorizam de forma genérica a conservação de qualquer documento. `LACUNAS.md` L13 já mantém em aberto a ambiguidade de `base_legal_conservacao`, o que agrava apresentar a questão global como fechada | Médio — risco de sobre-prometer conformidade RGPD num texto lido por decisores | **aberto** — ver 5.6 |
-| R22 | A tabela de `nivel_assinatura` associa `qualificada` a certificado qualificado + CAdES-B-LTA, sem exigir explicitamente **dispositivo qualificado de criação de assinatura** (eIDAS art. 26.º/32.º). Sem essa distinção, `nivel_assinatura: "qualificada"` pode ser lido como conclusão jurídica em vez de requisito declarado pelo produtor, a confirmar pelo verificador | Médio-alto — confunde declaração do produtor com validação jurídica efetiva; agrava-se com a lacuna do gate CAdES (R2) | **aberto** — ver 5.6 |
+| R19 | `specs/registry/profiles/pt-dglab.schema.json`: o exemplo `ts/at/300.20` de `classificacao_ref` não passava na própria regex. Confirmado por teste do regex | Baixo — defeito editorial isolado, mas junta-se a outros sinais de deriva entre exemplos e schemas (ver 5.5, 5.6) | **resolvido** (2026-09-11) — regex reescrita por segmentos (`^[a-z][a-z0-9-]*/[A-Za-z0-9][A-Za-z0-9.-]*(?:/[A-Za-z0-9][A-Za-z0-9.-]*)*$`); a primeira correção (`.+` no lugar de `[^/]+`) tinha ficado permissiva demais — aceitava `"ts/"`, `"ts//"`, `"ts/at/"` e espaços — identificado por revisão adversarial ao próprio commit. Guardrail novo, `tools/check_profile_patterns.py`, testa examples[] contra pattern e mantém os casos negativos que já escaparam uma vez |
+| R20 | `CRA_REPORTING.md` atribui o aviso a utilizadores afetados ao art. 14.º, n.º 4; o correto é o **n.º 8**. O texto também liga esse aviso à notificação prévia à autoridade como condição sequencial; o n.º 8 liga a obrigação ao momento em que o fabricante toma conhecimento do evento, não a essa sequência. Confirmado contra o texto do Regulamento (UE) 2024/2847 | Médio — erro de citação jurídica num documento apresentado como leitura operacional do CRA | **citações corrigidas** (2026-09-11) — art. 14.º n.º 8 correto; a correção inicial da isenção FOSS introduziu novo erro (art. 2.º, n.º 4, é equipamento marítimo, Diretiva 2014/90/UE, sem relação com software aberto), corrigido para se apoiar no art. 2.º n.º 1 + art. 3.º ponto 22 (definição de "disponibilização no mercado") + considerandos 15/18/19, sem fixar um número de exceção isolado. Adequação jurídica de fundo — se a leitura destes artigos é a correta para o caso concreto do NORMORDIS — continua a exigir revisão profissional externa; ver ponto 5.6 sobre a natureza desta revisão |
+| R21 | A SPEC do NDF apresenta a tensão entre imutabilidade e apagamento (RGPD) como "resolvida" por conservação legal, pseudonimização e eliminação no termo do prazo — formulação excessiva: pseudonimização não retira automaticamente os dados do âmbito do RGPD, e as exceções ao apagamento não autorizam de forma genérica a conservação de qualquer documento. `LACUNAS.md` L13 já mantém em aberto a ambiguidade de `base_legal_conservacao`, o que agrava apresentar a questão global como fechada | Médio — risco de sobre-prometer conformidade RGPD num texto lido por decisores | **formulação corrigida** (§1.4 da SPEC, "enquadrada" em vez de "resolvida") — a ambiguidade de fundo de `base_legal_conservacao` (`LACUNAS.md` L13) e a revisão jurídica RGPD mais ampla continuam pendentes, sem data |
+| R22 | A tabela de `nivel_assinatura` associa `qualificada` a certificado qualificado + CAdES-B-LTA, sem exigir explicitamente **dispositivo qualificado de criação de assinatura**. Sem essa distinção, `nivel_assinatura: "qualificada"` pode ser lido como conclusão jurídica em vez de requisito declarado pelo produtor, a confirmar pelo verificador | Médio-alto — confunde declaração do produtor com validação jurídica efetiva; agrava-se com a lacuna do gate CAdES (R2) | **citações corrigidas** (2026-09-11) — a correção inicial atribuiu o requisito de QSCD ao art. 26.º (que define a assinatura eletrónica **avançada**, não o dispositivo qualificado); corrigido para Art.º 3.º ponto 12 (definição), Art.º 29.º + Anexo II (requisitos do dispositivo) e Art.º 32.º, n.º 1, alínea f) (confirmação na validação). Mesma ressalva de R20 quanto a revisão profissional externa |
+| R23 | `ndt.schema.json` já vincula por hash cada recurso `referenciado_por_hash` (`recursos[].hash_sha256`, nome do ficheiro em `recursos/` igual ao hash — §8.1), mas `tools/validate.py` nunca verificou essa correspondência contra os bytes físicos do ficheiro — nem que o nome do ficheiro coincide com o hash declarado, nem que o conteúdo hasheia para esse valor. Encontrado ao implementar `dependencias_interpretacao` (ADR-026), ao mapear a cadeia de recursos do NDT | Médio-alto — mesma classe de ataque de `R16` (substituir um recurso, o nome do ficheiro por si só não garante nada se não for recalculado e verificado), aplicada a fontes e imagens em vez do NDT inteiro | **aberto** — vetor de teste "substituir uma fonte ou imagem referenciada" (Fase 1E, P0.2) fica pendente até esta verificação existir |
 
 ---
 
@@ -747,15 +748,50 @@ mutação (remover a violação documentada e introduzir outra faz o runner falh
 Melhorou-se também `fmt_schema_error` para as proibições condicionais
 `if/then/else`, que produziam mensagens com o objeto validado inteiro.
 
-### 5.6 R16–R22 — avaliação externa ao commit `a9d72f8` (2026-09-11)
+### 5.6 R16–R22 — revisão adversarial assistida por IA, com testes locais reproduzidos, ao commit `a9d72f8` (2026-09-11)
 
-Primeira revisão registada neste documento que não nasce de auto-revisão do
-mantenedor. Método declarado pelo avaliador: leitura de especificações,
-schemas, documentação de conformidade e código; execução da suite principal e
-de testes adversariais locais; análise jurídica documental (não parecer
-profissional). Reexecutados nesta sessão os pontos falsificáveis mais
-concretos — todos confirmados; ver plano de resolução em
+**Nota sobre a natureza desta revisão (corrigida 2026-09-11).** A primeira
+redação desta secção chamava-lhe "avaliação externa" e falava num
+"avaliador". É impreciso: não houve revisor humano independente, nem
+especializado em criptografia, direito ou arquivística, a assinar estes
+achados. O que houve foi leitura de especificações, schemas, documentação de
+conformidade e código, execução da suite principal e de testes adversariais
+locais reproduzidos nesta sessão, e análise jurídica documental — não
+parecer profissional. Os achados técnicos falsificáveis (`R16`–`R19`)
+resistiram a essa reprodução local. Os achados jurídicos (`R20`–`R22`)
+tiveram, eles próprios, erros de remissão corrigidos numa segunda ronda
+(ver abaixo) — o que é evidência direta, não hipotética, de que este
+método **não substitui** revisão jurídica ou criptográfica profissional
+para fechar gates externos (`docs/normalization/READINESS.md`, gates 2–4).
+Continua a ser um bom método para gerar achados verificáveis e para
+reproduzir localmente o que é reproduzível — não para encerrar uma questão
+jurídica ou criptográfica por si só. Ver plano de resolução em
 [`../../ROADMAP.md`](../../ROADMAP.md), Fase 1E.
+
+**Segunda ronda de correções (2026-09-11).** A primeira passagem sobre
+`R19`, `R20` e `R22` já continha erro próprio, identificado só depois:
+
+- `R19` — a primeira correção da regex (`[^/]+` → `.+`) ficou permissiva
+  demais, aceitando `"ts/"`, `"ts//"`, `"ts/at/"` e valores com espaços.
+  Corrigido para uma regex por segmentos, com guardrail novo
+  (`tools/check_profile_patterns.py`) a testar `examples[]` contra
+  `pattern` e a fixar os casos negativos que já escaparam.
+- `R20` — a primeira correção da isenção FOSS do CRA citou o art. 2.º, n.º
+  4, que é sobre equipamento marítimo (Diretiva 2014/90/UE), sem relação
+  com software aberto. Corrigido para se apoiar no art. 2.º n.º 1 + art.
+  3.º ponto 22 (definição de "disponibilização no mercado" como atividade
+  comercial) + considerandos 15/18/19 — sem fixar um número de exceção
+  isolado, que é precisamente o tipo de atalho que produziu o erro.
+- `R22` — a primeira correção do requisito de dispositivo qualificado
+  citou o art. 26.º, que define a assinatura eletrónica **avançada**, não o
+  dispositivo qualificado. Corrigido para Art.º 3.º ponto 12 (definição),
+  Art.º 29.º + Anexo II (requisitos do dispositivo) e Art.º 32.º, n.º 1,
+  alínea f) (confirmação na validação).
+
+Nenhuma destas correções de segunda ronda resultou de revisão humana
+externa — resultou de o próprio utilizador (mantenedor do projeto) ter
+verificado as remissões contra o texto legal e as ter devolvido para
+correção. Reforça, e não contradiz, a nota acima.
 
 **R16 — ligação NDF↔NDT.** O achado mais grave. Detalhado em 4.2.1 (segunda
 correção). Resolve-se com um manifesto de dependências de interpretação cujo
@@ -798,7 +834,14 @@ certas ao mesmo tempo.
 **R22 — definição de assinatura qualificada.** Falta, na tabela normativa, o
 requisito de dispositivo qualificado de criação de assinatura. Sem ele, a
 tabela lê-se como se certificado qualificado + CAdES-B-LTA bastassem para
-concluir qualificação — não bastam (eIDAS art. 26.º e 32.º).
+concluir qualificação — não bastam (eIDAS Art.º 3.º ponto 12, Art.º 29.º +
+Anexo II, Art.º 32.º n.º 1 alínea f)).
+
+**R23 — recursos do NDT sem verificação física.** `ndt.schema.json` já
+vincula por hash cada recurso `referenciado_por_hash` dentro do próprio NDT,
+mas nada em `tools/validate.py` recalculava o SHA-256 do ficheiro físico em
+`recursos/` contra esse hash — encontrado ao mapear a cadeia de dependências
+para ADR-026. Mesma classe de ataque de R16, aplicada a fontes e imagens.
 
 **Lição registada para o processo.** R19 e a contagem desatualizada em
 `docs/normalization/READINESS.md` (documentava 8 vetores negativos de

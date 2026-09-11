@@ -79,9 +79,16 @@ exata do NDT, os schemas e os recursos necessários à renderização.
 |---|---|---|
 | `metadados.tipo_documento_ref` | `schema_id` | Identifica o tipo de documento |
 | `ndt_version_ref` | `schema_id@versao_ndt` | Identifica a versão concreta do template |
+| `dependencias_interpretacao[papel="ndt"].hash_sha256` | hash dos bytes do ficheiro | Vincula os **bytes exatos** do template, dentro dos bytes assinados |
 
-O hash do ficheiro NDT é registado no inventário do `.ndfpkg`. Não existe um
-campo `ndt_hash` no NDF-core v1.0.0.
+Não existe um campo `ndt_hash` no NDF-core v1.0.0 — o campo chama-se
+`dependencias_interpretacao` (NDF SPEC.md §2.6.2,
+[ADR-026](../../docs/architecture/ADR-026-dependencias-interpretacao-autenticadas.md))
+e, ao contrário do hash em `manifest.inventario`, está dentro dos
+`payload_bytes` e coberto pela assinatura. Alterar o ficheiro NDT sem
+recalcular o NDF-core (e portanto sem invalidar `payload_hash` e a assinatura)
+deixa de ser possível — antes de ADR-026, bastava recalcular o hash no
+`manifest.json`, que não é assinado.
 
 Todos os caminhos de dados declarados pelo NDT são relativos a
 `NDF-core.documento`. Por exemplo, `corpo` resolve para

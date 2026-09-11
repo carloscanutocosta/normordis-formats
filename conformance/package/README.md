@@ -13,8 +13,13 @@ requisito e DEVE ser rejeitada.
 | `PKG-NEG-005` | NDT referenciado ausente | `NDF-PKG-006` |
 | `PKG-NEG-006` | identidade interna do NDT divergente | resolução NDF ↔ NDT |
 | `PKG-NEG-007` | envelope assinado sem timestamps | `NDF-READ-006`, `NDF-READ-008` |
+| `PKG-NEG-008` | assinatura sem `assinatura_id` | §4.4.1 |
+| `PKG-NEG-009` | NDT com referência de campo pendurada | `check_ndt_bindings`, ADR-independente |
 | `PKG-NEG-015` | anexo de documento **nativo** declarado e ausente do pacote | `NDF-PKG-009`, §2.8.1.3 |
 | `PKG-NEG-016` | ficheiro em `anexos/` inventariado e não declarado | `NDF-PKG-009`, sentido inverso |
+| `PKG-NEG-017` | texto fixo do NDT alterado, só o hash físico do manifesto recalculado | `NDF-PKG-010`, `NDF-READ-025` |
+| `PKG-NEG-018` | schema do perfil (`pt-dglab`) trocado mantendo o identificador, só o manifesto recalculado | `NDF-PKG-010`, `NDF-READ-025` |
+| `PKG-NEG-019` | entrada `schema_perfil` omitida de `dependencias_interpretacao` | `NDF-PROD-025` |
 
 Os vetores seguintes derivam do pacote de captura
 `specs/ndf/examples/captura-requerimento` e exercitam §2.8.1.
@@ -38,6 +43,13 @@ vocabulário paralelo.
 `PKG-NEG-011` é o caso que motiva a colocação dos componentes nos bytes
 assinados: sem `NDF-PKG-009`, o pacote passaria — a assinatura cobre o
 NDF-core e o manifesto não é assinado.
+
+`PKG-NEG-017` reproduz, ponto por ponto, o achado de uma avaliação técnica
+externa (2026-09-11, `docs/reports/READINESS-ASSESSMENT.md` R16): antes de
+`dependencias_interpretacao` (ADR-026), o hash do NDT só existia em
+`manifest.json`, fora dos bytes assinados — alterar o template e recalcular
+só o manifesto passava. `PKG-NEG-018` é o mesmo ataque aplicado ao schema do
+perfil de avaliação, a segunda dependência que ADR-026 vincula por hash.
 
 ```bash
 python3 tools/check_package_vectors.py

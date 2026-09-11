@@ -6,6 +6,18 @@
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "despacho-generico@1.0.0",
+  "dependencias_interpretacao": [
+    {
+      "papel": "ndt",
+      "ref": "despacho-generico@1.0.0",
+      "hash_sha256": "sha256:340a069b4684d741d6d999c601e65a98db35420c5ba94c0afb1cfb2bba4d7846"
+    },
+    {
+      "papel": "schema_perfil",
+      "ref": "pt-dglab",
+      "hash_sha256": "sha256:769c5363ac54fc4b20680b1c3dbf0f8a140a7fc9abab0bb1db2c4f0ffb0af6db"
+    }
+  ],
   "metadados": {
     "tipo_documento_ref": "despacho@2.0.0",
     "entidade_produtora": {

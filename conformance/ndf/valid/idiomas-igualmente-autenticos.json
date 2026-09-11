@@ -6,6 +6,23 @@
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "vermerk-generico@1.0.0",
+  "dependencias_interpretacao": [
+    {
+      "papel": "ndt",
+      "ref": "vermerk-generico@1.0.0",
+      "hash_sha256": "sha256:f601fc4d82eb4eb6702387c2fac21d3d7bd551470d05449079c183723a5a7cb5"
+    },
+    {
+      "papel": "schema_tipo",
+      "ref": "ext.example.decision@1.0.0",
+      "hash_sha256": "sha256:d43c94786c46e3b433ff5b94c6a32d261c7cccfe48bb205e5fafa0a555f38344"
+    },
+    {
+      "papel": "schema_perfil",
+      "ref": "generic",
+      "hash_sha256": "sha256:357c89f42361e2597df28326771bfc09afa4a3e551db007ed96faa9bb2b0a0c9"
+    }
+  ],
   "metadados": {
     "tipo_documento_ref": "ext.example.decision@1.0.0",
     "entidade_produtora": {
