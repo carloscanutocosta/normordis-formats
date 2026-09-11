@@ -34,6 +34,9 @@ jobs:
       - name: Package negative vectors
         run: python3 tools/check_package_vectors.py
 
+      - name: Profile schema pattern/examples coherence
+        run: python3 tools/check_profile_patterns.py
+
       - name: Conjunto de transferência — exemplo (must pass)
         run: |
           python3 tools/build_ndfxfer_example.py

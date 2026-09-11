@@ -20,6 +20,8 @@ requisito e DEVE ser rejeitada.
 | `PKG-NEG-017` | texto fixo do NDT alterado, só o hash físico do manifesto recalculado | `NDF-PKG-010`, `NDF-READ-025` |
 | `PKG-NEG-018` | schema do perfil (`pt-dglab`) trocado mantendo o identificador, só o manifesto recalculado | `NDF-PKG-010`, `NDF-READ-025` |
 | `PKG-NEG-019` | entrada `schema_perfil` omitida de `dependencias_interpretacao` | `NDF-PROD-025` |
+| `PKG-NEG-020` | schema de tipo **canónico** (`oficio`, não extensão) trocado mantendo o identificador, só o manifesto recalculado | `NDF-PKG-007`, `NDF-PKG-010`, `NDF-READ-025` |
+| `PKG-NEG-021` | recurso do NDT (`recursos/`) trocado mantendo o nome, só o manifesto recalculado | `NDF-PKG-011`, `NDF-READ-026` |
 
 Os vetores seguintes derivam do pacote de captura
 `specs/ndf/examples/captura-requerimento` e exercitam §2.8.1.
@@ -44,12 +46,18 @@ vocabulário paralelo.
 assinados: sem `NDF-PKG-009`, o pacote passaria — a assinatura cobre o
 NDF-core e o manifesto não é assinado.
 
-`PKG-NEG-017` reproduz, ponto por ponto, o achado de uma avaliação técnica
-externa (2026-09-11, `docs/reports/READINESS-ASSESSMENT.md` R16): antes de
-`dependencias_interpretacao` (ADR-026), o hash do NDT só existia em
+`PKG-NEG-017` reproduz, ponto por ponto, o achado de uma revisão adversarial
+assistida por IA (2026-09-11, `docs/reports/READINESS-ASSESSMENT.md` R16):
+antes de `dependencias_interpretacao` (ADR-026), o hash do NDT só existia em
 `manifest.json`, fora dos bytes assinados — alterar o template e recalcular
 só o manifesto passava. `PKG-NEG-018` é o mesmo ataque aplicado ao schema do
-perfil de avaliação, a segunda dependência que ADR-026 vincula por hash.
+perfil de avaliação.
+
+`PKG-NEG-020` e `PKG-NEG-021` fecham duas lacunas encontradas por revisão
+adversarial à *primeira* implementação de `dependencias_interpretacao`
+(commit `3985001`): schemas de tipo **canónico** (não só extensão
+qualificada, R24) e recursos do NDT referenciados por hash (R23) ficaram,
+nessa primeira ronda, sem a mesma proteção do NDT.
 
 ```bash
 python3 tools/check_package_vectors.py

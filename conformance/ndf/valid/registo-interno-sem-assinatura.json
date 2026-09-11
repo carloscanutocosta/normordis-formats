@@ -16,6 +16,11 @@
       "papel": "schema_perfil",
       "ref": "pt-dglab",
       "hash_sha256": "sha256:769c5363ac54fc4b20680b1c3dbf0f8a140a7fc9abab0bb1db2c4f0ffb0af6db"
+    },
+    {
+      "papel": "schema_tipo",
+      "ref": "informacao-tecnica@2.0.0",
+      "hash_sha256": "sha256:633e40dba172bc79c033d913f3082671f52a1520b6cc0cb9d43dc3273d361b52"
     }
   ],
   "metadados": {
