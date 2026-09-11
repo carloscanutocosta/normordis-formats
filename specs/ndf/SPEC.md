@@ -141,18 +141,41 @@ dos bytes sobre os quais a própria assinatura é calculada.
 
 O NDF admite dados pessoais (NIF, dados fiscais, dados de saúde, dados processuais) sujeitos ao RGPD (Regulamento (UE) 2016/679) e à Lei n.º 58/2019. O princípio de imutabilidade do NDF (§2.1) cria uma tensão com o direito ao apagamento (Art.º 17.º RGPD).
 
-#### Resolução da tensão imutabilidade ↔ direito ao apagamento
+#### Enquadramento da tensão imutabilidade ↔ direito ao apagamento
 
-A tensão é resolvida pela articulação de três mecanismos legais e técnicos:
+A tensão é **enquadrada — não integralmente resolvida** — pela articulação de
+três mecanismos legais e técnicos. Nenhum deles substitui a avaliação, pelo
+responsável pelo tratamento, da base legal, finalidade e necessidade
+aplicáveis a cada tipo de documento; o NDF disponibiliza os mecanismos, a
+decisão de os aplicar cabe ao responsável:
 
-1. **Base legal de conservação prevalente**: documentos da Administração Pública são conservados com base em obrigação legal (Art.º 6.º, n.º 1, al. c) RGPD) e missão de interesse público (al. e)). O direito ao apagamento cede face a obrigações legais de conservação (Art.º 17.º, n.º 3, al. b) RGPD) — o prazo de conservação e o destino final (§3) resolvem esta decisão por tipo de documento.
+1. **Base legal de conservação declarada por tipo de documento**: quando
+   exista obrigação legal (Art.º 6.º, n.º 1, al. c) RGPD) ou missão de
+   interesse público (al. e)) aplicável a um tipo de documento concreto, o
+   direito ao apagamento cede face a essa obrigação (Art.º 17.º, n.º 3,
+   al. b) RGPD). **Isto não é uma autorização genérica de conservação para
+   qualquer documento da Administração Pública** — a base legal e a
+   finalidade têm de ser identificáveis por tipo de documento, e é isso que
+   `base_legal_conservacao` regista. Arquivo de interesse público (Art.º 89.º
+   RGPD) está sujeito às condições e salvaguardas aí previstas, não é uma
+   exceção automática.
 
-2. **Pseudonimização pré-arquivo**: quando aplicável, é possível pseudonimizar dados pessoais antes da finalização. O NDF finalizado contém o pseudónimo; a tabela de correspondência é gerida fora do NDF com controlos de acesso próprios.
+2. **Pseudonimização pré-arquivo**: quando aplicável, é possível pseudonimizar dados pessoais antes da finalização. O NDF finalizado contém o pseudónimo; a tabela de correspondência é gerida fora do NDF com controlos de acesso próprios. **A pseudonimização não retira os dados do âmbito do RGPD** (Art.º 4.º, n.º 5 e considerando 26) — continuam a ser dados pessoais enquanto a correspondência for reconstituível por alguém; o mecanismo reduz risco, não substitui uma base legal de conservação.
 
 3. **Eliminação no termo do PCA**: documentos com `destino_final: eliminacao`
    são eliminados segundo a decisão e procedimento arquivístico aplicável. O
    mecanismo apoia a limitação da conservação, mas não demonstra por si só
    conformidade integral com o RGPD.
+
+O NDF não resolve, e não tenta resolver, questões que dependem de decisão do
+responsável pelo tratamento: como tratar um dado pessoal indevidamente
+incluído num documento já finalizado; como distinguir preservação do
+original de acesso a uma versão retificada; como propagar uma decisão de
+eliminação a cópias já transferidas; que metadados permanecem após
+eliminação e com que fundamento. `LACUNAS.md` L13 mantém em aberto a
+ambiguidade de `base_legal_conservacao` — ver também
+[`docs/reports/READINESS-ASSESSMENT.md`](../../docs/reports/READINESS-ASSESSMENT.md)
+`R21`.
 
 #### Campos de metadados obrigatórios relativos a proteção de dados
 
@@ -1350,7 +1373,7 @@ uma assinatura pessoal. Ver a arquitetura normativa comum em
 |---|---|---|---|
 | `"nenhuma"` | — | Nenhum | Passos 1–3 e 8 (canonicalização, hash, validation_code, persistência) |
 | `"avancada"` | SEA — Assinatura Eletrónica Avançada (eIDAS Art.º 26.º) | Certificado com identificação única do signatário; não obrigatoriamente qualificado | Passos 1–8 com CAdES-B-LTA |
-| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS | Passos 1–8 com CAdES-B-LTA |
+| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS **E** criação por dispositivo qualificado de criação de assinatura (QSCD, eIDAS Art.º 26.º) | Passos 1–8 com CAdES-B-LTA |
 
 **Esta tabela não dá exemplos de tipos de ato, e a omissão é deliberada.** Uma
 coluna que associasse ofícios a `"avancada"` e contratos públicos a
@@ -1358,6 +1381,20 @@ coluna que associasse ofícios a `"avancada"` e contratos públicos a
 apesar de §2.10.2 dizer o contrário duas linhas abaixo. A tabela fixa apenas o
 que se decide dentro do artefacto: que certificado cada valor exige e que passos
 do pipeline desencadeia. Que atos pertencem a cada classe é matéria de §2.10.2.
+
+**Nota sobre o requisito de dispositivo qualificado.** Certificado qualificado
+e CAdES-B-LTA não bastam, por si, para concluir que existe uma assinatura
+eletrónica qualificada — o eIDAS exige também o QSCD (Art.º 26.º), e a
+verificação desse requisito segue o Art.º 32.º. A coluna acima descreve o que
+`nivel_assinatura: "qualificada"` **declara** ser exigido pelo produtor no
+momento da assinatura; não é, por si, prova de que o requisito foi cumprido.
+`nivel_assinatura` é uma declaração do produtor; a evidência de certificado e
+QSCD fica em `assinaturas[]` e no material de validação do envelope (§4.4); a
+conclusão sobre se os requisitos eIDAS foram efetivamente cumpridos é apurada
+pelo verificador a partir dessa evidência — nunca promovida automaticamente a
+partir da declaração JSON. Ver
+[`docs/reports/READINESS-ASSESSMENT.md`](../../docs/reports/READINESS-ASSESSMENT.md)
+`R22`.
 
 #### 2.10.2 Responsabilidade de classificação
 
