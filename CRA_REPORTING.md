@@ -5,8 +5,20 @@
 Este documento assume, por precaução, que o ecossistema NORMORDIS (incluindo
 `normordis-formats` e `normordis-pdf`) pode vir a ser considerado "produto com
 elementos digitais" nos termos do Regulamento (UE) 2024/2847 (Cyber
-Resilience Act), dado o seu propósito declarado — sistemas institucionais,
-não um projeto pessoal incidental. **Isto não é uma determinação jurídica
+Resilience Act). A vocação institucional do projeto, por si só, **não** é o
+critério que determina isso — é preciso separar especificação, software
+distribuído, atividade comercial e papel de cada interveniente. O critério
+real está no art. 2.º, n.º 4: software livre e de código aberto fica isento
+quando desenvolvido ou disponibilizado **fora do âmbito de uma atividade
+comercial**; o considerando 18 esclarece que a forma como o desenvolvimento é
+financiado não é, por si, decisiva — mas aceitar donativos que excedam os
+custos de conceção, desenvolvimento e disponibilização pode configurar
+atividade comercial. O art. 24.º cria ainda a categoria distinta de *steward*
+de software de código aberto — pessoa coletiva que apoia, de forma
+sistemática e sustentada, um projeto FOSS **destinado a atividades
+comerciais**, garantindo a sua viabilidade —, com obrigações próprias e mais
+limitadas do que as de fabricante. Nenhuma destas fronteiras está hoje
+clarificada para o NORMORDIS. **Isto não é uma determinação jurídica
 formal**; é uma decisão prática de estar preparado antes de confirmar a
 classificação exata com aconselhamento jurídico, à medida que o projeto for
 adotado por terceiros.
@@ -124,11 +136,13 @@ se um evento qualifica, o mais prudente é reportar (o custo de um aviso
 prévio desnecessário é baixo; o de silêncio sobre um evento que qualificava
 não é).
 
-## Aviso a utilizadores afetados (Artigo 14(4))
+## Aviso a utilizadores afetados (Artigo 14(8))
 
 A notificação à autoridade (SRP/CERT.PT) **não substitui** o dever de avisar
-os utilizadores. O Artigo 14(4) exige, sem demora indevida e após a
-notificação à autoridade, informar:
+os utilizadores. O Artigo 14(8) exige, sem demora indevida **depois de o
+fabricante tomar conhecimento** da vulnerabilidade ativamente explorada ou do
+incidente grave — o texto liga a obrigação a esse conhecimento, não a uma
+sequência que dependa da notificação prévia à autoridade —, informar:
 
 - os **utilizadores afetados** pela vulnerabilidade ativamente explorada ou
   pelo incidente grave; e, quando apropriado,

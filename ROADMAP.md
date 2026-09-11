@@ -48,6 +48,7 @@ disso.
 | D5 | **NDF-core congelado em âmbito.** O formato prevê já o que foi idealizado: guarda de documentos, metadados de segurança, auditoria, relações entre documentos, intervenientes | Cessa o alargamento normativo do NDF-core; esforço desloca-se para NDT, NCRTF, `normordis-pdf` e `normordis-odf` |
 | D6 | **Procura de necessidade institucional em linha paralela**, sem depender de marcos de engenharia | Gate externo 7 passa a trabalho ativo — ver `R5` |
 | D7 | **Três eixos de posicionamento**: soberania documental, eficiência e capacidade, implementabilidade livre por terceiros | Exige corpus comparativo de medição antes de qualquer afirmação quantitativa — ver `R6` |
+| D8 | **Resposta à avaliação externa de 2026-09-11 entra no caminho crítico, à frente do fecho do laboratório CAdES.** A falha NDF↔NDT (`R16`) e as omissões silenciosas do validador (`R17`, `R18`) tornam qualquer assinatura CAdES real, por si só, insuficiente para provar a cadeia de confiança | Nova **Fase 1E**. A Fase 1D (D4) passa a depender da conclusão do bloco P0 da Fase 1E para ser lida como prova completa da cadeia; os passos técnicos de laboratório em si não ficam bloqueados, só a sua interpretação |
 
 ### Alcance de D5
 
@@ -423,6 +424,253 @@ verificador já existente em [`tools/check_cades_gate.py`](tools/check_cades_gat
 | 3 | Positivas com material real (`qualified-real`, `institutional-seal-real`, `offline-tsa-real`) | Dependem de certificado/TSA reais ou parceria — **permanecem gate externo** |
 
 O passo 1 é caminho crítico até à abertura do debate; os passos 2 e 3 não são.
+
+---
+
+## Fase 1E — Integridade da cadeia de confiança e resposta à avaliação externa (2026-09-11)
+
+Origem: avaliação técnica e jurídica externa ao commit `a9d72f8`, com achados
+registados em
+[`docs/reports/READINESS-ASSESSMENT.md`](docs/reports/READINESS-ASSESSMENT.md)
+§5.6 (`R16`–`R22`). Ao contrário das fases anteriores, esta não nasce de
+auto-revisão do mantenedor — é a primeira resposta estruturada a um
+avaliador independente (ver D8), pelo que o critério de conclusão de cada
+item é mais estrito: tem de sobreviver a nova tentativa de falsificação, não
+apenas passar a suite existente.
+
+**Objetivo único**: tornar demonstrável, por terceiros, o percurso
+NDF → assinatura → pacote → validação → representação, sem depender de
+leitura confiante da documentação. Cartão de Cidadão e cartão profissional
+ECCE ficam fora de qualquer teste, em todos os passos abaixo — ver P1.1.
+
+### Sequência de trabalho
+
+| Prioridade | Entrega | Resultado esperado | Achados cobertos |
+|---|---|---|---|
+| P0.1 | Clarificar garantias e limitações na documentação | O leitor distingue especificado / implementado / demonstrado | `R18`, `R19`, `R21`, `R22` |
+| P0.2 | Autenticar NDT e dependências de interpretação | Substituição de NDT sem alterar os bytes do NDF-core passa a ser detetada | `R16` |
+| P0.3 | Eliminar validação silenciosa e separar resultados por camada | `rfc8785` obrigatório; validador reporta por camada; *placeholders* só aceites em testes explicitamente marcados como tal | `R17`, `R18` |
+| P0.4 | Correções jurídicas pontuais | CRA, RGPD e assinatura qualificada corrigidos no texto | `R20`, `R21`, `R22` |
+| P0.5 | Correções editoriais pontuais | regex/exemplo de `pt-dglab` coerentes; contagens desatualizadas corrigidas | `R19` |
+| P1.1 | Laboratório CAdES sem cartões (estende a Fase 1D / D4) | Assinaturas e provas temporais reais, identidades fictícias, três resultados separados (técnico / laboratório / eIDAS) | `R2`, `R22` |
+| P1.2 | Caso documental completo reproduzível | Um percurso ponta-a-ponta, verificável por terceiro | `R8`, `R15` |
+| P2.1 | Revisão independente delimitada | Perguntas jurídicas/arquivísticas concretas, com resposta acionável | `R4`, `R5` |
+
+O bloco P0 é o caminho crítico desta fase — nenhum item de P1 conta como
+prova fechada de cadeia de confiança enquanto P0.2 e P0.3 não estiverem
+concluídos (D8).
+
+### P0.1 — Documentação: garantia / mecanismo / evidência / limitação
+
+- [ ] Tabela «garantia / mecanismo / evidência / limitação» em `README.md` ou
+      `docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`, cobrindo pelo menos:
+      imutabilidade, `nivel_assinatura`, autonomia do pacote, reprodução
+      fiel, conformidade
+- [ ] Em cada menção normativa relevante, distinguir requisito declarado
+      pelo produtor de conclusão apurada pelo verificador (ver P0.4)
+- [ ] Identificar explicitamente os exemplos com assinaturas/certificados/
+      timestamps fictícios (`specs/ndf/examples/ndfpkg-example/envelope.json`
+      e equivalentes)
+- [ ] Apresentar `pt-dglab` como perfil experimental do projeto, sem
+      aprovação institucional — nota no próprio schema, não só no
+      `README.md` geral
+
+**Critério de conclusão**: cada garantia pública aponta para um requisito e
+uma evidência; onde falta evidência, isso fica dito junto da afirmação.
+
+### P0.2 — Ligação criptográfica NDF↔NDT (`R16`)
+
+- [ ] Registar decisão em **ADR-026**: manifesto de dependências de
+      interpretação, com digest coberto pela assinatura do NDF-core,
+      separado do inventário físico do `.ndfpkg`
+- [ ] Definir os bytes sujeitos a hash e a canonicalização do manifesto
+      (JCS/RFC 8785, mesmo padrão do NDF-core)
+- [ ] Fechar a cadeia de referências — NDT exato, schemas específicos,
+      recursos (fontes, imagens) necessários à renderização — sem
+      referências circulares ao envelope nem a provas acrescentadas depois
+      da assinatura
+- [ ] Atualizar `ndf-core.schema.json`, produtor, leitor
+      (`tools/validate.py`) e exemplos
+- [ ] Preservar a distinção entre documentos antigos (sem a garantia) e
+      novos (com ela) — sem invalidar retroativamente
+- [ ] Vetores de teste obrigatórios em `conformance/`:
+
+  | Caso | Resultado exigido |
+  |---|---|
+  | Alterar texto fixo do NDT, recalcular só o inventário físico (o ataque reproduzido na avaliação) | rejeitar |
+  | Trocar o schema mantendo o identificador | rejeitar |
+  | Substituir uma fonte ou imagem referenciada | rejeitar |
+  | Omitir uma dependência do manifesto | rejeitar |
+  | Reorganizar legitimamente os caminhos do pacote, mesmos componentes | continuar válido |
+
+**Critério de conclusão**: o ataque reproduzido na avaliação deixa de passar
+no validador, sem depender de conhecimento informal do repositório
+original.
+
+### P0.3 — Validador honesto sobre o que verificou (`R17`, `R18`)
+
+- [ ] Tornar `rfc8785` dependência obrigatória em `tools/validate.py` quando
+      a operação exige verificação JCS — falha dura, não `PASS` silencioso,
+      se a biblioteca faltar
+- [ ] Relatório com resultado por camada — estrutura, canonicalização,
+      integridade de componentes, dependências autenticadas (P0.2),
+      assinatura/confiança, representação — cada uma `aprovada` /
+      `reprovada` / `indeterminada` (só assinatura/confiança) / `não
+      executada`
+- [ ] Relatório também em JSON, além da saída legível; registar versão do
+      validador, perfil, política de confiança e instante de validação
+- [ ] Impedir aprovação global quando falta uma verificação exigida pelo
+      perfil
+- [ ] Reservar aceitação de *placeholders* para testes estruturais
+      explicitamente identificados como tal no resultado — nunca um `PASS`
+      indistinto do de um pacote genuíno
+- [ ] Testar os exemplos incluídos nos próprios schemas (teria apanhado
+      `R19` automaticamente)
+- [ ] Casos adversariais novos: nomes duplicados em ZIP, caminhos inseguros
+      (`../`), ligações simbólicas, limites de recursos (tamanho,
+      profundidade)
+
+**Critério de conclusão**: um pacote estruturalmente válido mas sem
+assinatura verificável nunca aparece como integralmente validado.
+
+### P0.4 — Correções jurídicas pontuais (`R20`, `R21`, `R22`)
+
+- [ ] `CRA_REPORTING.md`: corrigir a citação para art. 14.º, **n.º 8**;
+      remover a formulação que liga o aviso a utilizadores à sequência
+      "após notificação à autoridade" — o n.º 8 liga-o ao conhecimento do
+      evento
+- [ ] `CRA_REPORTING.md`: rever a justificação inicial de sujeição ao
+      CRA — "vocação institucional" não é, por si, critério suficiente;
+      separar especificação, software distribuído, atividade comercial e
+      papel de cada interveniente
+- [ ] Secção RGPD do NDF (`specs/ndf/SPEC.md`): substituir "resolvido" por
+      formulação que distinga mecanismos suportados pelo formato de
+      decisões que cabem ao responsável pelo tratamento — sem tentar
+      resolver a tensão dentro do NDF-core
+- [ ] Tabela de `nivel_assinatura` (`specs/ndf/SPEC.md` §2.10.1):
+      acrescentar nota normativa de que `qualificada` exige também
+      dispositivo qualificado de criação (eIDAS art. 26.º/32.º), e que a
+      validação efetiva desse requisito é apurada pelo verificador, não
+      pela declaração JSON
+
+**Critério de conclusão**: as três referências legais citam corretamente o
+texto aplicável, e nenhuma afirmação de especificação promove uma
+declaração do produtor a conclusão jurídica.
+
+### P0.5 — Correções editoriais pontuais (`R19`)
+
+- [ ] Corrigir a regex de `classificacao_ref` em
+      `specs/registry/profiles/pt-dglab.schema.json` ou o exemplo
+      `ts/at/300.20` — a decidir por quem souber se a regra ou o exemplo é
+      que está errado
+- [ ] Corrigir contagem de vetores negativos de pacote em
+      `docs/normalization/READINESS.md` (8 → 16)
+- [ ] Reexecutar `tools/check_spec_coherence.py` e a suite completa depois
+      das correções
+
+### P1.1 — Laboratório CAdES sem cartões (estende a Fase 1D / D4)
+
+Não substitui a Fase 1D — acrescenta-lhe a decisão operacional de manter o
+Cartão de Cidadão e o cartão ECCE fora de qualquer teste.
+
+- [ ] `NORMORDIS TEST CA` fictícia (OpenSSL): CA raiz + certificados de
+      assinatura, identidades inequivocamente fictícias (`Pessoa Fictícia
+      001 — TEST ONLY`)
+- [ ] Confiança configurada apenas no verificador de laboratório — nunca
+      instalada como raiz confiável no sistema operativo
+- [ ] Sequência incremental, alinhada com
+      [`docs/normalization/CADES-GATE-PLAN.md`](docs/normalization/CADES-GATE-PLAN.md):
+      assinatura destacada sobre bytes JCS → validação sob confiança de
+      laboratório → timestamp de assinatura → material de validação →
+      timestamp de arquivo e renovação → casos negativos e validação
+      histórica
+- [ ] Ferramentas: DSS (Comissão Europeia) para criação/extensão/validação
+      CAdES a partir de certificados `.p12`; SoftHSM numa fase posterior
+      para exercitar PKCS#11
+- [ ] Acrescentar a `CADES-GATE-PLAN.md` o caso em falta: evidência de
+      validade histórica insuficiente → resultado **indeterminado**, sem
+      aprovação silenciosa (não consta hoje dos 5 positivos/7 negativos)
+- [ ] Documentar explicitamente os **três resultados separados**:
+      conformidade técnica CAdES / validação sob confiança de laboratório /
+      qualificação eIDAS demonstrada externamente — nunca apresentar o
+      segundo como o terceiro
+- [ ] Chaves operacionais de CI separadas dos artefactos públicos; fixtures
+      com chaves de teste deliberadamente incluídas marcadas como públicas
+      e sem confiança fora dos testes
+
+**Critério de conclusão**: outra pessoa executa os testes e obtém os
+resultados previstos, incluindo os casos em que o resultado correto é
+"indeterminado" — sem que o Cartão de Cidadão ou o cartão ECCE entrem em
+nenhum passo.
+
+### P1.2 — Caso documental completo reproduzível
+
+- [ ] Primeiro caso: ofício sintético de várias páginas, com tabela,
+      imagem, assinatura e anexo. Segundo caso: um documento capturado
+- [ ] Produzir: NDF + dependências autenticadas (P0.2), pacote portátil,
+      assinatura de laboratório (P1.1), PDF gerado, relatório de
+      validação, instruções de reprodução, resultados esperados de
+      conteúdo e apresentação
+- [ ] Verificar: conteúdo (nada perdido), paginação (sem cortes/
+      sobreposições/duplicações), recursos (fontes/imagens correspondem
+      aos bytes declarados), PDF/A (perfil efetivamente pretendido),
+      acessibilidade (automática + revisão humana), portabilidade
+      (reprodução em ambiente limpo)
+- [ ] Ferramentas: `normordis-pdf`, veraPDF, comparação de texto/estrutura/
+      imagens
+- [ ] Preencher os resultados *golden* em falta em
+      `specs/ndt/RENDERER-CONFORMANCE.md` (número e caixas de páginas,
+      *bounding boxes* com tolerância declarada, identidade de fontes e
+      recursos incorporados) — fecha também a lacuna de
+      `check_ndt_semantic_corpus.py`, que hoje verifica estrutura mas não
+      renderiza nem compara conteúdo produzido
+- [ ] Não usar igualdade binária entre PDFs como critério geral — só
+      quando o ambiente completo estiver fixado; exigir a equivalência que
+      o perfil efetivamente promete
+
+**Critério de conclusão**: um terceiro reproduz o percurso sem explicações
+informais do mantenedor, e qualquer diferença fica identificada.
+
+### P2.1 — Revisão independente delimitada
+
+| Tema | Ação interna | Pergunta para revisão externa |
+|---|---|---|
+| eIDAS | P0.4 | O perfil e as conclusões do verificador estão juridicamente bem delimitados? |
+| RGPD | P0.4 | Como representar retificação, eliminação e conservação sem substituir o responsável pelo tratamento? |
+| CRA | P0.4 | Que componentes e intervenientes estão efetivamente abrangidos? |
+| Arquivística | — | Que informação é necessária numa transferência e que informação pertence ao sistema custodiante? |
+
+Contributo externo em criptografia (revisão do ADR-026 e do laboratório
+CAdES), direito (matriz acima) e arquivística (transferência OAIS/METS/
+PREMIS) — não bloqueia P0/P1, que avançam em paralelo.
+
+### Issues a abrir no GitHub
+
+1. Autenticar NDT e dependências de interpretação (P0.2, ADR-026, `R16`)
+2. Impedir validação parcial silenciosa (P0.3, `R17`, `R18`)
+3. Separar resultados estruturais, criptográficos e de confiança (P0.3, `R18`)
+4. Corrigir afirmações e referências jurídicas (P0.4, `R20`, `R21`, `R22`)
+5. Criar corpus CAdES com PKI de laboratório (P1.1, `R2`)
+6. Publicar um percurso documental reproduzível por terceiros (P1.2)
+
+Cada issue: problema, âmbito, ficheiros afetados, evidência esperada,
+critério de conclusão — conforme os blocos acima.
+
+### Calendário indicativo
+
+Ajustável — sequência de dependências, não compromisso de prazo:
+
+| Período | Foco | Condição para avançar |
+|---|---|---|
+| Semana 1 | P0.1, P0.3, P0.4, P0.5 | Limitações explícitas na documentação; validador falha cedo e por camada |
+| Semana 2 | P0.2 | Ataque de substituição de NDT deixa de passar |
+| Semana 3 | P1.1 | Assinatura de laboratório real, verificada, com identidades fictícias |
+| Semana 4 | P1.2 | Caso documental completo, reproduzível por terceiro |
+
+P2.1 e o fecho pleno da Fase 1D (fixtures com material real —
+`qualified-real`, `institutional-seal-real`, `offline-tsa-real`) não têm
+data — dependem de evidência externa (parceria, certificado real), tal como
+já registado em D4/Fase 1D.
 
 ---
 
