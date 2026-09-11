@@ -49,6 +49,9 @@ def cases(root: Path):
     yield "PKG-NEG-009-ndt-referencia-pendurada", lambda p: _dangling_ndt_ref(p)
     yield "PKG-NEG-015-anexo-nativo-ausente", lambda p: _anexo_nativo_ausente(p)
     yield "PKG-NEG-016-anexo-nativo-nao-declarado", lambda p: _anexo_nativo_nao_declarado(p)
+    yield "PKG-NEG-017-ndt-texto-alterado-manifesto-recalculado", lambda p: _ndt_texto_alterado_manifesto_recalculado(p)
+    yield "PKG-NEG-018-schema-perfil-trocado-manifesto-recalculado", lambda p: _schema_trocado_manifesto_recalculado(p)
+    yield "PKG-NEG-019-dependencia-omitida", lambda p: _dependencia_omitida(p)
 
 
 def cases_captura(root: Path):
@@ -176,6 +179,67 @@ def _unsafe_path(root: Path) -> None:
         "hash_sha256": "sha256:" + "0" * 64,
     })
     dump(root / "manifest.json", manifest)
+
+
+def _ndt_texto_alterado_manifesto_recalculado(root: Path) -> None:
+    """Reproduz o achado externo R16: altera texto fixo do NDT e recalcula
+    apenas o hash físico em manifest.json, sem tocar em ndf-core.json.
+
+    Antes de ADR-026 (`dependencias_interpretacao`), isto passava — o hash do
+    NDT só existia no manifesto, fora dos bytes assinados. `schema_id` e
+    `versao_ndt` mantêm-se inalterados; só o conteúdo visível muda. A
+    verificação que tem de apanhar isto é NDF-PKG-010/NDF-READ-025 — a
+    entrada 'ndt' de `dependencias_interpretacao` (dentro do NDF-core, logo
+    dos bytes assinados) fica desatualizada, e o pacote deixa de fechar.
+    """
+    relative = "ndt/oficio-generico@2.0.0.ndt.json"
+    path = root / relative
+    ndt = load(path)
+    elementos = ndt["paginas_def"][0]["fluxo"]["elementos"]
+    for elemento in elementos:
+        if elemento.get("tipo") == "texto_fixo":
+            elemento["conteudo"] = "PEDIDO INDEFERIDO — texto alterado no template"
+            break
+    else:
+        raise RuntimeError("nenhum texto_fixo encontrado no NDT de exemplo")
+    dump(path, ndt)
+    update_inventory_hash(root, relative)
+    # ndf-core.json (e dependencias_interpretacao) ficam intencionalmente
+    # desatualizados — é exactamente isso que a verificação tem de apanhar.
+
+
+def _schema_trocado_manifesto_recalculado(root: Path) -> None:
+    """Troca o schema do perfil de avaliação mantendo o identificador
+    (`schemas/pt-dglab.schema.json`) e recalcula apenas manifest.json.
+
+    Mesma classe de ataque que R16, aplicada à segunda dependência que
+    ADR-026 vincula por hash: um verificador que resolvesse o schema a
+    partir do pacote (comportamento normativo, NDF-PKG-008) obteria um
+    contrato diferente do que a entrada 'schema_perfil' de
+    `dependencias_interpretacao` autentica.
+    """
+    relative = "schemas/pt-dglab.schema.json"
+    path = root / relative
+    schema = load(path)
+    schema["properties"]["classificacao_ref"]["pattern"] = "^.*$"
+    dump(path, schema)
+    update_inventory_hash(root, relative)
+
+
+def _dependencia_omitida(root: Path) -> None:
+    """Remove do NDF-core a entrada 'schema_perfil' de
+    `dependencias_interpretacao`, mantendo `avaliacao.perfil` declarado.
+
+    NDF-PROD-025: quando `avaliacao.perfil` está declarado, tem de existir
+    entrada correspondente. Omiti-la é tão inválido como declará-la errada —
+    ambas deixam uma dependência de interpretação sem vínculo criptográfico.
+    """
+    core_path = root / "ndf-core.json"
+    core = load(core_path)
+    deps = core["dependencias_interpretacao"]
+    core["dependencias_interpretacao"] = [d for d in deps if d.get("papel") != "schema_perfil"]
+    dump(core_path, core)
+    update_inventory_hash(root, "ndf-core.json")
 
 
 def _mismatch_ndt(root: Path) -> None:

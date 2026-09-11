@@ -6,6 +6,18 @@
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "avancada",
   "ndt_version_ref": "aceitacao-custodia@1.0.0",
+  "dependencias_interpretacao": [
+    {
+      "papel": "ndt",
+      "ref": "aceitacao-custodia@1.0.0",
+      "hash_sha256": "sha256:f227ef476bbdd3a78f78562ce5f64a55452ce70c4cee9dc8325e0b1059d9c9e0"
+    },
+    {
+      "papel": "schema_perfil",
+      "ref": "pt-dglab",
+      "hash_sha256": "sha256:769c5363ac54fc4b20680b1c3dbf0f8a140a7fc9abab0bb1db2c4f0ffb0af6db"
+    }
+  ],
   "metadados": {
     "tipo_documento_ref": "aceitacao-custodia@1.0.0",
     "entidade_produtora": {

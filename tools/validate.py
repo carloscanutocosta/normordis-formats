@@ -491,6 +491,35 @@ def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
                 f"e o pacote não contém schemas/{tipo_id}.schema.json (§2.9.5, NDF-PKG-007)"
             )
 
+    # dependencias_interpretacao (§2.6.2, ADR-026, NDF-PROD-024/025): o schema
+    # exige o array e cada entrada bem-formada, mas não que exista a entrada
+    # *certa* — isso é semântico. Sem esta verificação, um NDF-core com
+    # dependencias_interpretacao presente mas a apontar para outra coisa
+    # passava no schema e reabria a lacuna que o campo existe para fechar.
+    deps = doc.get("dependencias_interpretacao")
+    if isinstance(deps, list):
+        por_papel: dict[str, list[dict]] = {}
+        for d in deps:
+            if isinstance(d, dict) and isinstance(d.get("papel"), str):
+                por_papel.setdefault(d["papel"], []).append(d)
+        if ndt_ref and not any(e.get("ref") == ndt_ref for e in por_papel.get("ndt", [])):
+            errors.append(
+                "dependencias_interpretacao não contém entrada papel='ndt' com "
+                f"ref igual a ndt_version_ref ('{ndt_ref}') (§2.6.2, NDF-PROD-024)"
+            )
+        if tipo_id and tipo_id.startswith("ext."):
+            if not any(e.get("ref") == tipo_ref for e in por_papel.get("schema_tipo", [])):
+                errors.append(
+                    "dependencias_interpretacao não contém entrada papel='schema_tipo' "
+                    f"com ref igual a tipo_documento_ref ('{tipo_ref}'), exigida para "
+                    "extensão qualificada (§2.6.2, NDF-PROD-025)"
+                )
+        if perfil and not any(e.get("ref") == perfil for e in por_papel.get("schema_perfil", [])):
+            errors.append(
+                "dependencias_interpretacao não contém entrada papel='schema_perfil' "
+                f"com ref igual a avaliacao.perfil ('{perfil}') (§2.6.2, NDF-PROD-025)"
+            )
+
     prov_sistema = doc.get("proveniencia_sistema")
     if isinstance(prov_sistema, list):
         # §2.14.3: JCS preserva a ordem dos arrays, logo a ordem entra no
@@ -1191,6 +1220,40 @@ def validate_package_dir(root: Path) -> bool:
             tipo_schema, _origem = _resolve_tipo_schema(tipo_id, root)
             if tipo_schema is not None:
                 errors.extend(check_ndt_bindings(ndt, tipo_schema, tipo_ref))
+
+    # NDF-PKG-010 / NDF-READ-025 (§2.6.2, ADR-026): dependencias_interpretacao
+    # vincula por hash o NDT e os schemas materializados. Sem esta verificação,
+    # substituir o NDT (ou um schema) e recalcular só manifest.json bastava
+    # para passar — os bytes assinados diziam uma coisa, o pacote entregava
+    # outra. Achado externo R16.
+    for dep in core.get("dependencias_interpretacao") or []:
+        if not isinstance(dep, dict):
+            continue
+        papel = dep.get("papel")
+        ref = dep.get("ref", "?")
+        declarado = dep.get("hash_sha256")
+        if papel == "ndt":
+            alvo = root / "ndt" / f"{ref}.ndt.json"
+        elif papel == "schema_tipo":
+            tipo_id_dep = ref.rsplit("@", 1)[0] if "@" in ref else ref
+            alvo = root / "schemas" / f"{tipo_id_dep}.schema.json"
+        elif papel == "schema_perfil":
+            alvo = root / "schemas" / f"{ref}.schema.json"
+        else:
+            continue
+        if not alvo.is_file():
+            errors.append(
+                f"dependencias_interpretacao: '{papel}' ({ref}) referencia "
+                f"'{alvo.relative_to(root)}', ausente do pacote (NDF-PKG-010, §2.6.2)"
+            )
+            continue
+        atual = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
+        if atual != declarado:
+            errors.append(
+                f"dependencias_interpretacao: '{papel}' ({ref}) — hash declarado "
+                f"não corresponde aos bytes de '{alvo.relative_to(root)}' "
+                f"(NDF-PKG-010, NDF-READ-025, §2.6.2)"
+            )
 
     if errors:
         print(f"{RED}FAIL{RESET}  pacote {root}")

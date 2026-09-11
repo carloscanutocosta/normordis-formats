@@ -11,6 +11,7 @@
     "payload_hash_alg",
     "nivel_assinatura",
     "ndt_version_ref",
+    "dependencias_interpretacao",
     "metadados",
     "documento",
     "avaliacao"
@@ -65,6 +66,14 @@
         "modelo3-irs@2026.1",
         "informacao-tecnica@2.3.1"
       ]
+    },
+    "dependencias_interpretacao": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/dependencia_interpretacao"
+      },
+      "description": "Cryptographic binding to the NDT and schemas that govern this document's interpretation — hash of the exact bytes materialised in the .ndfpkg, inside the signed payload_bytes. Closes the gap where ndt_version_ref binds a version label but not the bytes it names. See SPEC.md §2.6.2, ADR-026."
     },
     "metadados": {
       "$ref": "#/$defs/metadados",
@@ -582,6 +591,38 @@
         }
       },
       "additionalProperties": false
+    },
+    "dependencia_interpretacao": {
+      "type": "object",
+      "required": [
+        "papel",
+        "ref",
+        "hash_sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "papel": {
+          "type": "string",
+          "enum": [
+            "ndt",
+            "schema_tipo",
+            "schema_perfil"
+          ],
+          "description": "Which interpretation dependency this entry binds. 'ndt' is always required (every NDF-core has ndt_version_ref). 'schema_tipo' is required under the same condition as NDF-PROD-018 (qualified type extension). 'schema_perfil' is required whenever avaliacao.perfil is declared. See SPEC.md §2.6.2."
+        },
+        "ref": {
+          "type": "string",
+          "description": "Identifier of the dependency — equal to ndt_version_ref, metadados.tipo_documento_ref, or avaliacao.perfil, depending on papel. Resolution is by ref + hash, never by file path inside the package."
+        },
+        "hash_sha256": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
+          "description": "SHA-256 of the raw bytes of the file as materialised in the .ndfpkg (ndt/ or schemas/), not JCS-canonicalised. Same convention as manifest.inventario[].hash_sha256 and documento.componentes[].sha256.",
+          "examples": [
+            "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
+          ]
+        }
+      }
     },
     "relacao": {
       "type": "object",
