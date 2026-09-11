@@ -373,6 +373,7 @@ Estado: `aberto`, `em curso`, `fechado por decisão`, `resolvido`.
 | R22 | A tabela de `nivel_assinatura` associa `qualificada` a certificado qualificado + CAdES-B-LTA, sem exigir explicitamente **dispositivo qualificado de criação de assinatura**. Sem essa distinção, `nivel_assinatura: "qualificada"` pode ser lido como conclusão jurídica em vez de requisito declarado pelo produtor, a confirmar pelo verificador | Médio-alto — confunde declaração do produtor com validação jurídica efetiva; agrava-se com a lacuna do gate CAdES (R2) | **citações corrigidas** (2026-09-11) — a correção inicial atribuiu o requisito de QSCD ao art. 26.º (que define a assinatura eletrónica **avançada**, não o dispositivo qualificado); corrigido para Art.º 3.º ponto 12 (definição), Art.º 29.º + Anexo II (requisitos do dispositivo) e Art.º 32.º, n.º 1, alínea f) (confirmação na validação). Mesma ressalva de R20 quanto a revisão profissional externa |
 | R23 | `ndt.schema.json` já vincula por hash cada recurso `referenciado_por_hash` (`recursos[].hash_sha256`, nome do ficheiro em `recursos/` igual ao hash — §8.1), mas `tools/validate.py` nunca verificou essa correspondência contra os bytes físicos do ficheiro. Registado ao implementar `dependencias_interpretacao`; reproduzido por revisão adversarial ao commit `3985001` (trocar `recursos/brasao-republica.svg` e recalcular só o manifesto físico dava `PASS`) | Médio-alto — mesma classe de ataque de `R16`, aplicada a fontes e imagens em vez do NDT inteiro | **resolvido** (2026-09-11) — `NDF-PKG-011`/`NDF-READ-026`, vetor `PKG-NEG-021`. Corrigida também a convenção "nome = hash" nos dois pacotes de exemplo que a violavam (ficheiro chamava-se `brasao-republica.svg`, não pelo hash) |
 | R24 | A condição original de `dependencias_interpretacao.schema_tipo` (só extensão qualificada `ext.*`) deixava sem proteção os schemas de **tipos canónicos** transportados no pacote — `schemas/oficio.schema.json` podia ser substituído, com o inventário recalculado, sem deteção. Reproduzido por revisão adversarial ao commit `3985001`, mesmo commit que introduziu `dependencias_interpretacao` | Alto — mesma classe de ataque de `R16`, sobre a segunda dependência que a proteção deveria cobrir; achado na própria ronda que fechou R16 | **resolvido** (2026-09-11) — `schema_tipo` passa a sempre obrigatório (canónico ou extensão), `NDF-PKG-007` revisto para exigir presença física sempre; vetor `PKG-NEG-020` |
+| R25 | A verificação de `R23` (recursos do NDT) resolvia `recursos/<hash>.*` e confirmava só o primeiro candidato por ordem alfabética (`candidatos[0]`), ignorando os restantes. Reproduzido por revisão adversarial ao commit `f25a3bc` (que introduziu a verificação de `R23`): uma cópia legítima com extensão `.aaa` ao lado do `.svg` adulterado — `.aaa` < `.svg` — dava `PASS`, com o ficheiro adulterado nunca escrutinado | Alto — mesma classe de ataque de `R23`, na própria correção de `R23`; risco se um renderizador escolher o recurso por extensão/tipo em vez de pela ordem que o verificador usa | **resolvido** (2026-09-11) — mais de um ficheiro candidato passa a erro explícito (`NDF-PKG-011`); vetor `PKG-NEG-022` |
 
 ---
 
@@ -816,6 +817,18 @@ corrigidos e cobertos por vetor de teste nesta mesma ronda — ver R23, R24 e
 Para o terceiro ponto, a decisão foi retirar a promessa de reorganização em
 vez de implementar a resolução por hash — SPEC.md §2.6.2 já reflete o
 comportamento real.
+
+**Quarta ronda — revisão adversarial à correção de R23 (2026-09-11).** A
+própria verificação que fechou R23 tinha uma ambiguidade: resolvia
+`recursos/<hash>.*` e confirmava só o primeiro ficheiro por ordem
+alfabética, ignorando os restantes. Reproduzido: uma cópia legítima com
+extensão `.aaa` ao lado do `.svg` adulterado dava `PASS`, porque `.aaa`
+ordena antes de `.svg` e só esse era verificado. Registado e corrigido como
+`R25` — mais de um candidato passa a ser rejeitado explicitamente, não
+silenciosamente aceite pelo primeiro. Encontrada também uma descrição
+desatualizada no schema (`dependencia_interpretacao.ref` ainda dizia
+"nunca por caminho", contradizendo a correção da terceira ronda) —
+corrigida no mesmo commit.
 
 **R16 — ligação NDF↔NDT.** O achado mais grave. Detalhado em 4.2.1 (segunda
 correção). Resolve-se com um manifesto de dependências de interpretação cujo

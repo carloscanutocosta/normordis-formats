@@ -54,6 +54,7 @@ def cases(root: Path):
     yield "PKG-NEG-019-dependencia-omitida", lambda p: _dependencia_omitida(p)
     yield "PKG-NEG-020-schema-canonico-trocado-manifesto-recalculado", lambda p: _schema_canonico_trocado(p)
     yield "PKG-NEG-021-recurso-trocado-manifesto-recalculado", lambda p: _recurso_trocado(p)
+    yield "PKG-NEG-022-recurso-candidatos-ambiguos", lambda p: _recurso_candidatos_ambiguos(p)
 
 
 def cases_captura(root: Path):
@@ -260,6 +261,35 @@ def _recurso_trocado(root: Path) -> None:
     path = candidatos[0]
     path.write_bytes(b"<svg>recurso trocado, mesmo nome de ficheiro</svg>")
     update_inventory_hash(root, str(path.relative_to(root)))
+
+
+def _recurso_candidatos_ambiguos(root: Path) -> None:
+    """Dois ficheiros candidatos ao mesmo recurso: uma cópia legítima com
+    outra extensão, e o ficheiro original (nome = hash correto) adulterado.
+
+    Reproduz revisão adversarial ao commit f25a3bc: a resolução por
+    `recursos/<hash>.*` verificava só `candidatos[0]` (ordem alfabética) e
+    ignorava os restantes — uma cópia `.aaa` legítima ao lado do `.svg`
+    adulterado passava, porque `.aaa` < `.svg`. Um renderizador que escolha
+    por extensão ou tipo pode consumir precisamente o ficheiro nunca
+    escrutinado. Corrigido: mais de um candidato é erro (NDF-PKG-011).
+    """
+    hash_hex = "32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
+    recdir = root / "recursos"
+    legit = recdir / f"{hash_hex}.svg"
+    copia = recdir / f"{hash_hex}.aaa"
+    copia.write_bytes(legit.read_bytes())
+    legit.write_bytes(b"<svg>adulterado</svg>")
+    manifest_path = root / "manifest.json"
+    manifest = load(manifest_path)
+    for item in manifest["inventario"]:
+        if item["ficheiro"] == f"recursos/{hash_hex}.svg":
+            item["hash_sha256"] = "sha256:" + hashlib.sha256(legit.read_bytes()).hexdigest()
+    manifest["inventario"].append({
+        "ficheiro": f"recursos/{hash_hex}.aaa",
+        "hash_sha256": "sha256:" + hashlib.sha256(copia.read_bytes()).hexdigest(),
+    })
+    dump(manifest_path, manifest)
 
 
 def _dependencia_omitida(root: Path) -> None:

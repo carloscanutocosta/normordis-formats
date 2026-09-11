@@ -22,6 +22,7 @@ requisito e DEVE ser rejeitada.
 | `PKG-NEG-019` | entrada `schema_perfil` omitida de `dependencias_interpretacao` | `NDF-PROD-025` |
 | `PKG-NEG-020` | schema de tipo **canónico** (`oficio`, não extensão) trocado mantendo o identificador, só o manifesto recalculado | `NDF-PKG-007`, `NDF-PKG-010`, `NDF-READ-025` |
 | `PKG-NEG-021` | recurso do NDT (`recursos/`) trocado mantendo o nome, só o manifesto recalculado | `NDF-PKG-011`, `NDF-READ-026` |
+| `PKG-NEG-022` | dois ficheiros candidatos ao mesmo recurso (cópia legítima com outra extensão + original adulterado) | `NDF-PKG-011` |
 
 Os vetores seguintes derivam do pacote de captura
 `specs/ndf/examples/captura-requerimento` e exercitam §2.8.1.
@@ -57,7 +58,10 @@ perfil de avaliação.
 adversarial à *primeira* implementação de `dependencias_interpretacao`
 (commit `3985001`): schemas de tipo **canónico** (não só extensão
 qualificada, R24) e recursos do NDT referenciados por hash (R23) ficaram,
-nessa primeira ronda, sem a mesma proteção do NDT.
+nessa primeira ronda, sem a mesma proteção do NDT. `PKG-NEG-022` fecha uma
+lacuna na própria correção de R23 (commit `f25a3bc`): a resolução do
+recurso por `recursos/<hash>.*` só verificava o primeiro candidato por
+ordem alfabética — R25.
 
 ```bash
 python3 tools/check_package_vectors.py

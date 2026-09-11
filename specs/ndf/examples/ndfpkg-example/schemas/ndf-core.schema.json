@@ -612,7 +612,7 @@
         },
         "ref": {
           "type": "string",
-          "description": "Identifier of the dependency — equal to ndt_version_ref, metadados.tipo_documento_ref, or avaliacao.perfil, depending on papel. Resolution is by ref + hash, never by file path inside the package."
+          "description": "Identifier of the dependency — equal to ndt_version_ref, metadados.tipo_documento_ref, or avaliacao.perfil, depending on papel. Resolution is by fixed path derived from ref (ndt/<schema_id>@<versao>.ndt.json, schemas/<tipo_id or perfil>.schema.json), not by searching the package for a matching hash — see SPEC.md §2.6.2."
         },
         "hash_sha256": {
           "type": "string",
