@@ -471,6 +471,16 @@ def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
                 f"documento não valida contra {tipo_ref} (schema do {origem}): {e.message}" +
                 (f" (campo: {field})" if field else "")
             )
+        # NDF-PKG-007 (revisto 2026-09-11): deixou de ser condicional a
+        # extensão qualificada — todo o schema de tipo é sempre obrigatório
+        # em schemas/, mesma razão de schema_perfil. Resolver via registo
+        # dentro de um pacote significa que o pacote não o transporta.
+        if pkg_root is not None and origem == "registo":
+            errors.append(
+                f"metadados.tipo_documento_ref '{tipo_ref}' resolve pelo registo "
+                f"canónico, mas o pacote não contém schemas/{tipo_id}.schema.json "
+                f"(§2.9.2, NDF-PKG-007)"
+            )
     elif tipo_id:
         # §2.9.5: este runner é estrito porque DETÉM o registo canónico — aqui,
         # um tipo canónico não resolúvel significa que não existe, não que o
@@ -507,13 +517,13 @@ def check_ndf_semantic(doc: dict, pkg_root: Path | None = None) -> list[str]:
                 "dependencias_interpretacao não contém entrada papel='ndt' com "
                 f"ref igual a ndt_version_ref ('{ndt_ref}') (§2.6.2, NDF-PROD-024)"
             )
-        if tipo_id and tipo_id.startswith("ext."):
-            if not any(e.get("ref") == tipo_ref for e in por_papel.get("schema_tipo", [])):
-                errors.append(
-                    "dependencias_interpretacao não contém entrada papel='schema_tipo' "
-                    f"com ref igual a tipo_documento_ref ('{tipo_ref}'), exigida para "
-                    "extensão qualificada (§2.6.2, NDF-PROD-025)"
-                )
+        if tipo_id and not any(e.get("ref") == tipo_ref for e in por_papel.get("schema_tipo", [])):
+            errors.append(
+                "dependencias_interpretacao não contém entrada papel='schema_tipo' "
+                f"com ref igual a tipo_documento_ref ('{tipo_ref}') — obrigatória "
+                "para todo o tipo documental, canónico ou extensão qualificada "
+                "(§2.6.2, NDF-PROD-025)"
+            )
         if perfil and not any(e.get("ref") == perfil for e in por_papel.get("schema_perfil", [])):
             errors.append(
                 "dependencias_interpretacao não contém entrada papel='schema_perfil' "
@@ -1210,6 +1220,33 @@ def validate_package_dir(root: Path) -> bool:
         expected_ref = f"{ndt.get('schema_id', '')}@{ndt.get('versao_ndt', '')}"
         if expected_ref != ndt_ref:
             errors.append("ndt_version_ref não corresponde à identidade do NDT")
+
+        # NDF-PKG-011 / NDF-READ-026 (R23, SPEC §8.1): recursos NDT em modo
+        # 'referenciado_por_hash' já vinculam por hash dentro do próprio NDT
+        # (coberto por dependencias_interpretacao, via ADR-026), mas nada
+        # verificava esse hash contra os bytes físicos em recursos/. O nome
+        # do ficheiro é o hash (§8.1) — resolve-se por ele, nunca pelo `id`
+        # declarado, que é descritivo.
+        for recurso in ndt.get("recursos") or []:
+            if not isinstance(recurso, dict) or recurso.get("modo") != "referenciado_por_hash":
+                continue
+            declarado = recurso.get("hash_sha256", "")
+            hex_digest = declarado.split(":", 1)[1] if ":" in declarado else declarado
+            rid = recurso.get("id", "?")
+            candidatos = sorted((root / "recursos").glob(f"{hex_digest}.*")) if (root / "recursos").is_dir() else []
+            if not candidatos:
+                errors.append(
+                    f"recurso '{rid}': nenhum ficheiro 'recursos/{hex_digest}.*' "
+                    f"encontrado para o hash declarado (NDF-PKG-011, §8.1)"
+                )
+                continue
+            alvo = candidatos[0]
+            atual = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
+            if atual != declarado:
+                errors.append(
+                    f"recurso '{rid}': hash declarado não corresponde aos bytes "
+                    f"de '{alvo.relative_to(root)}' (NDF-PKG-011, NDF-READ-026, §8.1)"
+                )
 
         # Ligações de dados NDT → schema do tipo documental. Dentro de um
         # pacote existem os dois artefactos, logo é aqui que a junta pode ser

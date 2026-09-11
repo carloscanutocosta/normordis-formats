@@ -6,8 +6,8 @@
   "estado": "ativo",
   "nivel_assinatura": "qualificada",
   "finalizado_em": "2026-06-18T10:30:00Z",
-  "payload_hash": "sha256:7d4a970215c6912e3aba294a56adb32459ff97481d3b6910f52b99d1b9f04533",
-  "validation_code": "NDF-TNHEKVKHVRUSTL6H7F4O",
+  "payload_hash": "sha256:8e3600426a4e97bcd09dd78f53de37f7d99e332fb61b1ce868468e063304d2c4",
+  "validation_code": "NDF-QBMUKIWKOKL2BSY7PN2O",
   "inventario": [
     {
       "ficheiro": "README.md",
@@ -19,18 +19,18 @@
     },
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:3aad95267fe31f99c052535782d3ea557fbfc9cd08f737864bbb1c1b5a424cd8"
+      "hash_sha256": "sha256:d5bfa6a0be42d2ee7bb36c038845cc5facbdff3f66e26faf69ba794797aaf965"
     },
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:7d4a970215c6912e3aba294a56adb32459ff97481d3b6910f52b99d1b9f04533"
+      "hash_sha256": "sha256:8e3600426a4e97bcd09dd78f53de37f7d99e332fb61b1ce868468e063304d2c4"
     },
     {
       "ficheiro": "ndt/oficio-generico@2.0.0.ndt.json",
       "hash_sha256": "sha256:4c3c69dbdfe1f3f55444231610285e94e5fb08cca201ab135d7b7cdd055ed67c"
     },
     {
-      "ficheiro": "recursos/brasao-republica.svg",
+      "ficheiro": "recursos/32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316.svg",
       "hash_sha256": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
     },
     {
@@ -51,7 +51,7 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:68d4c0dad923d85dc8a7b2a4a1ab8df4eabe1a40f5b7a01aa16c4e50f1269bcd"
+      "hash_sha256": "sha256:1f43ca59ebffd231384901250dce44235c42f99e8072c4347e3446758cfe3591"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",

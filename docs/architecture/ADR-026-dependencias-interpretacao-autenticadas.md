@@ -46,7 +46,10 @@ esteja vinculado (este ADR), o hash de cada recurso hash-referenciado fica
 transitivamente coberto, por estar dentro dos bytes do NDT. O que falta nesse
 ponto não é um novo campo — é o verificador confirmar que o ficheiro em
 `recursos/<hash>.<ext>` hashes efetivamente para `<hash>` (`tools/validate.py`
-não o faz hoje; corrigido na mesma ronda desta ADR, registado como `R23`).
+não o faz hoje; registado como `R23`, com vetor de teste reproduzido por
+revisão adversarial — substituir o recurso e recalcular só o manifesto
+físico passava. Implementado na segunda ronda desta ADR, 2026-09-11 — ver
+"Correções" no fim deste documento).
 
 ## Decisão
 
@@ -64,7 +67,7 @@ uma dependência de interpretação materializada no `.ndfpkg`.
 | `papel` | Obrigatória quando | `ref` | Ficheiro correspondente |
 |---|---|---|---|
 | `"ndt"` | Sempre — todo o NDF tem `ndt_version_ref` | igual a `ndt_version_ref` | `ndt/<schema_id>@<versao>.ndt.json` |
-| `"schema_tipo"` | `metadados.tipo_documento_ref` usa extensão qualificada (mesma condição de `NDF-PROD-018`) | igual a `tipo_documento_ref` | `schemas/<tipo_id>.schema.json` |
+| `"schema_tipo"` | Sempre — canónico ou extensão qualificada (ver "Correções" no fim; a versão inicial só exigia para extensão qualificada) | igual a `tipo_documento_ref` | `schemas/<tipo_id>.schema.json` |
 | `"schema_perfil"` | `avaliacao.perfil` está declarado (sempre obrigatório em `schemas/`, §8.1) | igual a `avaliacao.perfil` | `schemas/<perfil>.schema.json` |
 
 `hash_sha256` é o SHA-256 dos **bytes brutos** do ficheiro tal como
@@ -76,11 +79,15 @@ impor um adicionaria uma segunda máquina de canonicalização por um ganho que
 o hash de bytes brutos já entrega — determinismo suficiente, porque o ficheiro
 é gerado uma vez e não reserializado (mesmo princípio de `NDF-PROD-020`).
 
-**Resolução por identificador, nunca por caminho** — `ref` identifica a
-dependência, `hash_sha256` verifica-a; o nome do ficheiro dentro de `ndt/` ou
-`schemas/` pode ser reorganizado sem invalidar nada, desde que o conteúdo e o
-identificador se mantenham. Mesmo princípio de `NDF-PKG-009` para
-`componentes[]`.
+**Resolução por caminho fixo, não por `ref`+hash** (corrigido na segunda
+ronda — ver "Correções"). `ref` identifica a dependência e `hash_sha256`
+verifica-a, mas o caminho físico é derivado do próprio `ref`
+(`ndt/<schema_id>@<versao>.ndt.json`, `schemas/<tipo_id ou perfil>.schema.json`),
+não livre. Ao contrário de `componentes[]` (ADR-021), que resolve por
+digest em diretórios de papel para admitir vários ficheiros por diretório
+com nomes livres, aqui há sempre um ficheiro por dependência — o caminho já
+a identifica univocamente, e procurar por hash em todo o diretório seria
+complexidade sem ganho correspondente.
 
 ### O teste de admissão de novas primitivas (`ROADMAP.md`)
 
@@ -179,6 +186,43 @@ já faz para `payload_hash`.
 responsabilidade — uma é documental e assinada, a outra é física do pacote —
 mas exige coerência entre as duas (`NDF-PKG-010`, novo, mesmo padrão de
 `NDF-PKG-009`).
+
+## Correções (segunda ronda, 2026-09-11)
+
+Revisão adversarial ao commit `3985001` (primeira implementação desta ADR)
+reproduziu três lacunas que a redação original desta ADR não cobria ou
+descrevia incorretamente:
+
+1. **R23 não estava corrigido**, apesar do texto do §"Contexto" o afirmar.
+   Substituir o recurso do NDT (`recursos/brasao-republica.svg`) e
+   recalcular só `manifest.json` passava — `PASS`. Implementado: verificação
+   física de `recursos[].hash_sha256` contra os bytes do ficheiro, resolvido
+   por nome = hash (§8.1), não pelo `id` declarado (`NDF-PKG-011`,
+   `NDF-READ-026`). Os dois pacotes de exemplo com recurso hash-referenciado
+   não seguiam sequer a convenção "nome = hash" que a SPEC já declarava — o
+   ficheiro chamava-se `brasao-republica.svg`, não pelo seu hash; corrigido
+   nos dois.
+2. **Schemas de tipo canónico não tinham proteção nenhuma.** A condição
+   original de `schema_tipo` (só extensão qualificada) deixava
+   `schemas/oficio.schema.json` — um schema canónico, não uma extensão —
+   livre para ser substituído no pacote sem deteção. Alterar-lhe a
+   `description` e recalcular só `manifest.json` passava — `PASS`.
+   Corrigido: `schema_tipo` passa a obrigatório sempre, e o pacote passa a
+   ter de transportar o schema do tipo mesmo quando canónico
+   (`NDF-PKG-007`, revisto).
+3. **A promessa de reorganização de caminhos nunca foi implementada.**
+   Renomear o ficheiro do NDT, mesmo com bytes e `ref` corretos e o
+   inventário atualizado, era rejeitado (`ndt/<ref>.ndt.json` ausente) — o
+   validador sempre resolveu por caminho fixo, nunca por `ref`+hash. Em vez
+   de implementar a resolução prometida — complexidade adicional sem
+   necessidade demonstrada, ao contrário de `componentes[]`, que precisa
+   dela por admitir vários ficheiros por diretório —, a decisão foi
+   **retirar a promessa**: a Decisão e a SPEC.md §2.6.2 passam a descrever
+   o comportamento real (caminho fixo).
+
+Nenhuma destas três exigiu rever a decisão de fundo (campo inline no
+NDF-core, ver "Alternativas consideradas") — são correções de âmbito e de
+honestidade descritiva sobre a mesma decisão, não uma decisão diferente.
 
 ## Referências
 

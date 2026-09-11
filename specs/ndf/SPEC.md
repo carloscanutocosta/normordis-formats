@@ -705,13 +705,23 @@ NDF-core. `dependencias_interpretacao` fecha essa lacuna (ADR-026):
 | `papel` | Obrigatória quando | Ficheiro correspondente |
 |---|---|---|
 | `"ndt"` | Sempre — todo o NDF-core tem `ndt_version_ref` | `ndt/<schema_id>@<versao>.ndt.json` |
-| `"schema_tipo"` | `metadados.tipo_documento_ref` usa extensão qualificada (mesma condição de `NDF-PROD-018`) | `schemas/<tipo_id>.schema.json` |
+| `"schema_tipo"` | Sempre — todo o schema de tipo documental usado para interpretar ou validar `documento`, canónico ou extensão qualificada (revisto 2026-09-11; a condição inicial, só para extensão qualificada, deixava por autenticar os schemas de tipos canónicos transportados no pacote) | `schemas/<tipo_id>.schema.json` |
 | `"schema_perfil"` | `avaliacao.perfil` está declarado (sempre obrigatório em `schemas/`, §8.1) | `schemas/<perfil>.schema.json` |
 
-A resolução é **por `ref`, nunca por caminho de ficheiro dentro do pacote** —
-uma reorganização do nome físico em `ndt/` ou `schemas/` não invalida nada,
-desde que o conteúdo e o `ref` se mantenham (mesmo princípio de
-`NDF-PKG-009` para `componentes[]`).
+**A resolução é por caminho fixo, não por `ref`+hash** (corrigido
+2026-09-11 — a primeira redação prometia resolução por `ref`, ao estilo de
+`NDF-PKG-009` para `componentes[]`, sem que o verificador a implementasse).
+Um verificador conforme localiza cada dependência em
+`ndt/<schema_id>@<versao>.ndt.json` ou `schemas/<tipo_id ou perfil>.schema.json`
+— o caminho é derivado do próprio `ref`, não livre. Renomear o ficheiro
+físico, mesmo mantendo bytes e `ref` corretos, torna o pacote não conforme
+(`ndt/`/`schemas/` ausentes no caminho esperado). Ao contrário de
+`componentes[]`, que resolve por digest em diretórios de papel
+(`original/`, `anexos/`, …) precisamente para permitir nomes livres, NDT e
+schemas não têm essa necessidade — há um por dependência, o caminho já os
+identifica univocamente, e resolver por hash exigiria procurar em todo o
+diretório. Ver a nota equivalente para recursos do NDT logo abaixo, que
+resolve por hash — aí há tipicamente vários por NDT.
 
 Os recursos do NDT (fontes, imagens) não precisam de entrada própria aqui:
 `ndt.schema.json` já vincula por hash cada recurso `referenciado_por_hash`
@@ -3047,12 +3057,17 @@ em `documento`, nenhum leitor sabe que papel tem, e a assinatura não o cobre.
 
 O diretório `schemas/` torna o pacote autonomamente validável: um verificador
 independente valida `documento` contra o schema que veio no pacote, sem acesso
-ao registo canónico. É **obrigatório** quando `tipo_documento_ref` usa uma
-extensão qualificada `ext.<entidade>.<tipo>@<versao>` (§2.9.5), por não haver
-outro local onde o schema possa ser resolvido, e RECOMENDADO nos restantes
-casos. O nome do ficheiro é o identificador do tipo sem a versão — por exemplo
-`schemas/ext.at.liquidacao-irs.schema.json` para
-`ext.at.liquidacao-irs@2026.1`.
+ao registo canónico. É **sempre obrigatório**, tanto para extensão qualificada
+`ext.<entidade>.<tipo>@<versao>` (§2.9.5) como para tipo canónico do registo —
+revisto em 2026-09-11: a condição original ("obrigatório para extensão
+qualificada, RECOMENDADO nos restantes casos") deixava o schema de um tipo
+canónico transportado no pacote sem vínculo criptográfico nenhum, ao contrário
+do que `dependencias_interpretacao` (§2.6.2, ADR-026) exige — um schema
+recebido no pacote e efetivamente usado para validar `documento` tem de ter a
+identidade autenticada, independentemente de o tipo ser canónico ou extensão
+qualificada. O nome do ficheiro é o identificador do tipo sem a versão — por
+exemplo `schemas/oficio.schema.json` para `oficio@1.0.0`, ou
+`schemas/ext.at.liquidacao-irs.schema.json` para `ext.at.liquidacao-irs@2026.1`.
 
 O schema do perfil de avaliação declarado em `avaliacao.perfil` (§3.2.3) é
 **sempre obrigatório** em `schemas/`, pela mesma razão: sem ele, um verificador
@@ -3126,7 +3141,7 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 22. **NDF-PROD-022 — NÃO DEVE** derivar `nivel_assinatura` de assinaturas contidas em componentes binários; o campo descreve a assinatura do NDF (§2.10, §4.5.1).
 23. **NDF-PROD-023 — NÃO DEVE** declarar `metadados.origem_nao_identificavel` em conjunto com `participantes` contendo `papel` em `autor`, `coautor` ou `decisor`, ou com `proveniencia_sistema` não vazio; e **DEVE** preencher `fundamento` com a razão concreta pela qual a origem não é apurável (§2.2.1, §2.7.6).
 24. **NDF-PROD-024 — DEVE** incluir em `dependencias_interpretacao` uma entrada com `papel: "ndt"` cujo `hash_sha256` seja o SHA-256 dos bytes do ficheiro NDT materializado em `ndt/` no `.ndfpkg` (§2.6.2, ADR-026).
-25. **NDF-PROD-025 — DEVE** incluir em `dependencias_interpretacao` uma entrada com `papel: "schema_tipo"` quando `NDF-PROD-018` se aplicar, e uma entrada com `papel: "schema_perfil"` sempre que `avaliacao.perfil` estiver declarado — cada uma com `hash_sha256` dos bytes do respetivo ficheiro em `schemas/` (§2.6.2, ADR-026).
+25. **NDF-PROD-025 — DEVE** incluir em `dependencias_interpretacao` uma entrada com `papel: "schema_tipo"`, referenciando o schema de `metadados.tipo_documento_ref` (canónico ou extensão qualificada), e uma entrada com `papel: "schema_perfil"` sempre que `avaliacao.perfil` estiver declarado — cada uma com `hash_sha256` dos bytes do respetivo ficheiro em `schemas/` (§2.6.2, ADR-026).
 
 ### 9.2 Leitor conforme
 
@@ -3157,6 +3172,7 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 23. **NDF-READ-023 — DEVE** resolver um componente declarado em `documento` pelo seu digest, e **NÃO DEVE** resolvê-lo pelo nome de origem declarado, que é descritivo (§2.8.1).
 24. **NDF-READ-024 — NÃO DEVE** interpretar `metadados.origem_nao_identificavel` como ausência de entidade produtora ou de responsável pela custódia, que continuam obrigatórios; o bloco declara apenas que a origem do conteúdo não é apurável (§2.7.6).
 25. **NDF-READ-025 — DEVE** recalcular o SHA-256 de cada ficheiro referenciado por `dependencias_interpretacao` (NDT e schemas materializados no `.ndfpkg`) e **REJEITAR** o documento se algum não corresponder ao `hash_sha256` declarado (§2.6.2, ADR-026).
+26. **NDF-READ-026 — DEVE** recalcular o SHA-256 de cada recurso do NDT em modo `referenciado_por_hash` contra o ficheiro `recursos/<hash>.<ext>` correspondente, resolvido pelo hash e não pelo `id` declarado, e **REJEITAR** o documento se o ficheiro estiver ausente ou o hash não corresponder (§8.1, ADR-026).
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 
@@ -3168,10 +3184,11 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 4. **NDF-PKG-004** — `SHA-256(ndf-core.json)` **DEVE** coincidir com `manifest.inventario[ndf-core.json].hash_sha256`.
 5. **NDF-PKG-005** — `ndf-core.json` **DEVE** ser um NDF-core conforme (§9.1).
 6. **NDF-PKG-006** — O NDT referenciado por `ndt_version_ref` **DEVE** estar presente em `ndt/<schema_id>@<versao>.ndt.json`.
-7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** ser resolúvel a partir do pacote em `schemas/<tipo_id>.schema.json` quando o tipo for uma extensão qualificada (§2.9.5); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver.
+7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** estar presente em `schemas/<tipo_id>.schema.json`, canónico ou extensão qualificada (§2.9.5, revisto 2026-09-11 — deixou de ser condicional à extensão qualificada); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver, caso em que o pacote não é conforme.
 8. **NDF-PKG-008** — O schema do perfil referenciado por `avaliacao.perfil` **DEVE** estar presente em `schemas/<perfil>.schema.json` (§3.2.3, §8.1), e o bloco `avaliacao` **DEVE** validar contra ele; um verificador **DEVE** resolvê-lo preferencialmente a partir do pacote.
 9. **NDF-PKG-009** — A correspondência entre componentes declarados e ficheiros do pacote **DEVE** fechar nos dois sentidos. Cada componente declarado em `documento` nos termos de §2.8.1 **DEVE** ter, em `manifest.inventario`, uma entrada cujo `hash_sha256` coincida com o seu digest, e o ficheiro correspondente **DEVE** estar presente. Inversamente, cada ficheiro contido em `original/`, `representacoes/`, `anexos/` ou `evidencias/` (§8.1) **DEVE** corresponder a um componente declarado. Um pacote que declare um componente ausente, cujo digest não coincida com os bytes presentes, ou que transporte num destes diretórios um ficheiro não declarado, **NÃO É** conforme.
 10. **NDF-PKG-010** — A correspondência entre `dependencias_interpretacao` e os ficheiros materializados **DEVE** fechar: cada entrada **DEVE** ter, em `ndt/` ou `schemas/` conforme o `papel`, um ficheiro cujo SHA-256 coincida com `hash_sha256`. Um pacote que declare uma entrada sem ficheiro correspondente, ou cujo ficheiro não coincida com o hash declarado, **NÃO É** conforme (§2.6.2, ADR-026).
+11. **NDF-PKG-011** — Cada recurso do NDT em modo `referenciado_por_hash` **DEVE** ter, em `recursos/`, um ficheiro cujo nome seja o `hash_sha256` declarado e cujo SHA-256 coincida com ele. Um pacote com recurso ausente ou cujo conteúdo não coincida com o hash declarado **NÃO É** conforme (§8.1, ADR-026).
 
 ### 9.4 Suite de conformidade e test runner
 

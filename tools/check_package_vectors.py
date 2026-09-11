@@ -52,6 +52,8 @@ def cases(root: Path):
     yield "PKG-NEG-017-ndt-texto-alterado-manifesto-recalculado", lambda p: _ndt_texto_alterado_manifesto_recalculado(p)
     yield "PKG-NEG-018-schema-perfil-trocado-manifesto-recalculado", lambda p: _schema_trocado_manifesto_recalculado(p)
     yield "PKG-NEG-019-dependencia-omitida", lambda p: _dependencia_omitida(p)
+    yield "PKG-NEG-020-schema-canonico-trocado-manifesto-recalculado", lambda p: _schema_canonico_trocado(p)
+    yield "PKG-NEG-021-recurso-trocado-manifesto-recalculado", lambda p: _recurso_trocado(p)
 
 
 def cases_captura(root: Path):
@@ -224,6 +226,40 @@ def _schema_trocado_manifesto_recalculado(root: Path) -> None:
     schema["properties"]["classificacao_ref"]["pattern"] = "^.*$"
     dump(path, schema)
     update_inventory_hash(root, relative)
+
+
+def _schema_canonico_trocado(root: Path) -> None:
+    """Troca o schema do tipo **canónico** (`oficio`, não extensão
+    qualificada) mantendo o identificador, e recalcula apenas manifest.json.
+
+    Reproduz revisão adversarial ao commit 3985001: a condição inicial de
+    `schema_tipo` (só extensão qualificada) deixava um schema canónico
+    transportado no pacote livre para ser substituído sem deteção —
+    `schemas/oficio.schema.json` alterado passava. Corrigido tornando
+    `schema_tipo` sempre obrigatório (§2.6.2, ADR-026, segunda ronda).
+    """
+    relative = "schemas/oficio.schema.json"
+    path = root / relative
+    schema = load(path)
+    schema["description"] = schema.get("description", "") + " [ALTERADO]"
+    dump(path, schema)
+    update_inventory_hash(root, relative)
+
+
+def _recurso_trocado(root: Path) -> None:
+    """Troca um recurso do NDT (`recursos/`) referenciado por hash,
+    mantendo o nome do ficheiro, e recalcula apenas manifest.json.
+
+    Reproduz R23 (achado da revisão externa de 2026-09-11): antes desta
+    verificação, `recursos[].hash_sha256` dentro do NDT não era confrontado
+    com os bytes físicos — trocar o ficheiro passava.
+    """
+    candidatos = list((root / "recursos").glob("*.svg"))
+    if not candidatos:
+        raise RuntimeError("nenhum recurso .svg encontrado no pacote de exemplo")
+    path = candidatos[0]
+    path.write_bytes(b"<svg>recurso trocado, mesmo nome de ficheiro</svg>")
+    update_inventory_hash(root, str(path.relative_to(root)))
 
 
 def _dependencia_omitida(root: Path) -> None:

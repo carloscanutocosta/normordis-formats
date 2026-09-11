@@ -26,7 +26,7 @@
       "hash_sha256": "sha256:c625845c9328e497dba50cddeacd2e4b43859fa9016cbbbda7db7b02612438a3"
     },
     {
-      "ficheiro": "recursos/brasao-republica.svg",
+      "ficheiro": "recursos/32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316.svg",
       "hash_sha256": "sha256:32c937bf849181d3799a656e088b304f575311b141e557aba7682e50b38c3316"
     },
     {
@@ -51,7 +51,7 @@
     },
     {
       "ficheiro": "schemas/ndf-core.schema.json",
-      "hash_sha256": "sha256:68d4c0dad923d85dc8a7b2a4a1ab8df4eabe1a40f5b7a01aa16c4e50f1269bcd"
+      "hash_sha256": "sha256:1f43ca59ebffd231384901250dce44235c42f99e8072c4347e3446758cfe3591"
     },
     {
       "ficheiro": "schemas/ndt.schema.json",

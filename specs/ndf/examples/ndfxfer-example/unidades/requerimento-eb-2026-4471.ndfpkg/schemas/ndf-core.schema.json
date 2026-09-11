@@ -608,7 +608,7 @@
             "schema_tipo",
             "schema_perfil"
           ],
-          "description": "Which interpretation dependency this entry binds. 'ndt' is always required (every NDF-core has ndt_version_ref). 'schema_tipo' is required under the same condition as NDF-PROD-018 (qualified type extension). 'schema_perfil' is required whenever avaliacao.perfil is declared. See SPEC.md §2.6.2."
+          "description": "Which interpretation dependency this entry binds. 'ndt' is always required (every NDF-core has ndt_version_ref). 'schema_tipo' is always required (revised 2026-09-11 — every type schema used to validate documento, canonical or qualified extension, not only NDF-PROD-018 cases). 'schema_perfil' is required whenever avaliacao.perfil is declared. See SPEC.md §2.6.2."
         },
         "ref": {
           "type": "string",
@@ -616,8 +616,8 @@
         },
         "hash_sha256": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*:[0-9a-f]+$",
-          "description": "SHA-256 of the raw bytes of the file as materialised in the .ndfpkg (ndt/ or schemas/), not JCS-canonicalised. Same convention as manifest.inventario[].hash_sha256 and documento.componentes[].sha256.",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "SHA-256 (exactly — the field name says so, unlike the algorithm-agnostic alvo.payload_hash) of the raw bytes of the file as materialised in the .ndfpkg (ndt/ or schemas/), not JCS-canonicalised. Same convention as manifest.inventario[].hash_sha256 and documento.componentes[].sha256.",
           "examples": [
             "sha256:3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b"
           ]
