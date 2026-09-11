@@ -292,6 +292,21 @@ template, ambos dentro dos bytes assinados; a fidelidade da renderização é
 garantida por perfil de conformidade de renderizador com testes golden, e o
 PDF pode ser adicionalmente assinado com PAdES quando o caso o exigir.»
 
+**Segunda correção (2026-09-11) — a formulação acima ainda estava
+sobredimensionada.** Avaliação externa ao commit `a9d72f8` mostrou que "versão
+exata do template" não equivale a "bytes do template". `ndt_version_ref`
+assinado é **nome + número de versão** — uma etiqueta. O hash dos bytes do
+NDT só existe no manifesto do `.ndfpkg` (SPEC §1.1), que **não está** coberto
+pela assinatura sobre o NDF-core. Reproduzido: substituir texto fixo do NDT,
+manter nome/versão, recalcular só o hash do manifesto — o validador aceita,
+com os mesmos bytes de NDF-core e envelope. Registado como `R16` (§5.6).
+
+A frase correta deixa de ser "a assinatura vincula dados + versão exata do
+template" e passa a ser: **a assinatura vincula dados + identificador de
+versão do template; os bytes do template ficam por vincular até `R16` estar
+resolvido.** A resposta de debate acima só pode ser usada depois de `R16`
+fechado — até lá, é uma afirmação a corrigir, não a repetir.
+
 ### 4.3 Como usar isto em debate
 
 A posição defensável **não** é «o NDF substitui o PDF». É:
@@ -349,6 +364,13 @@ Estado: `aberto`, `em curso`, `fechado por decisão`, `resolvido`.
 | R11 | O bloco `avaliacao` continua semanticamente acoplado ao modelo arquivístico português (PCA, DF, Lista Consolidada, DGLAB). Aceitável para 1.0 focada na AP portuguesa; relevante se o âmbito da candidatura for europeu | Médio — estava registado em [`../../ROADMAP.md`](../../ROADMAP.md) como nota para v2.0.0 | **resolvido** (2026-08-14) — ver 5.4 |
 | R12 | O plano em [`../roadmap/NGI-MVP-2026.md`](../roadmap/NGI-MVP-2026.md) ficou desatualizado: M2 (2026-08-15), M3 (2026-08-31), M4 (2026-09-15) e M5 (2026-09-30) assentam numa cadeia sequencial que D1 e D2 alteram | Médio — documento de orientação a induzir em erro se não for anotado | **em curso** — anotado como parcialmente superado |
 | R13 | A tese escrita em `NGI-MVP-2026.md` §2 e §11 é de *interoperabilidade documental*, mas a evidência demonstrável passa a ser saída para dois formatos. Reformulado em 2026-08-11: o problema **não** é a ausência do adapter XML — é a confusão de camadas na própria tese. Ver 5.2 | Médio-alto — desalinhamento entre a tese comunicada e a evidência demonstrável | **resolvido** (2026-08-11) — nota informativa `docs/interoperability/INTEROPERABILITY-LAYERS.md`; a interoperabilidade a demonstrar é ao nível do **pacote documental** (depósito OAIS), não dos dados |
+| R16 | O `ndt_version_ref` assinado identifica o NDT por **nome e versão**, não pelos seus bytes — o hash do NDT só existe no manifesto do `.ndfpkg`, fora dos bytes cobertos pela assinatura do NDF-core (SPEC.md §1.1). Reproduzido: substituir texto fixo do NDT mantendo nome/versão e recalculando apenas o hash do manifesto é aceite pelo validador, com os mesmos bytes de NDF-core e envelope. Corrige a leitura de §4.2.1, que tratava "versão exata do template" como equivalente a bytes vinculados | Alto — bloqueador de confiança na reconstituição documental; é a junta que falta para que "o que se assina" e "o que se vê" sejam a mesma coisa | **aberto** — ver 5.6; ADR-026 a escrever |
+| R17 | `rfc8785` é dependência opcional em `tools/validate.py` (import em `try/except`, `rfc8785 = None` em falha); se ausente, a verificação de bytes canónicos JCS é omitida sem qualquer sinal no resultado. Reproduzido simulando a ausência da biblioteca | Alto — uma verificação obrigatória pode desaparecer silenciosamente sem que o `PASS` o assinale | **aberto** — ver 5.6 |
+| R18 | O `PASS` global do validador não distingue estrutura, canonicalização, integridade de componentes, autenticação de dependências, assinatura/confiança e representação; o pacote de exemplo (`envelope.json`) recebe `PASS` com assinaturas, certificados e timestamps *placeholder*, sem sinalização de que não são reais | Médio-alto — um `PASS` sem camadas é fácil de ler como mais do que verifica | **aberto** — ver 5.6 |
+| R19 | `specs/registry/profiles/pt-dglab.schema.json`: o exemplo `ts/at/300.20` de `classificacao_ref` não passa na própria regex (`^[a-z][a-z0-9-]*/[^/]+$` exige uma única barra; o exemplo tem duas). Confirmado por teste do regex | Baixo — defeito editorial isolado, mas junta-se a outros sinais de deriva entre exemplos e schemas (ver 5.5, 5.6) | **aberto** |
+| R20 | `CRA_REPORTING.md` atribui o aviso a utilizadores afetados ao art. 14.º, n.º 4; o correto é o **n.º 8**. O texto também liga esse aviso à notificação prévia à autoridade como condição sequencial; o n.º 8 liga a obrigação ao momento em que o fabricante toma conhecimento do evento, não a essa sequência. Confirmado contra o texto do Regulamento (UE) 2024/2847 | Médio — erro de citação jurídica num documento apresentado como leitura operacional do CRA | **aberto** — ver 5.6 |
+| R21 | A SPEC do NDF apresenta a tensão entre imutabilidade e apagamento (RGPD) como "resolvida" por conservação legal, pseudonimização e eliminação no termo do prazo — formulação excessiva: pseudonimização não retira automaticamente os dados do âmbito do RGPD, e as exceções ao apagamento não autorizam de forma genérica a conservação de qualquer documento. `LACUNAS.md` L13 já mantém em aberto a ambiguidade de `base_legal_conservacao`, o que agrava apresentar a questão global como fechada | Médio — risco de sobre-prometer conformidade RGPD num texto lido por decisores | **aberto** — ver 5.6 |
+| R22 | A tabela de `nivel_assinatura` associa `qualificada` a certificado qualificado + CAdES-B-LTA, sem exigir explicitamente **dispositivo qualificado de criação de assinatura** (eIDAS art. 26.º/32.º). Sem essa distinção, `nivel_assinatura: "qualificada"` pode ser lido como conclusão jurídica em vez de requisito declarado pelo produtor, a confirmar pelo verificador | Médio-alto — confunde declaração do produtor com validação jurídica efetiva; agrava-se com a lacuna do gate CAdES (R2) | **aberto** — ver 5.6 |
 
 ---
 
@@ -724,6 +746,68 @@ Todos saneados: cada caso passa agora pela sua própria regra, verificado por
 mutação (remover a violação documentada e introduzir outra faz o runner falhar).
 Melhorou-se também `fmt_schema_error` para as proibições condicionais
 `if/then/else`, que produziam mensagens com o objeto validado inteiro.
+
+### 5.6 R16–R22 — avaliação externa ao commit `a9d72f8` (2026-09-11)
+
+Primeira revisão registada neste documento que não nasce de auto-revisão do
+mantenedor. Método declarado pelo avaliador: leitura de especificações,
+schemas, documentação de conformidade e código; execução da suite principal e
+de testes adversariais locais; análise jurídica documental (não parecer
+profissional). Reexecutados nesta sessão os pontos falsificáveis mais
+concretos — todos confirmados; ver plano de resolução em
+[`../../ROADMAP.md`](../../ROADMAP.md), Fase 1E.
+
+**R16 — ligação NDF↔NDT.** O achado mais grave. Detalhado em 4.2.1 (segunda
+correção). Resolve-se com um manifesto de dependências de interpretação cujo
+digest passa a integrar os bytes assinados do NDF-core — decisão a registar
+em ADR-026.
+
+**R17 — `rfc8785` opcional.** `tools/validate.py:29-38` importa `rfc8785` em
+`try/except`; se falhar, `rfc8785 = None` e o bloco de verificação JCS
+(linha ~1157) é saltado sem produzir erro nem aviso no relatório. Uma suite
+"verde" nessas condições não executou a verificação que julga ter executado.
+
+**R18 — `PASS` sem camadas.** Consequência do mesmo desenho: o resultado
+binário não distingue o que foi verificado do que não foi. O pacote de
+exemplo do repositório (`specs/ndf/examples/ndfpkg-example/envelope.json`)
+contém assinaturas, certificados e timestamps *placeholder* e ainda assim
+recebe `PASS` — correto para testar estrutura, mas indistinguível, na saída,
+de um pacote com prova criptográfica real.
+
+**R19 — regex vs. exemplo em `pt-dglab`.** Confirmado por teste direto do
+padrão: `ts/at/300.20`, um dos três exemplos declarados no próprio schema,
+tem duas barras e a regex só admite uma. Ou o exemplo está errado, ou a regra
+está — falta decidir qual, com quem conhece a semântica de `ts/at/...` na
+Tabela de Seleção.
+
+**R20 — citação do CRA.** `CRA_REPORTING.md:127` cita "Artigo 14(4)" para o
+aviso a utilizadores; o Regulamento (UE) 2024/2847 coloca essa obrigação no
+**artigo 14.º, n.º 8**: "After becoming aware of an actively exploited
+vulnerability or a severe incident [...] the manufacturer shall inform the
+impacted users [...] and, where appropriate, all users". Não há, no texto do
+n.º 8, condição de sequência face à notificação à autoridade — a obrigação
+liga-se ao conhecimento do evento, não a essa notificação. A distinção entre
+"vocação institucional" e sujeição efetiva ao CRA também precisa de correção
+de fundo, não só de citação.
+
+**R21 — RGPD apresentada como "resolvida".** `LACUNAS.md` L13 já assinala a
+ambiguidade de `base_legal_conservacao` como aberta; a SPEC, noutro sítio,
+fecha a mesma questão como resolvida. As duas afirmações não podem estar
+certas ao mesmo tempo.
+
+**R22 — definição de assinatura qualificada.** Falta, na tabela normativa, o
+requisito de dispositivo qualificado de criação de assinatura. Sem ele, a
+tabela lê-se como se certificado qualificado + CAdES-B-LTA bastassem para
+concluir qualificação — não bastam (eIDAS art. 26.º e 32.º).
+
+**Lição registada para o processo.** R19 e a contagem desatualizada em
+`docs/normalization/READINESS.md` (documentava 8 vetores negativos de
+pacote; `tools/check_package_vectors.py` corre hoje 16/16) são sintomas do
+mesmo tipo de deriva já registado em 5.5: uma suite verde não garante
+coerência semântica de todos os exemplos e afirmações. A mesma disciplina de
+teste por mutação aplicada em 5.5 devia estender-se a exemplos de schema.
+
+---
 
 ## 8. Registo de verificação
 
