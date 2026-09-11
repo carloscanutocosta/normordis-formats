@@ -7,21 +7,37 @@ Este documento assume, por precaução, que o ecossistema NORMORDIS (incluindo
 elementos digitais" nos termos do Regulamento (UE) 2024/2847 (Cyber
 Resilience Act). A vocação institucional do projeto, por si só, **não** é o
 critério que determina isso — é preciso separar especificação, software
-distribuído, atividade comercial e papel de cada interveniente. O critério
-real está no art. 2.º, n.º 4: software livre e de código aberto fica isento
-quando desenvolvido ou disponibilizado **fora do âmbito de uma atividade
-comercial**; o considerando 18 esclarece que a forma como o desenvolvimento é
-financiado não é, por si, decisiva — mas aceitar donativos que excedam os
-custos de conceção, desenvolvimento e disponibilização pode configurar
-atividade comercial. O art. 24.º cria ainda a categoria distinta de *steward*
-de software de código aberto — pessoa coletiva que apoia, de forma
-sistemática e sustentada, um projeto FOSS **destinado a atividades
-comerciais**, garantindo a sua viabilidade —, com obrigações próprias e mais
-limitadas do que as de fabricante. Nenhuma destas fronteiras está hoje
-clarificada para o NORMORDIS. **Isto não é uma determinação jurídica
-formal**; é uma decisão prática de estar preparado antes de confirmar a
-classificação exata com aconselhamento jurídico, à medida que o projeto for
-adotado por terceiros.
+distribuído, atividade comercial e papel de cada interveniente.
+
+**Correção (2026-09-11): a referência anterior ao art. 2.º, n.º 4, estava
+errada** — esse número exclui do âmbito do regulamento equipamento marítimo
+abrangido pela Diretiva 2014/90/UE; não tem relação com software livre ou de
+código aberto. O critério real não está numa exceção isolada, mas na própria
+definição do que aciona o regulamento: o art. 2.º, n.º 1, aplica-o a produtos
+"disponibilizados no mercado", e o art. 3.º, ponto 22, define
+"disponibilização no mercado" como o fornecimento **no decurso de uma
+atividade comercial**, a título oneroso ou gratuito. Se o NORMORDIS não for
+fornecido no decurso de atividade comercial, não preenche essa definição —
+não é uma isenção à parte, é a própria condição de entrada em âmbito que não
+se verifica.
+
+Os considerandos 15, 18 e 19 esclarecem essa fronteira: o considerando 15
+indica que aceitar donativos que excedam os custos de conceção,
+desenvolvimento e disponibilização pode configurar atividade comercial; o
+considerando 18 esclarece que a forma como o desenvolvimento é financiado não
+é, por si, decisiva, e que a disponibilização de software livre e de código
+aberto não monetizado pelos seus fabricantes não deve ser considerada
+atividade comercial; o considerando 19 descreve a figura do *steward* de
+código aberto — apoio sistemático e sustentado a um projeto, incluindo alojar
+ou gerir infraestrutura de desenvolvimento — e confirma que um mero
+contribuidor de código para um projeto que não está sob a sua
+responsabilidade fica fora do âmbito. O art. 24.º regula as obrigações,
+mais limitadas do que as de fabricante, desses *stewards*.
+
+Nenhuma destas fronteiras está hoje clarificada para o NORMORDIS. **Isto não
+é uma determinação jurídica formal**; é uma decisão prática de estar
+preparado antes de confirmar a classificação exata com aconselhamento
+jurídico, à medida que o projeto for adotado por terceiros.
 
 Este documento cobre a **obrigação de reporting regulatório** (Artigo 14 do
 CRA) — a notificação de vulnerabilidades ativamente exploradas ou incidentes

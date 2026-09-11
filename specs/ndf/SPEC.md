@@ -94,7 +94,7 @@ vida distintos:
 |---|---|---|
 | **NDF-core** | Fonte de verdade documental: conteúdo, metadados descritivos, classificação, avaliação arquivística e a referência ao NDT | Sim — é exatamente o que é canonicalizado (JCS) e assinado |
 | **Envelope** | Provas criptográficas: assinaturas CAdES-B-LTA, timestamps RFC 3161, material de validação (cadeia de certificados + revogação) | Não — é produzido a partir da assinatura sobre o NDF-core; adicionado depois |
-| **NDT** | Definição de apresentação, necessária à reprodução visual | Não — não integra os bytes assinados; é referenciado por `ndt_version_ref` |
+| **NDT** | Definição de apresentação, necessária à reprodução visual | Parcial — os bytes do NDT não integram o NDF-core, mas o `schema_id@versao` está em `ndt_version_ref` e o `hash_sha256` dos seus bytes está em `dependencias_interpretacao` (§2.6.2, ADR-026), ambos dentro dos `payload_bytes` |
 
 Estes três artefactos combinam-se em duas unidades com nome próprio:
 
@@ -302,6 +302,9 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "qualificada",
   "ndt_version_ref": "oficio-generico@1.0.0",
+  "dependencias_interpretacao": [
+    { "papel": "ndt", "ref": "oficio-generico@1.0.0", "hash_sha256": "sha256:…" }
+  ],
   "metadados": { /* ... ver §2.7 ... */ },
   "documento": { /* ... conteúdo lógico, estrutura definida por metadados.tipo_documento_ref ... */ },
   "avaliacao": { /* ... ver §3 ... */ }
@@ -316,6 +319,7 @@ O NDF-core é um objeto JSON com os seguintes campos de topo:
 | `payload_hash_alg` | Sim | Algoritmo usado para calcular `payload_hash`. Valor normativo desta versão: `"sha256"` (NIST FIPS 180-4). Ver §2.5. |
 | `nivel_assinatura` | Sim | Nível de assinatura eletrónica declarado pelo sistema produtor para este documento, segundo a política e o enquadramento jurídico que aplica. Enum fechado — ver §2.10. |
 | `ndt_version_ref` | Sim | Referência normativa ao NDT usado na reprodução visual. Formato: `"schema_id@versao_ndt"`. Ver §2.6. |
+| `dependencias_interpretacao` | Sim | Ligação criptográfica ao NDT e aos schemas que regem a interpretação do documento — hash dos bytes materializados no `.ndfpkg`. Ver §2.6.2. |
 | `metadados` | Sim | Metadados descritivos, classificação e conformidade. Schema completo definido em §2.7. |
 | `documento` | Sim | Conteúdo lógico do documento. Estrutura definida pelo schema referenciado em `metadados.tipo_documento_ref`. |
 | `avaliacao` | Sim | Avaliação arquivística — prazo de conservação e destino final, sob o perfil declarado. Ver §3. |
@@ -674,6 +678,50 @@ Para a maioria dos tipos de documento, os dois são 1:1 — um único NDT serve 
 - Um mesmo NDT é reutilizável por múltiplas versões patch do mesmo schema de documento.
 
 O registo (`specs/registry/`) mantém a correspondência canónica entre tipos de documento e os seus NDTs de referência.
+
+#### 2.6.2 `dependencias_interpretacao`
+
+`ndt_version_ref` identifica **que versão** do NDT é a referenciada; não
+vincula **que bytes** constituem essa versão — esse hash vivia apenas em
+`manifest.inventario` (§8.2), que não é coberto pela assinatura sobre o
+NDF-core. `dependencias_interpretacao` fecha essa lacuna (ADR-026):
+
+```json
+"dependencias_interpretacao": [
+  { "papel": "ndt", "ref": "oficio-generico@2.0.0", "hash_sha256": "sha256:…" },
+  { "papel": "schema_tipo", "ref": "ext.at.liquidacao-irs@2026.1", "hash_sha256": "sha256:…" },
+  { "papel": "schema_perfil", "ref": "pt-dglab", "hash_sha256": "sha256:…" }
+]
+```
+
+| Campo | Descrição |
+|---|---|
+| `papel` | `"ndt"` \| `"schema_tipo"` \| `"schema_perfil"`. |
+| `ref` | Identificador da dependência — igual a `ndt_version_ref`, `metadados.tipo_documento_ref` ou `avaliacao.perfil`, consoante `papel`. |
+| `hash_sha256` | SHA-256 dos bytes brutos do ficheiro tal como materializado no `.ndfpkg` — mesma convenção de `manifest.inventario[].hash_sha256` (§8.2) e `documento.componentes[].sha256` (§2.8.1). Não é JCS: o ficheiro não tem requisito de canonicalização própria, e não é reserializado. |
+
+**Obrigatoriedade de cada entrada:**
+
+| `papel` | Obrigatória quando | Ficheiro correspondente |
+|---|---|---|
+| `"ndt"` | Sempre — todo o NDF-core tem `ndt_version_ref` | `ndt/<schema_id>@<versao>.ndt.json` |
+| `"schema_tipo"` | `metadados.tipo_documento_ref` usa extensão qualificada (mesma condição de `NDF-PROD-018`) | `schemas/<tipo_id>.schema.json` |
+| `"schema_perfil"` | `avaliacao.perfil` está declarado (sempre obrigatório em `schemas/`, §8.1) | `schemas/<perfil>.schema.json` |
+
+A resolução é **por `ref`, nunca por caminho de ficheiro dentro do pacote** —
+uma reorganização do nome físico em `ndt/` ou `schemas/` não invalida nada,
+desde que o conteúdo e o `ref` se mantenham (mesmo princípio de
+`NDF-PKG-009` para `componentes[]`).
+
+Os recursos do NDT (fontes, imagens) não precisam de entrada própria aqui:
+`ndt.schema.json` já vincula por hash cada recurso `referenciado_por_hash`
+dentro do próprio NDT (`recursos[].hash_sha256`, nome do ficheiro em
+`recursos/` igual ao hash — §8.1). Uma vez que o hash do NDT esteja em
+`dependencias_interpretacao`, o hash de cada recurso fica transitivamente
+coberto, por estar dentro dos bytes do NDT.
+
+Ver [ADR-026](../../docs/architecture/ADR-026-dependencias-interpretacao-autenticadas.md)
+para a justificação completa e as alternativas consideradas.
 
 ### 2.7 `metadados` — schema normativo
 
@@ -1373,7 +1421,7 @@ uma assinatura pessoal. Ver a arquitetura normativa comum em
 |---|---|---|---|
 | `"nenhuma"` | — | Nenhum | Passos 1–3 e 8 (canonicalização, hash, validation_code, persistência) |
 | `"avancada"` | SEA — Assinatura Eletrónica Avançada (eIDAS Art.º 26.º) | Certificado com identificação única do signatário; não obrigatoriamente qualificado | Passos 1–8 com CAdES-B-LTA |
-| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS **E** criação por dispositivo qualificado de criação de assinatura (QSCD, eIDAS Art.º 26.º) | Passos 1–8 com CAdES-B-LTA |
+| `"qualificada"` | SEQ — Assinatura Eletrónica Qualificada (eIDAS Art.º 25.º; definição no Art.º 3.º, ponto 12) | Certificado qualificado emitido por PSSC inscrito na lista de confiança eIDAS **E** criação por dispositivo qualificado de criação de assinatura (QSCD, requisitos no Art.º 29.º e Anexo II) | Passos 1–8 com CAdES-B-LTA |
 
 **Esta tabela não dá exemplos de tipos de ato, e a omissão é deliberada.** Uma
 coluna que associasse ofícios a `"avancada"` e contratos públicos a
@@ -1384,8 +1432,13 @@ do pipeline desencadeia. Que atos pertencem a cada classe é matéria de §2.10.
 
 **Nota sobre o requisito de dispositivo qualificado.** Certificado qualificado
 e CAdES-B-LTA não bastam, por si, para concluir que existe uma assinatura
-eletrónica qualificada — o eIDAS exige também o QSCD (Art.º 26.º), e a
-verificação desse requisito segue o Art.º 32.º. A coluna acima descreve o que
+eletrónica qualificada — a definição do Art.º 3.º, ponto 12, exige também
+criação por dispositivo qualificado de criação de assinatura (QSCD), cujos
+requisitos técnicos constam do Art.º 29.º e do Anexo II; a validação de uma
+assinatura qualificada tem de confirmar especificamente esse ponto (Art.º
+32.º, n.º 1, alínea f)) — distinto do Art.º 26.º, que fixa os requisitos da
+assinatura eletrónica **avançada** (linha `"avancada"` acima), não os do
+dispositivo qualificado. A coluna acima descreve o que
 `nivel_assinatura: "qualificada"` **declara** ser exigido pelo produtor no
 momento da assinatura; não é, por si, prova de que o requisito foi cumprido.
 `nivel_assinatura` é uma declaração do produtor; a evidência de certificado e
@@ -3035,8 +3088,8 @@ exemplo valida contra `manifest.schema.json`):
 ### 8.3 Garantias do `.ndfpkg`
 
 - **Auto-suficiência**: contém tudo o que é necessário para verificar a assinatura, reproduzir visualmente o documento e confirmar a avaliação arquivística — sem dependência de infraestrutura online.
-- **NDT embebido**: o NDT referenciado por `ndt_version_ref` é incluído no pacote, garantindo reprodutibilidade visual mesmo que o NDT evolua ou o repositório original deixe de existir.
-- **Verificabilidade**: o pacote permite a qualquer implementação conforme verificar `sha256(ndf-core.json) == payload_hash` e validar a assinatura CAdES-B-LTA sem acesso ao core-documental original.
+- **NDT embebido e vinculado por hash**: o NDT referenciado por `ndt_version_ref` é incluído no pacote, garantindo reprodutibilidade visual mesmo que o NDT evolua ou o repositório original deixe de existir; o seu `hash_sha256` está em `dependencias_interpretacao`, dentro dos bytes assinados — substituir o ficheiro sem invalidar a assinatura não é possível (§2.6.2, ADR-026).
+- **Verificabilidade**: o pacote permite a qualquer implementação conforme verificar `sha256(ndf-core.json) == payload_hash`, validar a assinatura CAdES-B-LTA e confirmar que o NDT e os schemas materializados coincidem com `dependencias_interpretacao` (`NDF-PKG-010`) — sem acesso ao core-documental original.
 - **Cadeia de sucessão**: reconstruível a partir das `relacoes` no `ndf-core.json` de cada pacote (§6.3) — os bytes assinados. O `manifest.json` é inventário físico do pacote e NÃO DEVE duplicar informação documental do NDF-core.
 
 ---
@@ -3072,6 +3125,8 @@ Uma implementação é um **produtor NDF conforme** se e apenas se satisfizer to
 21. **NDF-PROD-021 — NÃO DEVE** incluir numa declaração de componente qualquer localização de armazenamento — URI, *bucket*, caminho dentro do pacote ou nome de adaptador (§2.8.1).
 22. **NDF-PROD-022 — NÃO DEVE** derivar `nivel_assinatura` de assinaturas contidas em componentes binários; o campo descreve a assinatura do NDF (§2.10, §4.5.1).
 23. **NDF-PROD-023 — NÃO DEVE** declarar `metadados.origem_nao_identificavel` em conjunto com `participantes` contendo `papel` em `autor`, `coautor` ou `decisor`, ou com `proveniencia_sistema` não vazio; e **DEVE** preencher `fundamento` com a razão concreta pela qual a origem não é apurável (§2.2.1, §2.7.6).
+24. **NDF-PROD-024 — DEVE** incluir em `dependencias_interpretacao` uma entrada com `papel: "ndt"` cujo `hash_sha256` seja o SHA-256 dos bytes do ficheiro NDT materializado em `ndt/` no `.ndfpkg` (§2.6.2, ADR-026).
+25. **NDF-PROD-025 — DEVE** incluir em `dependencias_interpretacao` uma entrada com `papel: "schema_tipo"` quando `NDF-PROD-018` se aplicar, e uma entrada com `papel: "schema_perfil"` sempre que `avaliacao.perfil` estiver declarado — cada uma com `hash_sha256` dos bytes do respetivo ficheiro em `schemas/` (§2.6.2, ADR-026).
 
 ### 9.2 Leitor conforme
 
@@ -3101,6 +3156,7 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 22. **NDF-READ-022 — NÃO DEVE** apresentar uma assinatura contida num componente como assinatura do NDF, nem inferir dela o `nivel_assinatura` (§4.5.1).
 23. **NDF-READ-023 — DEVE** resolver um componente declarado em `documento` pelo seu digest, e **NÃO DEVE** resolvê-lo pelo nome de origem declarado, que é descritivo (§2.8.1).
 24. **NDF-READ-024 — NÃO DEVE** interpretar `metadados.origem_nao_identificavel` como ausência de entidade produtora ou de responsável pela custódia, que continuam obrigatórios; o bloco declara apenas que a origem do conteúdo não é apurável (§2.7.6).
+25. **NDF-READ-025 — DEVE** recalcular o SHA-256 de cada ficheiro referenciado por `dependencias_interpretacao` (NDT e schemas materializados no `.ndfpkg`) e **REJEITAR** o documento se algum não corresponder ao `hash_sha256` declarado (§2.6.2, ADR-026).
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 
@@ -3115,6 +3171,7 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 7. **NDF-PKG-007** — O schema do tipo referenciado por `metadados.tipo_documento_ref` **DEVE** ser resolúvel a partir do pacote em `schemas/<tipo_id>.schema.json` quando o tipo for uma extensão qualificada (§2.9.5); um verificador **DEVE** resolver o schema do tipo preferencialmente a partir do pacote, recorrendo ao registo canónico apenas quando o pacote não o contiver.
 8. **NDF-PKG-008** — O schema do perfil referenciado por `avaliacao.perfil` **DEVE** estar presente em `schemas/<perfil>.schema.json` (§3.2.3, §8.1), e o bloco `avaliacao` **DEVE** validar contra ele; um verificador **DEVE** resolvê-lo preferencialmente a partir do pacote.
 9. **NDF-PKG-009** — A correspondência entre componentes declarados e ficheiros do pacote **DEVE** fechar nos dois sentidos. Cada componente declarado em `documento` nos termos de §2.8.1 **DEVE** ter, em `manifest.inventario`, uma entrada cujo `hash_sha256` coincida com o seu digest, e o ficheiro correspondente **DEVE** estar presente. Inversamente, cada ficheiro contido em `original/`, `representacoes/`, `anexos/` ou `evidencias/` (§8.1) **DEVE** corresponder a um componente declarado. Um pacote que declare um componente ausente, cujo digest não coincida com os bytes presentes, ou que transporte num destes diretórios um ficheiro não declarado, **NÃO É** conforme.
+10. **NDF-PKG-010** — A correspondência entre `dependencias_interpretacao` e os ficheiros materializados **DEVE** fechar: cada entrada **DEVE** ter, em `ndt/` ou `schemas/` conforme o `papel`, um ficheiro cujo SHA-256 coincida com `hash_sha256`. Um pacote que declare uma entrada sem ficheiro correspondente, ou cujo ficheiro não coincida com o hash declarado, **NÃO É** conforme (§2.6.2, ADR-026).
 
 ### 9.4 Suite de conformidade e test runner
 

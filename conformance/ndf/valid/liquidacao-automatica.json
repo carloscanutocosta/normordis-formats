@@ -6,6 +6,23 @@
   "payload_hash_alg": "sha256",
   "nivel_assinatura": "nenhuma",
   "ndt_version_ref": "oficio-generico@1.0.0",
+  "dependencias_interpretacao": [
+    {
+      "papel": "ndt",
+      "ref": "oficio-generico@1.0.0",
+      "hash_sha256": "sha256:ba6c130b9c4f65f325f06aa3893ba2ef771417f4ce0b21c756d49f64c1e85757"
+    },
+    {
+      "papel": "schema_tipo",
+      "ref": "ext.at.liquidacao-irs@2026.1",
+      "hash_sha256": "sha256:e41db6d24d34461e28d42cf9a659bc8256ee98c10a38d8a5b5fb5cd6b99bf938"
+    },
+    {
+      "papel": "schema_perfil",
+      "ref": "pt-dglab",
+      "hash_sha256": "sha256:769c5363ac54fc4b20680b1c3dbf0f8a140a7fc9abab0bb1db2c4f0ffb0af6db"
+    }
+  ],
   "metadados": {
     "tipo_documento_ref": "ext.at.liquidacao-irs@2026.1",
     "entidade_produtora": {
