@@ -485,12 +485,17 @@ concluídos (D8).
 **Critério de conclusão**: cada garantia pública aponta para um requisito e
 uma evidência; onde falta evidência, isso fica dito junto da afirmação.
 
-### P0.2 — Ligação criptográfica NDF↔NDT (`R16`, `R23`, `R24`) — ✅ concluído (2026-09-11)
+### P0.2 — Ligação criptográfica NDF↔NDT (`R16`, `R23`, `R24`, `R25`) — ✅ concluído (2026-09-11)
 
-Duas rondas. A primeira (commit `3985001`) fechou o ataque ao NDT mas deixou
-duas dependências sem a mesma proteção e uma promessa da SPEC por cumprir —
-achados de revisão adversarial ao próprio commit, verificados de forma
-independente antes de corrigir. A segunda ronda fecha os três.
+Três rondas, cada uma resposta a revisão adversarial à ronda anterior,
+verificada de forma independente antes de corrigir. A primeira (commit
+`3985001`) fechou o ataque ao NDT mas deixou duas dependências sem a mesma
+proteção e uma promessa da SPEC por cumprir. A segunda fechou essas duas
+(`R23`, `R24`) e retirou a promessa. A terceira (`R25`) fechou uma
+ambiguidade na própria correção de `R23`: a resolução do recurso por
+`recursos/<hash>.*` só verificava o primeiro candidato por ordem
+alfabética — dois ficheiros com o mesmo hash declarado, um legítimo e um
+adulterado, e só o primeiro por ordem alfabética era escrutinado.
 
 - [x] Registado em **[ADR-026](docs/architecture/ADR-026-dependencias-interpretacao-autenticadas.md)**:
       campo `dependencias_interpretacao` inline no NDF-core (não manifesto
@@ -531,13 +536,14 @@ independente antes de corrigir. A segunda ronda fecha os três.
   | Omitir uma dependência do manifesto | rejeitar | ✅ `PKG-NEG-019` |
   | Trocar o schema de um tipo **canónico** (não extensão) mantendo o identificador | rejeitar | ✅ `PKG-NEG-020` |
   | Substituir uma fonte ou imagem referenciada pelo NDT | rejeitar | ✅ `PKG-NEG-021` |
+  | Dois ficheiros candidatos ao mesmo recurso (um legítimo, um adulterado) | rejeitar | ✅ `PKG-NEG-022` |
   | Reorganizar os caminhos do pacote, mesmos componentes | — | retirado; resolução é por caminho fixo, não é mais uma promessa a testar |
 
-**Critério de conclusão**: cumprido, incluindo as duas lacunas e a
-divergência de contrato encontradas na revisão adversarial ao próprio
-commit. Verificado: `tools/validate.py` 103/103, `check_spec_coherence`
-PASS, `check_package_vectors` 21/21, `check_profile_patterns` PASS,
-`audit_normative` 109 IDs / 317 declarações.
+**Critério de conclusão**: cumprido, incluindo as lacunas e a divergência de
+contrato encontradas em três rondas de revisão adversarial sucessivas —
+cada uma à correção da anterior. Verificado: `tools/validate.py` 103/103,
+`check_spec_coherence` PASS, `check_package_vectors` 22/22,
+`check_profile_patterns` PASS, `audit_normative` 109 IDs / 317 declarações.
 
 ### P0.3 — Validador honesto sobre o que verificou (`R17`, `R18`)
 

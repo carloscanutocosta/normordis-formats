@@ -224,6 +224,21 @@ Nenhuma destas três exigiu rever a decisão de fundo (campo inline no
 NDF-core, ver "Alternativas consideradas") — são correções de âmbito e de
 honestidade descritiva sobre a mesma decisão, não uma decisão diferente.
 
+## Correções (terceira ronda, 2026-09-11)
+
+Revisão adversarial à correção de R23 (segunda ronda, acima) encontrou uma
+ambiguidade na própria verificação: resolvia `recursos/<hash>.*` e
+confirmava só o primeiro ficheiro por ordem alfabética
+(`candidatos[0]`), ignorando os restantes. Uma cópia legítima com extensão
+`.aaa` ao lado do `.svg` original adulterado dava `PASS` — `.aaa` ordena
+antes de `.svg`, e só esse primeiro era verificado; o ficheiro adulterado
+nunca era escrutinado. Registado como `R25`. Corrigido: mais de um
+candidato para o mesmo hash é erro explícito, não escolha silenciosa do
+primeiro (`NDF-PKG-011`, vetor `PKG-NEG-022`). Corrigida também, no mesmo
+commit, a descrição de `dependencia_interpretacao.ref` no schema, que ainda
+dizia "nunca por caminho" — desatualizada desde a correção do ponto 3
+acima.
+
 ## Referências
 
 - SPEC.md §1.2 (composição), §2.6 (`ndt_version_ref`), §2.6.2 (novo,

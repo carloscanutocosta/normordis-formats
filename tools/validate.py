@@ -1240,6 +1240,18 @@ def validate_package_dir(root: Path) -> bool:
                     f"encontrado para o hash declarado (NDF-PKG-011, §8.1)"
                 )
                 continue
+            if len(candidatos) > 1:
+                # Ambiguidade real, não só teórica: verificar candidatos[0] e
+                # ignorar os restantes deixaria um ficheiro nunca escrutinado
+                # ao lado de outro que passou — um renderizador que escolha
+                # por extensão ou tipo pode consumir precisamente esse.
+                nomes = ", ".join(c.name for c in candidatos)
+                errors.append(
+                    f"recurso '{rid}': mais de um ficheiro em 'recursos/' para "
+                    f"o mesmo hash ({nomes}) — resolução tem de ser unívoca "
+                    f"(NDF-PKG-011, §8.1)"
+                )
+                continue
             alvo = candidatos[0]
             atual = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
             if atual != declarado:
