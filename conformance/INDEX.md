@@ -6,7 +6,7 @@ editado manualmente. A definição normativa de conformidade está em
 
 ## NDF
 
-### `valid/` — devem ser aceites (17)
+### `valid/` — devem ser aceites (18)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -26,9 +26,10 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/valid/protecao-dados-regime-nao-eu.json` | Caso de teste: base legal de conservação declarada num regime que não é o RGPD. Cobre §1.4.1 — 'base_legal_conservacao' é um par {regime, base} e o NDF não enum… |
 | `ndf/valid/registo-interno-sem-assinatura.json` | Caso de teste: registo interno sem assinatura eletrónica (nivel_assinatura: nenhuma), com destino_final conservacao_permanente. Requer CAdES-B-LTA para integrid… |
 | `ndf/valid/relacao-extensao-qualificada.json` | Caso de teste: relacoes[0].tipo usa extensão qualificada 'ext.<entidade>.<tipo>' (§2.11.7), fora do vocabulário base fechado mas estruturalmente válida. |
+| `ndf/valid/revisor-humano-com-evidencia-acao.json` | Caso de teste: registo interno sem assinatura eletrónica (nivel_assinatura: nenhuma), com um participante revisor_humano cuja ação é sustentada por evidencia_ac… |
 | `ndf/valid/versao-substituicao.json` | Caso de teste: NDF-core de um documento que SUBSTITUI um anterior, via relacoes[{tipo:'substitui'}] no core assinado (§6, ADR-011). O NDF-core em si tem estado=… |
 
-### `invalid/` — devem ser rejeitados (38)
+### `invalid/` — devem ser rejeitados (39)
 
 | Ficheiro | Descrição |
 |---|---|
@@ -38,6 +39,7 @@ editado manualmente. A definição normativa de conformidade está em
 | `ndf/invalid/base-legal-sem-regime.json` | Caso de teste inválido: 'base_legal_conservacao' declara 'base' sem 'regime'. Uma base legal sem o regime a que pertence não tem significado determinado — o mes… |
 | `ndf/invalid/dados-pessoais-sem-base-legal.json` | INVÁLIDO: contem_dados_pessoais: true mas base_legal_conservacao ausente. Violação: §2.7.2, §1.6. |
 | `ndf/invalid/document-schema-mismatch.json` | INVÁLIDO: documento não cumpre o schema oficio@1.0.0. |
+| `ndf/invalid/evidencia-acao-sem-ambito.json` | INVÁLIDO: participantes[1].evidencia_acao omite o campo obrigatório ambito. Sem ambito, a evidência não identifica que conteúdo foi apresentado à pessoa no inst… |
 | `ndf/invalid/idioma-locale-posix.json` | INVÁLIDO: idioma usa a forma de locale POSIX 'pt_PT' em vez da etiqueta BCP 47 'pt-PT'. Violação: §2.7.2 — o separador é hífen, não underscore. |
 | `ndf/invalid/idiomas-autenticos-sem-principal.json` | Caso de teste inválido: 'idiomas_autenticos' não inclui o valor de 'idioma'. A versão que o NDF apresenta tem de constar das igualmente autênticas, sob pena de … |
 | `ndf/invalid/imputacao-aceitacao-sem-data.json` | INVÁLIDO: imputação por aceitação expressa sem o instante 'em'. Violação: §2.15.2 — a aceitação é um ato datado. |
@@ -156,4 +158,4 @@ editado manualmente. A definição normativa de conformidade está em
 | `jcs/numbers.json` | — |
 | `jcs/vectors.json` | — |
 
-**Total: 102 casos.**
+**Total: 104 casos.**
