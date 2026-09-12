@@ -712,8 +712,9 @@ método em READINESS-ASSESSMENT.md §5.6.
       escaparam duas vezes
 - [x] Corrigir contagem de vetores negativos de pacote em
       `docs/normalization/READINESS.md` (8 → 16)
-- [ ] Reexecutar `tools/check_spec_coherence.py` e a suite completa depois
-      das correções
+- [x] Reexecutar `tools/check_spec_coherence.py` e a suite completa depois
+      das correções — verde de forma repetida nas rondas de 2026-09-12
+      (`evidencia_acao`, §2.12.8, e correções subsequentes)
 
 ### P1.1 — Laboratório CAdES sem cartões (estende a Fase 1D / D4)
 
