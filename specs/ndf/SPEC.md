@@ -3172,7 +3172,7 @@ Uma implementação é um **leitor NDF conforme** se e apenas se satisfizer todo
 23. **NDF-READ-023 — DEVE** resolver um componente declarado em `documento` pelo seu digest, e **NÃO DEVE** resolvê-lo pelo nome de origem declarado, que é descritivo (§2.8.1).
 24. **NDF-READ-024 — NÃO DEVE** interpretar `metadados.origem_nao_identificavel` como ausência de entidade produtora ou de responsável pela custódia, que continuam obrigatórios; o bloco declara apenas que a origem do conteúdo não é apurável (§2.7.6).
 25. **NDF-READ-025 — DEVE** recalcular o SHA-256 de cada ficheiro referenciado por `dependencias_interpretacao` (NDT e schemas materializados no `.ndfpkg`) e **REJEITAR** o documento se algum não corresponder ao `hash_sha256` declarado (§2.6.2, ADR-026).
-26. **NDF-READ-026 — DEVE** recalcular o SHA-256 de cada recurso do NDT em modo `referenciado_por_hash` contra o ficheiro `recursos/<hash>.<ext>` correspondente, resolvido pelo hash e não pelo `id` declarado, e **REJEITAR** o documento se o ficheiro estiver ausente ou o hash não corresponder (§8.1, ADR-026).
+26. **NDF-READ-026 — DEVE** localizar, para cada recurso do NDT em modo `referenciado_por_hash`, todos os ficheiros em `recursos/` cujo nome comece pelo `hash_sha256` declarado (resolução pelo hash, não pelo `id`), e **REJEITAR** o documento se esse conjunto não tiver **exatamente um** elemento, ou se o SHA-256 do único ficheiro encontrado não corresponder ao hash declarado (§8.1, ADR-026). **NÃO DEVE** aceitar o primeiro de vários candidatos por qualquer critério de ordenação — mais de um candidato é, em si, motivo de rejeição.
 
 ### 9.3 Pacote conforme (`.ndfpkg`)
 
@@ -3188,21 +3188,25 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 8. **NDF-PKG-008** — O schema do perfil referenciado por `avaliacao.perfil` **DEVE** estar presente em `schemas/<perfil>.schema.json` (§3.2.3, §8.1), e o bloco `avaliacao` **DEVE** validar contra ele; um verificador **DEVE** resolvê-lo preferencialmente a partir do pacote.
 9. **NDF-PKG-009** — A correspondência entre componentes declarados e ficheiros do pacote **DEVE** fechar nos dois sentidos. Cada componente declarado em `documento` nos termos de §2.8.1 **DEVE** ter, em `manifest.inventario`, uma entrada cujo `hash_sha256` coincida com o seu digest, e o ficheiro correspondente **DEVE** estar presente. Inversamente, cada ficheiro contido em `original/`, `representacoes/`, `anexos/` ou `evidencias/` (§8.1) **DEVE** corresponder a um componente declarado. Um pacote que declare um componente ausente, cujo digest não coincida com os bytes presentes, ou que transporte num destes diretórios um ficheiro não declarado, **NÃO É** conforme.
 10. **NDF-PKG-010** — A correspondência entre `dependencias_interpretacao` e os ficheiros materializados **DEVE** fechar: cada entrada **DEVE** ter, em `ndt/` ou `schemas/` conforme o `papel`, um ficheiro cujo SHA-256 coincida com `hash_sha256`. Um pacote que declare uma entrada sem ficheiro correspondente, ou cujo ficheiro não coincida com o hash declarado, **NÃO É** conforme (§2.6.2, ADR-026).
-11. **NDF-PKG-011** — Cada recurso do NDT em modo `referenciado_por_hash` **DEVE** ter, em `recursos/`, um ficheiro cujo nome seja o `hash_sha256` declarado e cujo SHA-256 coincida com ele. Um pacote com recurso ausente ou cujo conteúdo não coincida com o hash declarado **NÃO É** conforme (§8.1, ADR-026).
+11. **NDF-PKG-011** — Cada recurso do NDT em modo `referenciado_por_hash` **DEVE** ter, em `recursos/`, **exatamente um** ficheiro cujo nome seja o `hash_sha256` declarado, e o seu SHA-256 **DEVE** coincidir com ele. Um pacote com recurso ausente, com mais de um ficheiro correspondente ao mesmo `hash_sha256` (mesmo nome, extensões diferentes), ou cujo conteúdo não coincida com o hash declarado, **NÃO É** conforme (§8.1, ADR-026).
 
 ### 9.4 Suite de conformidade e test runner
 
 A suite oficial de casos de teste está em `conformance/ndf/`. O test runner de referência é `tools/validate.py`.
 
 ```bash
-# Pré-requisito
-pip install jsonschema
+# Pré-requisito — rfc8785 é obrigatório desde 2026-09-11 (R17); sem ela o
+# runner recusa arrancar, em vez de omitir a verificação de canonicalização
+pip install -r tools/requirements.txt
 
 # Correr toda a suite NDF + NDT + NCRTF
 python3 tools/validate.py
 
 # Validar o exemplo portátil end-to-end
 python3 tools/validate.py --package specs/ndf/examples/ndfpkg-example
+
+# Idem, com relatório por camada em JSON (§9.4.2)
+python3 tools/validate.py --package specs/ndf/examples/ndfpkg-example --json
 
 # Validar um ficheiro específico
 python3 tools/validate.py path/to/ndf-core.json
@@ -3240,6 +3244,41 @@ equivalente, a correspondência entre a rejeição e a violação documentada em
 verificação internas. Estes campos **NÃO DEVEM** constar do NDF-core produzido
 por uma implementação — o test runner remove-os automaticamente antes de
 validar.
+
+#### 9.4.2 Comunicação de resultados por camada (verificação de pacote)
+
+Revisão de 2026-09-11 (R18): um resultado único de aceite/rejeitado para um
+`.ndfpkg` esconde diferenças relevantes — a validade estrutural, com
+`payload_hash` correto e dependências autenticadas, é independente da
+validade criptográfica da assinatura e da confiança na cadeia de
+certificados. Nenhuma implementação deste projeto faz essa segunda
+verificação — não há biblioteca CAdES nem trust store em
+`tools/validate.py` — pelo que um `PASS` indistinto convida a lê-lo como mais
+do que foi de facto verificado.
+
+**RECOMENDA-SE** que um verificador de pacote separe o resultado em, pelo
+menos, estas camadas: estrutura (schemas, inventário, ligações NDT↔tipo),
+canonicalização (JCS, `payload_hash`, `validation_code`), integridade de
+componentes (`NDF-PKG-009`), dependências de interpretação autenticadas
+(`NDF-PKG-010`, `NDF-PKG-011`), assinatura/confiança, e representação
+(fidelidade de renderização). Cada camada **DEVE** ser reportada como
+aprovada, reprovada, indeterminada ou não executada — nunca silenciosamente
+omitida.
+
+Em particular, a camada de assinatura/confiança **NÃO DEVE** ser reportada
+como aprovada por um verificador que não realize validação criptográfica
+efetiva da assinatura e da cadeia de certificados — "indeterminada" é o
+resultado honesto quando apenas a presença estrutural de assinatura,
+timestamps e material de validação foi confirmada. Um verificador **DEVE**
+sinalizar explicitamente quando esse material contém marcadores de
+conteúdo fictício (como os `<..._PLACEHOLDER>` dos pacotes de exemplo desta
+especificação) — aceitar esse material sem sinalização confundiria um
+pacote de teste com um documento genuíno.
+
+`tools/validate.py --package <dir> --json` implementa esta recomendação, com
+`tools/check_layered_report.py` a verificar os três estados possíveis da
+camada de assinatura/confiança (indeterminada com/sem placeholder, não
+executada).
 
 ### 9.5 Perfil de Ciclo de Vida NORMORDIS (opcional)
 

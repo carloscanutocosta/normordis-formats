@@ -37,6 +37,12 @@ jobs:
       - name: Profile schema pattern/examples coherence
         run: python3 tools/check_profile_patterns.py
 
+      - name: JCS canonicalisation cannot be silently skipped (R17)
+        run: python3 tools/check_jcs_required.py
+
+      - name: Layered package report (R18)
+        run: python3 tools/check_layered_report.py
+
       - name: Conjunto de transferência — exemplo (must pass)
         run: |
           python3 tools/build_ndfxfer_example.py
