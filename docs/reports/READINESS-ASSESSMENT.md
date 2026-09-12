@@ -877,6 +877,19 @@ para `stderr` em modo JSON; corte explícito antes da verificação semântica
 quando manifest/core/envelope não são objetos; `estado`/`motivo`
 separados. Dois vetores novos em `check_layered_report.py`.
 
+**Terceira ronda (2026-09-12) — a correção anterior ainda não cobria a
+causa geral.** Verificar só se os três documentos são objetos de topo não
+protegia contra um campo interno com o tipo errado: `metadados: []`
+derrubava `check_ndf_semantic`, `manifest.inventario: null` derrubava a
+construção do inventário, `envelope.assinaturas: [null]` derrubava a
+verificação de assinaturas — três pontos de falha diferentes, todos
+reproduzidos e nenhum devolvendo relatório. Generalizado: o corte passa a
+verificar se a validação de schema encontrou **qualquer** erro nos três
+documentos, não uma lista de campos específicos. Cobre estes três casos e
+qualquer outro da mesma classe. Quatro casos de estrutura inválida (o
+original mais os três novos) em `check_layered_report.py`; SPEC.md §9.4.2
+explicita o critério geral.
+
 **R19 — regex vs. exemplo em `pt-dglab`.** Confirmado por teste direto do
 padrão: `ts/at/300.20`, um dos três exemplos declarados no próprio schema,
 tem duas barras e a regex só admite uma. Ou o exemplo está errado, ou a regra

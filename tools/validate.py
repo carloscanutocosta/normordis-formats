@@ -1194,14 +1194,18 @@ def validate_package_report(root: Path, json_mode: bool = False) -> dict:
         for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(value):
             add("estrutura", f"{name}: {fmt_schema_error(e)}")
 
-    # Um dos três não ser um objeto (ex.: ndf-core.json == "[]") já ficou
-    # registado como erro de schema acima, mas todo o código a seguir
-    # assume dict (.get(), indexação por chave) — sem este corte, um
-    # ndf-core.json que não seja objeto provoca AttributeError a meio da
-    # verificação em vez de devolver um relatório com a camada reprovada.
-    if not all(isinstance(v, dict) for v in (manifest, core, envelope)):
-        motivo_impedida = ("impedida — manifest.json, ndf-core.json ou envelope.json "
-                            "não é um objeto JSON")
+    # Generalização (revisão de 2026-09-12): não basta os três documentos
+    # serem objetos de topo — qualquer campo interno com o tipo errado
+    # (`metadados: []`, `manifest.inventario: null`,
+    # `envelope.assinaturas: [null]`) provoca o mesmo tipo de exceção mais
+    # à frente, em código que assume a forma validada pelo schema. Em vez
+    # de ir tapando cada campo problemático um a um, o corte é geral: se a
+    # validação de schema já encontrou qualquer erro nos três documentos,
+    # não se avança para verificações que pressupõem a forma que faltou.
+    # Isto cobre o caso anterior (documento que não é objeto) e qualquer
+    # outro campo mal formado, sem enumerar casos.
+    if camadas["estrutura"]["erros"]:
+        motivo_impedida = "impedida — manifest.json, ndf-core.json ou envelope.json não valida contra o schema"
         for nome in ("canonicalizacao", "integridade_componentes",
                      "dependencias_interpretacao", "assinatura_confianca"):
             camadas[nome] = {"estado": "não_executada", "motivo": motivo_impedida, "erros": []}

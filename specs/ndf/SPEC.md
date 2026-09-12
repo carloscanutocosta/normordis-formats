@@ -3284,15 +3284,27 @@ equivalente) para consumo automático, **DEVE** conter apenas esse relatório
 — mensagens destinadas a leitura humana **NÃO DEVEM** ser misturadas no
 mesmo fluxo de saída.
 
+Um verificador **DEVE** também garantir que uma estrutura interna
+inválida — não só o documento de topo não ser um objeto, mas qualquer
+campo interno com o tipo errado (`metadados` não sendo objeto,
+`manifest.inventario` sendo nulo, um elemento de `envelope.assinaturas`
+sendo nulo, entre outros) — interrompe as verificações que pressupõem essa
+estrutura, devolvendo a camada de estrutura reprovada e as camadas
+dependentes como não executadas, em vez de terminar com uma exceção não
+tratada e sem relatório nenhum. O critério é geral: qualquer erro
+detetado na validação de schema dos três documentos principais basta para
+não avançar às verificações seguintes — não é uma lista de campos a
+proteger um a um.
+
 `tools/validate.py --package <dir> --json` implementa esta recomendação:
 `camadas.<nome>.estado` é um valor estável, `camadas.<nome>.motivo` leva a
 explicação, e a saída em `stdout` desse modo é só o JSON — mensagens de
 leitura humana vão para `stderr`. `tools/check_layered_report.py` verifica
 os três estados possíveis da camada de assinatura/confiança (indeterminada
 com/sem placeholder no motivo, não executada), a pureza de `stdout` em
-modo `--json`, e que um `ndf-core.json` malformado (não um objeto JSON)
-produz relatório com a camada de estrutura reprovada — não uma exceção não
-tratada.
+modo `--json`, e quatro casos de estrutura interna inválida — cada um
+produz relatório com a camada de estrutura reprovada, nunca uma exceção
+não tratada.
 
 ### 9.5 Perfil de Ciclo de Vida NORMORDIS (opcional)
 

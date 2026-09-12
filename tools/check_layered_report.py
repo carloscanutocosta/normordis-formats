@@ -17,10 +17,15 @@ Garante também que um `PASS` global nunca aparece sozinho quando a camada
 'assinatura_confianca' não passou de 'indeterminada' — a saída legível tem
 de imprimir essa camada à parte, sempre.
 
-Mais dois casos de robustez do próprio relatório, encontrados por revisão
-adversarial ao commit 65a21e3: `--json` misturava mensagens humanas com o
-JSON em stdout, e um `ndf-core.json` que não fosse objeto (ex.: `[]`)
-derrubava o processo com `AttributeError` em vez de devolver um relatório.
+Mais casos de robustez do próprio relatório. Do commit 65a21e3: `--json`
+misturava mensagens humanas com o JSON em stdout. Do commit 5b34aec,
+reproduzidos por revisão adversarial à correção anterior: o corte para
+`ndf-core.json` que não fosse objeto de todo (`[]`) não cobria campos
+internos malformados — `metadados: []`, `manifest.inventario: null`,
+`envelope.assinaturas: [null]` — cada um derrubava o processo num ponto
+diferente do código, mais à frente. A correção generalizou o corte: se a
+validação de schema encontrar qualquer erro nos três documentos, para ali,
+independentemente de qual campo o causou.
 """
 
 import hashlib
@@ -99,25 +104,37 @@ def main() -> int:
     except json.JSONDecodeError as e:
         falhas.append(f"--json não produziu JSON puro em stdout: {e} — stdout: {proc.stdout[:200]!r}")
 
-    # 5. ndf-core.json que não seja objeto não pode derrubar o processo com
-    # exceção não tratada — tem de devolver relatório com estrutura reprovada
-    # e as restantes camadas 'não_executada' (revisão de 2026-09-12).
-    with tempfile.TemporaryDirectory(prefix="normordis-layered-") as tmp:
-        target = Path(tmp) / "core-nao-objeto"
-        shutil.copytree(ROOT / "specs/ndf/examples/ndfpkg-example", target)
-        (target / "ndf-core.json").write_text("[]", encoding="utf-8")
-        try:
-            r5 = validate_package_report(target, json_mode=True)
-        except Exception as e:  # noqa: BLE001 — é exatamente o que não deve acontecer
-            falhas.append(f"ndf-core.json == '[]' derrubou o validador: {type(e).__name__}: {e}")
-        else:
+    # 5. Estrutura interna malformada não pode derrubar o processo com
+    # exceção não tratada — tem de devolver relatório com estrutura
+    # reprovada e as restantes camadas 'não_executada'. O primeiro caso
+    # (documento inteiro não é objeto) foi corrigido em 5b34aec; os três
+    # seguintes — campo interno com o tipo errado — só foram cobertos pela
+    # generalização desta ronda (2026-09-12).
+    CASOS_ESTRUTURA_INVALIDA = (
+        ("ndf-core.json não é objeto", "ndf-core.json", lambda _d: []),
+        ("metadados não é objeto", "ndf-core.json", lambda d: {**d, "metadados": []}),
+        ("manifest.inventario é null", "manifest.json", lambda d: {**d, "inventario": None}),
+        ("envelope.assinaturas contém null", "envelope.json", lambda d: {**d, "assinaturas": [None]}),
+    )
+    for rotulo, ficheiro, mutar in CASOS_ESTRUTURA_INVALIDA:
+        with tempfile.TemporaryDirectory(prefix="normordis-layered-") as tmp:
+            target = Path(tmp) / "estrutura-invalida"
+            shutil.copytree(ROOT / "specs/ndf/examples/ndfpkg-example", target)
+            alvo = target / ficheiro
+            original = json.loads(alvo.read_text(encoding="utf-8"))
+            alvo.write_text(json.dumps(mutar(original), ensure_ascii=False), encoding="utf-8")
+            try:
+                r5 = validate_package_report(target, json_mode=True)
+            except Exception as e:  # noqa: BLE001 — é exatamente o que não deve acontecer
+                falhas.append(f"{rotulo}: derrubou o validador: {type(e).__name__}: {e}")
+                continue
             if r5["ok"]:
-                falhas.append("ndf-core.json == '[]' devia reprovar, não passar")
+                falhas.append(f"{rotulo}: devia reprovar, não passar")
             if r5["camadas"]["estrutura"]["estado"] != "reprovada":
-                falhas.append(f"estrutura devia estar 'reprovada': {r5['camadas']['estrutura']}")
+                falhas.append(f"{rotulo}: estrutura devia estar 'reprovada': {r5['camadas']['estrutura']}")
             for nome in ("canonicalizacao", "integridade_componentes", "dependencias_interpretacao"):
                 if r5["camadas"][nome]["estado"] != "não_executada":
-                    falhas.append(f"{nome} devia estar 'não_executada' quando a estrutura impede a verificação: {r5['camadas'][nome]}")
+                    falhas.append(f"{rotulo}: {nome} devia estar 'não_executada': {r5['camadas'][nome]}")
 
     if falhas:
         for f in falhas:
