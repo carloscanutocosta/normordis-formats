@@ -1099,6 +1099,7 @@ VALIDATOR_VERSION = "2026-09-12"
 # deteção, um pacote com placeholders em vez de assinatura, certificados e
 # timestamps reais recebia o mesmo PASS que um pacote com prova genuína.
 _PLACEHOLDER_MARK = "PLACEHOLDER"
+_MOTIVO_REPRESENTACAO = "este verificador não renderiza nem compara saída visual"
 
 
 def _report_metadata(perfil: str | None = None) -> dict:
@@ -1132,7 +1133,7 @@ def _contains_placeholder(value) -> bool:
     return False
 
 
-def validate_package_report(root: Path) -> dict:
+def validate_package_report(root: Path, json_mode: bool = False) -> dict:
     """Valida um directório com o conteúdo descomprimido de um .ndfpkg.
 
     R18 (revisão de 2026-09-11): um `PASS` único não distinguia estrutura,
@@ -1142,13 +1143,24 @@ def validate_package_report(root: Path) -> dict:
     `validate_package_dir` (abaixo) é o wrapper booleano de sempre.
 
     Camadas: 'estrutura', 'canonicalizacao', 'dependencias_interpretacao',
-    'assinatura_confianca', 'representacao'. Estados possíveis: 'aprovada',
-    'reprovada', 'indeterminada' (só `assinatura_confianca` — este
-    verificador não faz validação criptográfica de CAdES nem de cadeia de
-    confiança, apenas estrutural) e 'não_executada'.
+    'assinatura_confianca', 'representacao'. Cada camada tem 'estado'
+    (valor estável, sem texto explicativo — 'aprovada', 'reprovada',
+    'indeterminada' [só `assinatura_confianca`, por este verificador não
+    fazer validação criptográfica de CAdES nem de cadeia de confiança,
+    apenas estrutural] ou 'não_executada') e 'motivo' (texto livre,
+    `None` quando o estado não precisa de explicação — revisão de
+    2026-09-12: um consumidor automático não deve procurar fragmentos de
+    texto dentro de 'estado').
+
+    `json_mode`: quando `True`, as mensagens de leitura humana (PASS/FAIL,
+    lista de erros, estado por camada) vão para stderr em vez de stdout —
+    para que `stdout` contenha só o relatório, quando o chamador o emite em
+    JSON. Revisão de 2026-09-12: `--json` produzia essas mensagens e o JSON
+    ambos em stdout, tornando `stdout` ilegível como JSON.
     """
+    out = sys.stderr if json_mode else sys.stdout
     camadas: dict[str, dict] = {
-        nome: {"estado": "aprovada", "erros": []}
+        nome: {"estado": "aprovada", "motivo": None, "erros": []}
         for nome in ("estrutura", "canonicalizacao", "integridade_componentes",
                      "dependencias_interpretacao", "assinatura_confianca", "representacao")
     }
@@ -1164,11 +1176,12 @@ def validate_package_report(root: Path) -> dict:
         core = json.loads(core_bytes)
         envelope = json.loads((root / "envelope.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
-        print(f"ERRO: pacote ilegível — {e}")
+        print(f"ERRO: pacote ilegível — {e}", file=out)
         add("estrutura", f"pacote ilegível — {e}")
         for nome in ("canonicalizacao", "integridade_componentes",
-                     "dependencias_interpretacao", "assinatura_confianca", "representacao"):
-            camadas[nome] = {"estado": "não_executada", "erros": []}
+                     "dependencias_interpretacao", "assinatura_confianca"):
+            camadas[nome] = {"estado": "não_executada", "motivo": "impedida — pacote ilegível", "erros": []}
+        camadas["representacao"] = {"estado": "não_executada", "motivo": _MOTIVO_REPRESENTACAO, "erros": []}
         camadas["estrutura"]["estado"] = "reprovada"
         return {"ok": False, "camadas": camadas, "root": str(root), **_report_metadata()}
 
@@ -1180,6 +1193,24 @@ def validate_package_report(root: Path) -> dict:
         schema = _load_schema(schema_path)
         for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(value):
             add("estrutura", f"{name}: {fmt_schema_error(e)}")
+
+    # Um dos três não ser um objeto (ex.: ndf-core.json == "[]") já ficou
+    # registado como erro de schema acima, mas todo o código a seguir
+    # assume dict (.get(), indexação por chave) — sem este corte, um
+    # ndf-core.json que não seja objeto provoca AttributeError a meio da
+    # verificação em vez de devolver um relatório com a camada reprovada.
+    if not all(isinstance(v, dict) for v in (manifest, core, envelope)):
+        motivo_impedida = ("impedida — manifest.json, ndf-core.json ou envelope.json "
+                            "não é um objeto JSON")
+        for nome in ("canonicalizacao", "integridade_componentes",
+                     "dependencias_interpretacao", "assinatura_confianca"):
+            camadas[nome] = {"estado": "não_executada", "motivo": motivo_impedida, "erros": []}
+        camadas["representacao"] = {"estado": "não_executada", "motivo": _MOTIVO_REPRESENTACAO, "erros": []}
+        camadas["estrutura"]["estado"] = "reprovada"
+        print(f"{RED}FAIL{RESET}  pacote {root}", file=out)
+        for e in errors:
+            print(f"      → {e}", file=out)
+        return {"ok": False, "camadas": camadas, "root": str(root), **_report_metadata()}
 
     # §9.3 (NDF-PKG-007): dentro de um pacote, o schema do tipo resolve-se
     # primeiro a partir de schemas/ — é isso que torna o .ndfpkg autonomamente
@@ -1400,33 +1431,37 @@ def validate_package_report(root: Path) -> dict:
     if camadas["assinatura_confianca"]["erros"]:
         camadas["assinatura_confianca"]["estado"] = "reprovada"
     elif required_level in {"avancada", "qualificada"} or signatures:
-        camadas["assinatura_confianca"]["estado"] = (
-            "indeterminada — material presente, mas este verificador não faz "
-            "validação criptográfica de CAdES nem de cadeia de confiança"
-            + (", e contém marcadores de placeholder" if sinal_placeholder else "")
-        )
+        camadas["assinatura_confianca"]["estado"] = "indeterminada"
+        motivo = ("material presente, mas este verificador não faz validação "
+                  "criptográfica de CAdES nem de cadeia de confiança")
+        if sinal_placeholder:
+            motivo += " — contém marcadores de placeholder"
+        camadas["assinatura_confianca"]["motivo"] = motivo
     else:
         camadas["assinatura_confianca"]["estado"] = "não_executada"
-    camadas["representacao"]["estado"] = (
-        "não_executada — este verificador não renderiza nem compara saída visual"
-    )
+        camadas["assinatura_confianca"]["motivo"] = (
+            "nivel_assinatura é 'nenhuma' e não há selo institucional"
+        )
+    camadas["representacao"]["estado"] = "não_executada"
+    camadas["representacao"]["motivo"] = _MOTIVO_REPRESENTACAO
     for nome in ("estrutura", "canonicalizacao", "integridade_componentes", "dependencias_interpretacao"):
         if camadas[nome]["erros"]:
             camadas[nome]["estado"] = "reprovada"
 
     ok = not errors
     if errors:
-        print(f"{RED}FAIL{RESET}  pacote {root}")
+        print(f"{RED}FAIL{RESET}  pacote {root}", file=out)
         for e in errors:
-            print(f"      → {e}")
+            print(f"      → {e}", file=out)
     else:
-        print(f"{GREEN}PASS{RESET}  pacote {root} (estrutura/canonicalização/integridade/dependências)")
+        print(f"{GREEN}PASS{RESET}  pacote {root} (estrutura/canonicalização/integridade/dependências)", file=out)
         for advisory in check_ndf_advisories(core, pkg_root=root):
-            print(f"      {YELLOW}AVISO{RESET} {advisory}")
+            print(f"      {YELLOW}AVISO{RESET} {advisory}", file=out)
     for nome, dados in camadas.items():
         if nome in ("estrutura", "canonicalizacao", "integridade_componentes", "dependencias_interpretacao"):
             continue  # já refletidas no PASS/FAIL acima
-        print(f"      {nome}: {dados['estado']}")
+        sufixo = f" — {dados['motivo']}" if dados["motivo"] else ""
+        print(f"      {nome}: {dados['estado']}{sufixo}", file=out)
 
     return {
         "ok": ok,
@@ -1456,8 +1491,10 @@ def main():
     args = parser.parse_args()
 
     if args.package:
-        report = validate_package_report(args.package)
+        report = validate_package_report(args.package, json_mode=args.json)
         if args.json:
+            # stdout leva só o JSON — as mensagens de leitura humana já
+            # foram para stderr (json_mode=True, acima).
             print(json.dumps(report, ensure_ascii=False, indent=2))
         sys.exit(0 if report["ok"] else 1)
 

@@ -3275,10 +3275,24 @@ conteúdo fictício (como os `<..._PLACEHOLDER>` dos pacotes de exemplo desta
 especificação) — aceitar esse material sem sinalização confundiria um
 pacote de teste com um documento genuíno.
 
-`tools/validate.py --package <dir> --json` implementa esta recomendação, com
-`tools/check_layered_report.py` a verificar os três estados possíveis da
-camada de assinatura/confiança (indeterminada com/sem placeholder, não
-executada).
+**RECOMENDA-SE** que o estado de cada camada seja um valor estável (por
+exemplo, `"indeterminada"`), sem texto explicativo embutido — a explicação
+tem lugar próprio (por exemplo, um campo `motivo`), para que um consumidor
+automático do relatório não precise de procurar fragmentos de texto dentro
+do estado. Quando o relatório é emitido em formato estruturado (JSON ou
+equivalente) para consumo automático, **DEVE** conter apenas esse relatório
+— mensagens destinadas a leitura humana **NÃO DEVEM** ser misturadas no
+mesmo fluxo de saída.
+
+`tools/validate.py --package <dir> --json` implementa esta recomendação:
+`camadas.<nome>.estado` é um valor estável, `camadas.<nome>.motivo` leva a
+explicação, e a saída em `stdout` desse modo é só o JSON — mensagens de
+leitura humana vão para `stderr`. `tools/check_layered_report.py` verifica
+os três estados possíveis da camada de assinatura/confiança (indeterminada
+com/sem placeholder no motivo, não executada), a pureza de `stdout` em
+modo `--json`, e que um `ndf-core.json` malformado (não um objeto JSON)
+produz relatório com a camada de estrutura reprovada — não uma exceção não
+tratada.
 
 ### 9.5 Perfil de Ciclo de Vida NORMORDIS (opcional)
 
