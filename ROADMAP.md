@@ -467,23 +467,56 @@ O bloco P0 é o caminho crítico desta fase — nenhum item de P1 conta como
 prova fechada de cadeia de confiança enquanto P0.2 e P0.3 não estiverem
 concluídos (D8).
 
-### P0.1 — Documentação: garantia / mecanismo / evidência / limitação
+### P0.1 — Documentação: garantia / mecanismo / evidência / limitação — ✅ concluído (2026-09-12)
 
-- [ ] Tabela «garantia / mecanismo / evidência / limitação» em `README.md` ou
-      `docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`, cobrindo pelo menos:
-      imutabilidade, `nivel_assinatura`, autonomia do pacote, reprodução
-      fiel, conformidade
-- [ ] Em cada menção normativa relevante, distinguir requisito declarado
-      pelo produtor de conclusão apurada pelo verificador (ver P0.4)
-- [ ] Identificar explicitamente os exemplos com assinaturas/certificados/
-      timestamps fictícios (`specs/ndf/examples/ndfpkg-example/envelope.json`
-      e equivalentes)
-- [ ] Apresentar `pt-dglab` como perfil experimental do projeto, sem
-      aprovação institucional — nota no próprio schema, não só no
-      `README.md` geral
+- [x] Tabela «garantia / mecanismo / evidência / limitação» em
+      [`docs/normalization/NDF-INFORMATIVE-GUIDANCE.md`](docs/normalization/NDF-INFORMATIVE-GUIDANCE.md)
+      (secção nova «Garantias e limitações»), cobrindo imutabilidade,
+      `nivel_assinatura`, autonomia do pacote, reprodução fiel e
+      conformidade — com a distinção especificado / implementado /
+      demonstrado explicitada antes da tabela
+- [x] A mesma secção explicita, como regra geral, a distinção entre valor
+      **declarado pelo produtor** (ex.: `nivel_assinatura`) e **conclusão
+      apurada pelo verificador** (SPEC.md §9.4.2); a linha `nivel_assinatura`
+      da tabela aplica essa distinção em concreto. Correção ponto a ponto de
+      cada menção normativa na SPEC.md fica para P0.4, que trata as
+      correções jurídicas pontuais
+- [x] Exemplos com assinaturas/certificados/timestamps fictícios já
+      identificados explicitamente onde existe material desse tipo:
+      `ndfpkg-example/README.md`, `informacao-parecer-despacho/README.md`,
+      `liquidacao-irs-automatica/README.md` (nota própria); `ndfxfer-example`
+      remete para os dois primeiros, de quem as unidades são cópia.
+      `captura-requerimento` não tem assinaturas (`assinaturas: []`), não
+      precisa de nota
+- [x] `pt-dglab` marcado como perfil experimental do projeto, sem aprovação
+      institucional, na `description` do próprio schema
+      ([`specs/registry/profiles/pt-dglab.schema.json`](specs/registry/profiles/pt-dglab.schema.json))
+      e em [`specs/registry/README.md`](specs/registry/README.md). Alteração
+      ao schema propagada às 3 cópias embutidas estáticas
+      (`ndfpkg-example`, `captura-requerimento`, `liquidacao-irs-automatica`)
+      e ao hash declarado em `dependencias_interpretacao` de cada
+      `ndf-core.json` (P0.2, ADR-026); pacotes reselados com
+      `tools/reseal_example_package.py`, `ndfxfer-example` regenerado com
+      `tools/build_ndfxfer_example.py`
 
-**Critério de conclusão**: cada garantia pública aponta para um requisito e
-uma evidência; onde falta evidência, isso fica dito junto da afirmação.
+**Critério de conclusão**: cumprido — cada garantia pública aponta para um
+requisito e uma evidência; onde falta evidência, isso fica dito junto da
+afirmação. Verificado: `tools/validate.py` 103/103, `--package` PASS nos 3
+pacotes base + 2 unidades de `ndfxfer-example` (camada
+`assinatura_confianca` continua, corretamente, `indeterminada`/
+`não_executada` — P0.1 não muda o que é verificado, só a documentação),
+`check_spec_coherence` PASS (6 schemas verificados nas cópias),
+`check_package_vectors` 22/22, `check_profile_patterns` PASS,
+`check_transferencia` e `check_transferencia_vectors` 11/11, `audit_normative`
+109 IDs / 325 declarações.
+
+**Nota lateral, não relacionada com P0.1**: `liquidacao-irs-automatica`
+falha hoje em `validate.py --package` por divergência entre o NDT e o
+schema do tipo (`signatario`, `signatario_b`, `corpo`, `destinatario`,
+`numero` não declarados por `ext.at.liquidacao-irs@2026.1`). Confirmado por
+`git stash` que a falha já existia antes desta ronda — não é regressão
+introduzida aqui. Fica registado como defeito a abrir separadamente, fora
+do âmbito de P0.1/P2.1.
 
 ### P0.2 — Ligação criptográfica NDF↔NDT (`R16`, `R23`, `R24`, `R25`) — ✅ concluído (2026-09-11)
 
@@ -754,9 +787,15 @@ informais do mantenedor, e qualquer diferença fica identificada.
 | CRA | P0.4 | Que componentes e intervenientes estão efetivamente abrangidos? |
 | Arquivística | — | Que informação é necessária numa transferência e que informação pertence ao sistema custodiante? |
 
+Cada linha desdobrada em perguntas concretas, com referência SPEC exata, em
+[`docs/normalization/INDEPENDENT-REVIEW-QUESTIONS.md`](docs/normalization/INDEPENDENT-REVIEW-QUESTIONS.md)
+(2026-09-12) — um título de uma linha não é, por si só, uma pergunta a que
+um revisor externo consiga responder de forma acionável.
+
 Contributo externo em criptografia (revisão do ADR-026 e do laboratório
 CAdES), direito (matriz acima) e arquivística (transferência OAIS/METS/
-PREMIS) — não bloqueia P0/P1, que avançam em paralelo.
+PREMIS) — não bloqueia P0/P1, que avançam em paralelo. Sem contribuidor
+externo identificado; não há, por isso, prazo nem issue aberta.
 
 ### Issues a abrir no GitHub
 

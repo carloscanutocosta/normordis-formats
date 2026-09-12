@@ -6,8 +6,8 @@
   "estado": "ativo",
   "nivel_assinatura": "nenhuma",
   "finalizado_em": "2026-07-31T03:15:30Z",
-  "payload_hash": "sha256:80716554bfa9fc92b1d7987eac341f007934049247330204dd2f42fa659bf560",
-  "validation_code": "NDF-2A2MUVSSFHWC2HIGDQ2P",
+  "payload_hash": "sha256:d808893dda38ca4cbe66c60361d45f9022f7cd7fcc792135ccebac300e97748c",
+  "validation_code": "NDF-HJHFAHHNO5LSL2C4WLT6",
   "inventario": [
     {
       "ficheiro": "README.md",
@@ -15,11 +15,11 @@
     },
     {
       "ficheiro": "envelope.json",
-      "hash_sha256": "sha256:066b3e9d3067160b6ded252af242b3bd58fc9c7ab4d54221dc41d8284fb00672"
+      "hash_sha256": "sha256:6c2a6e5002d2a262e5ab236b292e53655c0a0f97e0f7cc4487c4b0b45bd62e31"
     },
     {
       "ficheiro": "ndf-core.json",
-      "hash_sha256": "sha256:80716554bfa9fc92b1d7987eac341f007934049247330204dd2f42fa659bf560"
+      "hash_sha256": "sha256:d808893dda38ca4cbe66c60361d45f9022f7cd7fcc792135ccebac300e97748c"
     },
     {
       "ficheiro": "ndt/liquidacao-irs@2026.1.ndt.json",
@@ -59,7 +59,7 @@
     },
     {
       "ficheiro": "schemas/pt-dglab.schema.json",
-      "hash_sha256": "sha256:81ac2cedc75fd0a7249585cafe7a22059bfafbfd03e6dbf89e7fb217d30847f4"
+      "hash_sha256": "sha256:7f7bb9f884b48d5f876cf7a0cd28bfafdc0adcc0670e4f34ec93f7138e9c75ae"
     }
   ]
 }

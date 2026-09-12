@@ -32,6 +32,14 @@ Catálogo oficial de identificadores canónicos (`schema_id`) para o ecossistema
 | `pt-dglab` | Administração Pública portuguesa — MEG/DGLAB |
 | `generic` | Sem restrições jurisdicionais |
 
+**Nota de estado (Fase 1E, P0.1)**: `pt-dglab` é um perfil **experimental do
+projeto NORMORDIS**, não uma adoção ou homologação do modelo MEG/DGLAB pela
+Direção-Geral do Livro, dos Arquivos e das Bibliotecas ou por qualquer outra
+entidade da Administração Pública portuguesa. A mesma nota consta da
+`description` do próprio schema
+([`profiles/pt-dglab.schema.json`](profiles/pt-dglab.schema.json)), para
+quem consome apenas o schema sem ler este README.
+
 ## Entradas registadas
 
 > A definir.
