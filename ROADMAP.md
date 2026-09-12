@@ -614,9 +614,25 @@ Vetores novos em `tools/check_layered_report.py`: pureza de `stdout` em
 atualizada com as duas recomendações (estado sem texto embutido; não
 misturar leitura humana com formato estruturado).
 
+**Terceira ronda (2026-09-12) — a correção anterior ainda não cobria a
+causa geral.** O corte de "documento não é objeto" não protegia contra um
+campo *interno* com o tipo errado — `metadados: []`, `manifest.inventario:
+null`, `envelope.assinaturas: [null]` — cada um reproduzido e cada um
+derrubava o processo num ponto diferente (`check_ndf_semantic`, a
+construção do inventário, a verificação de assinaturas), sem devolver
+relatório nenhum. Generalizado: o corte deixa de verificar tipos campo a
+campo e passa a verificar se a validação de schema encontrou **qualquer**
+erro nos três documentos — nesse caso, para ali, sem tentar continuar.
+Cobre estes três casos e qualquer outro da mesma classe, sem os enumerar.
+
+Quatro casos de estrutura inválida agora em `tools/check_layered_report.py`
+(documento não-objeto + os três campos internos). SPEC.md §9.4.2 explicita
+o critério geral (qualquer erro de schema interrompe as camadas
+dependentes).
+
 Verificado: `tools/validate.py` 103/103, `check_package_vectors` 22/22,
-`check_jcs_required` PASS, `check_layered_report` PASS (5 casos),
-`check_spec_coherence` PASS, `audit_normative` 109 IDs / 324 declarações.
+`check_jcs_required` PASS, `check_layered_report` PASS,
+`check_spec_coherence` PASS, `audit_normative` 109 IDs / 325 declarações.
 
 ### P0.4 — Correções jurídicas pontuais (`R20`, `R21`, `R22`)
 
