@@ -831,6 +831,18 @@ já registado em D4/Fase 1D.
 
 Ferramentas CLI independentes que demonstram que a especificação é implementável e reduzem o custo de adoção para terceiros. Repositório: `normordis-tools` (separado desta especificação).
 
+**Nota sobre linguagem de implementação (em aberto).** `ARCHITECTURE.md` §1
+já fixa o princípio: ferramentas em qualquer linguagem são implementações de
+referência substituíveis, nunca requisitos normativos — o contrato é o JSON
+Schema, os algoritmos publicados (JCS/RFC 8785, SHA-256) e os vetores de
+conformidade, já hoje verificados em paralelo por uma segunda implementação
+em Node.js (`tools/check-jcs-vectors.mjs`, `tools/check-custody.mjs`, job
+`conformance-js` do CI). Rust encaixaria da mesma forma — e é candidato
+natural precisamente onde a exatidão de bytes importa mais (JCS, cadeia de
+hash de custódia): tipagem forte, sem GC a interferir com serialização, e
+crates maduras para JSON canónico e SHA-256. Sem decisão tomada; registado
+aqui para quando `normordis-tools` (T1/T2) for iniciado.
+
 ### T1 — `normordis-validate`
 
 **Prioridade: crítica.** A ferramenta mais importante para adoção.
