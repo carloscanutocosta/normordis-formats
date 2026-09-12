@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://normordis.org/schemas/profiles/pt-dglab.schema.json",
   "title": "Perfil de avaliação arquivística — pt-dglab",
-  "description": "Restringe o bloco avaliacao do NDF-core ao modelo arquivístico português (MEG/DGLAB). Aplica-se quando avaliacao.perfil é 'pt-dglab'. Ver SPEC.md §3.2.3 e ADR-015.",
+  "description": "Perfil EXPERIMENTAL do projeto NORMORDIS, sem aprovação, homologação ou validação pela DGLAB ou por qualquer entidade da Administração Pública portuguesa — o nome evoca o modelo MEG/DGLAB por referência, não por reconhecimento institucional (Fase 1E, P0.1). Restringe o bloco avaliacao do NDF-core a esse modelo arquivístico. Aplica-se quando avaliacao.perfil é 'pt-dglab'. Ver SPEC.md §3.2.3 e ADR-015.",
   "type": "object",
   "required": ["perfil", "classificacao_ref", "instrumento_ref"],
   "properties": {
