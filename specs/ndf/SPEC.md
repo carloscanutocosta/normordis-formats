@@ -3195,14 +3195,18 @@ Um arquivo `.ndfpkg` é conforme se satisfizer todos os seguintes requisitos:
 A suite oficial de casos de teste está em `conformance/ndf/`. O test runner de referência é `tools/validate.py`.
 
 ```bash
-# Pré-requisito
-pip install jsonschema
+# Pré-requisito — rfc8785 é obrigatório desde 2026-09-11 (R17); sem ela o
+# runner recusa arrancar, em vez de omitir a verificação de canonicalização
+pip install -r tools/requirements.txt
 
 # Correr toda a suite NDF + NDT + NCRTF
 python3 tools/validate.py
 
 # Validar o exemplo portátil end-to-end
 python3 tools/validate.py --package specs/ndf/examples/ndfpkg-example
+
+# Idem, com relatório por camada em JSON (§9.4.2)
+python3 tools/validate.py --package specs/ndf/examples/ndfpkg-example --json
 
 # Validar um ficheiro específico
 python3 tools/validate.py path/to/ndf-core.json
@@ -3240,6 +3244,41 @@ equivalente, a correspondência entre a rejeição e a violação documentada em
 verificação internas. Estes campos **NÃO DEVEM** constar do NDF-core produzido
 por uma implementação — o test runner remove-os automaticamente antes de
 validar.
+
+#### 9.4.2 Comunicação de resultados por camada (verificação de pacote)
+
+Revisão de 2026-09-11 (R18): um resultado único de aceite/rejeitado para um
+`.ndfpkg` esconde diferenças relevantes — a validade estrutural, com
+`payload_hash` correto e dependências autenticadas, é independente da
+validade criptográfica da assinatura e da confiança na cadeia de
+certificados. Nenhuma implementação deste projeto faz essa segunda
+verificação — não há biblioteca CAdES nem trust store em
+`tools/validate.py` — pelo que um `PASS` indistinto convida a lê-lo como mais
+do que foi de facto verificado.
+
+**RECOMENDA-SE** que um verificador de pacote separe o resultado em, pelo
+menos, estas camadas: estrutura (schemas, inventário, ligações NDT↔tipo),
+canonicalização (JCS, `payload_hash`, `validation_code`), integridade de
+componentes (`NDF-PKG-009`), dependências de interpretação autenticadas
+(`NDF-PKG-010`, `NDF-PKG-011`), assinatura/confiança, e representação
+(fidelidade de renderização). Cada camada **DEVE** ser reportada como
+aprovada, reprovada, indeterminada ou não executada — nunca silenciosamente
+omitida.
+
+Em particular, a camada de assinatura/confiança **NÃO DEVE** ser reportada
+como aprovada por um verificador que não realize validação criptográfica
+efetiva da assinatura e da cadeia de certificados — "indeterminada" é o
+resultado honesto quando apenas a presença estrutural de assinatura,
+timestamps e material de validação foi confirmada. Um verificador **DEVE**
+sinalizar explicitamente quando esse material contém marcadores de
+conteúdo fictício (como os `<..._PLACEHOLDER>` dos pacotes de exemplo desta
+especificação) — aceitar esse material sem sinalização confundiria um
+pacote de teste com um documento genuíno.
+
+`tools/validate.py --package <dir> --json` implementa esta recomendação, com
+`tools/check_layered_report.py` a verificar os três estados possíveis da
+camada de assinatura/confiança (indeterminada com/sem placeholder, não
+executada).
 
 ### 9.5 Perfil de Ciclo de Vida NORMORDIS (opcional)
 

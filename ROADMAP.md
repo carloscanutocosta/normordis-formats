@@ -545,31 +545,55 @@ cada uma à correção da anterior. Verificado: `tools/validate.py` 103/103,
 `check_spec_coherence` PASS, `check_package_vectors` 22/22,
 `check_profile_patterns` PASS, `audit_normative` 109 IDs / 317 declarações.
 
-### P0.3 — Validador honesto sobre o que verificou (`R17`, `R18`)
+### P0.3 — Validador honesto sobre o que verificou (`R17`, `R18`) — ✅ concluído (2026-09-12)
 
-- [ ] Tornar `rfc8785` dependência obrigatória em `tools/validate.py` quando
-      a operação exige verificação JCS — falha dura, não `PASS` silencioso,
-      se a biblioteca faltar
-- [ ] Relatório com resultado por camada — estrutura, canonicalização,
-      integridade de componentes, dependências autenticadas (P0.2),
-      assinatura/confiança, representação — cada uma `aprovada` /
-      `reprovada` / `indeterminada` (só assinatura/confiança) / `não
-      executada`
-- [ ] Relatório também em JSON, além da saída legível; registar versão do
-      validador, perfil, política de confiança e instante de validação
-- [ ] Impedir aprovação global quando falta uma verificação exigida pelo
-      perfil
-- [ ] Reservar aceitação de *placeholders* para testes estruturais
-      explicitamente identificados como tal no resultado — nunca um `PASS`
-      indistinto do de um pacote genuíno
-- [ ] Testar os exemplos incluídos nos próprios schemas (teria apanhado
-      `R19` automaticamente)
-- [ ] Casos adversariais novos: nomes duplicados em ZIP, caminhos inseguros
-      (`../`), ligações simbólicas, limites de recursos (tamanho,
-      profundidade)
+- [x] `rfc8785` passa a dependência obrigatória em `tools/validate.py` —
+      falha dura no arranque (`sys.exit(1)`, mesma mensagem de todas as
+      outras ferramentas do projeto), não `PASS` silencioso na sua
+      ausência. Vetor `tools/check_jcs_required.py` (subprocesso isolado,
+      simula a ausência)
+- [x] Relatório com resultado por camada — `validate_package_report()`
+      devolve `estrutura`, `canonicalizacao`, `integridade_componentes`,
+      `dependencias_interpretacao`, `assinatura_confianca`,
+      `representacao`, cada uma `aprovada` / `reprovada` / `indeterminada`
+      (só `assinatura_confianca` — nunca "aprovada", por este verificador
+      não fazer validação criptográfica de CAdES nem de cadeia de
+      confiança) / `não_executada` (sempre em `representacao`; em
+      `assinatura_confianca` quando `nivel_assinatura: "nenhuma"` sem selo)
+- [x] `tools/validate.py --package <dir> --json` — relatório completo em
+      JSON, com `versao_verificador`, `perfil_avaliacao`,
+      `instante_verificacao` e `politica_confianca` (declarada
+      explicitamente como "nenhuma", não omissão)
+- [x] Aprovação global já estava condicionada às verificações exigidas
+      pelo perfil (P0.2, `dependencias_interpretacao.schema_perfil`
+      sempre obrigatória quando `avaliacao.perfil` declarado)
+- [x] Placeholders: `_contains_placeholder()` deteta o marcador
+      `PLACEHOLDER` já usado pelos pacotes de exemplo em material
+      criptográfico, e a camada `assinatura_confianca` sinaliza-o
+      explicitamente no estado, nunca aceite em silêncio
+- [x] SPEC.md §9.4.2 (novo) — recomendação para qualquer verificador, não
+      só a ferramenta de referência
+- [x] Vetor `tools/check_layered_report.py` — três estados de
+      `assinatura_confianca` exercitados contra pacotes reais do
+      repositório (placeholder presente, placeholder removido,
+      `nivel_assinatura: "nenhuma"` sem selo)
+- [ ] Testar os exemplos incluídos nos próprios schemas — já coberto por
+      `tools/check_profile_patterns.py` (Fase 1E, P0.5)
+- [ ] Casos adversariais de ZIP (nomes duplicados, caminhos inseguros,
+      ligações simbólicas): **fora de âmbito nesta ronda** —
+      `tools/validate.py --package` opera sobre um diretório já
+      descomprimido, não existe hoje nenhum caminho de código que abra um
+      `.ndfpkg` real (ficheiro ZIP); adversários de ZIP exigiriam primeiro
+      construir esse caminho. Fica registado como trabalho futuro, não
+      como lacuna de R18
 
-**Critério de conclusão**: um pacote estruturalmente válido mas sem
-assinatura verificável nunca aparece como integralmente validado.
+**Critério de conclusão**: cumprido — um pacote estruturalmente válido mas
+sem assinatura criptograficamente verificada nunca aparece como
+"aprovado" na camada de assinatura/confiança; o `PASS` global passa a
+dizer explicitamente que camadas cobre. Verificado: `tools/validate.py`
+103/103, `check_package_vectors` 22/22, `check_jcs_required` PASS,
+`check_layered_report` PASS, `check_spec_coherence` PASS, `audit_normative`
+109 IDs / 321 declarações.
 
 ### P0.4 — Correções jurídicas pontuais (`R20`, `R21`, `R22`)
 

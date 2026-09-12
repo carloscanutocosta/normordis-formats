@@ -22,7 +22,7 @@ import argparse
 import base64
 import hashlib
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 try:
@@ -35,7 +35,14 @@ except ImportError:
 try:
     import rfc8785
 except ImportError:
-    rfc8785 = None
+    # R17 (revisão de 2026-09-11): rfc8785 era dependência opcional aqui —
+    # único ponto do projeto onde isso acontecia (todas as outras
+    # ferramentas que dependem de JCS falham a arrancar sem ela). Sem esta
+    # falha dura, a verificação de bytes canónicos em validate_package_dir
+    # era omitida em silêncio, e um pacote não-canónico podia obter PASS
+    # sem que o resultado o assinalasse.
+    print("ERRO: instale tools/requirements.txt para obter rfc8785", file=sys.stderr)
+    sys.exit(1)
 
 REPO_ROOT = Path(__file__).parent.parent
 NDF_SCHEMA_PATH   = REPO_ROOT / "specs/ndf/schemas/ndf-core.schema.json"
@@ -1085,9 +1092,72 @@ def validate_single(path: Path) -> bool:
     return validate_ndf_file(path, schema, expect_valid=True)
 
 
-def validate_package_dir(root: Path) -> bool:
-    """Valida um directório com o conteúdo descomprimido de um .ndfpkg."""
-    errors = []
+VALIDATOR_VERSION = "2026-09-12"
+
+# Convenção usada pelos pacotes de exemplo para marcar material criptográfico
+# fictício (ex.: "<BASE64_DER_CADES_B_LTA_PLACEHOLDER — ...>"). R18: sem esta
+# deteção, um pacote com placeholders em vez de assinatura, certificados e
+# timestamps reais recebia o mesmo PASS que um pacote com prova genuína.
+_PLACEHOLDER_MARK = "PLACEHOLDER"
+
+
+def _report_metadata(perfil: str | None = None) -> dict:
+    """Metadados comuns a qualquer relatório de pacote (R18): versão do
+    verificador, perfil de avaliação declarado, instante da verificação, e
+    política de confiança — que é sempre 'nenhuma' aqui, explicitamente, e
+    não a ausência de menção que convidaria a assumir o contrário. Este
+    verificador não tem trust store, não faz OCSP/CRL, e não decide se uma
+    cadeia de certificados é confiável; só confirma presença estrutural.
+    """
+    return {
+        "versao_verificador": VALIDATOR_VERSION,
+        "perfil_avaliacao": perfil,
+        "instante_verificacao": datetime.now(timezone.utc).isoformat(),
+        "politica_confianca": (
+            "nenhuma — este verificador não valida cadeia de certificados, "
+            "não consulta OCSP/CRL, e não tem trust store; confirma apenas "
+            "presença estrutural de assinatura, timestamps e material de "
+            "validação, e a ausência de marcadores de placeholder"
+        ),
+    }
+
+
+def _contains_placeholder(value) -> bool:
+    if isinstance(value, str):
+        return _PLACEHOLDER_MARK in value
+    if isinstance(value, list):
+        return any(_contains_placeholder(v) for v in value)
+    if isinstance(value, dict):
+        return any(_contains_placeholder(v) for v in value.values())
+    return False
+
+
+def validate_package_report(root: Path) -> dict:
+    """Valida um directório com o conteúdo descomprimido de um .ndfpkg.
+
+    R18 (revisão de 2026-09-11): um `PASS` único não distinguia estrutura,
+    canonicalização, dependências autenticadas e confiança na assinatura —
+    um pacote com placeholders em vez de prova criptográfica real obtinha o
+    mesmo resultado que um pacote genuíno. Devolve um relatório por camada;
+    `validate_package_dir` (abaixo) é o wrapper booleano de sempre.
+
+    Camadas: 'estrutura', 'canonicalizacao', 'dependencias_interpretacao',
+    'assinatura_confianca', 'representacao'. Estados possíveis: 'aprovada',
+    'reprovada', 'indeterminada' (só `assinatura_confianca` — este
+    verificador não faz validação criptográfica de CAdES nem de cadeia de
+    confiança, apenas estrutural) e 'não_executada'.
+    """
+    camadas: dict[str, dict] = {
+        nome: {"estado": "aprovada", "erros": []}
+        for nome in ("estrutura", "canonicalizacao", "integridade_componentes",
+                     "dependencias_interpretacao", "assinatura_confianca", "representacao")
+    }
+    errors: list[str] = []
+
+    def add(camada: str, mensagem: str) -> None:
+        camadas[camada]["erros"].append(mensagem)
+        errors.append(mensagem)
+
     try:
         manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
         core_bytes = (root / "ndf-core.json").read_bytes()
@@ -1095,7 +1165,12 @@ def validate_package_dir(root: Path) -> bool:
         envelope = json.loads((root / "envelope.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         print(f"ERRO: pacote ilegível — {e}")
-        return False
+        add("estrutura", f"pacote ilegível — {e}")
+        for nome in ("canonicalizacao", "integridade_componentes",
+                     "dependencias_interpretacao", "assinatura_confianca", "representacao"):
+            camadas[nome] = {"estado": "não_executada", "erros": []}
+        camadas["estrutura"]["estado"] = "reprovada"
+        return {"ok": False, "camadas": camadas, "root": str(root), **_report_metadata()}
 
     for name, value, schema_path in (
         ("manifest", manifest, MANIFEST_SCHEMA_PATH),
@@ -1104,50 +1179,61 @@ def validate_package_dir(root: Path) -> bool:
     ):
         schema = _load_schema(schema_path)
         for e in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(value):
-            errors.append(f"{name}: {fmt_schema_error(e)}")
+            add("estrutura", f"{name}: {fmt_schema_error(e)}")
 
     # §9.3 (NDF-PKG-007): dentro de um pacote, o schema do tipo resolve-se
     # primeiro a partir de schemas/ — é isso que torna o .ndfpkg autonomamente
     # validável por um terceiro sem acesso ao registo canónico.
-    errors.extend(check_ndf_semantic(core, pkg_root=root))
+    # check_ndf_semantic mistura duas camadas (estrutura + dependências); o
+    # próprio texto da mensagem diz qual, não há indireção mais limpa sem
+    # reescrever a função para devolver pares (camada, mensagem).
+    for msg in check_ndf_semantic(core, pkg_root=root):
+        add("dependencias_interpretacao" if "dependencias_interpretacao" in msg else "estrutura", msg)
 
     required_level = core.get("nivel_assinatura")
     signatures = envelope.get("assinaturas") or []
+    sinal_placeholder = False
     if required_level in {"avancada", "qualificada"}:
         matching = [s for s in signatures if s.get("nivel") == required_level]
         if not matching:
-            errors.append(f"envelope não contém assinatura pessoal {required_level} exigida")
+            add("assinatura_confianca", f"envelope não contém assinatura pessoal {required_level} exigida")
         # timestamps e validation_material são por assinatura (unidade de prova
         # autocontida — SPEC.md §4.4.1), não campos globais do envelope.
         for s in matching:
             if not s.get("timestamps"):
-                errors.append(f"assinatura {s.get('assinatura_id', '?')} sem timestamps B-LTA")
+                add("assinatura_confianca", f"assinatura {s.get('assinatura_id', '?')} sem timestamps B-LTA")
             if not s.get("validation_material"):
-                errors.append(f"assinatura {s.get('assinatura_id', '?')} sem material de validação")
+                add("assinatura_confianca", f"assinatura {s.get('assinatura_id', '?')} sem material de validação")
+            if _contains_placeholder(s):
+                sinal_placeholder = True
+    elif signatures:
+        # nivel_assinatura: "nenhuma" admite selo institucional opcional
+        # (§2.10.4) — o mesmo cuidado de placeholder aplica-se.
+        sinal_placeholder = any(_contains_placeholder(s) for s in signatures)
 
     items = manifest.get("inventario", [])
     inventory = {item["ficheiro"]: item["hash_sha256"] for item in items}
     if len(inventory) != len(items):
-        errors.append("inventário contém nomes de ficheiro duplicados")
+        add("estrutura", "inventário contém nomes de ficheiro duplicados")
     actual_files = {
         str(path.relative_to(root))
         for path in root.rglob("*") if path.is_file()
     } - {"manifest.json", "README.md"}
     unlisted = actual_files - set(inventory)
     if unlisted:
-        errors.append("ficheiros não inventariados: " + ", ".join(sorted(unlisted)))
+        add("estrutura", "ficheiros não inventariados: " + ", ".join(sorted(unlisted)))
     for rel, declared in inventory.items():
         path = Path(rel)
         if path.is_absolute() or ".." in path.parts:
-            errors.append(f"inventário: caminho inseguro '{rel}'")
+            add("estrutura", f"inventário: caminho inseguro '{rel}'")
             continue
         target = root / path
         if not target.is_file():
-            errors.append(f"inventário: ficheiro ausente '{rel}'")
+            add("estrutura", f"inventário: ficheiro ausente '{rel}'")
             continue
         actual = "sha256:" + hashlib.sha256(target.read_bytes()).hexdigest()
         if actual != declared:
-            errors.append(f"inventário: hash incorrecto para '{rel}'")
+            add("integridade_componentes", f"inventário: hash incorrecto para '{rel}'")
 
     # NDF-PKG-009: cada componente declarado em `documento` (§2.8.1) tem de
     # constar do inventário pelo seu digest, e o ficheiro tem de estar
@@ -1164,7 +1250,7 @@ def validate_package_dir(root: Path) -> bool:
             if not digest_comp:
                 continue
             if digest_comp not in digests_inventario:
-                errors.append(
+                add("integridade_componentes",
                     f"componente '{cid}': digest {digest_comp} não consta de "
                     f"manifest.inventario (NDF-PKG-009, §2.8.1)"
                 )
@@ -1186,40 +1272,42 @@ def validate_package_dir(root: Path) -> bool:
                 continue
             digest_f = "sha256:" + hashlib.sha256(ficheiro.read_bytes()).hexdigest()
             if digest_f not in declarados:
-                errors.append(
+                add("integridade_componentes",
                     f"'{ficheiro.relative_to(root)}' está em {diretorio}/ mas não "
                     f"corresponde a nenhum componente declarado "
                     f"(NDF-PKG-009, §2.8.1)"
                 )
 
     payload_hash = "sha256:" + hashlib.sha256(core_bytes).hexdigest()
-    if rfc8785 is not None:
-        try:
-            canonical = rfc8785.dumps(core)
-            if canonical != core_bytes:
-                errors.append("ndf-core.json não contém exactamente os bytes JCS/RFC 8785")
-        except rfc8785.CanonicalizationError as exc:
-            errors.append(f"NDF-core não canonicalizável por RFC 8785: {exc}")
+    # rfc8785 é sempre importável aqui (falha dura no arranque, R17) — a
+    # verificação de canonicalização JCS deixou de poder ser omitida.
+    try:
+        canonical = rfc8785.dumps(core)
+        if canonical != core_bytes:
+            add("canonicalizacao", "ndf-core.json não contém exactamente os bytes JCS/RFC 8785")
+    except rfc8785.CanonicalizationError as exc:
+        add("canonicalizacao", f"NDF-core não canonicalizável por RFC 8785: {exc}")
     if envelope.get("payload_hash") != payload_hash or manifest.get("payload_hash") != payload_hash:
-        errors.append("payload_hash não corresponde aos bytes de ndf-core.json")
+        add("canonicalizacao", "payload_hash não corresponde aos bytes de ndf-core.json")
 
     digest = hashlib.sha256((core.get("ndf_id", "") + "|" + payload_hash).encode("utf-8")).digest()
     code = "NDF-" + base64.b32encode(digest).decode("ascii").rstrip("=")[:20]
     if envelope.get("validation_code") != code or manifest.get("validation_code") != code:
-        errors.append("validation_code incorrecto")
+        add("canonicalizacao", "validation_code incorrecto")
 
     ndt_ref = core.get("ndt_version_ref", "")
     ndt_path = root / "ndt" / f"{ndt_ref}.ndt.json"
     if not ndt_path.is_file():
-        errors.append(f"NDT referenciado ausente: {ndt_path.relative_to(root)}")
+        add("estrutura", f"NDT referenciado ausente: {ndt_path.relative_to(root)}")
     else:
         ndt = json.loads(ndt_path.read_text(encoding="utf-8"))
         for e in Draft202012Validator(_load_schema(NDT_SCHEMA_PATH)).iter_errors(ndt):
-            errors.append(f"NDT: {e.message}")
-        errors.extend(f"NDT: {e}" for e in check_ndt_semantic(ndt))
+            add("estrutura", f"NDT: {e.message}")
+        for e in check_ndt_semantic(ndt):
+            add("estrutura", f"NDT: {e}")
         expected_ref = f"{ndt.get('schema_id', '')}@{ndt.get('versao_ndt', '')}"
         if expected_ref != ndt_ref:
-            errors.append("ndt_version_ref não corresponde à identidade do NDT")
+            add("estrutura", "ndt_version_ref não corresponde à identidade do NDT")
 
         # NDF-PKG-011 / NDF-READ-026 (R23, SPEC §8.1): recursos NDT em modo
         # 'referenciado_por_hash' já vinculam por hash dentro do próprio NDT
@@ -1235,7 +1323,7 @@ def validate_package_dir(root: Path) -> bool:
             rid = recurso.get("id", "?")
             candidatos = sorted((root / "recursos").glob(f"{hex_digest}.*")) if (root / "recursos").is_dir() else []
             if not candidatos:
-                errors.append(
+                add("dependencias_interpretacao",
                     f"recurso '{rid}': nenhum ficheiro 'recursos/{hex_digest}.*' "
                     f"encontrado para o hash declarado (NDF-PKG-011, §8.1)"
                 )
@@ -1246,7 +1334,7 @@ def validate_package_dir(root: Path) -> bool:
                 # ao lado de outro que passou — um renderizador que escolha
                 # por extensão ou tipo pode consumir precisamente esse.
                 nomes = ", ".join(c.name for c in candidatos)
-                errors.append(
+                add("dependencias_interpretacao",
                     f"recurso '{rid}': mais de um ficheiro em 'recursos/' para "
                     f"o mesmo hash ({nomes}) — resolução tem de ser unívoca "
                     f"(NDF-PKG-011, §8.1)"
@@ -1255,7 +1343,7 @@ def validate_package_dir(root: Path) -> bool:
             alvo = candidatos[0]
             atual = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
             if atual != declarado:
-                errors.append(
+                add("dependencias_interpretacao",
                     f"recurso '{rid}': hash declarado não corresponde aos bytes "
                     f"de '{alvo.relative_to(root)}' (NDF-PKG-011, NDF-READ-026, §8.1)"
                 )
@@ -1268,7 +1356,8 @@ def validate_package_dir(root: Path) -> bool:
         if tipo_id:
             tipo_schema, _origem = _resolve_tipo_schema(tipo_id, root)
             if tipo_schema is not None:
-                errors.extend(check_ndt_bindings(ndt, tipo_schema, tipo_ref))
+                for e in check_ndt_bindings(ndt, tipo_schema, tipo_ref):
+                    add("estrutura", e)
 
     # NDF-PKG-010 / NDF-READ-025 (§2.6.2, ADR-026): dependencias_interpretacao
     # vincula por hash o NDT e os schemas materializados. Sem esta verificação,
@@ -1291,28 +1380,65 @@ def validate_package_dir(root: Path) -> bool:
         else:
             continue
         if not alvo.is_file():
-            errors.append(
+            add("dependencias_interpretacao",
                 f"dependencias_interpretacao: '{papel}' ({ref}) referencia "
                 f"'{alvo.relative_to(root)}', ausente do pacote (NDF-PKG-010, §2.6.2)"
             )
             continue
         atual = "sha256:" + hashlib.sha256(alvo.read_bytes()).hexdigest()
         if atual != declarado:
-            errors.append(
+            add("dependencias_interpretacao",
                 f"dependencias_interpretacao: '{papel}' ({ref}) — hash declarado "
                 f"não corresponde aos bytes de '{alvo.relative_to(root)}' "
                 f"(NDF-PKG-010, NDF-READ-025, §2.6.2)"
             )
 
+    # Fecho das camadas cujo estado não é determinado por presença de erro.
+    # 'assinatura_confianca' nunca chega a 'aprovada' por este validador: não
+    # há verificação criptográfica de CAdES nem de cadeia de confiança aqui,
+    # apenas estrutural (R18). No máximo, 'indeterminada'.
+    if camadas["assinatura_confianca"]["erros"]:
+        camadas["assinatura_confianca"]["estado"] = "reprovada"
+    elif required_level in {"avancada", "qualificada"} or signatures:
+        camadas["assinatura_confianca"]["estado"] = (
+            "indeterminada — material presente, mas este verificador não faz "
+            "validação criptográfica de CAdES nem de cadeia de confiança"
+            + (", e contém marcadores de placeholder" if sinal_placeholder else "")
+        )
+    else:
+        camadas["assinatura_confianca"]["estado"] = "não_executada"
+    camadas["representacao"]["estado"] = (
+        "não_executada — este verificador não renderiza nem compara saída visual"
+    )
+    for nome in ("estrutura", "canonicalizacao", "integridade_componentes", "dependencias_interpretacao"):
+        if camadas[nome]["erros"]:
+            camadas[nome]["estado"] = "reprovada"
+
+    ok = not errors
     if errors:
         print(f"{RED}FAIL{RESET}  pacote {root}")
         for e in errors:
             print(f"      → {e}")
-        return False
-    print(f"{GREEN}PASS{RESET}  pacote {root}")
-    for advisory in check_ndf_advisories(core, pkg_root=root):
-        print(f"      {YELLOW}AVISO{RESET} {advisory}")
-    return True
+    else:
+        print(f"{GREEN}PASS{RESET}  pacote {root} (estrutura/canonicalização/integridade/dependências)")
+        for advisory in check_ndf_advisories(core, pkg_root=root):
+            print(f"      {YELLOW}AVISO{RESET} {advisory}")
+    for nome, dados in camadas.items():
+        if nome in ("estrutura", "canonicalizacao", "integridade_componentes", "dependencias_interpretacao"):
+            continue  # já refletidas no PASS/FAIL acima
+        print(f"      {nome}: {dados['estado']}")
+
+    return {
+        "ok": ok,
+        "camadas": camadas,
+        "root": str(root),
+        **_report_metadata(core.get("avaliacao", {}).get("perfil")),
+    }
+
+
+def validate_package_dir(root: Path) -> bool:
+    """Wrapper booleano de compatibilidade — ver validate_package_report."""
+    return validate_package_report(root)["ok"]
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -1321,6 +1447,8 @@ def main():
     parser = argparse.ArgumentParser(description="NORMORDIS Conformance Test Runner")
     parser.add_argument("file", nargs="?", type=Path, help="Ficheiro NDF-core a validar.")
     parser.add_argument("--package", type=Path, help="Directório descomprimido de um .ndfpkg a validar.")
+    parser.add_argument("--json", action="store_true",
+                        help="Com --package: emite o relatório por camada em JSON, além da saída legível (R18).")
     parser.add_argument("--valid-only",   action="store_true")
     parser.add_argument("--invalid-only", action="store_true")
     parser.add_argument("--format", choices=["ndf", "ndt", "ncrtf", "all"], default="all",
@@ -1328,7 +1456,10 @@ def main():
     args = parser.parse_args()
 
     if args.package:
-        sys.exit(0 if validate_package_dir(args.package) else 1)
+        report = validate_package_report(args.package)
+        if args.json:
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+        sys.exit(0 if report["ok"] else 1)
 
     if args.file:
         ok = validate_single(args.file)
