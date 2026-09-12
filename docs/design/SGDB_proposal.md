@@ -21,7 +21,11 @@ canonicalização JCS de que depende toda a cadeia de integridade do NDF.
 
 ## 0. Porque isto importa para a utilidade demonstrada do formato
 
-`ARCHITECTURE.md` §1 já documenta um lado do ciclo de vida do NDF:
+`ARCHITECTURE.md` §1 já documenta, em dois diagramas separados, um lado do
+ciclo de vida do NDF — produção (`editor`/`NCRTF`/`NDF-core`/`NDT` →
+`renderizador` → PDF/ODF/HTML) e empacotamento (`NDF-core + envelope + NDT +
+schemas + recursos` → `.ndfpkg`). Lidos em conjunto — um `.ndfpkg` contém
+exatamente o que um renderizador precisa —, sintetizam-se numa única cadeia:
 
 ```text
 NDF-core + envelope + NDT + schemas + recursos ──► .ndfpkg
@@ -44,10 +48,11 @@ segunda metade.
 ## 1. O ponto crítico transversal — JCS não sobrevive a um SGBD por omissão
 
 O NDF exige RFC 8785 (JCS) para tudo o que é canonicalizado, hashed ou
-assinado — `payload_hash` (SPEC.md §2.5) e a própria admissibilidade da
-suite de conformidade (R17, `tools/check_jcs_required.py` recusa arrancar sem
-isso). Isto tem uma implicação direta para qualquer SGBD: **o que é hash e
-assinado são bytes exatos, não "o mesmo conteúdo lógico".**
+assinado — `payload_hash` (calculado em SPEC.md §5.2; o algoritmo é
+declarado em §2.5) e a própria admissibilidade da suite de conformidade
+(R17, `tools/check_jcs_required.py` recusa arrancar sem isso). Isto tem uma
+implicação direta para qualquer SGBD: **o que é hash e assinado são bytes
+exatos, não "o mesmo conteúdo lógico".**
 
 - **PostgreSQL `jsonb`** decompõe o JSON num formato binário interno: pode
   reordenar chaves, normaliza espaços e reformata números. Reconstituir JSON
@@ -79,7 +84,7 @@ de uma fronteira já fixada", não a desenhar de raiz:
   deduplicados por hash dentro do domínio de custódia, desde que a resolução
   seja transacional, imutável e auditável." Este documento detalha como
   cumprir esses três adjetivos.
-- **SPEC.md §2.4.1 e §4.7.** O log de auditoria de custódia tem de ser
+- **SPEC.md §2.4.2 e §4.7.** O log de auditoria de custódia tem de ser
   "separado do NDF e da sua base de dados operacional"; e a cifra, o controlo
   de acesso e a topologia de armazenamento são responsabilidade do sistema de
   custódia, nunca do formato (§4.7). Nenhum SGBD "resolve conformidade NDF"
@@ -92,7 +97,7 @@ tabela única —
 1. bytes canónicos do NDF-core + envelope (perfil de custódia, imutável);
 2. log de custódia/auditoria (append-only, cadeia de hash — SPEC.md §2.4.2);
 3. base de dados operacional (workflow, índices, pesquisa — explicitamente
-   separada de (2) por §2.4.1).
+   separada de (2) por §2.4.2).
 
 ## 3. Opção A — Relacional (PostgreSQL)
 
@@ -113,7 +118,7 @@ tabela única —
   eliminação.
 - **"Imutável" e "auditável"** aproximam-se por política: revogar
   `UPDATE`/`DELETE` do papel aplicacional numa tabela, com um trigger que só
-  permite `INSERT`, simula o *append-only* que §2.4.1 exige para o log de
+  permite `INSERT`, simula o *append-only* que §2.4.2 exige para o log de
   custódia. É imposição de política, não impossibilidade física — diferença
   que a própria SPEC assinala em §9.5 (Perfil de Ciclo de Vida NORMORDIS,
   opcional, onde WORM real é discutido).
@@ -157,7 +162,7 @@ tabela única —
 
 ## 5. O modelo que a arquitetura já sugere com mais força — objeto imutável + índice separado
 
-Dado que `ARCHITECTURE.md` §4 e SPEC.md §2.4.1/§4.7 já pressupõem separar
+Dado que `ARCHITECTURE.md` §4 e SPEC.md §2.4.2/§4.7 já pressupõem separar
 "bytes do perfil de custódia" de "base de dados operacional", o modelo mais
 fiel ao desenho do NDF não é um SGBD único, é híbrido:
 
@@ -192,7 +197,7 @@ qualquer um deles:
 |---|---|---|
 | Bytes canónicos (NDF-core, envelope) | Armazenamento de objetos com Object Lock | Imutabilidade física, endereçada por hash |
 | Índice operacional (`participantes`, `imputacao`, `avaliacao`, workflow, `evidencia_acao`) | SGBD relacional | Consulta estruturada, retenção agendada, transacionalidade do pipeline de finalização |
-| Log de custódia (§2.4, cadeia de hash) | Tabela *append-only* no mesmo SGBD relacional, schema/role distintos do índice operacional | Separação lógica de §2.4.1, sem exigir um segundo SGBD |
+| Log de custódia (§2.4, cadeia de hash) | Tabela *append-only* no mesmo SGBD relacional, schema/role distintos do índice operacional | Separação lógica de §2.4.2, sem exigir um segundo SGBD |
 | Eventos de workflow (ex.: "revisão confirmada" → grava `evidencia_acao`) | Fila de mensagens | Desacopla a ação humana no GED do momento em que é persistida no NDF |
 | Cache de resolução de `validation_code` (§4.6.4) | Cache em memória | Só se existir serviço de verificação exposto — nunca como fonte de verdade |
 
@@ -223,7 +228,7 @@ NDF-core em si que o justifique sobre a opção relacional.
 ## 8. Ligação ao outro lado do ciclo — reconstrução determinística
 
 O valor prático do formato não está só em "guarda-se sem corromper", mas em
-"guarda-se sem corromper **e** continua a produzir, determinísticamente, a
+"guarda-se sem corromper **e** continua a produzir, deterministicamente, a
 mesma representação visual". Um sistema que implemente o perfil de custódia
 conforme este documento fecha o ciclo completo:
 
