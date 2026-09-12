@@ -866,6 +866,17 @@ documenta isto como recomendação para qualquer verificador, não só para
 `tools/check_layered_report.py` (R18, três estados de
 `assinatura_confianca` exercitados contra pacotes reais).
 
+**Segunda ronda — revisão adversarial à própria correção (2026-09-12).**
+Três problemas no relatório de R18, reproduzidos antes de corrigir: `--json`
+misturava mensagens humanas com o JSON no mesmo `stdout` (`json.loads`
+falhava); `ndf-core.json` não sendo objeto JSON (ex.: `[]`) derrubava o
+processo com `AttributeError` em `check_ndf_semantic`, em vez de devolver
+relatório; `estado` misturava valor estável e explicação, impedindo
+consumo automático por igualdade. Corrigidos os três: mensagens humanas
+para `stderr` em modo JSON; corte explícito antes da verificação semântica
+quando manifest/core/envelope não são objetos; `estado`/`motivo`
+separados. Dois vetores novos em `check_layered_report.py`.
+
 **R19 — regex vs. exemplo em `pt-dglab`.** Confirmado por teste direto do
 padrão: `ts/at/300.20`, um dos três exemplos declarados no próprio schema,
 tem duas barras e a regex só admite uma. Ou o exemplo está errado, ou a regra

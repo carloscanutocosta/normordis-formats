@@ -215,11 +215,14 @@ permanecem definidos no texto normativo.
 | NDF | 9.4.2 | `specs/ndf/SPEC.md:3264` | subordinado | `requisito identificado na própria cláusula` | (fidelidade de renderização). Cada camada **DEVE** ser reportada como |
 | NDF | 9.4.2 | `specs/ndf/SPEC.md:3268` | subordinado | `requisito identificado na própria cláusula` | Em particular, a camada de assinatura/confiança **NÃO DEVE** ser reportada |
 | NDF | 9.4.2 | `specs/ndf/SPEC.md:3272` | subordinado | `requisito identificado na própria cláusula` | timestamps e material de validação foi confirmada. Um verificador **DEVE** |
-| NDF | 9.5 | `specs/ndf/SPEC.md:3287` | subordinado | `requisito identificado na própria cláusula` | depois da finalização. Um produtor ou leitor NDF conforme PODE optar por |
-| NDF | 9.5 | `specs/ndf/SPEC.md:3291` | principal | `CUST-REQ-001` | 1. **CUST-REQ-001 — DEVE** registar cada transição de estado (§2.4.1) num log de auditoria imutável, validando cada entrada contra `custody-event.schema.json` e mantendo a cadeia de hash encadeado (§2.4.2). |
-| NDF | 9.5 | `specs/ndf/SPEC.md:3292` | principal | `CUST-REQ-002` | 2. **CUST-REQ-002 — DEVE** usar armazenamento append-only ou WORM para `payload_bytes`, envelope e log de custódia. |
-| NDF | 9.5 | `specs/ndf/SPEC.md:3293` | principal | `CUST-REQ-003` | 3. **CUST-REQ-003 — DEVE** registar o evento terminal de eliminação (§2.4.3) antes de destruir `payload_bytes` **e todos os componentes binários declarados em `documento`** (§2.8.1) de um documento elegível para eliminação, conservando `validation_code`, `payload_hash` e os digests dos componentes destruídos em `details`. |
-| NDF | 9.5 | `specs/ndf/SPEC.md:3294` | principal | `CUST-REQ-004` | 4. **CUST-REQ-004 — DEVE**, ao transferir evidência de custódia para outra entidade, transferir eventos íntegros e não editados, e **NÃO DEVE** reescrever, renumerar ou recompor a cadeia para ocultar as omissões (§2.4.4). |
+| NDF | 9.4.2 | `specs/ndf/SPEC.md:3278` | subordinado | `requisito identificado na própria cláusula` | **RECOMENDA-SE** que o estado de cada camada seja um valor estável (por |
+| NDF | 9.4.2 | `specs/ndf/SPEC.md:3283` | subordinado | `requisito identificado na própria cláusula` | equivalente) para consumo automático, **DEVE** conter apenas esse relatório |
+| NDF | 9.4.2 | `specs/ndf/SPEC.md:3284` | subordinado | `requisito identificado na própria cláusula` | — mensagens destinadas a leitura humana **NÃO DEVEM** ser misturadas no |
+| NDF | 9.5 | `specs/ndf/SPEC.md:3301` | subordinado | `requisito identificado na própria cláusula` | depois da finalização. Um produtor ou leitor NDF conforme PODE optar por |
+| NDF | 9.5 | `specs/ndf/SPEC.md:3305` | principal | `CUST-REQ-001` | 1. **CUST-REQ-001 — DEVE** registar cada transição de estado (§2.4.1) num log de auditoria imutável, validando cada entrada contra `custody-event.schema.json` e mantendo a cadeia de hash encadeado (§2.4.2). |
+| NDF | 9.5 | `specs/ndf/SPEC.md:3306` | principal | `CUST-REQ-002` | 2. **CUST-REQ-002 — DEVE** usar armazenamento append-only ou WORM para `payload_bytes`, envelope e log de custódia. |
+| NDF | 9.5 | `specs/ndf/SPEC.md:3307` | principal | `CUST-REQ-003` | 3. **CUST-REQ-003 — DEVE** registar o evento terminal de eliminação (§2.4.3) antes de destruir `payload_bytes` **e todos os componentes binários declarados em `documento`** (§2.8.1) de um documento elegível para eliminação, conservando `validation_code`, `payload_hash` e os digests dos componentes destruídos em `details`. |
+| NDF | 9.5 | `specs/ndf/SPEC.md:3308` | principal | `CUST-REQ-004` | 4. **CUST-REQ-004 — DEVE**, ao transferir evidência de custódia para outra entidade, transferir eventos íntegros e não editados, e **NÃO DEVE** reescrever, renumerar ou recompor a cadeia para ocultar as omissões (§2.4.4). |
 | NCRTF | 2 | `specs/ncrtf/SPEC.md:126` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **DEVE** / **DEVEM** \| Requisito obrigatório \| |
 | NCRTF | 2 | `specs/ncrtf/SPEC.md:127` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **NÃO DEVE** / **NÃO DEVEM** \| Proibição \| |
 | NCRTF | 2 | `specs/ncrtf/SPEC.md:128` | subordinado | `NCRTF-PROD-001..007; NCRTF-READ-001..005` | \| **RECOMENDA-SE** \| Prática aconselhada; desvios aceitáveis com justificação \| |
@@ -328,4 +331,4 @@ permanecem definidos no texto normativo.
 | NDT | 9.4 | `specs/ndt/SPEC.md:1380` | subordinado | `requisito identificado na própria cláusula` | `conformance/ndt/invalid/` **DEVEM** ser rejeitados, e cada um declara em |
 | NDT-RENDER | preâmbulo | `specs/ndt/RENDERER-CONFORMANCE.md:37` | subordinado | `NDT-RENDER-001..011` | testes golden DEVEM comparar: |
 
-Total: **321 declarações com modalidade normativa**.
+Total: **324 declarações com modalidade normativa**.
