@@ -590,10 +590,33 @@ cada uma à correção da anterior. Verificado: `tools/validate.py` 103/103,
 **Critério de conclusão**: cumprido — um pacote estruturalmente válido mas
 sem assinatura criptograficamente verificada nunca aparece como
 "aprovado" na camada de assinatura/confiança; o `PASS` global passa a
-dizer explicitamente que camadas cobre. Verificado: `tools/validate.py`
-103/103, `check_package_vectors` 22/22, `check_jcs_required` PASS,
-`check_layered_report` PASS, `check_spec_coherence` PASS, `audit_normative`
-109 IDs / 321 declarações.
+dizer explicitamente que camadas cobre.
+
+**Segunda ronda (2026-09-12) — revisão adversarial à própria correção.**
+Três problemas no relatório, todos reproduzidos antes de corrigir:
+
+- `--package --json` misturava mensagens de leitura humana com o JSON no
+  mesmo `stdout` — `json.loads(stdout)` falhava. Corrigido: mensagens
+  humanas passam a `stderr` quando `json_mode=True`; `stdout` fica só com
+  o relatório.
+- `ndf-core.json` que não fosse objeto JSON (ex.: `[]`) derrubava o
+  processo com `AttributeError` dentro de `check_ndf_semantic` — o
+  verificador nunca chegava a devolver relatório nenhum. Corrigido: um
+  corte explícito antes da verificação semântica, que devolve estrutura
+  reprovada e as restantes camadas `não_executada`.
+- `estado` misturava valor estável e explicação (ex.: `"indeterminada —
+  material presente..."`), impedindo um consumidor automático de comparar
+  por igualdade. Corrigido: `estado` passa a valor estável, `motivo` leva
+  o texto livre (`None` quando não há nada a explicar).
+
+Vetores novos em `tools/check_layered_report.py`: pureza de `stdout` em
+`--json`, e `ndf-core.json` não-objeto sem exceção. SPEC.md §9.4.2
+atualizada com as duas recomendações (estado sem texto embutido; não
+misturar leitura humana com formato estruturado).
+
+Verificado: `tools/validate.py` 103/103, `check_package_vectors` 22/22,
+`check_jcs_required` PASS, `check_layered_report` PASS (5 casos),
+`check_spec_coherence` PASS, `audit_normative` 109 IDs / 324 declarações.
 
 ### P0.4 — Correções jurídicas pontuais (`R20`, `R21`, `R22`)
 
