@@ -1488,6 +1488,12 @@ Mesmo quando o ato não requer assinatura eletrónica para validade jurídica, h
 
 Quando CAdES-B-LTA é aplicado a um documento com `nivel_assinatura: "nenhuma"`, o envelope DEVE usar um **selo institucional** (não uma assinatura pessoal) — um certificado de autenticação da entidade produtora ou do sistema de gestão documental, não um certificado qualificado pessoal. O efeito jurídico é de integridade técnica, não de assinatura com efeito legal equivalente à manuscrita.
 
+Este selo protege o envelope, não a ação de uma pessoa concreta. Para
+evidência de que um `participante` identificado praticou uma ação de
+autoria, revisão ou decisão sobre este documento — o que a cadeia de
+responsabilidade tipicamente exige quando não há assinatura pessoal — ver
+`participantes[].evidencia_acao` (§2.12.8).
+
 ### 2.11 Relações documentais (`relacoes`)
 
 #### 2.11.1 Objetivo e princípio
@@ -1806,6 +1812,60 @@ A remoção de `validador` e `aprovador` encerra a lacuna L10 de `LACUNAS.md`,
 que identificara estes dois papéis como descrevendo estado processual e não
 autoria do conteúdo canonicalizado, e deixara a decisão em aberto.
 
+#### 2.12.8 Evidência de ação (`evidencia_acao`)
+
+`participantes` é, por desenho, um índice declarativo (§2.12.1): identifica
+quem interveio e em que papel, mas não o instante da intervenção, o âmbito
+exato do conteúdo apresentado à pessoa, nem o meio de autenticação dessa
+ação concreta. Para papéis como `revisor_humano` e `decisor`, essa ausência
+é uma lacuna concreta quando `nivel_assinatura` é `"nenhuma"` (§2.10) e a
+cadeia de responsabilidade tem de apoiar-se apenas em `participantes`.
+
+O NDF já resolve o mesmo problema para intervenções de IA —
+`proveniencia_ia.intervencoes[].revisao_humana` e `.evidencia_ref` (§2.13.2,
+§2.13.3). Esta secção generaliza o mesmo padrão a qualquer entrada de
+`participantes`, em vez de introduzir um segundo vocabulário para o mesmo
+conceito.
+
+Cada entrada de `participantes[]` admite o bloco opcional `evidencia_acao`:
+
+```json
+{
+  "participante_ref": "user:456",
+  "papel": "revisor_humano",
+  "evidencia_acao": {
+    "praticada_em": "2026-06-18T11:00:00Z",
+    "ambito": { "tipo": "payload_hash", "valor": "sha256:..." },
+    "autenticacao": { "meio": "senha_acesso", "nivel_garantia": "substancial" },
+    "evidencia_ref": { "tipo": "registo_externo", "identificador": "string", "hash": "sha256:..." }
+  }
+}
+```
+
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `praticada_em` | Sim, dentro de `evidencia_acao` | Instante em que esta pessoa praticou a ação correspondente a `papel` — distinto do instante de criação ou finalização do NDF. |
+| `ambito` | Sim, dentro de `evidencia_acao` | Identifica o conteúdo exato apresentado à pessoa nesse instante. `tipo: "payload_hash"` referencia o `payload_hash` deste NDF nesse momento (§2.5); `tipo: "versao_documental"` referencia uma versão anterior à finalização, quando a ação incidiu sobre um estado que não é o final. |
+| `autenticacao` | Não | Mesma estrutura de `imputacao[].autenticacao` (§2.15.4): `meio` e `nivel_garantia` opcional. Regista o facto de autenticação observado para esta ação específica — não para a sessão em geral. |
+| `evidencia_ref` | Não | Mesma referência externa de §2.13.2: `{ tipo, identificador, hash }`, ligada ao registo detalhado da ação (log de auditoria do sistema produtor, evento de workflow, comprovativo de sessão), fora do NDF-core e sob política própria de retenção. |
+
+`evidencia_acao` não substitui uma assinatura eletrónica quando esta é
+exigida pelo `nivel_assinatura` declarado (§2.10); não resolve
+`participante_ref` para uma identidade concreta, que continua a ser
+responsabilidade do sistema produtor (§2.12.4); e não confere, por si só,
+força probatória — esta depende da proteção do registo apontado por
+`evidencia_ref`, não do campo em si. Um hash guardado a par do documento
+apenas permite verificar coerência: quem possa substituir ambos consegue
+recalculá-lo (mesmo aviso de §2.10, nota sobre o requisito de dispositivo
+qualificado).
+
+`evidencia_acao` descreve uma ação praticada sobre um conteúdo já existente
+nesse instante, nunca uma ação futura face à finalização do NDF que a
+contém. Uma revisão ocorrida depois de o NDF estar finalizado (§2.1, §5.3)
+NÃO DEVE ser acrescentada a `participantes` do NDF já finalizado: constitui
+evidência externa ligada por hash, no mesmo padrão de §2.13.2, ou dá origem
+a um NDF sucessor (§6 — Sucessão documental).
+
 ### 2.13 Proveniência de IA (`proveniencia_ia`)
 
 #### 2.13.1 Objetivo e âmbito
@@ -1856,6 +1916,11 @@ a IA). Orientação informativa adicional consta de
   }
 }
 ```
+
+O mesmo padrão de evidência — instante, autenticação e `evidencia_ref` — é
+reaproveitado fora do contexto de IA em `participantes[].evidencia_acao`
+(§2.12.8), para documentos inteiramente humanos que também careçam de
+assinatura eletrónica.
 
 #### 2.13.3 Estado de revisão humana
 
@@ -2160,6 +2225,11 @@ requer a autenticação de ambos os sujeitos passivos —, cada um constitui uma
 entrada própria, com o seu instante e o seu meio. Registar a autenticação ao
 nível do documento perderia essa informação, que é exatamente a que
 demonstra que a exigência legal foi satisfeita.
+
+A mesma estrutura `{ meio, nivel_garantia }` é reaproveitada, fora do
+contexto de imputação jurídica, em `participantes[].evidencia_acao.autenticacao`
+(§2.12.8) — para registar o meio pelo qual uma ação de autoria ou revisão,
+e não a titularidade de um ato, foi autenticada.
 
 **A imputação não é qualificável.** Esta especificação **NÃO DEFINE** nenhum
 mecanismo para exprimir grau de confiança, presunção ou reserva sobre uma

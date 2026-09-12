@@ -2,6 +2,45 @@
 
 ## Não publicado
 
+### Evidência de ação em `participantes[]` (2026-09-12)
+
+Adicionada a §2.12.8: bloco opcional `evidencia_acao` em cada entrada de
+`participantes[]` — `praticada_em`, `ambito` (`payload_hash` ou
+`versao_documental`), `autenticacao` e `evidencia_ref`. Resolve uma lacuna
+concreta: para documentos com `nivel_assinatura: "nenhuma"` (§2.10), a
+cadeia de responsabilidade tinha de apoiar-se num `participantes` puramente
+declarativo — sem instante, sem âmbito do conteúdo apresentado, sem meio de
+autenticação da ação. O NDF já resolvia o mesmo problema para intervenções
+de IA (`proveniencia_ia.intervencoes[].revisao_humana`/`evidencia_ref`,
+§2.13.2); esta ronda generaliza o padrão em vez de introduzir um segundo
+vocabulário.
+
+Aproveitada a ronda para fechar a lacuna L12 de `LACUNAS.md`: `autenticacao`
+foi extraído de `imputacao_entrada` para o `$def` partilhado `#/$defs/autenticacao`
+(reaproveitado também pelo novo `evidencia_acao`), e `evidencia_ref` de
+`proveniencia_ia.intervencoes[]` passa a apontar para `#/$defs/referencia_externa`
+em vez de repetir a definição inline — sem impacto nos exemplos e casos de
+conformidade existentes.
+
+Alterações:
+
+- `SPEC.md` — nova §2.12.8; referências cruzadas em §2.10.4, §2.13.2 e §2.15.4.
+- `schemas/ndf-core.schema.json` — `evidencia_acao` em `$defs/participante`;
+  `$defs/autenticacao` extraído; `intervencao_ia.evidencia_ref` aponta para
+  `$defs/referencia_externa`.
+- Cópias embutidas em `specs/ndf/examples/*/schemas/ndf-core.schema.json`
+  ressincronizadas (`tools/reseal_example_package.py`); `ndfxfer-example`
+  regenerado (`tools/build_ndfxfer_example.py`).
+- `conformance/ndf/valid/revisor-humano-com-evidencia-acao.json` e
+  `conformance/ndf/invalid/evidencia-acao-sem-ambito.json` — novos casos;
+  `conformance/INDEX.md` regenerado.
+- `docs/normalization/REQUIREMENTS.md` e `NORMATIVE-STATEMENTS.md`
+  regenerados (deslocamento de números de linha, sem alteração de conteúdo
+  normativo).
+
+Suite completa, pacotes e conjunto de transferência: verdes (105/105 casos
+NDF/NDT/NCRTF).
+
 ### `tools/validate.py`: três correções da revisão automática do PR #8 (2026-09-06)
 
 Um bot de revisão (`chatgpt-codex-connector`) apanhou três problemas reais na
