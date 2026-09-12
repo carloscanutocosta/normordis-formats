@@ -3408,6 +3408,7 @@ Ferramenta de referência: `tools/check_custody.py`; vetores em
 | JCS | JSON Canonicalization Scheme (RFC 8785) |
 | PCA | Prazo de Conservação Administrativa |
 | DF | Destino Final |
+| GCA | Gestão de/do Ciclo de Arquivo — usada junto de GED em §2.4.1 e §2.12.7 para o sistema de custódia que gere os estados do documento fora do NDF-core |
 | MEF | Macroestrutura Funcional (DGLAB) |
 | MIP | (classificação documental institucional/processual — DGLAB) |
 | Lista Consolidada | Referencial suprainstitucional da DGLAB com classificação + avaliação (PCA/DF) |
