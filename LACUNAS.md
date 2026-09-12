@@ -255,7 +255,7 @@ sistema de workflow do produtor. **RESOLVIDO.**
 
 ---
 
-### L12 — Duplicação estrutural entre `referencia_externa` e `evidencia_ref`
+### L12 — Duplicação estrutural entre `referencia_externa` e `evidencia_ref` — RESOLVIDO
 
 **Origem**: ronda de 2026-08-13 (ADR-013).
 
@@ -277,6 +277,15 @@ como string vazia), mas torna o schema marginalmente mais estrito, pelo que
 deve ser feita numa ronda em que o bloco de IA seja revisto de propósito e
 não como efeito colateral. Sem urgência — é higiene de schema, não defeito
 funcional.
+
+**Resolução (2026-09-12)**: feito na ronda que introduziu
+`participantes[].evidencia_acao` (SPEC.md §2.12.8), que reaproveita
+`#/$defs/referencia_externa` para o seu próprio `evidencia_ref` — exatamente
+a estrutura que este ponto recomendava herdar. Nessa mesma ronda,
+`proveniencia_ia.intervencoes[].evidencia_ref` passou a apontar para
+`#/$defs/referencia_externa` em vez de repetir a definição inline; nenhum
+ficheiro de conformidade usava `tipo`/`identificador` vazios, pelo que o
+aperto de `minLength: 1` não quebrou nada. **RESOLVIDO.**
 
 ---
 
