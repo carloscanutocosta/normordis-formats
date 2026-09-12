@@ -4,6 +4,50 @@
 
 Este documento reúne referências de contexto, estimativas, mapeamento jurídico, perfil físico de armazenamento e roadmap anteriormente intercalados no texto normativo.
 
+## Garantias e limitações (informativo)
+
+Secção criada pela Fase 1E, P0.1, em resposta ao achado `R18` (e, por
+extensão, `R19`/`R21`/`R22`) do [READINESS-ASSESSMENT.md](../reports/READINESS-ASSESSMENT.md)
+§5.6: a leitura confiante da documentação não pode ser o único caminho para
+saber o que está, de facto, coberto.
+
+**Três estados que não coincidem**:
+
+- **Especificado** — é requisito de texto em SPEC.md, com ID normativo
+  rastreável em [TRACEABILITY.md](TRACEABILITY.md).
+- **Implementado** — existe código neste repositório (`tools/validate.py` e
+  ferramentas associadas) que o verifica.
+- **Demonstrado** — foi exercitado com evidência reproduzível por terceiros,
+  não apenas por auto-revisão do mantenedor. Ver os gates externos de
+  [READINESS.md](READINESS.md); nenhum está hoje cumprido.
+
+Um requisito pode estar especificado e implementado sem estar demonstrado —
+é o caso da generalidade das linhas abaixo. Isso não é uma lacuna escondida:
+é o estado real do projeto em Draft, e fica dito aqui em vez de pressuposto.
+
+**Declarado pelo produtor vs. apurado pelo verificador.** A mesma distinção
+aplica-se campo a campo dentro do NDF-core. `nivel_assinatura`, por exemplo,
+é um valor que o sistema produtor **declara** segundo a sua própria política;
+o NDF não contém mecanismo que o torne, por si só, verdadeiro. O que um
+verificador como `tools/validate.py --package` **apura** é mais estreito do
+que o valor declarado sugere — ver SPEC.md §9.4.2 e a linha `nivel_assinatura`
+abaixo. Esta distinção aplica-se a qualquer afirmação jurídica ou normativa
+que cite um campo do NDF como prova: o campo transporta a afirmação do
+produtor, não a certifica.
+
+| Garantia pública | Mecanismo | Evidência | Limitação |
+|---|---|---|---|
+| **Imutabilidade** após finalização | Princípio normativo (SPEC.md §2.1): os bytes canonicalizados nunca são reserializados; qualquer alteração de conteúdo exige um novo NDF | Nenhuma verificação técnica interna ao NDF — é regra de processo para o core-documental que o produz | Especificado, não implementado como controlo técnico: o NDF deteta *alteração* (hash/assinatura deixam de corresponder) mas não *impede* reescrita por quem tem acesso de escrita ao armazenamento. "Imutável" é garantia processual, não um cofre criptográfico |
+| **`nivel_assinatura`** (`"nenhuma"` / `"avancada"` / `"qualificada"`) | Campo **declarado pelo produtor** (SPEC.md §2.10) | `tools/validate.py --package` confirma estrutura do envelope e deteta material placeholder (P0.3); não executa verificação criptográfica de CAdES nem da cadeia de confiança — camada `assinatura_confianca` nunca fica `aprovada` por este verificador (SPEC.md §9.4.2) | Especificado e parcialmente implementado; **não demonstrado**: nenhuma ferramenta de referência confirma que uma assinatura `"qualificada"` é, de facto, uma assinatura eIDAS qualificada válida — isso exige laboratório CAdES com cadeia de confiança real (Fase 1D/P1.1), ainda sem material real |
+| **Autonomia do pacote** (`.ndfpkg` autocontido) | `manifest.inventario` + resolução de `dependencias_interpretacao` por caminho fixo, verificada por `tools/validate.py --package` (P0.2, ADR-026) | 103/103 testes da suite; `check_package_vectors.py` 22/22, incluindo substituição de NDT, schema e recursos | Especificado, implementado e demonstrado *dentro* do conteúdo do pacote recebido. Não cobre o `.ndfpkg` como contentor ZIP adversarial (nomes duplicados, caminhos inseguros, ligações simbólicas) — fora de âmbito desta ronda (P0.3), registado como trabalho futuro |
+| **Reprodução fiel** (NDF + NDT → representação visual) | NDT embebido referencia NCRTF; `ndt_version_ref`/`dependencias_interpretacao` ligam à versão exata | Corpus semântico do NDT com 9 casos (READINESS.md, gate NDT) | Especificado e implementado ao nível estrutural; **não demonstrado**: "resultados extraídos de renderizadores independentes" continuam pendentes — a fidelidade visual não foi exercitada por um segundo renderizador fora do projeto |
+| **Conformidade** (NDF/NDT/NCRTF) | Suites de conformidade versionadas (`conformance/ndf/` e equivalentes) + matriz de rastreabilidade | `audit_normative`: 109 IDs / 317 declarações rastreadas; `check_spec_coherence`, `check_package_vectors`, `check_profile_patterns` em `PASS` | "Conforme a suite interna deste repositório" não é "revisto ou homologado por terceiro": nenhum dos 8 gates externos de READINESS.md está cumprido — ver [P2.1](../../ROADMAP.md#p21--revisão-independente-delimitada) |
+
+**Critério de conclusão (P0.1)**: cada garantia pública aponta para um
+requisito e uma evidência; onde falta evidência — ou a evidência é apenas
+interna —, isso fica dito junto da afirmação, em vez de pressuposto pelo
+leitor.
+
 ## Referências informativas e de perfil
 
 | Norma / Regulamento | Âmbito |
