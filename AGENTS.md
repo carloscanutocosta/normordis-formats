@@ -1,7 +1,4 @@
-# Convenção de registo de proveniência de IA
-
-Complementa [AI_USAGE.md](../AI_USAGE.md). Esta convenção trata do desenvolvimento
-do projeto, não do bloco `proveniencia_ia` dos documentos NDF.
+# Orientações para agentes
 
 ## Autoria humana e proveniência explícita (2026-09-19)
 
@@ -45,25 +42,3 @@ Quando a divisão histórica não puder ser estabelecida, registar:
 > The precise division between human and AI contribution cannot be reconstructed reliably from the available record.
 
 A ausência de declaração num commit histórico não demonstra ausência de IA.
-
-## Estrutura da mensagem
-
-Após o título, usar os quatro campos seguintes no corpo (sem trailers de
-coautoria de IA):
-
-- `AI assistance:` — modelo efetivamente usado, com versão quando conhecida.
-- `Human decision:` — decisão/requisito e origem humana identificável.
-- `AI contribution:` — redação, implementação, propagação, testes ou revisão
-  assistida efetivamente realizados.
-- `Human review:` — relato concreto fornecido pelo responsável humano.
-
-Preservar prompts e notas de output quando disponíveis. Nunca inventar um
-prompt, uma decisão ou uma revisão para completar a estrutura. Esta descrição
-não é uma mensagem pronta a commitar.
-
-## Auditoria
-
-Localizar assistência declarada com `git log --all --grep="AI assistance:"`.
-Consultar também os registos históricos de prompts e os mapas de normalização.
-A convenção nova aplica-se ao trabalho futuro; a normalização histórica corrige
-metadados mediante evidência, sem alterar requisitos ou resultados funcionais.

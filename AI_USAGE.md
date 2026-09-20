@@ -26,7 +26,7 @@ qualquer decisão de financiamento.
 
 | Repositório | Natureza | Licença | Uso de IA previsto |
 |---|---|---|---|
-| `normordis-formats` | Especificações, schemas, vetores de conformidade | CC0-1.0 | Marginal — ver §4 |
+| `normordis-formats` | Especificações, schemas, vetores de conformidade | CC0-1.0 | Assistência declarada por alteração — ver §4 |
 | `normordis-kernel` | Implementação | EUPL-1.2 | Geração de código sob revisão |
 | `normordis-go` | Implementação | EUPL-1.2 | Geração de código sob revisão |
 | `normordis-pdf` | Implementação | EUPL-1.2 declarada no manifesto — ver §6 | Geração de código sob revisão |
@@ -39,8 +39,8 @@ para aqui em vez de manterem cópias divergentes.
 
 ## 3. O que permanece exclusivamente humano
 
-As decisões seguintes são tomadas, redigidas e assumidas por pessoa
-identificada, sem delegação a sistemas generativos:
+As decisões seguintes são definidas, aprovadas e assumidas por pessoa
+identificada. A redação e propagação podem ser assistidas, com proveniência:
 
 - especificação e design dos formatos (NDF, NDT, NCRTF, `.ndfpkg`) e respetivos
   schemas;
@@ -60,10 +60,10 @@ Sempre com revisão humana registada:
 - geração de testes, nunca como única fonte de verdade de conformidade (§5);
 - documentação, tradução e revisão editorial.
 
-Neste repositório em concreto, o texto normativo das especificações é de
-autoria humana. A assistência de IA, quando usada, limita-se a revisão
-editorial, verificação de consistência entre texto, schema e vetores, e
-deteção de contradições — não à formulação de requisitos normativos.
+Neste repositório, as decisões normativas são humanas. A IA pode assistir
+a redação e propagação para schemas, exemplos, fixtures, índices e testes,
+além da revisão editorial e de consistência. Esta regra não certifica
+retroativamente a divisão de trabalho: lacunas históricas são declaradas.
 
 ## 5. Testes de conformidade independentes da sessão geradora
 
@@ -99,8 +99,8 @@ Antes de integrar qualquer output assistido:
 **Nota específica sobre CC0-1.0.** A CC0 é uma renúncia de direitos, o que
 pressupõe que quem a aplica é titular dos direitos a renunciar. Material cuja
 titularidade seja duvidosa não é adequado a dedicação CC0. Por essa razão, o
-texto normativo e os vetores de conformidade deste repositório são de autoria
-humana (§4), e não se aplica CC0 a blocos substanciais de texto gerado.
+texto normativo e os vetores de conformidade exigem decisão e responsabilidade
+humanas, com assistência explicitada (§4), e não se aplica CC0 a blocos substanciais de texto gerado.
 
 **Pendências conhecidas, a fixar antes de qualquer submissão que inclua
 `normordis-pdf` como entregável:**
@@ -195,3 +195,46 @@ Questões sobre o uso de IA neste projeto: carloscanutocosta@gmail.com
 *As referências à política GenAI da NLnet devem ser confirmadas contra o texto
 em vigor à data de submissão. Esta política é substantiva por si própria e não
 depende dessa confirmação.*
+
+## Autoria humana e proveniência explícita (2026-09-19)
+
+A autoria Git é exclusivamente humana. Carlos Canuto Costa assume a autoria e
+responsabilidade do projeto. IA é assistência/ferramenta: não deve constar dos
+campos de autor ou committer, de trailers de coautoria, nem de mecanismos que
+atribuam a modelos o estatuto de contributor GitHub. Desativar a coautoria
+automática da ferramenta antes de criar commits.
+
+Toda a assistência substantiva, incluindo documentação e testes, é declarada
+no corpo do commit. Identificar o modelo exato quando conhecido; quando não
+houver evidência da versão, declarar essa limitação sem adivinhar.
+
+O corpo contém `AI assistance:`, `Human decision:`, `AI contribution:` e
+`Human review:`. A decisão identifica o requisito, pedido, issue, ADR ou critério
+aprovado pelo responsável. A contribuição descreve o trabalho efetivo da IA.
+`Human review` é preenchido exclusivamente pelo responsável humano, com as
+verificações realmente feitas antes da aceitação. Não criar commits novos com
+placeholders, revisão vazia ou uma alegação de revisão escrita pelo agente.
+Sem revisão humana fornecida, conservar as alterações como diff para revisão.
+
+Alterações normativas, schemas e critérios de conformidade precisam de origem
+humana identificável. A IA pode ajudar a redigir e a propagar uma decisão humana
+para schemas, exemplos, fixtures, índices e testes; não define autonomamente
+requisitos. A conformidade não pode depender apenas da mesma sessão/modelo que
+implementou o comportamento: exige critérios derivados da especificação e
+verificação independente, incluindo validadores externos quando disponíveis.
+
+Não apagar nem falsificar proveniência. A normalização histórica autorizada
+preserva os registos originais em backup e os SHA num mapa de auditoria.
+Declarações históricas de revisão são preservadas como declarações, sem nova
+certificação. Uma lacuna histórica é registada como `Human review status`, nunca
+convertida numa revisão fictícia; isto não permite aceitar novos commits sem
+revisão. Uma revisão posterior só pode ser atestada pelo humano que a efetuou,
+com data, âmbito e limitações. Verificações do agente são identificadas como
+automatizadas e não contam como revisão humana.
+
+Quando a divisão histórica não puder ser estabelecida, registar:
+
+> Human provenance note:
+> The precise division between human and AI contribution cannot be reconstructed reliably from the available record.
+
+A ausência de declaração num commit histórico não demonstra ausência de IA.
